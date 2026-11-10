@@ -16,7 +16,7 @@ export default {
     caption: 'Girar imagem: formatos aceitos, saída e limites',
     head: ['Detalhe', 'O que acontece'],
     rows: [
-      ['Aceita', 'JPG, PNG e WebP, reconhecidos pelo conteúdo do arquivo e não pelo nome. Fotos HEIC passam antes pela ferramenta HEIC para JPG, e arquivos AVIF não são aceitos.'],
+      ['Aceita', 'JPG, PNG e WebP, reconhecidos pelo conteúdo do arquivo e não pelo nome. Fotos HEIC passam antes pela ferramenta HEIC para JPG, e arquivos AVIF, pela ferramenta AVIF para JPG.'],
       ['Girar', '90° à direita, que é o padrão, 90° à esquerda ou 180°.'],
       ['Espelhar', 'Nenhum, que é o padrão, Horizontal ou Vertical. O espelhamento se soma ao giro.'],
       ['Lote', 'O giro e o espelhamento escolhidos valem para todas as imagens do lote. Sem limite de imagens.'],

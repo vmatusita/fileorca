@@ -1,9 +1,10 @@
-// Builds the Markdown table "ferramenta × fixture × navegador" of the report (docs/relatorios/fase-02-matriz.md)
-// from the JSON records the matrix tests write while they run (test-results/matriz/*.json, one per test and
-// browser, from tests/e2e/image-matrix.spec.ts and image-presets.spec.ts). Nothing in the table is written by
-// hand: run the two specs in both browsers in ONE Playwright run (it clears test-results at its start), then
+// Builds the Markdown table "ferramenta × fixture × navegador" of the report (docs/relatorios/fase-02-matriz.md,
+// and docs/relatorios/fase-17-matriz.md since the F17, with AVIF to JPG and Convert to WebP) from the JSON records
+// the matrix tests write while they run (test-results/matriz/*.json, one per test and browser, from
+// tests/e2e/image-matrix.spec.ts and image-presets.spec.ts). Nothing in the table is written by hand: run the two
+// specs in both browsers in ONE Playwright run (it clears test-results at its start), then
 //
-//   node scripts/fixtures/matrix-table.ts > docs/relatorios/fase-02-matriz.md
+//   node scripts/fixtures/matrix-table.ts > docs/relatorios/fase-17-matriz.md
 //
 // The functions are exported so a Vitest can prove the layout (tests/unit/matrix-table.test.ts).
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
@@ -12,6 +13,7 @@ import { pathToFileURL } from 'node:url';
 import type { MatrixRecord, PresetRecord, RecordFile } from '../../tests/e2e/lib/matrix.ts';
 
 export const RECORDS_DIR = join('test-results', 'matriz');
+const BROWSERS = ['chromium', 'webkit'] as const;
 const BROWSER_NAME: Record<string, string> = { chromium: 'Chromium', webkit: 'WebKit' };
 
 export interface Records {
@@ -80,7 +82,9 @@ function cell(file: RecordFile | undefined): string {
   const out = file.output;
   if (!out) return 'ok';
   const parts = [`ok`, `${format(out.format)} ${out.width}×${out.height}`, size(out.bytes)];
-  if (out.decoded === 'pdf') parts.push('página do PDF');
+  // F17: an AVIF that this browser does not open by itself was checked by its bytes (header, size, alpha plane, metadata).
+  if (out.decoded === 'unsupported') parts.push('não abre neste navegador');
+  else if (out.decoded === 'pdf') parts.push('página do PDF');
   else parts.push('abre');
   if (out.note) parts.push(note(out.note));
   return parts.join(' · ');
@@ -130,7 +134,7 @@ function summary(records: MatrixRecord[]): string[] {
 export function buildTable(records: Records): string {
   const out: string[] = [];
   const { matrix, presets } = records;
-  out.push('# F2 · Matriz de fixtures', '');
+  out.push('# Matriz de fixtures das ferramentas de imagem', '');
   out.push(
     'Gerada por `node scripts/fixtures/matrix-table.ts` a partir de `test-results/matriz/*.json`, que `tests/e2e/image-matrix.spec.ts` e `tests/e2e/image-presets.spec.ts` gravam a cada execução, em Chromium e WebKit. Nada aqui é escrito à mão: para refazer, rode as duas specs numa execução do Playwright (ela limpa o `test-results`) e o comando acima.',
     '',
@@ -144,6 +148,18 @@ export function buildTable(records: Records): string {
 
   if (matrix.length > 0) {
     out.push('## Resumo por teste', '', ...summary(matrix), '');
+    // F17 (as the F2 draft, 840d565^): the tests that read or write AVIF learn whether the browser opens one by itself.
+    const probed = matrix.filter((record) => record.avifDecode !== undefined);
+    if (probed.length > 0) {
+      const avif = BROWSERS.map((browser) => {
+        const found = probed.find((record) => record.browser === browser);
+        return `${BROWSER_NAME[browser]}: ${found ? (found.avifDecode ? 'abre AVIF sozinho' : 'não abre AVIF sozinho') : '—'}`;
+      });
+      out.push(
+        `Decodificação nativa de AVIF nesta máquina: ${avif.join('; ')}. Onde o navegador não abre AVIF, a saída em AVIF foi conferida só nos bytes (formato real, dimensões no cabeçalho, plano alfa e metadados), e o AVIF to JPG leu o AVIF com o decodificador do próprio site.`,
+        '',
+      );
+    }
     const tools = [...new Set(matrix.map((record) => record.tool))];
     for (const tool of tools) {
       const mine = matrix.filter((record) => record.tool === tool);

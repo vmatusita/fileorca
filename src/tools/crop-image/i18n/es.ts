@@ -16,7 +16,7 @@ export default {
     caption: 'Recortar imagen: formatos que acepta, resultado y límites',
     head: ['Detalle', 'Qué pasa'],
     rows: [
-      ['Acepta', 'JPG, PNG y WebP, reconocidos por el contenido del archivo y no por el nombre. Las fotos HEIC pasan antes por HEIC a JPG, y los archivos AVIF no se aceptan.'],
+      ['Acepta', 'JPG, PNG y WebP, reconocidos por el contenido del archivo y no por el nombre. Las fotos HEIC pasan antes por HEIC a JPG, y los archivos AVIF, por AVIF a JPG.'],
       ['Formas', 'Cuadrado, que es la opción predeterminada, 4:5, 16:9 o Libre. El recuadro se abre centrado, así que hay un resultado listo en cuanto sueltas una imagen.'],
       ['Mover el recuadro', 'Arrastra el recuadro o sus esquinas, o selecciónalo y usa las flechas del teclado. Mayús con las flechas cambia su tamaño.'],
       ['Valores exactos', 'Escribe la x, la y, el ancho y el alto del recuadro en píxeles de la imagen: así puedes recortar sin un puntero.'],

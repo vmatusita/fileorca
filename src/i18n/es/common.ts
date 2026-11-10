@@ -116,6 +116,16 @@ export default {
       description: 'Convierte PNG en JPG, o JPG en PNG.',
       synonyms: ['png', 'jpg', 'jpeg', 'jpg a png', 'convertir', 'transparente', 'imagen'],
     },
+    'avif-to-jpg': {
+      name: 'AVIF a JPG',
+      description: 'Convierte imágenes AVIF en JPG.',
+      synonyms: ['avif', 'convertir', 'jpg', 'jpeg', 'imagen'],
+    },
+    'convert-to-webp': {
+      name: 'Convertir a WebP',
+      description: 'Convierte JPG y PNG en archivos WebP o AVIF más pequeños.',
+      synonyms: ['webp', 'avif', 'convertir a avif', 'convertir', 'más pequeño', 'jpg', 'jpeg', 'png', 'imagen'],
+    },
     'image-to-pdf': {
       name: 'Imagen a PDF',
       description: 'Junta tus imágenes en un solo PDF, una imagen por página.',

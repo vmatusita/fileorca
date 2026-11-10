@@ -29,7 +29,7 @@ Conferido em 2 de novembro de 2026 sobre a `main` em `29afbce` (a F7), na F8 (DE
 | 10. Desempenho | 1 | Run de ajuste de desempenho |
 | 11. CI e ferramentas | 1 | Run F9b |
 | 12. Kit de lançamento | 5 | Run de ajuste do kit |
-| 13. Conteúdo: a run 2b | 1 | Run 2b |
+| 13. Conteúdo: a run 2b | 0 | Run 2b |
 | 14. Decisões do Victor | 6 | Victor decide |
 | 15. Tarefas do Victor | 12 | Victor faz |
 | 16. Revisão das F4 a F7 (F8) | 16 | Runs de ajuste de cada tipo |
@@ -43,8 +43,9 @@ Conferido em 2 de novembro de 2026 sobre a `main` em `29afbce` (a F7), na F8 (DE
 | 24. O que a F14 deixou | 6 | O Victor e runs de ajuste |
 | 25. O que a F15 deixou | 3 | O Victor e runs de ajuste |
 | 26. O que a F16 deixou | 5 | O Victor e runs de ajuste |
+| 27. O que a F17 deixou | 2 | O Victor e runs de ajuste |
 
-Total: 189 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 2 (oráculo antes), 7, 8, 9, 10, 12 (os grupos 5 e 6 a F13b fechou, e o 3 a F16).
+Total: 190 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 2 (oráculo antes), 7, 8, 9, 10, 12 (os grupos 5 e 6 a F13b fechou, o 3 a F16 e o 13 a F17).
 
 ## 1. Saúde e fontes (YMYL)
 
@@ -197,9 +198,7 @@ Run de ajuste do kit (`docs/lancamento/` e `pnpm lancamento:imagens`). O `launch
 
 Run 2b (conteúdo). Não é correção: é a parte da F2 que a válvula do CI cortou (§ 85).
 
-| Id | Fonte | Sev. | Defeito | Correção proposta | Quem resolve |
-| --- | --- | --- | --- | --- | --- |
-| F2 2b | DECISOES.md § 85; ADR-003 | baixo | Convert to WebP/AVIF e AVIF to JPG ficaram de fora com o `verificar` a 1.457 s. O motor guarda a decodificação e a codificação de AVIF, a codificação de WebP e a operação `convert`, com os testes de unidade. | Páginas e pastas das duas ferramentas, entradas no registro (`IMAGE_TOOL_IDS`, `IMAGE_PAGES`) e as rotas, os textos (`ImageToolTexts`, cartões em `common.ts`), os casos da matriz (AVIF na saída, nos dois navegadores; recuperar dos commits `3812f49` e `840d565`), a medida de tempo do codificador AVIF no runner, o lugar no hub, na home, no rodapé e na busca. Depois da F6, também pt e es (`TRANSLATED_PATHS`, glossário). Atualizar o kit (`launch-kit.test.ts` compara as contagens: "eight" vira "ten") e as 18 linhas marcadas `<!-- muda com a 2b -->` em `docs/lancamento/`. Medir o JS do `budgets.spec.ts` e o CI antes de somar testes. | Run 2b |
+A F17 fechou a linha deste grupo (está em "Já corrigidos depois da revisão", no fim do arquivo); nenhuma ficou aberta.
 
 ## 14. Decisões do Victor
 
@@ -414,6 +413,15 @@ O que a F16 (o campo das calculadoras que lê o milhar em qualquer lugar, a mens
 | F16 m-4 | DECISOES § 692 | baixo | No Comprimir e no Cortar, o Tab para fora do campo num lote leva o foco à linha da foto enquanto ela espera e, logo depois, ao botão que escolhe a foto: o leitor de tela diz o nome do arquivo e depois o botão, duas falas num Tab | Conferir com NVDA e VoiceOver; se as duas falas atrapalharem, levar o foco direto ao botão quando ele voltar no mesmo quadro, ou calar o nome da linha nesse caminho | Victor (leitores de tela) e uma run de ajuste |
 | F16 m-5 | DECISOES § 692 | baixo | O Tab para fora do campo de número de imagem durante uma execução que a pausa de digitação começou (o valor já confirmado, então o `blur` não refaz) usa a mesma marca do foco; esse caminho tem o Vitest do `landing.ts`, mas nenhum teste de ponta a ponta | Um caso no `image-focus.spec.ts` que digita, espera a execução começar e só então aperta o Tab | Run de ajuste de testes |
 
+## 27. O que a F17 deixou
+
+O que a F17 (o AVIF to JPG e o Convert to WebP em en, pt e es, a recusa do AVIF com o link ao conversor e o lugar das duas no site) deixou para depois: as linhas vêm do agente principal e das notas das três frentes (`m-`) e da revisão adversarial (`R-`, `docs/relatorios/REVISAO-F17.md`).
+
+| Id | Fonte | Sev. | Defeito | Correção proposta | Quem resolve |
+| --- | --- | --- | --- | --- | --- |
+| F17 m-1 | DECISOES § 712 e § 718 | baixo | A medida do codificador AVIF numa foto de 12 MP (`[avif 12 MP]`) tem as três rodadas da máquina num §, mas o número do runner, sem a conferência do meio da run (o rótulo `ci` não existe), ficou só na descrição da PR da F17, lido no log da execução completa final. | Copiar para um § o `[avif 12 MP]` do runner, da descrição da PR da F17, nos dois navegadores, e dizer se a frase "AVIF takes longer to save than WebP" segue certa no runner. | Run F18 |
+| F17 m-2 | DECISOES § 703 | baixo | A linha "best balance · smallest" do glossário de pt (`docs/i18n/pt.md`) diz "melhor equilíbrio · menor arquivo", e o Comprimir imagem e o Converter para WebP dizem "menor tamanho" (desde antes da F17); o glossário e o site discordam numa palavra. | Escolher uma das duas formas e alinhar o glossário ou os textos (o Comprimir, o Converter para WebP e o preset), com o `glossary.test.ts` lendo a linha. | Run de ajuste de texto e voz |
+
 ## Registrados (escolhas, não defeitos)
 
 | Item | O que é |
@@ -518,3 +526,4 @@ O que a F16 (o campo das calculadoras que lê o milhar em qualquer lugar, a mens
 | F13b R-b-1: o foco caía no `body` quando o Baixar saía do DOM | F16, § 686: o foco vai ao controle seguinte que o Tab alcança (o Copiar link), e o Shift+Tab volta ao campo; `tests/e2e/money-input.spec.ts` (o critério 4, a 360 e a 1280, nos dois navegadores) |
 | F13b R-b-3: duas falas para uma digitação ("99" na taxa) | F16, § 685: a região do card espera enquanto um campo tem um rascunho que não lê; `tests/e2e/money-input.spec.ts` (o critério 3, em en, pt e es, nos dois navegadores) |
 | F15 R-b-1: o foco caía no `body` depois do Tab para fora do campo de número de imagem num lote | F16, § 692: a captura do `blur` na ilha guarda o controle para onde o foco ia, e um efeito de layout o leva a ele, ou à linha enquanto ela espera; `tests/e2e/image-focus.spec.ts` e `tests/unit/image-landing.test.ts` |
+| F2 2b: Convert to WebP/AVIF e AVIF to JPG fora do site desde a F2 (§ 85) | F17, § 701 a § 718: as duas ferramentas em en, pt e es (`src/tools/avif-to-jpg/`, `src/tools/convert-to-webp/`), no registro, nas rotas, no hub, na home, no rodapé, no menu, na busca, na "Abrir com" e no `share_target`; o AVIF recusado leva ao AVIF to JPG (§ 708); a matriz com o AVIF na saída nos dois navegadores (§ 711); a medida do codificador AVIF (§ 712); o kit e as linhas `<!-- muda com a 2b -->` (§ 713) |

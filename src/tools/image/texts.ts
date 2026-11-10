@@ -37,6 +37,12 @@ import esWebp from '../webp-to-jpg/i18n/es.ts';
 import enPng from '../png-to-jpg/i18n/en.ts';
 import ptPng from '../png-to-jpg/i18n/pt.ts';
 import esPng from '../png-to-jpg/i18n/es.ts';
+import enAvif from '../avif-to-jpg/i18n/en.ts';
+import ptAvif from '../avif-to-jpg/i18n/pt.ts';
+import esAvif from '../avif-to-jpg/i18n/es.ts';
+import enConvert from '../convert-to-webp/i18n/en.ts';
+import ptConvert from '../convert-to-webp/i18n/pt.ts';
+import esConvert from '../convert-to-webp/i18n/es.ts';
 import enPdf from '../image-to-pdf/i18n/en.ts';
 import ptPdf from '../image-to-pdf/i18n/pt.ts';
 import esPdf from '../image-to-pdf/i18n/es.ts';
@@ -55,6 +61,8 @@ export const IMAGE_TOOL_TEXTS: Record<ImagePageId, Record<Lang, AnyToolTexts>> =
   'heic-to-jpg': { en: enHeic, pt: ptHeic, es: esHeic },
   'webp-to-jpg': { en: enWebp, pt: ptWebp, es: esWebp },
   'png-to-jpg': { en: enPng, pt: ptPng, es: esPng },
+  'avif-to-jpg': { en: enAvif, pt: ptAvif, es: esAvif },
+  'convert-to-webp': { en: enConvert, pt: ptConvert, es: esConvert },
   'image-to-pdf': { en: enPdf, pt: ptPdf, es: esPdf },
 };
 

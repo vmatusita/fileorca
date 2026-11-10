@@ -4,7 +4,7 @@
 // The categories count what the Menu counts (sectionCount): the image and PDF tools with a page in the language, the
 // money calculators of the language's hub (14 in English and Spanish, the 8 made for Brazil in Portuguese), the home
 // and health calculators where they exist, and the QR code generator. The 3 image presets and the 4 money presets
-// never count: 46 tools in English, 29 in Portuguese and 35 in Spanish.
+// never count: 48 tools in English, 31 in Portuguese and 37 in Spanish.
 import { groupDigits } from '../i18n/format.ts';
 import { LANGS, QR_ID, pagePath, type Lang } from '../i18n/routes.ts';
 import { sectionCount } from './header-menu.ts';
@@ -41,8 +41,8 @@ export type StatKind = 'image' | 'pdf' | 'money' | 'life' | 'languages';
 
 /**
  * The four counts of the card "FileOrca in numbers" in a language, in order: the image tools, the PDF tools, the money
- * calculators of the hub, and the home and health calculators where the language has them (8 · 12 · 14 · 11 in English)
- * or the languages of the site where it has none (8 · 12 · 8 · 3 in Portuguese, 8 · 12 · 14 · 3 in Spanish).
+ * calculators of the hub, and the home and health calculators where the language has them (10 · 12 · 14 · 11 in English)
+ * or the languages of the site where it has none (10 · 12 · 8 · 3 in Portuguese, 10 · 12 · 14 · 3 in Spanish).
  */
 export function statsItems(lang: Lang): { kind: StatKind; value: number }[] {
   const here = toolCounts(lang);

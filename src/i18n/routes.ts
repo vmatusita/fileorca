@@ -45,6 +45,8 @@ export type RouteId =
   | 'heic-to-jpg'
   | 'webp-to-jpg'
   | 'png-to-jpg'
+  | 'avif-to-jpg'
+  | 'convert-to-webp'
   | 'image-to-pdf'
   | typeof MONEY_HUB_ID
   | CalcPageId
@@ -104,6 +106,8 @@ const TRANSLATED_PATHS: Partial<Record<RouteId, { pt: string; es: string }>> = {
   'heic-to-jpg': { pt: '/pt/heic-para-jpg/', es: '/es/heic-a-jpg/' },
   'webp-to-jpg': { pt: '/pt/webp-para-jpg/', es: '/es/webp-a-jpg/' },
   'png-to-jpg': { pt: '/pt/png-para-jpg/', es: '/es/png-a-jpg/' },
+  'avif-to-jpg': { pt: '/pt/avif-para-jpg/', es: '/es/avif-a-jpg/' },
+  'convert-to-webp': { pt: '/pt/converter-para-webp/', es: '/es/convertir-a-webp/' },
   'image-to-pdf': { pt: '/pt/imagem-para-pdf/', es: '/es/imagen-a-pdf/' },
   'pdf-tools': { pt: '/pt/ferramentas-pdf/', es: '/es/herramientas-pdf/' },
   'merge-pdf': { pt: '/pt/juntar-pdf/', es: '/es/unir-pdf/' },
@@ -256,6 +260,8 @@ function imageToolRoutes(): RouteDef[] {
     ['heic-to-jpg', 'heic-to-jpg'],
     ['webp-to-jpg', 'webp-to-jpg'],
     ['png-to-jpg', 'png-to-jpg'],
+    ['avif-to-jpg', 'avif-to-jpg'],
+    ['convert-to-webp', 'convert-to-webp'],
     ['image-to-pdf', 'image-to-pdf'],
   ];
   const presets: [RouteId, string, string][] = [

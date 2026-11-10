@@ -55,13 +55,11 @@ Legenda de "Tipo do link": só anoto o que o site declara. Quando não declara, 
 Add FileOrca to Graphics, Image and Design
 ```
 
-**Texto pronto (214 caracteres, formato da lista):**
+**Texto pronto (243 caracteres, formato da lista):**
 
 ```
-[FileOrca](https://fileorca.com/) - Image tools that run in the browser: compress, resize, crop, rotate, convert HEIC, WebP and PNG to JPG, and make PDFs. Nothing is uploaded and batches have no limit. No AVIF yet.
+[FileOrca](https://fileorca.com/) - Image tools that run in the browser: compress, resize, crop, rotate, convert HEIC, WebP, PNG and AVIF to JPG, turn JPG and PNG into WebP or AVIF, and make PDFs. Nothing is uploaded and batches have no limit.
 ```
-
-<!-- muda com a 2b: a lista de ferramentas e o "No AVIF yet". -->
 
 ## 2. Astro showcase
 
@@ -75,13 +73,11 @@ Add FileOrca to Graphics, Image and Design
 - **Categoria:** nenhuma pedida.
 - **Status:** não enviado.
 
-**Texto pronto (comentário, 277 caracteres):**
+**Texto pronto (comentário, 283 caracteres):**
 
 ```
-FileOrca (https://fileorca.com/) - free image tools that run in the browser: compress, resize, crop, rotate, convert HEIC, WebP and PNG, and make PDFs. Built with Astro and Preact islands, served as static files, with Web Workers and WebAssembly codecs. Files are not uploaded.
+FileOrca (https://fileorca.com/) - free image tools that run in the browser: compress, resize, crop, rotate, convert HEIC, WebP, PNG and AVIF, and make PDFs. Built with Astro and Preact islands, served as static files, with Web Workers and WebAssembly codecs. Files are not uploaded.
 ```
-
-<!-- muda com a 2b: a lista de ações. -->
 
 ## 3. PeerPush
 
@@ -99,22 +95,21 @@ FileOrca (https://fileorca.com/) - free image tools that run in the browser: com
 
 - Nome: `FileOrca`
 - Tagline (47 caracteres): `Image tools that run in your browser, no upload`
-- Descrição (315 caracteres):
+- Descrição (358 caracteres):
 
 ```
-FileOrca is a set of free image tools that run in the browser. Compress, resize, crop and rotate images, turn HEIC, WebP and PNG into JPG, and put images into one PDF. Files are processed on your device and are not uploaded. There is no account and no limit on batch size. Made by one developer in Curitiba, Brazil.
+FileOrca is a set of free image tools that run in the browser. Compress, resize, crop and rotate images, turn HEIC, WebP, PNG and AVIF into JPG, convert JPG and PNG to WebP or AVIF, and put images into one PDF. Files are processed on your device and are not uploaded. There is no account and no limit on batch size. Made by one developer in Curitiba, Brazil.
 ```
 
 - Casos de uso:
   - Make a photo fit the size limit of an online form.
   - Turn iPhone HEIC photos into JPG.
+  - Turn an AVIF image into a JPG.
   - Resize a picture to YouTube thumbnail size.
   - Put several scans or photos into one PDF.
 - Público: people who prepare photos and scans for forms, email or the web; people who prefer not to upload their files.
 - Preço: Free. Plataforma: Web.
 - Alternativas: TinyPNG, Squoosh, iLoveIMG.
-
-<!-- muda com a 2b: a descrição (lista de ações) e os casos de uso. -->
 
 ## 4. Launching Next
 
@@ -131,24 +126,22 @@ FileOrca is a set of free image tools that run in the browser. Compress, resize,
 **Texto pronto:**
 
 - Título curto (6 palavras): `Browser image tools, nothing is uploaded`
-- Descrição completa (926 caracteres, limite 2.500):
+- Descrição completa (896 caracteres, limite 2.500):
 
 ```
-FileOrca is a set of free image tools that run in the browser. You can compress, resize, crop and rotate JPG, PNG and WebP images, turn HEIC, WebP and PNG into JPG, and put images into one PDF. There are presets for common limits: 100 KB, 1 MB and a YouTube thumbnail.
+FileOrca is a set of free image tools that run in the browser. You can compress, resize, crop and rotate JPG, PNG and WebP images, turn HEIC, WebP, PNG and AVIF into JPG, convert JPG and PNG to WebP or AVIF, and put images into one PDF. There are presets for common limits: 100 KB, 1 MB and a YouTube thumbnail.
 
 Files are processed on your device and are not uploaded. There is no account, and there is no limit on how many images you add at once. You can paste images with Ctrl+V and download the results one by one or as a ZIP file.
 
-It is a static site built with Astro and Preact. The tools run in Web Workers, and the codecs (MozJPEG, OxiPNG, WebP and libheif) are WebAssembly that loads on first use. Hosting is Cloudflare Workers, with static files only.
+It is a static site built with Astro and Preact. The tools run in Web Workers, and the codecs (MozJPEG, OxiPNG, WebP, AVIF and libheif) are WebAssembly that loads on first use. Hosting is Cloudflare Workers, with static files only.
 
-I build it alone, in Curitiba, Brazil. Ads are not on yet. When they are, Google AdSense will pay the hosting and other costs. Next on the list: converters to WebP and AVIF, then calculators and PDF tools.
+I build it alone, in Curitiba, Brazil. Ads are not on yet. When they are, Google AdSense will pay the hosting and other costs.
 ```
 
 - Tags (8): `image tools, image compressor, image converter, heic to jpg, privacy, browser tools, free tools, pdf`
 - Tipo: "A side project" é o mais fiel hoje. Se preferir, "bootstrapped". Decisão sua.
 - Gasto de marketing nos próximos 90 dias: a faixa de US$ 0.
 - Quem envia: Victor Yuki Matusita, `contato@fileorca.com`.
-
-<!-- muda com a 2b: o primeiro parágrafo e o último ("Next on the list"). -->
 
 ## 5. G2
 
@@ -163,13 +156,11 @@ I build it alone, in Curitiba, Brazil. Ads are not on yet. When they are, Google
 - **Categoria sugerida:** edição ou otimização de imagem (a G2 decide).
 - **Status:** não enviado.
 
-**Texto pronto** (limite não declarado; 420 caracteres):
+**Texto pronto** (limite não declarado; 468 caracteres):
 
 ```
-FileOrca is a set of free image tools that run in the web browser. Users can compress, resize, crop and rotate JPG, PNG and WebP images, convert HEIC, WebP and PNG files to JPG, and put images into one PDF. Files are processed on the device and are not uploaded. There is no account and no limit on batch size. Results can be downloaded one by one or as a ZIP file. FileOrca is made by one developer in Curitiba, Brazil.
+FileOrca is a set of free image tools that run in the web browser. Users can compress, resize, crop and rotate JPG, PNG and WebP images, convert HEIC, WebP, PNG and AVIF files to JPG, turn JPG and PNG files into WebP or AVIF, and put images into one PDF. Files are processed on the device and are not uploaded. There is no account and no limit on batch size. Results can be downloaded one by one or as a ZIP file. FileOrca is made by one developer in Curitiba, Brazil.
 ```
-
-<!-- muda com a 2b: a lista de ações. -->
 
 ## 6. Toools.design
 
@@ -192,8 +183,6 @@ FileOrca is a set of free image tools that run in the web browser. Users can com
 FileOrca is a set of image tools that run in the browser: compress, resize, crop, rotate and convert, with no account and no upload. It is for people who prepare images for the web and for online forms. Free to use.
 ```
 
-<!-- muda com a 2b: a descrição e a mensagem (lista de ações). -->
-
 ## 7. SourceForge (diretório de software)
 
 - **Envio:** "Add a Product" em <https://sourceforge.net/software/vendors/new> (o link está em <https://sourceforge.net/software/vendors/>, que abriu; o formulário não abri). Cadastro de empresa em <https://sourceforge.net/user/registration_business>.
@@ -206,10 +195,8 @@ FileOrca is a set of image tools that run in the browser: compress, resize, crop
 
 **Texto pronto** (limites não declarados):
 
-- Resumo (140 caracteres): `Free image tools that run in your browser: compress, resize, crop, rotate, convert HEIC, WebP and PNG, and make PDFs. No account, no upload.`
-- Descrição: use a mesma da G2 (420 caracteres).
-
-<!-- muda com a 2b: o resumo e a descrição (lista de ações). -->
+- Resumo (146 caracteres): `Free image tools that run in your browser: compress, resize, crop, rotate, convert HEIC, WebP, PNG and AVIF, and make PDFs. No account, no upload.`
+- Descrição: use a mesma da G2 (468 caracteres).
 
 ## 8. awesome-privacy (Lissy93): **não recomendado agora**
 
@@ -228,19 +215,17 @@ FileOrca is a set of image tools that run in the browser: compress, resize, crop
 - **Relevância:** média. **Chance:** muito baixa. Só considere depois de 4 meses de site estável e de decidir a resposta sobre código aberto e IA.
 - **Status:** não enviado.
 
-**Rascunho do item (YAML, descrição com 236 caracteres):**
+**Rascunho do item (YAML, descrição com 229 caracteres):**
 
 ```yaml
 - name: FileOrca
   description: >-
-    Image tools that run in the browser: compress, resize, crop, rotate, convert HEIC, WebP and PNG, and make PDFs. Files are processed on the device and results carry no photo metadata. Uses Google Analytics with Consent Mode. No AVIF yet.
+    Image tools that run in the browser: compress, resize, crop, rotate, convert HEIC, WebP, PNG and AVIF, and make PDFs. Files are processed on the device and results carry no photo metadata. Uses Google Analytics with Consent Mode.
   url: https://fileorca.com/
   icon: https://fileorca.com/icon-512.png
 ```
 
 Antes de enviar, rode `make validate` no fork, como pede o CONTRIBUTING. Confirme o formato do campo `icon` no esquema (`lib/schema.json`), porque eu não o abri.
-
-<!-- muda com a 2b: a descrição (lista de ações e "No AVIF yet"). -->
 
 ## 9. awesome-privacy (pluja): **não recomendado agora**
 
@@ -258,8 +243,6 @@ Antes de enviar, rode `make validate` no fork, como pede o CONTRIBUTING. Confirm
 ```
 - [FileOrca](https://fileorca.com/) - Image tools that run in the browser: compress, resize, crop, rotate, convert and make PDFs. Files are processed on the device and results carry no photo metadata. Web, free.
 ```
-
-<!-- muda com a 2b: a lista de ações. -->
 
 ## 10. Privacy Guides (fórum, "Tool Suggestions"): **não recomendado agora**
 
@@ -284,8 +267,6 @@ Threat model: it protects the file from being sent to a server. It does not prot
 
 I'm happy to answer questions about how it works.
 ```
-
-<!-- muda com a 2b: a lista de ações. -->
 
 As duas primeiras afirmações do texto são as do Show HN e só ficam se a seção "Provas do Show HN" do relatório da F3 passar. "I don't claim an audit" só vale se não houver auditoria; confirme.
 
@@ -313,7 +294,7 @@ Título (66 caracteres): `I built free image tools that run in your browser, wit
 Corpo (rascunho; reescreva):
 
 ```
-I made FileOrca, a set of image tools that run in the browser: compress, resize, crop, rotate, HEIC to JPG, WebP to JPG, PNG to JPG and image to PDF. No account, and no limit on batch size.
+I made FileOrca, a set of image tools that run in the browser: compress, resize, crop, rotate, HEIC to JPG, WebP to JPG, PNG to JPG, AVIF to JPG, JPG and PNG to WebP or AVIF, and image to PDF. No account, and no limit on batch size.
 
 Files are processed on your device and are not uploaded. You can check it in the Network tab of your browser.
 
@@ -323,8 +304,6 @@ Feedback is welcome, especially a file that fails. Tell me the browser, the devi
 
 https://fileorca.com/image-tools/
 ```
-
-<!-- muda com a 2b: a lista de ferramentas do primeiro parágrafo. -->
 
 Não peça voto e não use contas secundárias. Leia a regra de autopromoção antes (a proporção entre posts próprios e participação costuma ser avaliada).
 
@@ -399,3 +378,5 @@ Se você abrir os quatro que deram 403 e todos forem grátis, sem troca de link,
 ## Linhas que mudam com a 2b (resumo)
 
 Todos os textos prontos acima que listam as ações do FileOrca (compress, resize, crop, rotate, convert, PDF) mudam quando a 2b entrar: entram Convert to WebP/AVIF e AVIF to JPG. As entradas 1 a 10, o corpo do r/SideProject e a descrição do Launching Next têm um comentário `<!-- muda com a 2b -->` logo abaixo do texto.
+
+A F17 (10/nov/2026) mudou os textos marcados e tirou os comentários: entraram o AVIF to JPG e a conversão de JPG e PNG para WebP e AVIF, saíram das entradas 1 e 8 a frase que dava o AVIF como ausente e, do Launching Next, a frase do que vinha a seguir, e o PeerPush ganhou um caso de uso de AVIF. Os textos que já diziam só "convert" (a descrição e a mensagem do Toools.design, a entrada 9 e a 10) ficaram iguais, porque "convert" cobre as conversões novas.

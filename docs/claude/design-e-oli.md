@@ -161,3 +161,8 @@ O que a próxima run precisa saber da home depois do ajuste `ajuste-home-cards` 
 - **Um `p.fo-prose` não tem margem:** as margens da prosa (`.fo-prose p`) são do parágrafo de dentro de uma `.fo-prose`, então a frase da seção encostava nos cards, como na F13a. A regra da seção dá a ela os 12 px de um parágrafo (§ 616), que a estimativa do mapa já contava (`PROSE_MARGIN`).
 - **A `--fo-band-dark` pinta só a faixa dos hubs** agora: ela continua no `components.css`, no bloco do topo da home, com o `@media screen`. Não a tire com o resto da home.
 - **O `node-html-parser` reescreve o SVG:** o `innerHTML` de um `<svg>` do `dist/` sai com `<path ...></path>` ou `<path .../>` conforme o parser, e não bate com o texto do `ICONS`. Para achar o ícone de um card pelo desenho, passe os dois lados pelo parser (`parse(inner).toString()`), como o `tests/unit/home.test.ts`; o `hub-icons.test.ts` lê o HTML cru com uma expressão regular. O `classList.value` dele é um array, não um texto.
+
+## F17: dois ícones novos
+
+- **Os cartões `.fo-tool` não são só os dos hubs e das homes:** a grade de relacionadas de cada página de ferramenta também usa o `ToolCard`. Um script que procura "ícone que nenhum cartão usa" pelo `.fo-tool` do `dist/` inteiro lê também as relacionadas; o `hub-icons.test.ts` só lê os hubs e as homes. Na F17, as duas leituras deram os mesmos 26 livres.
+- **O conjunto tem 74 ícones desde a F17** (§ 706; a seção da F13a diz 71, a história de então). Um ícone novo entra numa linha própria do README dos ícones, depois da linha "Os 27 das cinco linhas acima…", para a conta dela continuar certa.

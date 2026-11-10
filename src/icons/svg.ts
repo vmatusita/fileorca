@@ -5,8 +5,8 @@
 export const ICON_NAMES = [
   'alert', 'apple', 'area', 'arrow-right', 'bag', 'balance', 'balloon', 'book', 'browser-image', 'calculator',
   'calendar', 'car', 'card', 'check', 'chevron-down', 'chevron-right', 'close', 'coffee', 'coin-plus', 'coins',
-  'compress', 'convert', 'crop', 'download', 'file', 'file-drop', 'globe', 'growth', 'heart', 'home', 'image', 'info',
-  'key', 'link', 'lock', 'menu', 'merge', 'moon', 'offline', 'page-number', 'paint', 'paste', 'pdf', 'percent',
+  'compress', 'convert', 'crop', 'download', 'file', 'file-drop', 'globe', 'growth', 'heart', 'home', 'image',
+  'image-fast', 'image-stack', 'info', 'key', 'link', 'lock', 'menu', 'merge', 'moon', 'offline', 'page-number', 'paint', 'paste', 'pdf', 'percent',
   'phone-photo', 'piggy', 'qr', 'refinance', 'reorder', 'resize', 'rotate', 'search', 'shield', 'shovel', 'sign',
   'sparkline', 'split', 'stroller', 'sun', 'table', 'tape', 'theme-system', 'thermometer', 'tile', 'trash',
   'trend-down', 'unlock', 'upload', 'wallet', 'watermark', 'weight', 'zoom',

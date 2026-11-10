@@ -76,8 +76,9 @@ function converterLink(tool: ImageToolId, lang: Lang): ConverterLink {
 }
 
 /**
- * The links of the refused formats that have a converter (CONVERTER_FOR). A format with no entry, such as
- * AVIF in this release, has no link: the row says what the tool takes instead and points nowhere.
+ * The links of the refused formats that have a converter (CONVERTER_FOR): HEIC to JPG and, since the F17 (decision 7;
+ * DECISOES § 708), AVIF to JPG. A format with no entry has no link: the row says what the tool takes instead and
+ * points nowhere.
  */
 function convertersFor(lang: Lang): ImagePanelData['converters'] {
   const links: ImagePanelData['converters'] = {};

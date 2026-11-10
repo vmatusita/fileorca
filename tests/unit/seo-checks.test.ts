@@ -83,7 +83,9 @@ describe('sitemaps', () => {
   // Spanish get the QR code generator and the 10 file guides, and Spanish the 18 calculator pages and the 5 money guides.
   const f7Rows = ROUTES.filter((route) => route.adArea === 'casa-saude' || route.adArea === 'utilidades').map((route) => route.id);
   // F11 (decision 5): the guides hub, one page in each language (the last 1 of each sum).
-  const SIZES = { en: 19 + 24 + 13 + 10 + f7Rows.length + 1, pt: 8 + 11 + 13 + brRows + 1 + 10 + 1, es: 8 + 11 + 13 + 1 + CALC_PAGE_IDS.length + GUIDE_IDS.length + 1 + 10 + 1 } as const;
+  // F17 (DECISOES § 716): AVIF to JPG and Convert to WebP, in the three languages: English 21 pages of the image area and
+  // the institutional ones (19 before), and the other 13 pages of the image area in Portuguese and Spanish (11 before).
+  const SIZES = { en: 21 + 24 + 13 + 10 + f7Rows.length + 1, pt: 8 + 13 + 13 + brRows + 1 + 10 + 1, es: 8 + 13 + 13 + 1 + CALC_PAGE_IDS.length + GUIDE_IDS.length + 1 + 10 + 1 } as const;
 
   it('builds one valid sitemap per language and an index, with the counts of the route map', () => {
     expect([0, 1 + BR_CALC_IDS.length]).toContain(brRows);
@@ -105,7 +107,8 @@ describe('sitemaps', () => {
 
   it('lists every image and PDF page and both hubs in the sitemap of each language (F6; before, only Compress image outside English)', () => {
     const ids = [...Object.keys(IMAGE_PAGES), 'image-tools', PDF_HUB_ID, ...PDF_TOOL_IDS] as RouteId[];
-    expect(ids).toHaveLength(12 + 13);
+    // F17: 13 image pages and the hub (12 before), and the PDF hub and its 12 tools.
+    expect(ids).toHaveLength(14 + 13);
     for (const lang of ['en', 'pt', 'es'] as const) {
       const listed = new Set(sitemapUrls(lang));
       for (const id of ids) expect(listed.has(`${O}${routeById(id).paths[lang] ?? '-'}`), `${lang} ${id}`).toBe(true);

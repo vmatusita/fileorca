@@ -42,7 +42,7 @@ export default {
     title: 'Uy, Oli no pudo leer este archivo',
     empty: '{name} está vacío, así que no hay nada que leer. Elige un archivo que tenga una imagen.',
     unsupported: '{name} no es una imagen que Oli pueda leer. Prueba con un archivo {formats}.',
-    wrongTool: '{name} es un archivo {format}. Ábrelo en {tool}.',
+    wrongTool: { heic: '{name} es un archivo HEIC. Ábrelo en {tool}.', avif: '{name} es un archivo AVIF. Ábrelo en {tool}.' },
     wrongFormat: '{name} es un archivo {format}. Prueba con un archivo {formats}.',
     truncated: '{name} se corta antes de terminar, así que falta parte de la imagen. Descárgalo o expórtalo de nuevo e inténtalo otra vez.',
     decode: '{name} está dañado y Oli no puede leerlo. Prueba con otra copia del archivo.',
@@ -115,6 +115,8 @@ export default {
       'resize-image': { one: 'Redimensionar esta imagen', many: 'Redimensionar estas {count} imágenes' },
       'crop-image': { one: 'Recortar esta imagen', many: 'Recortar estas {count} imágenes' },
       'rotate-image': { one: 'Rotar esta imagen', many: 'Rotar estas {count} imágenes' },
+      // F17 (DECISOES § 707): Convertir a WebP después de Comprimir; lleva un resultado JPG o PNG, nunca un WebP.
+      'convert-to-webp': { one: 'Convertir esta imagen a WebP', many: 'Convertir estas {count} imágenes a WebP' },
       'image-to-pdf': { one: 'Pasar esta imagen a PDF', many: 'Pasar estas {count} imágenes a PDF' },
       // F15 (DECISOES § 653): las herramientas de PDF después de Imagen a PDF, con las palabras de la isla de PDF.
       'compress-pdf': { one: 'Comprimir este PDF', many: 'Comprimir estos {count} PDF' },

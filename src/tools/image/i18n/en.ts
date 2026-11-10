@@ -43,7 +43,7 @@ export default {
     title: "Oops, Oli couldn't read this file",
     empty: '{name} is empty, so there is nothing to read. Choose a file that has an image in it.',
     unsupported: "{name} isn't an image Oli can read. Try {formats}.",
-    wrongTool: '{name} is a {format} file. Open it in {tool}.',
+    wrongTool: { heic: '{name} is a HEIC file. Open it in {tool}.', avif: '{name} is an AVIF file. Open it in {tool}.' },
     wrongFormat: "{name} is in {format} format, which this tool doesn't take. Try {formats}.",
     truncated: '{name} stops before its end, so part of the image is missing. Download or export it again, then try once more.',
     decode: "{name} is damaged, so Oli can't read it. Try another copy of the file.",
@@ -116,6 +116,8 @@ export default {
       'resize-image': { one: 'Resize this image', many: 'Resize these {count} images' },
       'crop-image': { one: 'Crop this image', many: 'Crop these {count} images' },
       'rotate-image': { one: 'Rotate this image', many: 'Rotate these {count} images' },
+      // F17 (DECISOES § 707): Convert to WebP after Compress; it takes a JPG or a PNG result, never a WebP.
+      'convert-to-webp': { one: 'Convert this image to WebP', many: 'Convert these {count} images to WebP' },
       'image-to-pdf': { one: 'Turn this image into a PDF', many: 'Turn these {count} images into a PDF' },
       // F15 (DECISOES § 653): the PDF tools after Image to PDF, with the words of the PDF island.
       'compress-pdf': { one: 'Compress this PDF', many: 'Compress these {count} PDFs' },

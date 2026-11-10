@@ -16,7 +16,7 @@ export default {
     caption: 'Rotar imagen: formatos que acepta, resultado y límites',
     head: ['Detalle', 'Qué pasa'],
     rows: [
-      ['Acepta', 'JPG, PNG y WebP, reconocidos por el contenido del archivo y no por el nombre. Las fotos HEIC pasan antes por HEIC a JPG, y los archivos AVIF no se aceptan.'],
+      ['Acepta', 'JPG, PNG y WebP, reconocidos por el contenido del archivo y no por el nombre. Las fotos HEIC pasan antes por HEIC a JPG, y los archivos AVIF, por AVIF a JPG.'],
       ['Rotar', '90° a la derecha, que es la opción predeterminada, 90° a la izquierda o 180°.'],
       ['Reflejar', 'Ninguno, que es la opción predeterminada, Horizontal o Vertical. El reflejo se combina con la rotación.'],
       ['Lote', 'La rotación y el reflejo que elijas se aplican a todas las imágenes del lote. Sin límite de imágenes.'],

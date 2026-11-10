@@ -203,3 +203,7 @@ Pegadinhas que a F13b achou no card das calculadoras e no QR code, no guia de ar
 - **A divisão de hoje:** o Chromium em 8 partes e o WebKit em 14 (§ 648), depois que a execução completa da F14 mostrou a parte 4 do Chromium com 766 s e a 10 do WebKit com 744 s (os 104 testes `island-pdf-*` por navegador). A mudança veio numa PR separada, de merge do Victor.
 - **A máquina não mostra o tempo do CI:** no `pnpm verificar --partes` (6 workers, Windows) as duas partes deram 186 e 159 s. Para saber se um spec novo cabe numa parte, use os tempos de teste de uma execução completa do CI: `.cache/f14/ci-durations.mjs <run>` (lê os logs dos jobs do Playwright, só leitura) e `.cache/f14/part-files.mjs <durações> <projeto> <n>` (o `--list --shard` de cada parte, com a soma de cada spec). No CI, uma parte leva de 0,52 a 0,73 vez a soma dos testes dela; a parte com o `layout-shift.spec.ts` fica no alto (o `beforeAll` prende os testes em grupos).
 - **Os specs pesados vêm juntos na ordem dos nomes:** o `axe-pdf-states`, o `budgets` e o `clearance` caem na mesma parte do Chromium com 6 ou 7 partes; com 8 eles se separam. Projete a divisão inteira antes de somar uma parte.
+
+## F17: a projeção das partes
+
+- **A chave dos tempos do CI (`.cache/f14/ci-durations.mjs`) leva o número da linha do teste:** depois de editar um spec, case sem a linha (`file:linha ›` vira `file ›`). E o log do CI não traz tempo para todo teste (três blocos do `money-card.spec.ts` não aparecem): uma projeção que dá a média a quem não tem tempo infla a parte; separe o que é da run.

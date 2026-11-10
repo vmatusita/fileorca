@@ -42,7 +42,7 @@ export default {
     title: 'Ops, a Oli não conseguiu ler esse arquivo',
     empty: '{name} está vazio, então não há nada para ler. Escolha um arquivo que tenha uma imagem.',
     unsupported: '{name} não é uma imagem que a Oli consiga ler. Tente um arquivo {formats}.',
-    wrongTool: '{name} é um arquivo {format}. Abra-o em {tool}.',
+    wrongTool: { heic: '{name} é um arquivo HEIC. Abra-o em {tool}.', avif: '{name} é um arquivo AVIF. Abra-o em {tool}.' },
     wrongFormat: '{name} é um arquivo {format}. Tente um arquivo {formats}.',
     truncated: '{name} termina antes da hora, então falta parte da imagem. Baixe ou exporte o arquivo de novo e tente outra vez.',
     decode: '{name} está danificado e a Oli não consegue lê-lo. Tente outra cópia do arquivo.',
@@ -115,6 +115,8 @@ export default {
       'resize-image': { one: 'Redimensionar esta imagem', many: 'Redimensionar estas {count} imagens' },
       'crop-image': { one: 'Cortar esta imagem', many: 'Cortar estas {count} imagens' },
       'rotate-image': { one: 'Girar esta imagem', many: 'Girar estas {count} imagens' },
+      // F17 (DECISOES § 707): o Converter para WebP depois do Comprimir; ele leva um resultado JPG ou PNG, nunca um WebP.
+      'convert-to-webp': { one: 'Converter esta imagem para WebP', many: 'Converter estas {count} imagens para WebP' },
       'image-to-pdf': { one: 'Pôr esta imagem num PDF', many: 'Pôr estas {count} imagens num PDF' },
       // F15 (DECISOES § 653): as ferramentas de PDF depois da Imagem para PDF, com as palavras da ilha de PDF.
       'compress-pdf': { one: 'Comprimir este PDF', many: 'Comprimir estes {count} PDFs' },

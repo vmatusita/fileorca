@@ -9,7 +9,7 @@ Os textos que vão para fora estão em inglês. As explicações estão em portu
 1. **O Product Hunt não quer comentário escrito por IA.** As diretrizes de comentário dizem que a comunidade quer conversar com pessoas reais e pedem "No LLMs or Chrome extensions". Este arquivo foi redigido com ajuda de IA. Use o primeiro comentário como **roteiro de fatos** e reescreva com as suas palavras. O mesmo vale para as respostas às perguntas. A tagline e a descrição também: escolha e ajuste como você falaria.
 2. **O texto só afirma o que a run prova.** Cada afirmação técnica está ligada a um teste na seção "Provas". Se um teste deixar de passar, a frase sai.
 3. **Nunca peça voto.** Nem a amigos, nem em rede social, nem por mensagem. Pedir para visitar e comentar é permitido; pedir upvote, sorteio ligado a voto e voto pago derrubam o lançamento.
-4. **As contagens do produto são conferidas por teste.** `tests/unit/launch-kit.test.ts` lê este arquivo e compara cada contagem ("8 image tools", "12 PDF tools"…) com os registros do código. Se uma run mudar uma contagem (a 2b, por exemplo), o teste reprova até este arquivo ser atualizado. Mesmo assim, confira no dia em <https://fileorca.com/>.
+4. **As contagens do produto são conferidas por teste.** `tests/unit/launch-kit.test.ts` lê este arquivo e compara cada contagem ("10 image tools", "12 PDF tools"…) com os registros do código. Se uma run mudar uma contagem (a 2b, por exemplo), o teste reprova até este arquivo ser atualizado. Mesmo assim, confira no dia em <https://fileorca.com/>.
 
 ## Regras que importam (resumo em português)
 
@@ -102,16 +102,16 @@ Taglines (limite de 60):
 
 Por que a primeira: diz as três áreas e a diferença, sem adjetivo nem número. A segunda põe "free" na frente, que é verdade e é o que o visitante procura. A terceira troca a categoria pelas ações mais buscadas.
 
-**Descrição A (442 caracteres):**
+**Descrição A (449 caracteres):**
 
 ```
-FileOrca is a set of free tools for everyday files, and the work happens in your browser: your files are not uploaded. Compress, resize, crop and convert images (HEIC, WebP, PNG, JPG), merge, split, compress and sign PDFs, and work out a mortgage or a debt payoff plan. There are 8 image tools, 12 PDF tools and 14 money calculators, plus 15 guides, 10 of them with numbers measured on our test files. No sign-up: open a tool and drop a file.
+FileOrca is a set of free tools for everyday files, and the work happens in your browser: your files are not uploaded. Compress, resize, crop and convert images (HEIC, WebP, AVIF, PNG, JPG), merge, split, compress and sign PDFs, and work out a mortgage or a debt payoff plan. There are 10 image tools, 12 PDF tools and 14 money calculators, plus 15 guides, 10 of them with numbers measured on our test files. No sign-up: open a tool and drop a file.
 ```
 
-**Descrição B (313 caracteres):**
+**Descrição B (314 caracteres):**
 
 ```
-Free image, PDF and money tools that run in your browser. Your files are not uploaded: the work happens on your device, and you can see it in the Network tab. 8 image tools, 12 PDF tools, 14 money calculators and 15 guides, 10 of them with measured numbers. No sign-up, and a batch of files comes back as one ZIP.
+Free image, PDF and money tools that run in your browser. Your files are not uploaded: the work happens on your device, and you can see it in the Network tab. 10 image tools, 12 PDF tools, 14 money calculators and 15 guides, 10 of them with measured numbers. No sign-up, and a batch of files comes back as one ZIP.
 ```
 
 Por que a A: começa pelo que é e pela diferença, lista o que dá para fazer com os nomes que as pessoas buscam (HEIC, WebP) e termina no que a pessoa faz primeiro. A B é a curta, para quando a página de produto já mostrar a lista na galeria.
@@ -124,7 +124,7 @@ Escolha até 3 no formulário. Sugestões, pela ordem: **Productivity**, **Priva
 
 Poste como o primeiro comentário, logo que o lançamento entrar no ar. Reescreva com as suas palavras: o Product Hunt não quer comentário de IA.
 
-**Primeiro comentário (1543 caracteres):**
+**Primeiro comentário (1586 caracteres):**
 
 ```
 Hi Product Hunt! I'm Victor, a developer in Curitiba, Brazil, and I built FileOrca on my own.
@@ -132,7 +132,7 @@ Hi Product Hunt! I'm Victor, a developer in Curitiba, Brazil, and I built FileOr
 FileOrca does the work in your browser: you can make a photo smaller or turn an iPhone HEIC into a JPG without uploading it.
 
 What you can do today:
-- Images: compress, resize, crop, rotate, HEIC to JPG, WebP to JPG, PNG to JPG, and images into one PDF. 8 image tools and 3 presets for common limits.
+- Images: compress, resize, crop, rotate, HEIC to JPG, WebP to JPG, PNG to JPG, AVIF to JPG, JPG and PNG to WebP or AVIF, and images into one PDF. 10 image tools and 3 presets for common limits.
 - PDFs: merge, split, compress, PDF to JPG, sign, add or remove a password, watermark, page numbers and more. 12 PDF tools.
 - Money: a mortgage calculator, refinance, loans, debt payoff and others. 14 money calculators.
 - 15 guides: 10 file guides with numbers measured on our test files with the same tools, and 5 money guides worked out by the engines of the calculators.
@@ -197,7 +197,7 @@ Cada afirmação técnica do kit tem um teste que passa no `pnpm verificar` da r
    - **Prova:** `playwright.config.ts` (os dois projetos) e as partes do CI, que rodam a suíte inteira nos dois motores.
 5. **"10 of them with numbers measured on our test files" / "10 of them with measured numbers" / "10 file guides with numbers measured on our test files" / "File guides with numbers measured on our test files".** "measured" vale só para os 10 guias de arquivo; os 5 guias de dinheiro têm os números calculados pelos motores das calculadoras no build.
    - **Prova:** `tests/unit/guides-measured.test.ts` (cada número dos 10 guias de arquivo vem de `data/guides-measured.json`, com amostra, método e data), `tests/unit/guides-numbers.test.ts` (nenhum algarismo à mão) e `tests/unit/calc-guides.test.ts` (os guias de dinheiro contra o motor e o oráculo). O `tests/unit/launch-kit.test.ts` reprova "measured" junto de outra contagem.
-6. **As contagens** (8 image tools, 3 presets, 12 PDF tools, 14 money calculators, 15 guides, 10 file guides, 5 money guides).
+6. **As contagens** (10 image tools, 3 presets, 12 PDF tools, 14 money calculators, 15 guides, 10 file guides, 5 money guides).
    - **Prova:** `tests/unit/launch-kit.test.ts` compara cada contagem deste arquivo com os registros (`src/tools/image/registry.ts`, `src/tools/pdf/registry.ts`, `src/tools/calc/registry.ts`, `src/tools/guides/registry.ts`).
 7. **"There is no account" / "No sign-up".**
    - **Prova:** `tests/unit/routes.test.ts`: a lista de rotas é a do mapa, nenhuma página fica fora dele, e nenhum caminho nem página é de conta, login, cadastro ou perfil ("has no page of an account").
@@ -212,7 +212,7 @@ Cada afirmação técnica do kit tem um teste que passa no `pnpm verificar` da r
 12. **"keep your numbers on your device".** A legenda da galeria 5.
     - **Prova:** `tests/e2e/money-privacy.spec.ts` ("no typed number leaves the device"), em cada calculadora e guia de dinheiro.
 
-<!-- contagens: image-tools=8 image-presets=3 pdf-tools=12 calculators=14 guides=15 file-guides=10 money-guides=5 -->
+<!-- contagens: image-tools=10 image-presets=3 pdf-tools=12 calculators=14 guides=15 file-guides=10 money-guides=5 -->
 
 ## O que ficou fora do texto de propósito
 

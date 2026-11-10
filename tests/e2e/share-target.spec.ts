@@ -3,6 +3,7 @@
 // (the server never sees the POST: it would answer 405, like Cloudflare), keeps the files in the inbox and sends the
 // page to itself in GET. The "Open with" page shows the files and the tools that take them; the tool chosen gets them
 // through its island, by the way of a drop, and the inbox ends empty.
+import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import openWith from '../../src/i18n/en/open-with.ts';
 import pt from '../../src/i18n/pt/open-with.ts';
@@ -42,10 +43,11 @@ test('an image and a PDF shared: the files, the tools that take them, and Compre
   await expect(files.nth(0)).toContainText('JPG');
   await expect(files.nth(1)).toContainText('gen-paginas-mistas.pdf');
   await expect(files.nth(1)).toContainText('PDF');
-  // Only tools, from the registries: the image tools that take a JPG and the twelve PDF tools.
+  // Only tools, from the registries: the image tools that take a JPG and the twelve PDF tools. F17 (DECISOES § 716):
+  // Convert to WebP takes a JPG too, in the order of the registry.
   const shown = await page.locator('[data-tool]:visible').evaluateAll((items) => items.map((item) => item.getAttribute('data-tool')));
   expect(shown).toEqual([
-    'compress-image', 'resize-image', 'crop-image', 'rotate-image', 'png-to-jpg', 'image-to-pdf',
+    'compress-image', 'resize-image', 'crop-image', 'rotate-image', 'png-to-jpg', 'convert-to-webp', 'image-to-pdf',
     'merge-pdf', 'split-pdf', 'pdf-to-jpg', 'compress-pdf', 'rotate-pdf', 'delete-pdf-pages', 'add-page-numbers-to-pdf', 'sign-pdf',
     'protect-pdf', 'unlock-pdf', 'reorder-pdf-pages', 'watermark-pdf',
   ]);
@@ -61,6 +63,32 @@ test('an image and a PDF shared: the files, the tools that take them, and Compre
   expect([...out.subarray(0, 3)]).toEqual([0xff, 0xd8, 0xff]);
   // The PDF is refused on its row, as a drop of it would be.
   await expect(page.locator('#fo-tool-root')).toContainText('gen-paginas-mistas.pdf');
+  expect(await inboxState(page)).toEqual({ inbox: false, choice: null });
+  expect(server.requests.filter((request) => request.method !== 'GET' && request.method !== 'HEAD')).toEqual([]);
+});
+
+// F17 (decision 9; DECISOES § 710): AVIF to JPG takes AVIF, so the accept of the share target has it (the manifests,
+// tests/unit/open-with.test.ts), and a shared AVIF finds AVIF to JPG, alone, which gets it by its island and gives a JPG.
+// Before the F17 no tool took it: the page said so (data-no-tool), and no card showed.
+test('an AVIF shared: the page reads it as AVIF and shows AVIF to JPG alone, which gets it and gives a JPG', async ({ page }) => {
+  await visit(page, server, '/', { island: false });
+  if (await workerOff(page, server)) return;
+  await controlled(page);
+  await share(page, '/open-with/', [{ name: 'holiday.avif', mimeType: 'image/avif', buffer: readFileSync('fixtures/images/gen-avif.avif') }]);
+  const files = page.locator('[data-files] li');
+  await expect(files).toHaveCount(1);
+  await expect(files.nth(0)).toContainText('holiday.avif');
+  await expect(files.nth(0)).toContainText('AVIF');
+  const shown = await page.locator('[data-tool]:visible').evaluateAll((items) => items.map((item) => item.getAttribute('data-tool')));
+  expect(shown).toEqual(['avif-to-jpg']);
+  await expect(page.locator('[data-tool="avif-to-jpg"] [data-takes]')).toHaveText(openWith.takesThis);
+  await expect(page.locator('[data-no-tool]')).toBeHidden();
+
+  await page.locator('[data-tool="avif-to-jpg"] a').click();
+  await page.waitForURL('**/avif-to-jpg/');
+  await expect(page.locator('.fo-result')).toBeVisible({ timeout: 60_000 });
+  const out = await downloadBytes(page);
+  expect([...out.subarray(0, 3)]).toEqual([0xff, 0xd8, 0xff]);
   expect(await inboxState(page)).toEqual({ inbox: false, choice: null });
   expect(server.requests.filter((request) => request.method !== 'GET' && request.method !== 'HEAD')).toEqual([]);
 });

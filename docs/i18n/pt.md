@@ -80,6 +80,8 @@ As datas de "Revisado em" e "Última atualização" são o dia em Brasília.
 | HEIC to JPG | HEIC para JPG | /pt/heic-para-jpg/ |
 | WebP to JPG | WebP para JPG | /pt/webp-para-jpg/ |
 | PNG to JPG | PNG para JPG | /pt/png-para-jpg/ |
+| AVIF to JPG | AVIF para JPG | /pt/avif-para-jpg/ |
+| Convert to WebP | Converter para WebP | /pt/converter-para-webp/ |
 | Image to PDF | Imagem para PDF | /pt/imagem-para-pdf/ |
 | PDF tools (hub) | Ferramentas de PDF | /pt/ferramentas-pdf/ |
 | Merge PDF | Juntar PDF | /pt/juntar-pdf/ |

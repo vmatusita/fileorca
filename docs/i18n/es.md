@@ -78,6 +78,8 @@ As datas de "Revisado el" e "Última actualización" são o dia em Brasília.
 | HEIC to JPG | HEIC a JPG | /es/heic-a-jpg/ |
 | WebP to JPG | WebP a JPG | /es/webp-a-jpg/ |
 | PNG to JPG | PNG a JPG | /es/png-a-jpg/ |
+| AVIF to JPG | AVIF a JPG | /es/avif-a-jpg/ |
+| Convert to WebP | Convertir a WebP | /es/convertir-a-webp/ |
 | Image to PDF | Imagen a PDF | /es/imagen-a-pdf/ |
 | PDF tools (hub) | Herramientas PDF | /es/herramientas-pdf/ |
 | Merge PDF | Unir PDF | /es/unir-pdf/ |

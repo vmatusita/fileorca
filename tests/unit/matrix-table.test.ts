@@ -83,8 +83,20 @@ describe('buildTable', () => {
 
   it('summarises each test with its times and the requests that left the page', () => {
     expect(table).toContain('| `compress-image` | `compress-image` | Recommended | 2 | 1 | 1 | 4,2 s | 4,2 s | 0 |');
-    // No tool writes an AVIF in this release, so the table has nothing to say about reading one.
+    // No record here read or wrote an AVIF, so the table has nothing to say about reading one.
     expect(table).not.toMatch(/AVIF/);
+  });
+
+  it('F17: says where an AVIF output opened and where it was checked by its bytes, with what each browser decodes by itself', () => {
+    const avif = buildTable({
+      matrix: [
+        record('convert-to-webp-avif', 'convert-to-webp', 'chromium', 'AVIF, Recommended', [ok('gen-png-transparente.png', 'gen-png-transparente.avif', 'avif', 800, 600, 40_797, { note: 'alpha kept' })], { avifDecode: true }),
+        record('convert-to-webp-avif', 'convert-to-webp', 'webkit', 'AVIF, Recommended', [ok('gen-png-transparente.png', 'gen-png-transparente.avif', 'avif', 800, 600, 40_797, { decoded: 'unsupported', note: 'alpha kept' })], { avifDecode: false }),
+      ],
+      presets: [],
+    });
+    expect(avif).toContain('| `gen-png-transparente.png` | AVIF, Recommended | ok · AVIF 800×600 · 41 KB · abre · transparência mantida | ok · AVIF 800×600 · 41 KB · não abre neste navegador · transparência mantida |');
+    expect(avif).toContain('Decodificação nativa de AVIF nesta máquina: Chromium: abre AVIF sozinho; WebKit: não abre AVIF sozinho.');
   });
 
   it('says how many pages the PDF has, and gives the presets their own table with the bytes of each output', () => {

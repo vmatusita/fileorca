@@ -1,5 +1,5 @@
 // The Product Hunt kit stays true (prompt F5b, decision 8; DECISOES § 191): docs/lancamento/product-hunt.md is read here.
-//  - every product count it writes ("8 image tools", "12 PDF tools"…) equals the registries, so a run that adds a tool
+//  - every product count it writes ("10 image tools", "12 PDF tools"…) equals the registries, so a run that adds a tool
 //    or a guide (the 2b, a later one) fails here until the kit is updated;
 //  - the name, the taglines, the descriptions and the first comment have the character counts the file states, inside
 //    the limits read on the Product Hunt pages;

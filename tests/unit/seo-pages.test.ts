@@ -35,7 +35,7 @@ import { sitemapUrls, sitemapXml } from '../../src/seo/sitemap.ts';
 const O = 'https://fileorca.com';
 
 describe('the pages the SEO gate treats as image tools', () => {
-  it('are the eight tools and the presets of the registry, each with a route', () => {
+  it('are the ten tools and the presets of the registry, each with a route', () => {
     expect(IMAGE_PAGE_IDS).toEqual([...IMAGE_TOOL_IDS, ...IMAGE_PRESET_IDS]);
     expect(IMAGE_PAGE_IDS).toHaveLength(Object.keys(IMAGE_PAGES).length);
     for (const id of IMAGE_PAGE_IDS) {

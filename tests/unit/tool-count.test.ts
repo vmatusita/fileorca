@@ -1,7 +1,8 @@
 // One count of tools for the whole site, without the presets (F13b, decision 3; Victor's choice, F10 p-17 and F11
 // R-E-1; DECISOES § 540). The module reads the registries at build time; this test recounts them on its own, checks the
-// 46, 29 and 35 of the brief, and reads the built pages: the home H1, the "FileOrca in numbers" card of the About page,
-// the About text and the Terms say the number of the module in the three languages, and the Menu keeps its 14.
+// 48, 31 and 37 (the 46, 29 and 35 of the brief until the F17 added AVIF to JPG and Convert to WebP), and reads the built
+// pages: the home H1, the "FileOrca in numbers" card of the About page, the About text and the Terms say the number of the
+// module in the three languages, and the Menu keeps its 14.
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -16,8 +17,8 @@ import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 const exists = (ids: readonly string[], lang: Lang) => ids.filter((id) => pagePath(id as never, lang) !== undefined).length;
 
 describe('the count of tools of a language', () => {
-  it('is 46 in English, 29 in Portuguese and 35 in Spanish', () => {
-    expect(LANGS.map((lang) => toolCount(lang))).toEqual([46, 29, 35]);
+  it('is 48 in English, 31 in Portuguese and 37 in Spanish (F17: 46, 29 and 35 plus AVIF to JPG and Convert to WebP)', () => {
+    expect(LANGS.map((lang) => toolCount(lang))).toEqual([48, 31, 37]);
   });
 
   it('adds the categories of the registries, without the presets', () => {
@@ -31,9 +32,9 @@ describe('the count of tools of a language', () => {
       expect(exists(IMAGE_PRESET_IDS, lang), lang).toBeGreaterThan(0);
       expect(IMAGE_TOOL_IDS.some((id) => (IMAGE_PRESET_IDS as readonly string[]).includes(id))).toBe(false);
     }
-    expect(toolCounts('en')).toMatchObject({ image: 8, pdf: 12, money: 14, house: 6, health: 5, qr: 1, life: 11 });
-    expect(toolCounts('pt')).toMatchObject({ image: 8, pdf: 12, money: 8, house: 0, health: 0, qr: 1 });
-    expect(toolCounts('es')).toMatchObject({ image: 8, pdf: 12, money: 14, house: 0, health: 0, qr: 1 });
+    expect(toolCounts('en')).toMatchObject({ image: 10, pdf: 12, money: 14, house: 6, health: 5, qr: 1, life: 11 });
+    expect(toolCounts('pt')).toMatchObject({ image: 10, pdf: 12, money: 8, house: 0, health: 0, qr: 1 });
+    expect(toolCounts('es')).toMatchObject({ image: 10, pdf: 12, money: 14, house: 0, health: 0, qr: 1 });
   });
 
   it('gives the lint:texto the counts it fills the About and Terms with', () => {
@@ -44,9 +45,9 @@ describe('the count of tools of a language', () => {
   });
 
   it('gives the card "FileOrca in numbers" its four counts (F13b; DECISOES § 586)', () => {
-    expect(statsItems('en')).toEqual([{ kind: 'image', value: 8 }, { kind: 'pdf', value: 12 }, { kind: 'money', value: 14 }, { kind: 'life', value: 11 }]);
-    expect(statsItems('pt')).toEqual([{ kind: 'image', value: 8 }, { kind: 'pdf', value: 12 }, { kind: 'money', value: 8 }, { kind: 'languages', value: 3 }]);
-    expect(statsItems('es')).toEqual([{ kind: 'image', value: 8 }, { kind: 'pdf', value: 12 }, { kind: 'money', value: 14 }, { kind: 'languages', value: LANGS.length }]);
+    expect(statsItems('en')).toEqual([{ kind: 'image', value: 10 }, { kind: 'pdf', value: 12 }, { kind: 'money', value: 14 }, { kind: 'life', value: 11 }]);
+    expect(statsItems('pt')).toEqual([{ kind: 'image', value: 10 }, { kind: 'pdf', value: 12 }, { kind: 'money', value: 8 }, { kind: 'languages', value: 3 }]);
+    expect(statsItems('es')).toEqual([{ kind: 'image', value: 10 }, { kind: 'pdf', value: 12 }, { kind: 'money', value: 14 }, { kind: 'languages', value: LANGS.length }]);
   });
 
   it('counts the money calculators as the Menu does (14 in English and Spanish)', () => {
@@ -86,8 +87,8 @@ describe.runIf(BUILT)('the built pages say the number of the module', () => {
 
   // F13b (decision 8; DECISOES § 586): the card "FileOrca in numbers" of the About page reads the same module
   // (statsItems), whose fourth count is the home and health calculators in English and the languages elsewhere.
-  it('the card "FileOrca in numbers" of the About page says the counts of the module (8 · 12 · 14 · 11, 8 · 12 · 8 · 3, 8 · 12 · 14 · 3)', () => {
-    const want: Record<Lang, string[]> = { en: ['8', '12', '14', '11', '0'], pt: ['8', '12', '8', '3', '0'], es: ['8', '12', '14', '3', '0'] };
+  it('the card "FileOrca in numbers" of the About page says the counts of the module (10 · 12 · 14 · 11, 10 · 12 · 8 · 3, 10 · 12 · 14 · 3)', () => {
+    const want: Record<Lang, string[]> = { en: ['10', '12', '14', '11', '0'], pt: ['10', '12', '8', '3', '0'], es: ['10', '12', '14', '3', '0'] };
     for (const lang of LANGS) {
       const counts = toolCounts(lang);
       const card = /<section class="fo-stats[\s\S]*?<\/section>/.exec(main(html(pagePath('about', lang) ?? '/')))?.[0] ?? '';

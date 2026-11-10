@@ -1,6 +1,8 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 import { CODECS, ERROR_REASONS, EVENT_PARAMS, OUTCOMES } from '../../src/analytics/events.ts';
-import { CALC_EVENT_TOOLS, EVENT_TOOLS, PDF_EVENT_TOOLS } from '../../src/analytics/tool-ids.ts';
+import { CALC_EVENT_TOOLS, EVENT_TOOLS, IMAGE_EVENT_TOOLS, PDF_EVENT_TOOLS } from '../../src/analytics/tool-ids.ts';
 import { PDF_PAGES } from '../../src/tools/pdf/registry.ts';
 import { LIFE_CALC_PAGES } from '../../src/tools/calc/registry.ts';
 import unlockTexts from '../../src/tools/unlock-pdf/i18n/en.ts';
@@ -86,6 +88,49 @@ test('an English chip names the tool it leads to, and the preset page names itse
   await chip.click();
   expect(await lastEvent(page, 'next_step_click')).toEqual(['event', 'next_step_click', { tool: 'compress-image-to-100kb', lang: 'en', target: 'resize-image' }]);
   expect(await lastEvent(page, 'tool_start')).toEqual(['event', 'tool_start', { tool: 'compress-image-to-100kb', lang: 'en' }]);
+});
+
+// F17 (decision 9; DECISOES § 710): the two tools of the run 2b send the events of every image tool, with `tool` equal to
+// their id (the two ids entered IMAGE_EVENT_TOOLS, the closed list of `tool` and `target`) and no parameter that the event
+// did not have: tool_start, tool_complete with "converted", download and next_step_click, in that order, every value from
+// its closed list, and nothing of the file in the dataLayer. Convert to WebP runs with AVIF chosen (its encoder on the way).
+test.describe('the AVIF to JPG and Convert to WebP events', () => {
+  for (const { id, file, mimeType, avif } of [
+    { id: 'avif-to-jpg', file: 'gen-avif.avif', mimeType: 'image/avif', avif: false },
+    { id: 'convert-to-webp', file: 'gen-jpg-01-orientacao6.jpg', mimeType: 'image/jpeg', avif: true },
+  ] as const) {
+    test(`${id}: tool_start, tool_complete, download and next_step_click name the tool by its id, with no new parameter`, async ({ page }) => {
+      expect((await page.goto(`/${id}/`))?.status()).toBe(200);
+      await hydrated(page);
+      await dismissCookies(page);
+      if (avif) await page.locator('.fo-seg__opt', { hasText: 'AVIF' }).click();
+      await page.setInputFiles('input[type="file"]', { name: `Sentinel-Photo-6283.${file.split('.').pop()}`, mimeType, buffer: readFileSync(resolve('fixtures/images', file)) });
+      const download = page.locator('#fo-tool-root .fo-btn--download');
+      await expect(download).toBeVisible({ timeout: 30_000 });
+      await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault(), { capture: false }));
+      await download.click();
+      const chip = page.locator('nav.fo-next a.fo-chip').first();
+      const target = ((await chip.getAttribute('href')) ?? '').replaceAll('/', '');
+      await chip.click();
+
+      const events = (await dataLayer(page)).filter((entry) => entry[0] === 'event').map((entry) => [entry[1], entry[2]]);
+      expect(events).toEqual([
+        ['tool_start', { tool: id, lang: 'en' }],
+        ['tool_complete', { tool: id, lang: 'en', outcome: 'converted' }],
+        ['download', { tool: id, lang: 'en' }],
+        ['next_step_click', { tool: id, lang: 'en', target }],
+      ]);
+      expect(IMAGE_EVENT_TOOLS as readonly string[], `${id} is in the closed list of tool`).toContain(id);
+      expect(EVENT_TOOLS as readonly string[], `${target} is in the closed list of target`).toContain(target);
+      for (const [name, params] of events as [string, Record<string, unknown>][]) {
+        const allowed = (EVENT_PARAMS as Record<string, readonly string[]>)[name] ?? [];
+        for (const key of Object.keys(params)) expect(allowed, `${name}.${key} is a parameter of the event`).toContain(key);
+      }
+      expect(OUTCOMES as readonly string[]).toContain('converted');
+      const everything = JSON.stringify(await dataLayer(page));
+      expect(everything, 'the name of the file in the dataLayer').not.toMatch(/Sentinel|6283|\.avif|\.jpe?g/i);
+    });
+  }
 });
 
 test('the cookie notice has Decline first, two neutral buttons and no yellow', async ({ page }) => {

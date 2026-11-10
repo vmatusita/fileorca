@@ -230,6 +230,27 @@ for (const [width, pages] of Object.entries(REVIEWED)) {
   });
 }
 
+// F17 (decision 13; DECISOES § 715): the six pages of AVIF to JPG and Convert to WebP, read from the route map, load with no
+// layout shift: a first visit at 360 px with Figtree late, as above. In Chromium the CLS of the load is 0 (0.001 for the
+// rounding of the measure, as the review cases above); in both browsers the trail, the H1, the notice and the tool stay
+// where the first paint put them.
+const F17_PAGES = (['avif-to-jpg', 'convert-to-webp'] as const).flatMap((id) => LANGS.map((lang) => routeById(id).paths[lang] ?? `(${id} sem página em ${lang})`));
+test('F17: the six pages of AVIF to JPG and Convert to WebP load with no layout shift at 360 px, Figtree late', async ({ browser, browserName }) => {
+  test.setTimeout(120_000);
+  const wrong: string[] = [];
+  const seen: string[] = [];
+  for (const path of F17_PAGES) {
+    const visit = await firstVisit(browser, browserName, path, 360);
+    seen.push(`${path} ${visit.cls.toFixed(3)}`);
+    if (browserName === 'chromium' && visit.cls > 0.001) wrong.push(`${path}: CLS ${visit.cls.toFixed(3)} (${visit.moved.join('; ')})`);
+    if (JSON.stringify(visit.after) !== JSON.stringify(visit.before)) wrong.push(`${path}: a trilha, o H1 ou o aviso saíram do lugar`);
+    if (JSON.stringify(visit.tool.after) !== JSON.stringify(visit.tool.before)) wrong.push(`${path}: a ferramenta foi de ${visit.tool.before.join(', ')} a ${visit.tool.after.join(', ')}`);
+  }
+  if (browserName === 'chromium') console.log(`[cls] ${browserName} F17 360: ${seen.join(', ')}`);
+  expect(F17_PAGES).toHaveLength(6);
+  expect(wrong).toEqual([]);
+});
+
 // F12 (decision 11 and criterion 11; DECISOES § 422): the same first visits on the test build, with the boxes of the ad
 // map (the 37 units of the worst case), which reserve their room in the HTML from the first paint: nothing above them moves
 // either, and the shift of each page is printed next to the one of the default build.

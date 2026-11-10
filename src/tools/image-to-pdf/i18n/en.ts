@@ -16,7 +16,7 @@ export default {
     caption: 'Image to PDF: formats taken, output and limits',
     head: ['Detail', 'What happens'],
     rows: [
-      ['Takes', 'JPG, PNG and WebP, recognized from the file content and not from the name. HEIC photos go through HEIC to JPG first, and AVIF files are not accepted.'],
+      ['Takes', 'JPG, PNG and WebP, recognized from the file content and not from the name. HEIC photos go through HEIC to JPG first, and AVIF files through AVIF to JPG.'],
       ['Output', 'One PDF for the whole batch, with one image per page, in the order of the list.'],
       ['Image size', 'The default. Each page takes the size of its image, with no white border.'],
       ['Letter and A4', 'The whole image fits inside the sheet with a margin of 0.5 inch, which is 36 points. The sheet turns to match each image.'],

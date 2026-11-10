@@ -775,9 +775,13 @@ export interface ImagePanelTexts {
     /** One sentence per reason, with {name}. */
     empty: string;
     unsupported: string;
-    /** A format another tool opens: "{name} is a {format} file. Open it in {tool}." ({tool} becomes a link). */
-    wrongTool: string;
-    /** A format this tool does not take and no converter here opens (AVIF, GIF): "{name} is in {format} format, which this tool doesn't take. Try {formats}." No link, no article before the format name. */
+    /**
+     * A format that a converter here opens (CONVERTER_FOR), one sentence per format with the format written in it, so the
+     * article is the text's and the lint:texto reads the real sentence (F17, decision 7): "{name} is a HEIC file. Open it in
+     * {tool}." and "{name} is an AVIF file. Open it in {tool}." ({tool} becomes a link).
+     */
+    wrongTool: { heic: string; avif: string };
+    /** A format this tool does not take and no converter here opens (GIF, or a JPG in AVIF to JPG): "{name} is in {format} format, which this tool doesn't take. Try {formats}." No link, no article before the format name. */
     wrongFormat: string;
     truncated: string;
     decode: string;
@@ -862,8 +866,9 @@ export interface ImagePanelTexts {
     /**
      * What a chip says when it takes the images along, per destination ("Resize this image", "Resize these {count} images").
      * F15 (DECISOES § 653): the PDF tools Image to PDF leads to, with the words of the PDF island ("Compress this PDF").
+     * F17 (decision 5; DECISOES § 707): Convert to WebP, a chip of Compress again; it takes a JPG or a PNG result along.
      */
-    chips: Record<'compress-image' | 'resize-image' | 'crop-image' | 'rotate-image' | 'image-to-pdf' | 'compress-pdf' | 'merge-pdf' | 'add-page-numbers-to-pdf', CarryLabel>;
+    chips: Record<'compress-image' | 'resize-image' | 'crop-image' | 'rotate-image' | 'convert-to-webp' | 'image-to-pdf' | 'compress-pdf' | 'merge-pdf' | 'add-page-numbers-to-pdf', CarryLabel>;
     /** F15 (DECISOES § 653): the line under the chips of Image to PDF, with the words of the PDF ("Oli takes the PDF to …"). */
     linePdf: string;
   };
@@ -1010,6 +1015,20 @@ export interface SaveAsOptionsTexts {
   png: string;
   /** What changes between the two, in one line. */
   help: string;
+}
+
+/** Convert to WebP (F17; the F2 shape, DECISOES § 85): the output format and the level, at sight or under "Adjust". */
+export interface ConvertToOptionsTexts {
+  formatLegend: string;
+  webp: string;
+  avif: string;
+  levelLegend: string;
+  recommended: string;
+  recommendedHelp: string;
+  strong: string;
+  strongHelp: string;
+  /** What "Adjust ·" says: the format and the level ("{format} · {level}" gives "WebP · Recommended"). */
+  now: string;
 }
 
 export interface PdfOptionsTexts {
