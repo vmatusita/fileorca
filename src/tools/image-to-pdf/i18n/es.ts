@@ -16,7 +16,7 @@ export default {
     caption: 'Imagen a PDF: formatos que acepta, resultado y límites',
     head: ['Detalle', 'Qué pasa'],
     rows: [
-      ['Acepta', 'JPG, PNG y WebP, reconocidos por el contenido del archivo y no por el nombre. Las fotos HEIC pasan antes por HEIC a JPG, y los archivos AVIF no se aceptan.'],
+      ['Acepta', 'JPG, PNG y WebP, reconocidos por el contenido del archivo y no por el nombre. Las fotos HEIC pasan antes por HEIC a JPG, y los archivos AVIF, por AVIF a JPG.'],
       ['Resultado', 'Un solo PDF para todo el lote, con una imagen por página, en el orden de la lista.'],
       ['Tamaño de la imagen', 'La opción predeterminada. Cada página toma el tamaño de su imagen, sin borde blanco.'],
       ['Carta y A4', 'La imagen entera cabe dentro de la hoja con un margen de 0.5 pulgadas, que son 36 puntos. La hoja gira para coincidir con cada imagen.'],

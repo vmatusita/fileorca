@@ -30,7 +30,7 @@ export default {
       ['Lote', 'Sem limite de imagens. Várias imagens são baixadas juntas num só ZIP.'],
       ['Já está pequeno', 'Se a cópia nova não ficar menor, você recebe o original de volta, sem os metadados da foto.'],
       ['Metadados da foto', 'Modelo da câmera, data e localização GPS saem de todos os arquivos.'],
-      ['HEIC e AVIF', 'Não são comprimidos aqui. Transforme o HEIC em JPG antes, com a ferramenta HEIC para JPG. Arquivos AVIF não são aceitos.'],
+      ['HEIC e AVIF', 'Não são comprimidos aqui. Transforme o HEIC em JPG antes, com a ferramenta HEIC para JPG, e o AVIF, com a ferramenta AVIF para JPG.'],
     ],
   },
   presets: {

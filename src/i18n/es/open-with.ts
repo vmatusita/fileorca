@@ -11,7 +11,7 @@ export default {
   takesThis: 'Abre este archivo',
   takesAll: 'Abre todos los archivos ({total})',
   takesSome: 'Abre {count} de {total} archivos',
-  noTool: 'Ninguna herramienta de aquí abre estos archivos. FileOrca trabaja con JPG, PNG, WebP, HEIC y PDF.',
+  noTool: 'Ninguna herramienta de aquí abre estos archivos. FileOrca trabaja con JPG, PNG, WebP, HEIC, AVIF y PDF.',
   emptySays: 'No hay nada para abrir aquí.',
   emptyDetail: 'Comparte imágenes o PDF con FileOrca desde tu celular, o elige una herramienta.',
   unknown: 'formato desconocido',

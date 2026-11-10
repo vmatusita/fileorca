@@ -16,7 +16,7 @@ export default {
     caption: 'Cortar imagem: formatos aceitos, saída e limites',
     head: ['Detalhe', 'O que acontece'],
     rows: [
-      ['Aceita', 'JPG, PNG e WebP, reconhecidos pelo conteúdo do arquivo e não pelo nome. Fotos HEIC passam antes pela ferramenta HEIC para JPG, e arquivos AVIF não são aceitos.'],
+      ['Aceita', 'JPG, PNG e WebP, reconhecidos pelo conteúdo do arquivo e não pelo nome. Fotos HEIC passam antes pela ferramenta HEIC para JPG, e arquivos AVIF, pela ferramenta AVIF para JPG.'],
       ['Proporções', 'Quadrado, que é o padrão, 4:5, 16:9 ou Livre. A área do corte abre centralizada, então um resultado fica pronto assim que você solta uma imagem.'],
       ['Mover a área', 'Arraste a área do corte ou os cantos dela, ou dê foco nela e use as setas do teclado. Shift com as setas muda o tamanho.'],
       ['Valores exatos', 'Digite x, y, largura e altura da área do corte em pixels da imagem, que é o jeito de cortar sem arrastar nada.'],
