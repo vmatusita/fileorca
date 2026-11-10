@@ -54,7 +54,7 @@ const longest = (lines: readonly string[], width: (line: string) => number = (li
   lines.reduce((most, line) => (width(line) > width(most) ? line : most), '');
 
 /** The values of the start with one number field changed: one zero more and one digit less, as a person types them. */
-function nudges(def: CalcDef, data: CalcPanelData, start: Values): Values[] {
+export function nudges(def: CalcDef, data: CalcPanelData, start: Values): Values[] {
   const lang = data.lang as NumberLang;
   const out: Values[] = [];
   const twice = (spec: NumberSpec, value: number, put: (value: number) => Values) => {

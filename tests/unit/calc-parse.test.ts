@@ -1,7 +1,7 @@
 // The number format of the three languages (DECISOES § 112 and § 213): what a person types becomes the exact
 // whole number the engine takes, and the engine's numbers go back to the screen, the CSV and the PDF.
 import { describe, expect, it } from 'vitest';
-import { dollars, formatScaled, hundredthsPercent, money, parseScaled, ratePercent } from '../../src/calc/parse.ts';
+import { dollars, formatScaled, hundredthsPercent, money, parseScaled, ratePercent, readNumber } from '../../src/calc/parse.ts';
 
 describe('parseScaled', () => {
   it('reads English money, with or without the thousands separator and the dollar sign', () => {
@@ -44,6 +44,109 @@ describe('parseScaled', () => {
     expect(parseScaled('-5', 'en', 4, true)).toBe(-50_000);
     expect(parseScaled('−2.5', 'en', 4, true)).toBe(-25_000);
     expect(parseScaled('1234567890123456', 'en', 2)).toBeNull();
+  });
+});
+
+// F16, decision 3 (F4 DES-3; DECISOES § 683): a thousands separator followed by exactly three digits is a thousands separator
+// wherever it is in the whole part, so a digit typed in the middle of "375,000" reads; one followed by one or two digits at
+// the end of the text is the decimals of another language (the hint); anywhere else it is ignored. Every expected value is
+// written here by hand, in the units of the field (cents for money, 1/10,000 of a point for a rate).
+describe('readNumber and parseScaled, the format while typing (F16)', () => {
+  /** [language, text, decimals of the field, what it reads: a number of the field's units, 'separator' or 'format']. */
+  const CASES: [lang: 'en' | 'pt' | 'es', text: string, decimals: number, reads: number | 'separator' | 'format'][] = [
+    // A digit typed in the middle of a grouped number (the D13 of the plan).
+    ['en', '3755,000', 2, 375_500_000],
+    ['es', '3755,000', 2, 375_500_000],
+    ['pt', '3755.000', 2, 375_500_000],
+    ['pt', '5005.000', 2, 500_500_000],
+    ['en', '3755,000.50', 2, 375_500_050],
+    ['pt', '3755.000,50', 2, 375_500_050],
+    // As today: one group of three digits.
+    ['en', '1,234', 2, 123_400],
+    ['es', '1,234', 2, 123_400],
+    ['pt', '1.234', 2, 123_400],
+    ['en', '1,234', 0, 1234],
+    // Four digits or more after a separator: it is ignored.
+    ['en', '375,0005', 2, 375_000_500],
+    ['es', '375,0005', 2, 375_000_500],
+    ['pt', '375.0005', 2, 375_000_500],
+    // A separator at the end, while "375,000" is typed key by key, and at the start.
+    ['en', '375,', 2, 37_500],
+    ['es', '375,', 2, 37_500],
+    ['pt', '375.', 2, 37_500],
+    ['en', ',500', 2, 50_000],
+    // One or two digits after a separator and before another separator or the decimal mark: ignored.
+    ['en', '12,34,567', 0, 1_234_567],
+    ['en', '1,23.5', 2, 12_350],
+    ['pt', '1.23,5', 2, 12_350],
+    // One or two digits after the last separator and the end of the text: the decimals of another language.
+    ['en', '6,5', 4, 'separator'],
+    ['es', '6,5', 4, 'separator'],
+    ['pt', '11.5', 4, 'separator'],
+    ['en', '3,755,00', 2, 'separator'],
+    ['es', '3,755,00', 2, 'separator'],
+    ['pt', '3.755.00', 2, 'separator'],
+    ['en', '12,34,56', 2, 'separator'],
+    ['en', '1,23', 2, 'separator'],
+    ['en', ',5', 2, 'separator'],
+    ['en', '375,0', 2, 'separator'],
+    ['pt', '375.00', 2, 'separator'],
+    // A separator after the decimal mark does not read: the number of the other language.
+    ['en', '1.234,56', 2, 'format'],
+    ['es', '1.234,56', 2, 'format'],
+    ['pt', '1,234.56', 2, 'format'],
+    ['en', '1.5,0', 2, 'format'],
+    ['pt', '1,5.0', 2, 'format'],
+    // The refusals of always, in the three languages.
+    ['en', 'abc', 2, 'format'],
+    ['pt', 'abc', 2, 'format'],
+    ['es', 'abc', 2, 'format'],
+    ['en', '1.2.3', 2, 'format'],
+    ['es', '1.2.3', 2, 'format'],
+    ['pt', '1,2,3', 2, 'format'],
+    ['en', '-5', 4, 'format'],
+    ['pt', '-5', 4, 'format'],
+    ['es', '−5', 4, 'format'],
+    ['en', '', 2, 'format'],
+    ['pt', ' ', 2, 'format'],
+    ['es', '.', 2, 'format'],
+    ['pt', ',', 2, 'format'],
+    ['en', ',', 2, 'format'],
+    ['en', '1 234', 2, 'format'],
+    ['en', '1e5', 2, 'format'],
+    ['en', '--1', 4, 'format'],
+  ];
+
+  it('reads each case of the ficha and of decision 3 in English, Portuguese and Spanish', () => {
+    for (const [lang, text, decimals, reads] of CASES) {
+      const typed = readNumber(text, lang);
+      if (typeof reads === 'string') {
+        expect(typed, `${lang} "${text}"`).toBe(reads);
+        expect(parseScaled(text, lang, decimals), `${lang} "${text}"`).toBeNull();
+      } else expect(parseScaled(text, lang, decimals), `${lang} "${text}"`).toBe(reads);
+    }
+  });
+
+  it('keeps the sign, the 15 digits and the decimals of the field as they were', () => {
+    // Sixteen digits, with or without separators, do not read.
+    expect(parseScaled('1234567890123456', 'pt', 0)).toBeNull();
+    expect(parseScaled('1,234,567,890,123,456', 'en', 0)).toBeNull();
+    expect(parseScaled('123456789012345', 'en', 0)).toBe(123_456_789_012_345);
+    // More decimals than the field keeps: a well-formed number, which the field does not take.
+    expect(readNumber('1,234.567', 'en')).toEqual({ negative: false, whole: '1234', fraction: '567' });
+    expect(parseScaled('1,234.567', 'en', 2)).toBeNull();
+    expect(readNumber('3755.000,505', 'pt')).toEqual({ negative: false, whole: '3755000', fraction: '505' });
+    expect(parseScaled('6.55555', 'es', 4)).toBeNull();
+    expect(parseScaled('6.5555', 'es', 4)).toBe(65_555);
+    // The minus only where the field takes it, also before a grouped number.
+    expect(readNumber('−3,755,000', 'en', true)).toEqual({ negative: true, whole: '3755000', fraction: '' });
+    expect(parseScaled('-3755,000', 'en', 0, true)).toBe(-3_755_000);
+    expect(parseScaled('-0', 'en', 0, true)).toBe(0);
+    // The currency sign and the percent, ignored as before.
+    expect(parseScaled('$3755,000', 'en', 2)).toBe(375_500_000);
+    expect(parseScaled('R$ 3755.000', 'pt', 2)).toBe(375_500_000);
+    expect(parseScaled('6,5%', 'pt', 4)).toBe(65_000);
+    expect(readNumber('6,5%', 'en')).toBe('separator');
   });
 });
 
