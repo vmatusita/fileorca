@@ -53,14 +53,21 @@ export interface HeroReserves {
 const longest = (lines: readonly string[], width: (line: string) => number = (line) => line.length): string =>
   lines.reduce((most, line) => (width(line) > width(most) ? line : most), '');
 
-/** The values of the start with one number field changed: one zero more and one digit less, as a person types them. */
+/**
+ * The values of the start with one number field changed: one zero more and one digit less, as a person types them.
+ * One zero more only on a number the page writes without a thousands separator (F16, decision 13; DECISOES § 694): since the
+ * F16 reads "375,0000" as 3,750,000, and that sentence grew the card at load on 13 pages and widths in both browsers; the
+ * card keeps the room of the starting point, where "375,0000" did not read.
+ */
 export function nudges(def: CalcDef, data: CalcPanelData, start: Values): Values[] {
   const lang = data.lang as NumberLang;
   const out: Values[] = [];
   const twice = (spec: NumberSpec, value: number, put: (value: number) => Values) => {
     const text = display(spec.kind, value, lang, spec.decimals);
-    for (const typed of [`${text}0`, text.slice(0, -1)]) {
-      const parsed = parseScaled(typed, lang, decimalsOf(spec.kind, spec.decimals), spec.negative === true);
+    const places = decimalsOf(spec.kind, spec.decimals);
+    const grouped = Math.abs(value) >= 1000 * 10 ** places;
+    for (const typed of grouped ? [text.slice(0, -1)] : [`${text}0`, text.slice(0, -1)]) {
+      const parsed = parseScaled(typed, lang, places, spec.negative === true);
       if (parsed !== null && parsed !== value && inRange(spec, parsed)) out.push(put(parsed));
     }
   };
