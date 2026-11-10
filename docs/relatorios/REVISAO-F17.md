@@ -25,7 +25,7 @@ A revisão final da run F17 ("AVIF para JPG e Converter para WebP/AVIF", a run 2
 
 ## A segunda passada
 
-- **Lente b,** sobre o diff dos documentos depois do `c4002c6` (o § 706 com o contraste dos ícones, o § 719, este relato e o relatório): PREENCHER_SEGUNDA.
+- **Lente b,** sobre o diff dos documentos depois do `c4002c6` (o § 706 com o contraste dos ícones, o § 719, este relato e o relatório): nenhum achado. O b-1 resolvido (o § 719 depois do § 718, e a referência do `docs/claude/imagem.md` confere); o contraste do § 706 recalculado à mão pela luminância relativa da WCAG (6,9438, ou 6,94:1, com o `on-cat` #0F1B2D e o `turquesa` #14B8A6 de valor único nos dois temas, no `.fo-tool__icon` e no `.fo-chip__dot`); o § 719 e o `REVISAO-F17.md` iguais entre si e com o passo 5 do prompt; o `claude-md.test.ts` e o `pendencias.test.ts` verdes (20 testes).
 
 ## O que fica
 
