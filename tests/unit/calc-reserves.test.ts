@@ -66,16 +66,25 @@ describe('the room of the card', () => {
   });
 });
 
-// F16, decision 13 (DECISOES § 694): since the F16 "375,0000" reads 3,750,000, and its sentence grew the card at load on 13
-// pages and widths; the room of the card keeps the values of the starting point, where it did not read. In the mortgage the
-// price ($375,000) gets neither one zero more nor one digit less ("375,00" does not read); the down payment (20%), the rate
-// and the term lose a digit ("2", "6.", "3"), and their zero more is out of the range or the same value ("200", "6.50", "300").
+// F16, decision 13 (DECISOES § 694): since the F16 "375,0000" reads 3,750,000 (decision 3), and a person who types one zero
+// more at the end of the price gets that result; the card keeps its room (the exception of decision 13: it is the value of
+// another order of magnitude of the F13b c-3). In the mortgage the price ($375,000) gets one zero more ($3,750,000) and no
+// digit less ("375,00" does not read); the down payment (20%), the rate and the term lose a digit ("2", "6.", "3"), and their
+// zero more is out of the range or the same value ("200", "6.50", "300").
 describe('the values the room of the card is worked out from', () => {
-  it('nudges the example as the starting point did: no zero more on a number written with a thousands separator', () => {
-    const data = panelData('mortgage-calculator', 'en');
+  const changed = (id: AnyCalcId, lang: Lang) => {
+    const data = panelData(id, lang);
     const start = startValues(data);
-    const changed = nudges(DEFS['mortgage-calculator'], data, start).map((values) => Object.fromEntries(Object.entries(values).filter(([key, value]) => start[key] !== value)));
-    expect(changed).toEqual([{ dp: 20_000 }, { r: 60_000 }, { t: 3 }]);
+    return nudges(DEFS[id], data, start).map((values) => Object.fromEntries(Object.entries(values).filter(([key, value]) => start[key] !== value)));
+  };
+
+  it('nudges the example with one zero more also on a number written with a thousands separator', () => {
+    expect(changed('mortgage-calculator', 'en')).toEqual([{ p: 375_000_000 }, { dp: 20_000 }, { r: 60_000 }, { t: 3 }]);
+    expect(changed('mortgage-calculator', 'es')).toEqual([{ p: 375_000_000 }, { dp: 20_000 }, { r: 60_000 }, { t: 3 }]);
+    // The SAC × PRICE: R$ 500.000 and "500.0000", R$ 5.000.000.
+    expect(changed('br-sac-price', 'pt')).toContainEqual({ p: 500_000_000 });
+    // The personal loan of the F13b c-3: $15,000 and "15,0000", $150,000.
+    expect(changed('personal-loan-calculator', 'en')).toContainEqual({ a: 15_000_000 });
   });
 });
 

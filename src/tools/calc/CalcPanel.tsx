@@ -55,19 +55,17 @@ const longest = (lines: readonly string[], width: (line: string) => number = (li
 
 /**
  * The values of the start with one number field changed: one zero more and one digit less, as a person types them.
- * One zero more only on a number the page writes without a thousands separator (F16, decision 13; DECISOES § 694): since the
- * F16 reads "375,0000" as 3,750,000, and that sentence grew the card at load on 13 pages and widths in both browsers; the
- * card keeps the room of the starting point, where "375,0000" did not read.
+ * Since the F16 a zero more of a number with a thousands separator reads ("375,0000" is 3,750,000, decision 3), so the card
+ * keeps the room of ten times each grouped number too: the "a zero more" of the money-card spec types it, and it is the value
+ * of another order of magnitude typed key by key of the F13b c-3 (decision 13, the exception; DECISOES § 694).
  */
 export function nudges(def: CalcDef, data: CalcPanelData, start: Values): Values[] {
   const lang = data.lang as NumberLang;
   const out: Values[] = [];
   const twice = (spec: NumberSpec, value: number, put: (value: number) => Values) => {
     const text = display(spec.kind, value, lang, spec.decimals);
-    const places = decimalsOf(spec.kind, spec.decimals);
-    const grouped = Math.abs(value) >= 1000 * 10 ** places;
-    for (const typed of grouped ? [text.slice(0, -1)] : [`${text}0`, text.slice(0, -1)]) {
-      const parsed = parseScaled(typed, lang, places, spec.negative === true);
+    for (const typed of [`${text}0`, text.slice(0, -1)]) {
+      const parsed = parseScaled(typed, lang, decimalsOf(spec.kind, spec.decimals), spec.negative === true);
       if (parsed !== null && parsed !== value && inRange(spec, parsed)) out.push(put(parsed));
     }
   };
