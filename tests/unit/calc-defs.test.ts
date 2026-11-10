@@ -343,7 +343,9 @@ describe('the CSV', () => {
   });
 
   it('quotes by RFC 4180 and never groups thousands', () => {
-    const csv = csvText({ caption: 'c', head: ['Debt', 'Order'], rows: [[{ text: 'Debt 1, then "Debt 2"' }, { cents: 123_456_789 }]] }, 'Year');
+    // F16 (DECISOES § 696): every table declares its CSV columns, the header the file writes.
+    const head = ['Debt', 'Order'];
+    const csv = csvText({ caption: 'c', head, rows: [[{ text: 'Debt 1, then "Debt 2"' }, { cents: 123_456_789 }]], csv: [{ head: 'Debt', kind: 'text' }, { head: 'Order', kind: 'number' }] }, 'Year');
     expect(csv).toBe('﻿Debt,Order\r\n"Debt 1, then ""Debt 2""",1234567.89\r\n');
   });
 
@@ -364,8 +366,9 @@ describe('the CSV', () => {
     for (const line of es) expect(line, line).toMatch(/,\d+\.\d{2}%$/);
     // The numbers are the English ones, cell for cell (the words of the compounding are in each language).
     expect(es.map((line) => line.split(',').at(-1))).toEqual(rows('en').map((line) => line.split(',').at(-1)));
-    // The screen keeps the Spanish percent (§ 213): only the file glues it.
-    expect(viewOf(def, panelData('apr-to-apy-calculator', 'es'), def.initial).table().rows[0]?.[1]).toEqual({ text: expect.stringMatching(/\d %$/) });
+    // The screen keeps the Spanish percent (§ 213): only the file glues it. Since the F16 (DECISOES § 696) the cell also
+    // carries the number its CSV writes, so only its text is compared.
+    expect(viewOf(def, panelData('apr-to-apy-calculator', 'es'), def.initial).table().rows[0]?.[1]).toMatchObject({ text: expect.stringMatching(/\d %$/) });
   });
 });
 

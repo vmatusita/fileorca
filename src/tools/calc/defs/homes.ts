@@ -20,7 +20,7 @@ import {
   type RefinanceInput,
   type RefinanceResult,
 } from '../../../calc/loans.ts';
-import { duration, loanTable } from '../view.ts';
+import { columns, duration, loanTable } from '../view.ts';
 import { HOME_COSTS, mortgageInput } from './mortgage.ts';
 import { HOME_EXAMPLE, count, downOf, homeFields, money, num, rate, say, text } from './shared.ts';
 import type { CalcDef, Part, Table, Values } from '../types.ts';
@@ -300,10 +300,12 @@ export const fifteenVsThirtyDef: CalcDef<FifteenVsThirtyInput, FifteenVsThirtyRe
       paymentDiff: fmt(text(v, r.paymentDiff >= 0 ? 'more' : 'less'), { x: dollars(Math.abs(r.paymentDiff), l) }),
       interestEffect: fmt(text(v, r.interestDiff >= 0 ? 'saves' : 'adds'), { x: dollars(Math.abs(r.interestDiff), l) }),
     });
+    const head = [text(v, 'year'), text(v, 'balance15'), text(v, 'balance30')];
     const table = (): Table => ({
       caption: text(v, 'caption'),
-      head: [text(v, 'year'), text(v, 'balance15'), text(v, 'balance30')],
+      head,
       rows: r.thirty.yearEnd.map((balance, index) => [{ text: String(index + 1) }, { cents: r.fifteen.yearEnd[index] ?? 0 }, { cents: balance }]),
+      csv: columns(head),
     });
     return {
       hero: { label: text(v, 'label'), value: cash(r.fifteen.payment, l), unit: text(v, 'unit'), sentence: diff },

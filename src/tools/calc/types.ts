@@ -99,6 +99,12 @@ export type CsvKind = 'number' | 'date' | 'text';
 /** One value a cell writes in the CSV: a number at a scale, money, a day, a text, or nothing (an empty cell). */
 export type CsvValue = { scaled: number; decimals: number; percent?: boolean } | { cents: number } | { day: string } | { text: string } | null;
 
+/** A column of the CSV: its header (with the unit of its numbers, "Area (sq ft)") and what it holds. */
+export interface CsvColumn {
+  head: string;
+  kind: CsvKind;
+}
+
 /**
  * A cell of the schedule: money (cents), a measure (a whole number of 10^-decimals, F7), or plain text. The CSV writes cents
  * as 1896.20 and a measure with its decimals, never with a thousands separator. A text cell may say what it writes in the CSV
@@ -119,9 +125,9 @@ export interface Table {
   /**
    * The columns of the CSV after the year of a grouped table (F16, item 5; DECISOES § 687): the header of each, with its unit
    * ("Area (sq ft)"), and the kind of what it holds. A text cell with `csv` writes its values in that many columns; every
-   * other cell writes one.
+   * other cell writes one. Every table declares them, so a new table cannot leave its CSV to the screen's text.
    */
-  csv?: readonly { head: string; kind: CsvKind }[];
+  csv: readonly CsvColumn[];
 }
 
 /** What the result looks like for one set of values (CalcDef.view). */

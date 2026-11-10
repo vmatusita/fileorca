@@ -52,10 +52,13 @@ export function filled(template: string, values: Record<string, string>): string
   return template.replace(/\{(\w+)\}/g, (all, key: string) => values[key] ?? all);
 }
 
-/** A cell of a result table: text, or a measure the screen writes with its decimals and the CSV without the comma. */
+/**
+ * A cell of a result table: text, or a measure the screen writes with its decimals and the CSV without the comma and with an
+ * ASCII minus (F16, DECISOES § 687).
+ */
 export type Cell = string | { scaled: number; decimals: number };
 export const screenCell = (cell: Cell): string => (typeof cell === 'string' ? cell : scaled(cell.scaled, cell.decimals, cell.decimals));
-export const csvCell = (cell: Cell): string => (typeof cell === 'string' ? cell : scaled(cell.scaled, cell.decimals, cell.decimals, false));
+export const csvCell = (cell: Cell): string => (typeof cell === 'string' ? cell : scaled(cell.scaled, cell.decimals, cell.decimals, false).replace('−', '-'));
 
 export async function openCalc(page: Page, id: LifeCalcId, hash = ''): Promise<void> {
   expect((await page.goto(`${LIFE_CALC_PAGES[id].path}${hash}`))?.status(), id).toBe(200);
@@ -125,7 +128,11 @@ export function parseCsv(text: string): string[][] {
   return lines;
 }
 
-/** Saves the CSV from the page and reads it back: the fixed name, the BOM, CRLF, the head of the open table and its rows. */
+/**
+ * Saves the CSV from the page and reads it back: the fixed name, the BOM, CRLF, the CSV's own head and its rows. Since the F16
+ * (DECISOES § 688 and § 696) the head and the rows are the CSV's, not the open table's: a number and its unit in two columns,
+ * days as YYYY-MM-DD, a range in two columns; the rows are as many as the screen's.
+ */
 export async function expectCsv(page: Page, id: LifeCalcId, head: readonly string[], rows: readonly (readonly Cell[])[]): Promise<void> {
   const { name, bytes } = await saved(page, csvButton(page));
   expect(name).toBe(`${LIFE_CALC_PAGES[id].file}.csv`);
@@ -133,6 +140,7 @@ export async function expectCsv(page: Page, id: LifeCalcId, head: readonly strin
   expect(text.startsWith('﻿'), 'BOM UTF-8').toBe(true);
   expect(text.endsWith('\r\n'), 'the file ends with CRLF').toBe(true);
   expect(text.slice(1).replace(/\r\n/g, ''), 'no line ends without CR').not.toMatch(/\n/);
+  expect(text, 'no U+2212 in the CSV').not.toContain('−');
   const [header, ...lines] = parseCsv(text.slice(1));
   expect(header).toEqual([...head]);
   expect(lines).toEqual(rows.map((row) => row.map(csvCell)));
