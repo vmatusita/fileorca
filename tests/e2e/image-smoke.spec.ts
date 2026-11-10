@@ -4,7 +4,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { describedViolations } from './lib/axe.ts';
 import { imageSize, metadataReport, sniff } from './lib/images.ts';
 import { EVENT_PARAMS } from '../../src/analytics/events.ts';
-import { comparePixels, type Reference } from './lib/matrix.ts';
+import { baseOf, comparePixels, type Reference } from './lib/matrix.ts';
 import { parsePdf } from './lib/pdf.ts';
 import { readZip } from './lib/zip.ts';
 import { dataLayer, dismissCookies, downloadBytes, hydrated, openAdjust, type TestFile } from './lib/page.ts';
@@ -262,6 +262,63 @@ test.describe('webp-to-jpg', () => {
     await expect(page.locator('.fo-result__notes')).toContainText('first frame');
     await choose(page, 'PNG');
     await expectOutputs(page, ['gen-webp-exif-gps.png:png:1600x1200', 'gen-webp-animada.png:png:320x240']);
+  });
+});
+
+// F17 (decision 14; DECISOES § 711): the two choices of Convert to WebP, once a result is on screen. WebP · Recommended
+// is the default (the matrix has every fixture in it, and the small ones in AVIF); here the format and the level change
+// on the same photo, each change redoes the file at once, Strong comes out smaller than Recommended in both formats, and
+// the line of "Adjust" says the format and the level the result has.
+test.describe('convert-to-webp', () => {
+  test('WebP to AVIF and Recommended to Strong redo the photo in the right format, Strong is smaller, and Adjust says both', async ({ page }) => {
+    await open(page, '/convert-to-webp/');
+    await give(page, [JPG_01_ROT6]);
+    await ready(page);
+    const now = page.locator('details.fo-adjust > summary .fo-adjust__now');
+    const webp = `${baseOf(JPG_01_ROT6)}.webp:webp:1200x1600`;
+    const avif = `${baseOf(JPG_01_ROT6)}.avif:avif:1200x1600`;
+
+    /** The one output, once it reads like `expected` and its bytes are not the ones of `before` (the option redid it). */
+    const redone = async (expected: string, before?: Uint8Array): Promise<Out> => {
+      let out: Out | undefined;
+      await expect
+        .poll(
+          async () => {
+            try {
+              const [first, ...rest] = await outputs(page);
+              if (!first || rest.length) return 'not one file';
+              if (before && Buffer.from(first.bytes).equals(Buffer.from(before))) return 'the file of before';
+              out = first;
+              return describe([first])[0];
+            } catch {
+              return 'not ready';
+            }
+          },
+          { timeout: 30_000, message: `the output should become ${expected}` },
+        )
+        .toBe(expected);
+      if (!out) throw new Error('no output');
+      expectClean([out]);
+      return out;
+    };
+
+    await expect(now).toHaveText('· WebP · Recommended');
+    const webpRecommended = await redone(webp);
+
+    await choose(page, 'Strong');
+    const webpStrong = await redone(webp, webpRecommended.bytes);
+    await expect(now).toHaveText('· WebP · Strong');
+    expect(webpStrong.bytes.length, `WebP: Strong (${webpStrong.bytes.length} B) is smaller than Recommended (${webpRecommended.bytes.length} B)`).toBeLessThan(webpRecommended.bytes.length);
+
+    await choose(page, 'AVIF');
+    const avifStrong = await redone(avif, webpStrong.bytes);
+    await expect(now).toHaveText('· AVIF · Strong');
+
+    await choose(page, 'Recommended');
+    const avifRecommended = await redone(avif, avifStrong.bytes);
+    await expect(now).toHaveText('· AVIF · Recommended');
+    expect(avifStrong.bytes.length, `AVIF: Strong (${avifStrong.bytes.length} B) is smaller than Recommended (${avifRecommended.bytes.length} B)`).toBeLessThan(avifRecommended.bytes.length);
+    await expect(page.locator('.fo-btn--download')).toHaveAttribute('download', `${baseOf(JPG_01_ROT6)}.avif`);
   });
 });
 
