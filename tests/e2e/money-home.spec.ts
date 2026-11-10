@@ -25,6 +25,7 @@ import mulchTexts from '../../src/tools/mulch-calculator/i18n/en.ts';
 import paintTexts from '../../src/tools/paint-calculator/i18n/en.ts';
 import tileTexts from '../../src/tools/tile-calculator/i18n/en.ts';
 import btuTexts from '../../src/tools/btu-calculator/i18n/en.ts';
+import enShared from '../../src/tools/calc/i18n/en.ts';
 import { pdfTextLines } from './lib/pdf-text.ts';
 import { strictPdf } from './lib/pdf.ts';
 import { settle } from './lib/page.ts';
@@ -50,6 +51,8 @@ interface Result {
   hero: string;
   sentence: string;
   rows: Cell[][];
+  /** The rows of the CSV (F16, DECISOES § 688): as many as the screen's, one thing in each cell. */
+  csv: Cell[][];
 }
 
 interface House<I, E> {
@@ -57,12 +60,20 @@ interface House<I, E> {
   /** A corner of the oracle's grid and a random draw, typed in the fields. */
   cases: readonly string[];
   head: readonly string[];
+  /** The head of the CSV: the units in it, and the columns a cell unfolds into (F16, DECISOES § 688). */
+  csvHead: readonly string[];
   fill: (page: Page, input: I) => Promise<void>;
   result: (input: I, expected: E) => Result;
 }
 
 const m2 = (value: number): string => scaled(value, 2, 2);
 const signed = (n: number): string => (n < 0 ? `−${whole(-n)}` : `+${whole(n)}`);
+/** A measure of 2 decimals and a count as the CSV writes them (no thousands comma, an ASCII minus). */
+const n2 = (value: number): Cell => ({ scaled: value, decimals: 2 });
+const n0 = (value: number): Cell => ({ scaled: value, decimals: 0 });
+const UNIT = enShared.island.csvUnit;
+/** A field's label and its unit, the head of a CSV column. */
+const fieldHead = (field: { label: string; suffix?: string }): string => `${field.label} (${field.suffix ?? ''})`;
 
 // --- square footage -------------------------------------------------------------------------------------------------
 
@@ -73,6 +84,7 @@ const squareFootage: House<SquareFootageInput, { items: { sqft: number }[]; sqft
   id: 'square-footage-calculator',
   cases: ['grid-051', 'random-001'],
   head: [sq.colArea, sq.colShape, sq.colSize, sq.colSqft],
+  csvHead: [sq.colArea, sq.colShape, `${sq.csvX} (${squareTexts.panel.fields.x.suffix})`, `${sq.csvY} (${squareTexts.panel.fields.y.suffix})`, sq.colSqft],
   async fill(page, input) {
     const rows = page.locator('.fo-debt');
     // The Add button comes after the result (ListSpec.addBelow); Remove is in each area.
@@ -105,6 +117,14 @@ const squareFootage: House<SquareFootageInput, { items: { sqft: number }[]; sqft
         area.shape === 'circle' ? filled(sq.diameter, { x: scaled(area.x, 2) }) : filled(sq.sides, { x: scaled(area.x, 2), y: scaled(area.y, 2) }),
         { scaled: expected.items[index]?.sqft ?? NaN, decimals: 2 },
       ]),
+      // The size in its two measures, the second empty for a circle.
+      csv: input.areas.map((area, index) => [
+        filled(sq.row, { n: String(index + 1) }),
+        squareTexts.panel.options.s[area.shape],
+        n2(area.x),
+        area.shape === 'circle' ? '' : n2(area.y),
+        n2(expected.items[index]?.sqft ?? NaN),
+      ]),
     };
   },
 };
@@ -117,6 +137,7 @@ const concrete: House<ConcreteInput, ConcreteResult> = {
   id: 'concrete-calculator',
   cases: ['grid-072', 'random-001'],
   head: [cv.colBag, cv.colYield, cv.colBags],
+  csvHead: [`${cv.colWeight} (${cv.weightUnit})`, cv.colYield, cv.colBags],
   async fill(page, input) {
     await chooseOption(page, 'sh', input.shape);
     if (input.shape === 'slab') {
@@ -142,6 +163,12 @@ const concrete: House<ConcreteInput, ConcreteResult> = {
         [cv.bag60, { scaled: input.y60, decimals: 2 }, whole(expected.bags.b60)],
         [cv.bag80, { scaled: input.y80, decimals: 2 }, whole(expected.bags.b80)],
       ],
+      // The bag by its weight in pounds (the number in the oracle's names y40, b40).
+      csv: [
+        ['40', n2(input.y40), n0(expected.bags.b40)],
+        ['60', n2(input.y60), n0(expected.bags.b60)],
+        ['80', n2(input.y80), n0(expected.bags.b80)],
+      ],
     };
   },
 };
@@ -154,6 +181,7 @@ const mulch: House<MulchInput, MulchResult> = {
   id: 'mulch-calculator',
   cases: ['grid-162', 'random-009'],
   head: [mv.colItem, mv.colAmount],
+  csvHead: [mv.colItem, mv.colAmount, UNIT, fieldHead(mulchTexts.panel.fields.bm)],
   async fill(page, input) {
     await page.locator('#fo-calc-mo').selectOption(input.mode);
     await type(page, 'de', typed(input.depth, 2));
@@ -181,6 +209,13 @@ const mulch: House<MulchInput, MulchResult> = {
         [filled(mv.bags, { bag }), whole(expected.bags)],
         ...(gravel ? [[mv.tons, tons]] : []),
       ],
+      csv: [
+        [mv.area, n2(expected.sqft), mv.areaUnit, ''],
+        [mv.label, n2(expected.cuyd), mv.unit, ''],
+        [mv.feet, n2(expected.cuft), mv.feetUnit, ''],
+        [mv.bagsName, n0(expected.bags), '', n2(input.bag)],
+        ...(gravel && expected.tons !== null ? [[mv.tons, n2(expected.tons), '', '']] : []),
+      ],
     };
   },
 };
@@ -193,6 +228,7 @@ const paint: House<PaintInput, { wall: number; openings: number; paintable: numb
   id: 'paint-calculator',
   cases: ['grid-108', 'random-001'],
   head: [pv.colItem, pv.colAmount],
+  csvHead: [pv.colItem, pv.colAmount, UNIT],
   async fill(page, input) {
     await page.locator('#fo-calc-mo').selectOption(input.mode);
     await type(page, 'co', String(input.coats));
@@ -219,6 +255,14 @@ const paint: House<PaintInput, { wall: number; openings: number; paintable: numb
         [pv.label, `${m2(expected.gallons)} ${pv.unit}`],
         [pv.buy, whole(expected.buy)],
       ],
+      csv: [
+        [pv.wall, n2(expected.wall), sqft],
+        [pv.openings, n2(expected.openings), sqft],
+        [pv.paintable, n2(expected.paintable), sqft],
+        [pv.coats, n0(input.coats), ''],
+        [pv.label, n2(expected.gallons), pv.unit],
+        [pv.buy, n0(expected.buy), ''],
+      ],
     };
   },
 };
@@ -231,6 +275,7 @@ const tile: House<TileInput, TileResult> = {
   id: 'tile-calculator',
   cases: ['grid-001', 'random-001'],
   head: [tv.colItem, tv.colAmount],
+  csvHead: [tv.colItem, tv.colAmount, UNIT, fieldHead(tileTexts.panel.fields.tl), fieldHead(tileTexts.panel.fields.tw)],
   async fill(page, input) {
     await type(page, 'ar', typed(input.area, 2));
     await type(page, 'wa', String(input.waste));
@@ -254,6 +299,14 @@ const tile: House<TileInput, TileResult> = {
         [tv.label, whole(expected.tiles)],
         [tv.boxes, expected.boxes === null ? tv.noBox : whole(expected.boxes)],
       ],
+      // The tile size in the columns of its length and width; boxes not counted are an empty cell.
+      csv: [
+        [tv.area, n2(input.area), tv.areaUnit, '', ''],
+        [tv.tile, '', '', n2(input.length), n2(input.width)],
+        [tv.waste, `${input.waste}%`, '', '', ''],
+        [tv.label, n0(expected.tiles), '', '', ''],
+        [tv.boxes, expected.boxes === null ? '' : n0(expected.boxes), '', '', ''],
+      ],
     };
   },
 };
@@ -266,6 +319,7 @@ const btu: House<BtuInput, BtuResult> = {
   id: 'btu-calculator',
   cases: ['grid-008', 'random-001'],
   head: [bv.colStep, bv.colBtu],
+  csvHead: [bv.colStep, bv.colBtu, fieldHead(btuTexts.panel.fields.ar)],
   async fill(page, input) {
     await type(page, 'ar', typed(input.area, 2));
     await type(page, 'pe', String(input.people));
@@ -283,6 +337,14 @@ const btu: House<BtuInput, BtuResult> = {
         [bv.kitchen, signed(expected.kitchen)],
         [bv.label, whole(expected.btu)],
       ],
+      // Each step a number with an ASCII minus and no "+", and the table's area in a column of its own.
+      csv: [
+        [bv.baseName, n0(expected.base), n2(input.area)],
+        [input.sun === 'shade' ? bv.shade : input.sun === 'sun' ? bv.sunny : bv.normal, n0(expected.sun), ''],
+        [bv.people, n0(expected.people), ''],
+        [bv.kitchen, n0(expected.kitchen), ''],
+        [bv.label, n0(expected.btu), ''],
+      ],
     };
   },
 };
@@ -290,10 +352,12 @@ const btu: House<BtuInput, BtuResult> = {
 const HOUSE = [squareFootage, concrete, mulch, paint, tile, btu] as unknown as readonly House<unknown, unknown>[];
 
 async function expectResult<I, E>(page: Page, house: House<I, E>, input: I, expected: E): Promise<void> {
-  const { hero, sentence, rows } = house.result(input, expected);
+  const { hero, sentence, rows, csv } = house.result(input, expected);
   await expectHero(page, hero, sentence);
   await expectTable(page, house.head, rows);
-  await expectCsv(page, house.id, house.head, rows);
+  // F16 (DECISOES § 696): the CSV has its own head and rows, as many rows as the screen's.
+  expect(csv).toHaveLength(rows.length);
+  await expectCsv(page, house.id, house.csvHead, csv);
 }
 
 for (const house of HOUSE) {
