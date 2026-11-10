@@ -3,7 +3,8 @@
 // Spanish), byte for byte the CSV that tests/unit/calc-csv.test.ts checks, worked out here in Node by the same csvText from the
 // definition and the page's own texts (the island's view, with no panelData: a spec does not import the icons), with the BOM,
 // the separator and the CRLF of the language. A few lines of each are written here by hand too, from the oracle's examples.
-// The name starts with "money-" for the order of the CI parts, between money-home and money-life-privacy (DECISOES § 695).
+// The name starts with "money-" for the order of the CI parts, between money-es and money-health: the Chromium part 7 and the
+// WebKit part 11 by the `--list --shard` of the F16 (DECISOES § 695).
 import { expect, test, type Page } from '@playwright/test';
 import { DEFS } from '../../src/tools/calc/defs/index.ts';
 import { csvText } from '../../src/tools/calc/exports.ts';
