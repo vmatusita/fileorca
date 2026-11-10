@@ -214,7 +214,7 @@ const mulch: House<MulchInput, MulchResult> = {
         [mv.label, n2(expected.cuyd), mv.unit, ''],
         [mv.feet, n2(expected.cuft), mv.feetUnit, ''],
         [mv.bagsName, n0(expected.bags), '', n2(input.bag)],
-        ...(gravel && expected.tons !== null ? [[mv.tons, n2(expected.tons), '', '']] : []),
+        ...(gravel && expected.tons !== null ? [[mv.tons, n2(expected.tons), mv.tonsUnit, '']] : []),
       ],
     };
   },

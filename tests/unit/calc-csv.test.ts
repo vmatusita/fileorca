@@ -324,6 +324,20 @@ describe('the CSV of the calculators', () => {
     }
   });
 
+  it('writes the weight of gravel as a number with its unit in the Unit column, as the oracle gives it', () => {
+    const page = PAGES.find((one) => one.name === 'en-mulch-calculator');
+    if (!page) throw new Error('no mulch page');
+    const { input, expected } = oracleCase('mulch-calculator', 'grid-162');
+    expect(input['material']).toBe('gravel');
+    const values: Values = { ...page.start, m: 'gravel', mo: String(input['mode']), l: Number(input['length']), w: Number(input['width']), ar: Number(input['area']), de: Number(input['depth']), bg: Number(input['bag']), dn: Number(input['density']) };
+    const table = tableOf(page, values);
+    const csv = csvOf(page, table);
+    expect(problemsOf(csv, 'en', table)).toEqual([]);
+    const [, ...rows] = parseCsv(csv.slice(1), ',');
+    expect(rows.at(-1)).toEqual([page.data.texts.view['tons'], fixed(expected['tons'], 2), 'short tons', '']);
+    expect(rows.at(-2)?.slice(1)).toEqual([String(expected['bags']), '', fixed(input['bag'], 2)]);
+  });
+
   it('writes the days of a cycle and of a pregnancy as YYYY-MM-DD, across a new year too', () => {
     const ovulation = PAGES.find((one) => one.name === 'en-ovulation-calculator');
     const due = PAGES.find((one) => one.name === 'en-due-date-calculator');

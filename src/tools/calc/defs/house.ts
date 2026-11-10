@@ -242,7 +242,7 @@ export const mulchDef: CalcDef<MulchInput, MulchResult> = {
       measured(text(v, 'label'), r.cuyd, 'unit'),
       measured(text(v, 'feet'), r.cuft, 'feetUnit'),
       { item: fmt(text(v, 'bags'), { bag }), amount: whole(r.bags, l), csv: [n(r.bags, 0), null, n(num(values, bagKey))], name: text(v, 'bagsName') },
-      ...(gravel && r.tons !== null ? [{ item: text(v, 'tons'), amount: m2(r.tons, l, 2), csv: [n(r.tons)] }] : []),
+      ...(gravel && r.tons !== null ? [{ item: text(v, 'tons'), amount: m2(r.tons, l, 2), csv: [n(r.tons), unit(text(v, 'tonsUnit'))] }] : []),
     ];
     return {
       hero: { label: text(v, 'label'), value: yards, unit: text(v, 'unit'), sentence },
