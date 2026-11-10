@@ -268,7 +268,7 @@ https://fase-17-fileorca.vmatusita.workers.dev/ (o Workers Builds publica cada p
 
 ## A válvula de estouro
 
-Não foi usada: as duas ferramentas entraram nos três idiomas, com a matriz, a recusa com o link e os testes dos critérios. Nenhuma PR das partes do CI foi aberta: a projeção não mostra parte acima de 700 s por causa desta run (a 4 do WebKit já passava, F14 m-5).
+Não cortou nada: as duas ferramentas entraram nos três idiomas, com a matriz, a recusa com o link e os testes dos critérios. A primeira saída da válvula foi usada depois da execução completa: a PR separada das partes do CI (o WebKit em 15; adendo abaixo e § 720).
 
 ## A lista do que é do Victor
 
@@ -276,5 +276,14 @@ Não foi usada: as duas ferramentas entraram nos três idiomas, com a matriz, a 
 2. No Search Console, pedir a indexação das seis páginas novas (`/avif-to-jpg/`, `/pt/avif-para-jpg/`, `/es/avif-a-jpg/`, `/convert-to-webp/`, `/pt/converter-para-webp/`, `/es/convertir-a-webp/`).
 3. Se a linha do `PLANO-FILEORCA.md` ainda faltar, pô-la (o texto está no grupo 24, F14 m-1).
 4. Criar o rótulo `ci` (Issues → Labels), se ainda não existir.
-5. Nenhuma PR das partes do CI foi aberta (a decisão 19 não pediu); a 4 do WebKit segue no F14 m-5.
+5. Mesclar a PR das partes do CI (o WebKit em 15 partes; adendo abaixo e § 720) depois da execução completa dela; a 4 do WebKit, a do `clearance.spec.ts`, segue no F14 m-5.
 6. Passar as candidatas da seção E do `PLANO-UX-QV.md` no Keyword Planner e no Google Trends, se ainda não passou, e gerar o prompt da F18 com a skill, com os números, o SHA da main e o grupo 27 do `docs/PENDENCIAS.md` (o F17 m-1 pede copiar o `[avif 12 MP]` do runner para um §).
+
+## Adendo: a execução completa e a PR das partes
+
+A execução completa da PR 33, depois do `gh pr ready` (`pnpm ci:custo 42903419182`, o commit `6649a73`): **verde**, 29 jobs, **198 minutos cobrados** e **17,5 min de parede**; o CI mesclou a PR no `39d1341` e o `pos-deploy` conferiu a produção.
+
+- **As partes:** o Chromium de 301,6 a 595,4 s; o WebKit de 159,4 a 726,1 s, com duas acima de 700 s: a 4 (726,1 s, a do `clearance.spec.ts`, F14 m-5; 746,0 s no ponto de partida) e a 6 (710,3 s; 542,5 s na PR 32). A 6 subiu por um runner mais lento (os specs antigos dela de 17 a 33 % mais lentos) e pelos testes desta run nela (um bloco a mais do `fo-ad-map` e 2 do `events`, uns 26 s de soma). Pela válvula, a PR separada das partes passa o WebKit a 15 partes (§ 720), com a projeção de uns 630 s na maior parte; o merge dela é do Victor.
+- **A medida do AVIF no runner:** `[avif 12 MP] chromium 2.0` e `[avif 12 MP] webkit 4.9` (no § 720). O WebP da mesma foto não foi medido no runner (F17 m-1).
+- **A matriz no WebKit do Linux** passou; o log não diz se ele abriu AVIF sozinho.
+- **O tempo de cada spec da F17** nessa execução está no § 720.

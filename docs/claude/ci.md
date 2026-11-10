@@ -207,3 +207,4 @@ Pegadinhas que a F13b achou no card das calculadoras e no QR code, no guia de ar
 ## F17: a projeção das partes
 
 - **A chave dos tempos do CI (`.cache/f14/ci-durations.mjs`) leva o número da linha do teste:** depois de editar um spec, case sem a linha (`file:linha ›` vira `file ›`). E o log do CI não traz tempo para todo teste (três blocos do `money-card.spec.ts` não aparecem): uma projeção que dá a média a quem não tem tempo infla a parte; separe o que é da run.
+- **A divisão depois da F17:** o Chromium em 8 partes e o WebKit em 15 (§ 720), numa PR separada, de merge do Victor. Com 15, o `clearance.spec.ts` e o `fo-ad-map.spec.ts` se dividem cada um entre duas partes; com 14 e 16 o `fo-ad-map` fica inteiro numa parte, e com 17 os dois. O tempo de um mesmo spec muda até um terço de um runner para outro (a parte 6 de 14 da F17 deu 710 s com os specs antigos 17 a 33 % mais lentos): projete com margem, não com o alvo justo.
