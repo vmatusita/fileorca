@@ -436,8 +436,9 @@ test.describe('on fileorca.com, the one push script', () => {
 
   test('the lateral-2: only on a page with 600 words or more, and only where the column has the room', async ({ page, context }) => {
     await page.setViewportSize(DESKTOP);
-    // The image hub has under 600 words in English: no lateral-2 in its HTML, so none on screen.
-    const hub = routeById('image-tools').paths.en ?? '';
+    // The home calculators hub has under 600 words in English: no lateral-2 in its HTML, so none on screen. (The image hub
+    // was this example until the F17: with AVIF to JPG and Convert to WebP it has 632 words, and the lateral-2; DECISOES § 715.)
+    const hub = routeById('home-calculators').paths.en ?? '';
     const hubHtml = await (await page.request.get(`${TEST_BUILD_ORIGIN}${hub}`)).text();
     expect(hubHtml).not.toContain('data-ad-unit="lateral-2"');
     await page.goto(`${PRODUCTION_ORIGIN}${hub}`);
