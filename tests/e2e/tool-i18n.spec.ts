@@ -36,6 +36,8 @@ const IMAGE_INPUT: Record<ImagePageId, string[]> = {
   'heic-to-jpg': ['heic-08-iphone13pro-paisagem-hdr-ios17.heic'],
   'webp-to-jpg': ['gen-webp-exif-gps.webp'],
   'png-to-jpg': ['gen-png-transparente.png'],
+  'avif-to-jpg': ['gen-avif.avif'],
+  'convert-to-webp': [JPG],
   'image-to-pdf': [JPG, JPG_2],
 };
 
