@@ -313,7 +313,7 @@ const MADE_AVIF = `${baseOf(TRANSPARENT)}.avif`;
 
 const avifToJpg = outcomeFor(['avif'], (fixture) => {
   const [width, height] = display(fixture);
-  // gen-avif.avif is the jpg-03 photo upright (§ 80): its picture is the one of JPG_03 turned by its own tag.
+  // gen-avif.avif is the jpg-03 photo with its Orientation 3 applied (fixtures/ORIGEM.md): the picture of JPG_03 turned by its own tag.
   return { name: sameName(fixture, 'jpeg'), format: 'jpeg', width, height, pixels: { from: JPG_03, limit: 8 } };
 });
 
