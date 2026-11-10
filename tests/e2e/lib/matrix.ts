@@ -9,6 +9,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
 import { expect, type Download, type Locator, type Page } from '@playwright/test';
+import { parseBmff } from './bmff.ts';
 import { imageSize, metadataReport, sniff, type Format, type MetadataReport } from './images.ts';
 import { exifBlock, tiffOrientation, withOrientation } from './jpeg.ts';
 import { dataLayer, dismissCookies, hydrated, type TestFile } from './page.ts';
@@ -70,11 +71,12 @@ export function batchOf(accepted: readonly string[], refused: readonly string[])
 }
 
 export const baseOf = (name: string): string => name.replace(/\.[^.]+$/, '');
-export const EXT: Record<string, string> = { jpeg: 'jpg', png: 'png', webp: 'webp' };
+// F17 (decision 10): Convert to WebP writes AVIF too, so an output may be an AVIF again (as in the F2 draft, 840d565^).
+export const EXT: Record<string, string> = { jpeg: 'jpg', png: 'png', webp: 'webp', avif: 'avif' };
 
 // ---- what a test expects of each fixture ----------------------------------------------------------------------
 
-export type OutFormat = 'jpeg' | 'png' | 'webp';
+export type OutFormat = 'jpeg' | 'png' | 'webp' | 'avif';
 
 /** Compare the output to the picture of a fixture (see pixels.ts for how the reference is built). */
 export interface PixelCheck {
@@ -117,8 +119,8 @@ export type Refusal = 'wrong-tool' | 'unsupported' | 'truncated' | 'decode' | 'e
 
 export interface Refuse {
   refuse: Refusal;
-  /** Link the row offers (only HEIC has a converter in this release): where it goes and how it is named. */
-  link?: { href: string; name: string; sentence: RegExp };
+  /** Link the row offers (HEIC and AVIF go to their converters, F17): where it goes, how it is named, and the whole line, word for word. */
+  link?: ConverterLink;
   /** A good file of a format with no converter: the whole line, which names what the tool takes, and no link in the row. */
   plain?: RegExp;
 }
@@ -129,8 +131,9 @@ export const isRefusal = (outcome: Outcome): outcome is Refuse => 'refuse' in ou
 /** The line each reason shows in the row of the file (src/tools/image/i18n/en.ts, errors). */
 // F13a (D-06 and D-17; DECISOES § 468 and § 469): a name with an image extension over bytes that are no image
 // hears that the two disagree ("ends in .png, but it isn't an image inside"), and a PNG on HEIC to JPG hears that it is a PNG.
+// F17 (decision 7): an AVIF has a converter again, so its line is "is an AVIF file." (the article of English, never "an?").
 const REASON_TEXT: Record<Refusal, RegExp> = {
-  'wrong-tool': /is (a HEIC file\.|in (AVIF|JPG|PNG|WebP|GIF) format, which this tool doesn't take\.|a PNG, not a HEIC photo\.)/,
+  'wrong-tool': /is (a HEIC file\.|an AVIF file\.|in (JPG|PNG|WebP|GIF) format, which this tool doesn't take\.|a PNG, not a HEIC photo\.)/,
   unsupported: /isn't an image Oli can read\.|ends in \.\w+, but it isn't an image inside\./,
   truncated: /stops before its end/,
   decode: /is damaged/,
@@ -149,19 +152,60 @@ export function brokenRefusal(name: string): Refuse {
   return { refuse: 'decode' };
 }
 
-const HEIC_LINK = { href: '/heic-to-jpg/', name: 'HEIC to JPG', sentence: /is a HEIC file\. Open it in HEIC to JPG\./ };
+export type Lang = 'en' | 'pt' | 'es';
 
-/** How the line spells the format of the file it refuses. */
-const FORMAT_NAME: Partial<Record<Format, string>> = { jpeg: 'JPG', png: 'PNG', webp: 'WebP', avif: 'AVIF', gif: 'GIF' };
+export interface ConverterLink {
+  href: string;
+  name: string;
+  /** The whole line of the row, file name included, as the page writes it. */
+  line: string;
+}
 
 /**
- * A good file of a format the tool does not take. HEIC points to its converter. Every other format (AVIF
- * included, which has no converter in this release) gets the line that names what the tool takes
- * (`takes`, as the tool's panel says it) and no link at all.
+ * F17 (decision 7; DECISOES § 708): the converter a refused HEIC or AVIF points to, in the language of the page, and the
+ * line of the row word for word. English says "a HEIC file" and "an AVIF file"; the test holds the exact sentence, never
+ * "an?" (the F2 matrix accepted "a AVIF"). The same sentences are agreed with the texts of the island
+ * (src/tools/image/i18n/{en,pt,es}.ts, errors.wrongTool) and the paths with src/i18n/routes.ts.
+ */
+export function converterLink(format: 'heic' | 'avif', lang: Lang, name: string): ConverterLink {
+  const links: Record<'heic' | 'avif', Record<Lang, ConverterLink>> = {
+    heic: {
+      en: { href: '/heic-to-jpg/', name: 'HEIC to JPG', line: `${name} is a HEIC file. Open it in HEIC to JPG.` },
+      pt: { href: '/pt/heic-para-jpg/', name: 'HEIC para JPG', line: `${name} é um arquivo HEIC. Abra-o em HEIC para JPG.` },
+      es: { href: '/es/heic-a-jpg/', name: 'HEIC a JPG', line: `${name} es un archivo HEIC. Ábrelo en HEIC a JPG.` },
+    },
+    avif: {
+      en: { href: '/avif-to-jpg/', name: 'AVIF to JPG', line: `${name} is an AVIF file. Open it in AVIF to JPG.` },
+      pt: { href: '/pt/avif-para-jpg/', name: 'AVIF para JPG', line: `${name} é um arquivo AVIF. Abra-o em AVIF para JPG.` },
+      es: { href: '/es/avif-a-jpg/', name: 'AVIF a JPG', line: `${name} es un archivo AVIF. Ábrelo en AVIF a JPG.` },
+    },
+  };
+  return links[format][lang];
+}
+
+/**
+ * The row of a refused HEIC or AVIF: the line word for word, and the link to the converter, in the language of the page.
+ * `.fo-file__err > span` holds only the line (the icon sits beside it), so its text is the sentence and nothing else.
+ */
+export async function expectConverterRow(page: Page, name: string, link: ConverterLink): Promise<void> {
+  const row: Locator = page.locator('.fo-file[data-state="error"]', { has: page.getByText(name, { exact: true }) });
+  await expect(row, `${name} has an error row`).toHaveCount(1);
+  await expect(row.locator('.fo-file__err > span'), `${name}: the line of the row`).toHaveText(link.line);
+  await expect(row.getByRole('link', { name: link.name, exact: true }), `${name}: the link to ${link.name}`).toHaveAttribute('href', link.href);
+  await expect(row.locator('a'), `${name}: one link in the row`).toHaveCount(1);
+}
+
+/** How the line spells the format of the file it refuses. */
+const FORMAT_NAME: Partial<Record<Format, string>> = { jpeg: 'JPG', png: 'PNG', webp: 'WebP', gif: 'GIF' };
+
+/**
+ * A good file of a format the tool does not take. HEIC and AVIF point to their converters (F17: AVIF to JPG is back,
+ * DECISOES § 708). Every other format gets the line that names what the tool takes (`takes`, as the tool's panel says
+ * it) and no link at all.
  */
 export function wrongTool(name: string, takes: string): Refuse {
   const format = oracle(name).format;
-  if (format === 'heic') return { refuse: 'wrong-tool', link: HEIC_LINK };
+  if (format === 'heic' || format === 'avif') return { refuse: 'wrong-tool', link: converterLink(format, 'en', name) };
   // F13a (D-17): HEIC to JPG says a PNG is a PNG and names the tool that makes a JPG of it; the row carries no link (the
   // chip to PNG to JPG is in the band under the rectangle, when the PNG is the one file).
   if (format === 'png' && takes === 'HEIC or HEIF') return { refuse: 'wrong-tool', plain: /is a PNG, not a HEIC photo\. To get a JPG from it, use PNG to JPG\./ };
@@ -187,6 +231,15 @@ export interface MatrixCase {
   /** Phrases the result card must say beyond the line about the metadata every card has ("Transparent areas became white"). */
   says?: readonly string[];
   outcome: (fixture: string) => Outcome;
+  /**
+   * F17: the case reads or writes AVIF, so the page also learns whether this browser opens an AVIF by itself (the probe of
+   * decodeInPage); an AVIF output must open only where one does, and the record and the table say which it was.
+   */
+  avif?: true;
+  /** Files of the batch that are not fixtures (an output of an earlier step of the same test): name → path on disk. */
+  paths?: Readonly<Record<string, string>>;
+  /** A further step of the same test, on the same page, with what this batch delivered (F17: the AVIF with alpha goes on to AVIF to JPG). */
+  then?: (page: Page, browser: string, outputs: OutFile[]) => Promise<void>;
 }
 
 // ---- requests -----------------------------------------------------------------------------------------------
@@ -219,7 +272,10 @@ export function watchRequests(page: Page): RequestLog {
 // ---- the page and the batch ----------------------------------------------------------------------------------
 
 export async function openTool(page: Page, path: string): Promise<void> {
-  await page.goto(path);
+  // The serve-dist answers a path that is missing with the closest 404, which has no tool: the page must exist (F17,
+  // decision 14: before this run /avif-to-jpg/ was such a 404).
+  const response = await page.goto(path);
+  expect(response?.status(), `${path} exists`).toBe(200);
   await hydrated(page);
   await dismissCookies(page);
 }
@@ -272,6 +328,8 @@ export interface Decoded {
 
 export interface DecodeReport {
   files: Decoded[];
+  /** F17: this browser decodes an AVIF by itself (the AVIF fixture opens); undefined when the probe was not asked for. */
+  avif?: boolean;
 }
 
 const FFLATE = resolve('node_modules/fflate/umd/index.js');
@@ -279,16 +337,20 @@ const FFLATE = resolve('node_modules/fflate/umd/index.js');
 /**
  * Decodes what the Download link holds, in the page, without sending a byte through the protocol:
  * the page fetches its own blob, unpacks the ZIP with fflate and opens every entry as a bitmap.
+ * F17 (the probe of the F2 draft, 840d565^): with `probeAvif`, the AVIF fixture is decoded too, to learn whether this
+ * browser reads an AVIF at all (the WebKit of Playwright on Windows does not; the Linux one of the CI may), so an AVIF
+ * output is required to open only where one can, and is checked by its bytes elsewhere.
  */
-export async function decodeInPage(page: Page): Promise<DecodeReport> {
+export async function decodeInPage(page: Page, options: { probeAvif?: boolean } = {}): Promise<DecodeReport> {
   if (!(await page.evaluate(() => 'fflate' in window))) await page.addScriptTag({ path: FFLATE });
-  return page.evaluate(async () => {
+  const probe = options.probeAvif ? fixtureBytes('gen-avif.avif').toString('base64') : '';
+  return page.evaluate(async (avifBase64) => {
     const fflate = (window as unknown as { fflate: { unzipSync(zip: Uint8Array): Record<string, Uint8Array> } }).fflate;
     const link = document.querySelector<HTMLAnchorElement>('.fo-btn--download');
     if (!link) throw new Error('no download link');
     const data = new Uint8Array(await (await fetch(link.href)).arrayBuffer());
     const entries: [string, Uint8Array][] = data[0] === 0x50 && data[1] === 0x4b ? Object.entries(fflate.unzipSync(data)) : [[link.download, data]];
-    const types: Record<string, string> = { jpg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
+    const types: Record<string, string> = { jpg: 'image/jpeg', png: 'image/png', webp: 'image/webp', avif: 'image/avif' };
     const probe = document.createElement('canvas');
     probe.width = 1;
     probe.height = 1;
@@ -311,8 +373,17 @@ export async function decodeInPage(page: Page): Promise<DecodeReport> {
         files.push({ name, ok: false, width: 0, height: 0, cornerAlpha: [], error: String(error) });
       }
     }
-    return { files };
-  });
+    if (!avifBase64) return { files };
+    let avif = false;
+    try {
+      const raw = Uint8Array.from(atob(avifBase64), (character) => character.charCodeAt(0));
+      (await createImageBitmap(new Blob([raw], { type: 'image/avif' }))).close();
+      avif = true;
+    } catch {
+      avif = false;
+    }
+    return { files, avif };
+  }, probe);
 }
 
 // ---- pixels ----------------------------------------------------------------------------------------------------
@@ -329,7 +400,7 @@ export function storedBox(box: [number, number, number, number], tag: number): [
   return [Math.min(ax, bx), Math.min(ay, by), Math.abs(bx - ax), Math.abs(by - ay)];
 }
 
-const MIME_OF: Record<OutFormat, string> = { jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
+const MIME_OF: Record<OutFormat, string> = { jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', avif: 'image/avif' };
 
 export interface Reference {
   /** The grey grid the output should show. */
@@ -390,6 +461,11 @@ export async function colours(page: Page, output: OutFile, format: OutFormat): P
 
 // ---- metadata ---------------------------------------------------------------------------------------------------
 
+/** An AVIF with an alpha plane: an auxiliary image whose auxC type names alpha (F2 draft, 840d565^). */
+export function avifHasAlpha(bytes: Uint8Array): boolean {
+  return parseBmff(bytes).items.some((item) => item.properties.some((property) => property.type === 'auxC' && 'auxType' in property && /alpha/i.test(property.auxType)));
+}
+
 /** True when the Exif block says nothing but the Orientation (what strip.ts leaves on a rotated JPEG that went back as it was). */
 export function orientationOnly(bytes: Uint8Array): boolean {
   const tiff = exifBlock(bytes);
@@ -420,8 +496,8 @@ export function expectNoMetadata(file: OutFile, options: { tagMayStay?: boolean 
 export interface RecordFile {
   fixture: string;
   status: 'ok' | 'refused';
-  /** ok: what came out. */
-  output?: { name: string; format: string; width: number; height: number; bytes: number; decoded: 'yes' | 'pdf'; note: string };
+  /** ok: what came out; `unsupported` is an AVIF this browser does not open by itself, checked by its bytes (F17). */
+  output?: { name: string; format: string; width: number; height: number; bytes: number; decoded: 'yes' | 'unsupported' | 'pdf'; note: string };
   /** refused: the reason the page gave. */
   reason?: string;
 }
@@ -440,6 +516,8 @@ export interface MatrixRecord {
   requests: number;
   /** Requests that left the page origin (the test fails when there is one, so a record says 0). */
   outside: number;
+  /** F17: whether this browser opened the AVIF fixture by itself, on the cases that read or write AVIF. */
+  avifDecode?: boolean;
   files: RecordFile[];
   /** image-to-pdf: pages of the PDF. */
   pdf?: { pages: number; bytes: number };
@@ -486,10 +564,7 @@ export async function expectRefusals(page: Page, kase: MatrixCase, events: unkno
     await expect(row, `${name} has an error row`).toHaveCount(1);
     await expect(row.locator('.fo-file__err')).toContainText(name);
     await expect(row.locator('.fo-file__err')).toContainText(REASON_TEXT[refusal.refuse]);
-    if (refusal.link) {
-      await expect(row.locator('.fo-file__err')).toContainText(refusal.link.sentence);
-      await expect(row.getByRole('link', { name: refusal.link.name })).toHaveAttribute('href', refusal.link.href);
-    }
+    if (refusal.link) await expectConverterRow(page, name, refusal.link);
     if (refusal.plain) {
       // The line names what the tool takes, and nothing in the row points to a page that does not exist.
       await expect(row.locator('.fo-file__err')).toContainText(refusal.plain);
@@ -505,23 +580,33 @@ export const sizeOfFixture = (name: string): number => fixtureBytes(name).length
 
 export interface CheckContext {
   page: Page;
+  /** F17: this browser opens AVIF files by itself (the probe); an AVIF output that it cannot open is checked by its bytes. */
+  avif: boolean;
   references: Map<string, Reference>;
 }
 
 /** What is true of the output, whatever the tool: it is what it should be, it opens, it carries no metadata. */
 async function checkOutput(context: CheckContext, fixture: string, want: Expect, out: OutFile, decoded: Decoded | undefined): Promise<RecordFile> {
   const { page } = context;
-  const input = sizeOfFixture(fixture);
   expect(out.name, `${fixture}: name of the output`).toBe(want.name);
   expect(sniff(out.bytes), `${out.name}: real format`).toBe(want.format);
   const size = imageSize(out.bytes);
   expect([size.displayWidth, size.displayHeight], `${out.name}: size in the header`).toEqual([want.width, want.height]);
-  if (want.smaller) expect(out.bytes.length, `${out.name} is smaller than the ${input} bytes that went in`).toBeLessThan(input);
-  if (want.notBigger) expect(out.bytes.length, `${out.name} is not bigger than the ${input} bytes that went in`).toBeLessThanOrEqual(input);
+  if (want.smaller || want.notBigger) {
+    const input = sizeOfFixture(fixture);
+    if (want.smaller) expect(out.bytes.length, `${out.name} is smaller than the ${input} bytes that went in`).toBeLessThan(input);
+    if (want.notBigger) expect(out.bytes.length, `${out.name} is not bigger than the ${input} bytes that went in`).toBeLessThanOrEqual(input);
+  }
   expectNoMetadata(out, want.tagMayStay ? { tagMayStay: true } : {});
 
-  expect(decoded?.ok, `${out.name} opens in the browser: ${decoded?.error ?? 'not in the bundle'}`).toBe(true);
-  expect([decoded?.width, decoded?.height], `${out.name}: size once decoded`).toEqual([want.width, want.height]);
+  // F17 (as the F2 draft, 840d565^): an AVIF must open where this browser opens the AVIF fixture; where it does not (the
+  // WebKit of Playwright on Windows), the AVIF is checked by its bytes only: the real format, the size in the header, the
+  // alpha plane and the metadata above. Every other format must open everywhere.
+  const opens: 'yes' | 'unsupported' = want.format === 'avif' && !context.avif ? 'unsupported' : 'yes';
+  if (opens === 'yes') {
+    expect(decoded?.ok, `${out.name} opens in the browser: ${decoded?.error ?? 'not in the bundle'}`).toBe(true);
+    expect([decoded?.width, decoded?.height], `${out.name}: size once decoded`).toEqual([want.width, want.height]);
+  }
 
   const notes: string[] = [];
   if (want.format === 'webp') {
@@ -535,10 +620,13 @@ async function checkOutput(context: CheckContext, fixture: string, want: Expect,
     }
   }
   if (want.alpha === 'kept') {
-    expect(decoded?.cornerAlpha.every((alpha) => alpha < 40), `${out.name}: corners stay transparent (${decoded?.cornerAlpha.join(',')})`).toBe(true);
+    if (want.format === 'avif') expect(avifHasAlpha(out.bytes), `${out.name}: the AVIF carries an alpha plane`).toBe(true);
+    if (opens === 'yes') expect(decoded?.cornerAlpha.every((alpha) => alpha < 40), `${out.name}: corners stay transparent (${decoded?.cornerAlpha.join(',')})`).toBe(true);
     notes.push('alpha kept');
+  } else if (want.format === 'avif') {
+    expect(avifHasAlpha(out.bytes), `${out.name}: an opaque picture gets no alpha plane`).toBe(false);
   }
-  if (want.flatten || want.mostlyRed) {
+  if ((want.flatten || want.mostlyRed) && opens === 'yes') {
     const seen = await colours(page, out, want.format);
     if (want.flatten) {
       expect(decoded?.cornerAlpha.every((alpha) => alpha === 255), `${out.name} is opaque`).toBe(true);
@@ -559,7 +647,7 @@ async function checkOutput(context: CheckContext, fixture: string, want: Expect,
       notes.push('first frame is red');
     }
   }
-  if (want.pixels) {
+  if (want.pixels && opens === 'yes') {
     const verdict = await comparePixels(page, out, want.format, want.pixels, context.references);
     expect(verdict.right, `${out.name}: mean difference to the upright picture`).toBeLessThan(want.pixels.limit);
     if (verdict.closestWrong !== null) {
@@ -567,7 +655,7 @@ async function checkOutput(context: CheckContext, fixture: string, want: Expect,
     }
     notes.push(`orientation ok (Δ${verdict.right.toFixed(1)})`);
   }
-  return { fixture, status: 'ok', output: { name: out.name, format: want.format, width: want.width, height: want.height, bytes: out.bytes.length, decoded: 'yes', note: notes.join(', ') } };
+  return { fixture, status: 'ok', output: { name: out.name, format: want.format, width: want.width, height: want.height, bytes: out.bytes.length, decoded: opens, note: notes.join(', ') } };
 }
 
 function pdfFormat(image: PdfImage): OutFormat {
@@ -634,7 +722,7 @@ export async function runCase(page: Page, browser: string, kase: MatrixCase): Pr
   await kase.setup?.(page);
   const loaded = Date.now() - started;
   // By path: the files go from disk to the page as a person's would, without a copy through the protocol.
-  await page.setInputFiles('input[type="file"]', kase.batch.map((name) => resolve(DIR, name)));
+  await page.setInputFiles('input[type="file"]', kase.batch.map((name) => kase.paths?.[name] ?? resolve(DIR, name)));
   const uploaded = Date.now();
   await expect(page.locator('.fo-result')).toBeVisible({ timeout: 50_000 });
   const processed = Date.now() - uploaded;
@@ -652,19 +740,23 @@ export async function runCase(page: Page, browser: string, kase: MatrixCase): Pr
   const downloading = Date.now();
   const delivered = await takeDownload(page);
   const downloaded = Date.now() - downloading;
-  const context: CheckContext = { page, references: new Map() };
+  const context: CheckContext = { page, avif: false, references: new Map() };
   const accepting: RecordFile[] = [];
   let pdfRecord: MatrixRecord['pdf'];
   let decodeMs = 0;
+  let outs: OutFile[] = [];
+  let avifDecode: boolean | undefined;
   if (kase.deliverable === 'pdf') {
     const result = await checkPdf(context, kase, accepted, delivered);
     accepting.push(...result.files);
     pdfRecord = result.pdf;
   } else {
-    const outs = filesOf(delivered);
+    outs = filesOf(delivered);
     const decoding = Date.now();
-    const report = await decodeInPage(page);
+    const report = await decodeInPage(page, { probeAvif: kase.avif === true });
     decodeMs = Date.now() - decoding;
+    context.avif = report.avif === true;
+    avifDecode = report.avif;
     expect(outs.map((out) => out.name), 'one output per accepted file, in the order of the queue').toEqual(accepted.map((name) => (kase.outcome(name) as Expect).name));
     expect(new Set(outs.map((out) => out.name.toLowerCase())).size, 'names are unique').toBe(outs.length);
     for (const [index, fixture] of accepted.entries()) {
@@ -687,9 +779,12 @@ export async function runCase(page: Page, browser: string, kase: MatrixCase): Pr
     phases: { load: loaded, download: downloaded, decode: decodeMs },
     requests: log.urls.length,
     outside: log.outside().length,
+    ...(avifDecode === undefined ? {} : { avifDecode }),
     files: ordered,
     ...(pdfRecord ? { pdf: pdfRecord } : {}),
   };
   writeRecord(record);
+  // F17: a further step on the same page, with what came out (the AVIF with alpha goes on to AVIF to JPG).
+  await kase.then?.(page, browser, outs);
   return record;
 }
