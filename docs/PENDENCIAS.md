@@ -41,9 +41,9 @@ Conferido em 2 de novembro de 2026 sobre a `main` em `29afbce` (a F7), na F8 (DE
 | 22. O que a F13a deixou | 10 | O Victor, a run F13b e runs de ajuste |
 | 23. O que a F13b deixou | 14 | O Victor e runs de ajuste |
 | 24. O que a F14 deixou | 6 | O Victor e runs de ajuste |
-| 25. O que a F15 deixou | 3 | O Victor e runs de ajuste |
+| 25. O que a F15 deixou | 4 | O Victor e runs de ajuste |
 
-Total: 193 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 2 e 3 (oráculo antes), 7, 8, 9, 10, 12 (os grupos 5 e 6 a F13b fechou).
+Total: 194 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 2 e 3 (oráculo antes), 7, 8, 9, 10, 12 (os grupos 5 e 6 a F13b fechou).
 
 ## 1. Saúde e fontes (YMYL)
 
@@ -410,6 +410,7 @@ O que a F15 (a ordem e a lixeira da Imagem para PDF, a lixeira com Desfazer em t
 | F15 L-1 | DECISOES § 669; F13a R-b-4 | baixo | Com uma linha tirada de um lote de imagem, a linha do Desfazer conta como item da lista (o `li` no `ol` da Imagem para PDF, o `listitem` nas outras): até a próxima ação, o leitor de tela diz "3 de 3" para o 2º de 2 arquivos. É a mesma forma do Juntar (F13a R-b-4), de propósito | A mesma do F13a R-b-4: conferir com NVDA e VoiceOver e, se o problema se confirmar, pôr `aria-setsize` e `aria-posinset` nos itens dos arquivos, sem mudar a ordem do DOM, no Juntar e nas listas de imagem juntos | Victor (leitores de tela) e uma run de ajuste |
 | F15 L-2 | DECISOES § 670 | baixo | No WebKit do Windows as fotos são codificadas na página (sem `OffscreenCanvas` no worker), e o worker de imagem recebe só duas mensagens por lote: lá, a prova de "nenhuma foto codificada de novo depois do gesto" (o critério 2) conta só o ZIP. No Chromium ela conta as fotos | Ler no log da execução completa do CI as linhas `[mensagens]` do `image-list.spec.ts` no WebKit do Linux; se lá as fotos também forem da página, contar as chamadas de codificação da página (um espião no `encode` do caminho sem worker) | Run de ajuste de testes |
 | F15 Q-1 | DECISOES § 677 | baixo | A folga do QR a 360 × 740 (o código termina 25 px acima da dobra no pt e no es) foi medida no Windows; a fonte do Linux pode pôr uma linha a mais na ajuda do campo (20 px) | Ler as linhas `[QR 360x740]` do `qr-layout.spec.ts` na execução completa do CI; se a folga do Linux ficar abaixo de 16 px, encurtar a ajuda no celular ou a prévia para 200 px | Run de ajuste de layout |
+| F15 R-b-1 | REVISAO-F15.md b-1; DECISOES § 679 | baixo | Num lote de dois arquivos ou mais, o Tab para fora de um `NumberField` de imagem depois do resultado (o "Tamanho máximo" do Comprimir; a altura do Redimensionar já era assim no ponto de partida) deixa o foco no `body`: o campo confirma o valor no `blur`, o lote refaz, e a linha é trocada antes de o foco pousar no controle seguinte | No `blur` do `NumberField`, guardar o `relatedTarget` e devolver o foco a ele (ou ao mesmo lugar na linha nova) depois do `render()`, como a ilha já faz com o `bandFocus` e o `rowFocus`; um teste que tabula para fora do campo com três arquivos e confere o `document.activeElement` | Run F16 (os campos) ou uma run de ajuste de acessibilidade |
 
 ## Registrados (escolhas, não defeitos)
 
