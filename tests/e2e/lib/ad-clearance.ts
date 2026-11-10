@@ -87,6 +87,8 @@ export const SMALL_OF: Record<string, { fixture: string; mimeType: string }> = {
   '/compress-image/to-1mb/': { fixture: 'gen-png-transparente.png', mimeType: 'image/png' }, // 800 × 600, 1.1 MB
   '/heic-to-jpg/': { fixture: 'heic-08-iphone13pro-paisagem-hdr-ios17.heic', mimeType: 'image/heic' }, // 1512 × 850, 239 KB
   '/webp-to-jpg/': { fixture: 'gen-webp-exif-gps.webp', mimeType: 'image/webp' }, // 1600 × 1200, 262 KB
+  // F17 (decision 13; DECISOES § 715): AVIF to JPG takes AVIF only (Convert to WebP takes the JPEG drawn in the page).
+  '/avif-to-jpg/': { fixture: 'gen-avif.avif', mimeType: 'image/avif' }, // 1600 × 1200, 77 KB
 };
 
 /** `count` small files this page accepts, with names of their own (a batch of two or more shows the queue). */

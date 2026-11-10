@@ -8,7 +8,7 @@ import { chooseImage, dismissCookies, hydrated, startOver } from './lib/page.ts'
 import { choosePdfs, pdfFile } from './lib/pdf-tools.ts';
 import imagesTexts from '../../src/tools/pdf-to-jpg/i18n/en.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID } from '../../src/tools/guides/registry.ts';
-import { PDF_ENGINE_FILE, expectInitialBudget, expectNextPage, settler } from './lib/budgets.ts';
+import { PDF_ENGINE_FILE, expectInitialBudget, expectNextPage, settler, track } from './lib/budgets.ts';
 
 // Performance budgets (PLANO "Orçamento de desempenho"): initial JS of the tool page at most
 // 80 KB gzip (own-domain JS only, no WASM, inline scripts included); at most 8 own-domain
@@ -31,6 +31,9 @@ const TOOL_PAGES = [
   '/heic-to-jpg/',
   '/webp-to-jpg/',
   '/png-to-jpg/',
+  // F17 (decision 12; DECISOES § 714): the two tools of the run 2b, on the same rules as their sisters.
+  '/avif-to-jpg/',
+  '/convert-to-webp/',
   '/image-to-pdf/',
 ];
 // The hubs have no island: they are held to the same JS and request budgets, with at most the two files of a tool page.
@@ -72,6 +75,31 @@ for (const path of [...TOOL_PAGES, QR_PAGE, ...HUB_PAGES, ...CALC_PAGES, ...PDF_
       noPdfMaker: isCalc,
       noPdfEngine: isPdf || path === `/${PDF_HUB_ID}/` || PDF_GUIDE_PAGES.includes(path),
     });
+  });
+}
+
+// F17 (decision 12; DECISOES § 714): each new tool page asks for what its sister WebP to JPG asks for, request for request,
+// in a fresh browser each: the page, the shared island chunk and styles, the same fonts, and its own entry in the place
+// of the sister's (the one name that differs). So the two JS files and the requests of the sisters, and nothing more.
+const entryOf = (url: string): boolean => /^\/_astro\/\w+Page\.astro_astro_type_script_index_0_lang\.[\w-]+\.js$/.test(url);
+for (const path of ['/avif-to-jpg/', '/convert-to-webp/']) {
+  test(`${path} asks for the same requests as its sister /webp-to-jpg/, with its own entry in the place of the sister's`, async ({ browser, baseURL }) => {
+    const origin = new URL(baseURL ?? 'http://127.0.0.1:4173').origin;
+    const asked = async (target: string): Promise<string[]> => {
+      const context = await browser.newContext();
+      const page = await context.newPage();
+      const urls = track(page, origin);
+      const { settled } = settler(page);
+      expect((await page.goto(target))?.status(), `${target} exists`).toBe(200);
+      await settled();
+      const seen = [...urls].map((url) => (url === target ? 'the page' : entryOf(url) ? 'its own entry' : url)).sort();
+      await context.close();
+      return seen;
+    };
+    const sister = await asked('/webp-to-jpg/');
+    const own = await asked(path);
+    expect(sister.filter((url) => url === 'its own entry'), 'the sister has one entry of its own').toHaveLength(1);
+    expect(own, `${path}: the requests of the sister`).toEqual(sister);
   });
 }
 

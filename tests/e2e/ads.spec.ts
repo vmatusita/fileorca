@@ -35,6 +35,9 @@ const TOOL_PAGES = [
   '/heic-to-jpg/',
   '/webp-to-jpg/',
   '/png-to-jpg/',
+  // F17 (decision 13; DECISOES § 715): the two tools of the run 2b; their pt and es pages come in below, from the registry.
+  '/avif-to-jpg/',
+  '/convert-to-webp/',
   '/image-to-pdf/',
 ];
 // F6 (decision 9): the same pages in Portuguese and Spanish, read from the route map, with the same states and the
@@ -55,6 +58,9 @@ const ON_SCREEN: Record<string, string[]> = {
   '/crop-image/': ['.fo-crop', '.fo-crop__box', '.fo-crop__handle', '#cr-x', '#cr-y', '#cr-width', '#cr-height'],
   '/heic-to-jpg/': ['.fo-ba'],
   '/webp-to-jpg/': ['.fo-ba'],
+  // F17: both lose quality on purpose (beforeAfter 'lossy'), so the comparison is on screen with the result.
+  '/avif-to-jpg/': ['.fo-ba'],
+  '/convert-to-webp/': ['.fo-ba'],
 };
 
 // One load per page and browser, walked through four states: at rest, while the first file is processed (the

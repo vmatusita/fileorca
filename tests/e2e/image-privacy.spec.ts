@@ -256,3 +256,72 @@ test('the Tab out of the limit of Compress image in a batch of three, after the 
   const kept = await page.evaluate(() => JSON.stringify([document.title, { ...localStorage }, { ...sessionStorage }, document.cookie, (window as unknown as { dataLayer?: unknown[] }).dataLayer ?? []]));
   expect(kept, 'the title, the storage, the cookies and the dataLayer never have the limit').not.toMatch(/(^|\D)8,?642(\D|$)/);
 });
+
+// F17 (criterion 4 of the run's prompt; DECISOES § 711): AVIF to JPG and Convert to WebP in the path of this spec. Convert to
+// WebP writes a photo with GPS as an AVIF, and AVIF to JPG takes that AVIF back to a JPG. The AVIF encoder (and, where the
+// browser cannot read an AVIF by itself, the decoder) is the single-thread build of @jsquash/avif, the file of the package
+// as it is; the page is not cross-origin isolated and has no shared memory; no request leaves the page origin, none writes
+// and none has a query string; and neither file carries metadata.
+test('Convert to WebP writes an AVIF and AVIF to JPG reads it: the single-thread AVIF codecs of the package, and nothing leaves the browser', async ({ page }) => {
+  test.setTimeout(120_000);
+  const wasm: { name: string; hash: string }[] = [];
+  const reading: Promise<void>[] = [];
+  page.on('response', (response) => {
+    if (!response.url().endsWith('.wasm')) return;
+    reading.push(response.body().then((body) => void wasm.push({ name: withoutHash(response.url()), hash: sha256(new Uint8Array(body)) }), () => undefined));
+  });
+  const requests = watchRequests(page);
+  const PHOTO = 'gen-jpg-01-orientacao6.jpg'; // 1200 × 1600 on screen, with GPS
+
+  const convert = await page.goto('/convert-to-webp/');
+  expect(convert?.status()).toBe(200);
+  expect(convert?.headers()['cross-origin-opener-policy']).toBeUndefined();
+  expect(convert?.headers()['cross-origin-embedder-policy']).toBeUndefined();
+  await hydrated(page);
+  await dismissCookies(page);
+  await page.locator('.fo-seg__opt', { hasText: 'AVIF' }).click();
+  await page.setInputFiles('input[type="file"]', fixtureFile(PHOTO));
+  await expect(page.locator('.fo-result')).toBeVisible({ timeout: 50_000 });
+  const avif = await takeDownload(page);
+  expect(avif.name).toBe('gen-jpg-01-orientacao6.avif');
+  expect(imageSize(avif.bytes)).toMatchObject({ format: 'avif', displayWidth: 1200, displayHeight: 1600 });
+  expectNoMetadata({ name: avif.name, bytes: avif.bytes });
+  expect(await page.evaluate(() => crossOriginIsolated)).toBe(false);
+  expect(await page.evaluate(() => typeof SharedArrayBuffer)).toBe('undefined');
+
+  expect((await page.goto('/avif-to-jpg/'))?.status()).toBe(200);
+  await hydrated(page);
+  await page.setInputFiles('input[type="file"]', { name: avif.name, mimeType: 'image/avif', buffer: Buffer.from(avif.bytes) });
+  await expect(page.locator('.fo-result')).toBeVisible({ timeout: 50_000 });
+  const jpg = await takeDownload(page);
+  expect(jpg.name).toBe('gen-jpg-01-orientacao6.jpg');
+  expect(imageSize(jpg.bytes)).toMatchObject({ format: 'jpeg', displayWidth: 1200, displayHeight: 1600 });
+  expectNoMetadata({ name: jpg.name, bytes: jpg.bytes });
+  expect(await page.evaluate(() => crossOriginIsolated)).toBe(false);
+  expect(await page.evaluate(() => typeof SharedArrayBuffer)).toBe('undefined');
+
+  // The codecs that came are the files of the package, as they are; the encoder always (the browser never writes AVIF), the
+  // decoder at least where the browser cannot open the AVIF by itself (then the JPG could only come from it).
+  await Promise.all(reading);
+  const packaged: Record<string, string> = {
+    'avif_enc.wasm': sha256(new Uint8Array(readFileSync('node_modules/@jsquash/avif/codec/enc/avif_enc.wasm'))),
+    'avif_dec.wasm': sha256(new Uint8Array(readFileSync('node_modules/@jsquash/avif/codec/dec/avif_dec.wasm'))),
+  };
+  const avifCodecs = wasm.filter((entry) => entry.name.startsWith('avif_'));
+  expect(avifCodecs.map((entry) => entry.name), 'the AVIF encoder came for the AVIF').toContain('avif_enc.wasm');
+  for (const entry of avifCodecs) expect(entry.hash, `${entry.name}: the file of the package`).toBe(packaged[entry.name]);
+  const opensAvif = await page.evaluate(async (base64) => {
+    try {
+      (await createImageBitmap(new Blob([Uint8Array.from(atob(base64), (character) => character.charCodeAt(0))], { type: 'image/avif' }))).close();
+      return true;
+    } catch {
+      return false;
+    }
+  }, Buffer.from(avif.bytes).toString('base64'));
+  if (!opensAvif) expect(avifCodecs.map((entry) => entry.name), 'this browser cannot open an AVIF: the decoder of the site read it').toContain('avif_dec.wasm');
+  test.info().annotations.push({ type: 'avif', description: `opens AVIF by itself: ${opensAvif}; codecs: ${avifCodecs.map((entry) => entry.name).join(', ')}` });
+
+  expect(requests.outside(), 'no request leaves the page origin').toEqual([]);
+  expect(requests.writes, 'every request is a GET').toEqual([]);
+  expect(requests.urls.filter((url) => /^https?:/.test(url) && new URL(url).search !== ''), 'no request has a query string').toEqual([]);
+});

@@ -12,7 +12,7 @@ import protectPdfTexts from '../../src/tools/protect-pdf/i18n/en.ts';
 // The technical claims of the launch texts (docs/lancamento/show-hn.md and, from the F5b, product-hunt.md; DECISOES § 98),
 // proven over the dist/
 // in both browsers, on a JPEG codec, the libheif decoder, the PDF worker and, since F5a, qpdf (Compress PDF,
-// Protect PDF) and PDF.js (PDF to JPG):
+// Protect PDF) and PDF.js (PDF to JPG), and since the F17 the AVIF of AVIF to JPG and Convert to WebP:
 // 1. no byte of the file leaves the browser: every request the page and its workers make is a GET to the
 //    site's own origin, with no body;
 // 2. once the page and the codec are loaded, the tool keeps working offline: the network goes off and the
@@ -21,6 +21,8 @@ import protectPdfTexts from '../../src/tools/protect-pdf/i18n/en.ts';
 const JPEG = [0xff, 0xd8, 0xff];
 const PDF = [0x25, 0x50, 0x44, 0x46];
 const ZIP = [0x50, 0x4b];
+/** "ftypavif": the first box of an AVIF, at byte 4. */
+const AVIF = [0x66, 0x74, 0x79, 0x70, 0x61, 0x76, 0x69, 0x66];
 
 interface Case {
   path: string;
@@ -28,6 +30,8 @@ interface Case {
   second: string;
   /** The first bytes of what each file gives back. */
   magic: readonly number[];
+  /** Where the magic starts (an AVIF says what it is at byte 4, after the size of its first box). */
+  at?: number;
   /** Where the files come from: the image fixtures, unless the case says otherwise. */
   load?: (name: string) => TestFile;
   /** An option the tool needs set before the file arrives. Start over clears it, so it is set again for the second file. */
@@ -43,6 +47,11 @@ const CASES: Case[] = [
   { path: '/compress-image/', first: 'jpg-02-iphone6-paisagem-gps.jpg', second: 'jpg-01-pixel2-retrato-gps.jpg', magic: JPEG },
   { path: '/heic-to-jpg/', first: 'heic-06-iphone7-paisagem-gps.heic', second: 'heic-04-iphone11promax-retrato-livephoto-gps.heic', magic: JPEG },
   { path: '/image-to-pdf/', first: 'jpg-02-iphone6-paisagem-gps.jpg', second: 'gen-png-transparente.png', magic: PDF },
+  // F17 (criterion 4 of the run; DECISOES § 711): AVIF to JPG reads the AVIF (with the decoder of the site where the browser
+  // cannot; the one AVIF fixture goes in twice), and Convert to WebP writes AVIF with the encoder of the site, which the
+  // first file fetches and the second, offline, uses again.
+  { path: '/avif-to-jpg/', first: 'gen-avif.avif', second: 'gen-avif.avif', magic: JPEG },
+  { path: '/convert-to-webp/', first: 'gen-jpg-01-orientacao6.jpg', second: 'gen-png-transparente.png', magic: AVIF, at: 4, setup: (page) => option(page, 'AVIF') },
   // Lossless is qpdf alone: no codec of the images to fetch for the second file.
   {
     path: '/compress-pdf/',
@@ -86,7 +95,7 @@ const CASES: Case[] = [
   },
 ];
 
-for (const { path, first, second, magic, load = fixtureFile, setup, act } of CASES) {
+for (const { path, first, second, magic, at = 0, load = fixtureFile, setup, act } of CASES) {
   test(`${path}: no byte of the file leaves the browser, and the tool keeps working offline`, async ({ page, context }) => {
     const requests: { url: string; method: string; body: number }[] = [];
     context.on('request', (request) => requests.push({ url: request.url(), method: request.method(), body: request.postDataBuffer()?.length ?? 0 }));
@@ -105,7 +114,7 @@ for (const { path, first, second, magic, load = fixtureFile, setup, act } of CAS
     await act?.(page);
     await expect(page.locator('.fo-result')).toBeVisible({ timeout: 45_000 });
     const online = await takeDownload(page);
-    expect([...online.bytes.subarray(0, magic.length)], `${first}: a real result`).toEqual([...magic]);
+    expect([...online.bytes.subarray(at, at + magic.length)], `${first}: a real result`).toEqual([...magic]);
 
     // What the page and its workers asked for while the file was read, processed and downloaded.
     const sent = requests.filter((request) => !/^(blob|data|about):/.test(request.url));
@@ -124,7 +133,7 @@ for (const { path, first, second, magic, load = fixtureFile, setup, act } of CAS
     await act?.(page);
     await expect(page.locator('.fo-result')).toBeVisible({ timeout: 45_000 });
     const offline = await takeDownload(page);
-    expect([...offline.bytes.subarray(0, magic.length)], `${second}: a real result offline`).toEqual([...magic]);
+    expect([...offline.bytes.subarray(at, at + magic.length)], `${second}: a real result offline`).toEqual([...magic]);
     expect(requests.slice(before).filter((request) => !/^(blob|data|about):/.test(request.url)), 'offline, nothing was asked of the network').toEqual([]);
     await context.setOffline(false);
   });

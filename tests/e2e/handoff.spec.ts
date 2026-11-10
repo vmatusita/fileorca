@@ -250,6 +250,58 @@ test('the empty box has no axe violation, in both themes at 360 and 1280px', asy
   expect(await violationsEverywhere(page)).toEqual([]);
 });
 
+// F17 (decision 5; DECISOES § 496, § 497, § 654 and § 707): the chip takes the result only where the next tool takes its
+// format. Convert to WebP leads to Resize image and Compress image, which take JPG, PNG and WebP and no AVIF: with AVIF
+// out, no chip takes the file (each only opens its page, with its plain name, no line under the row, nothing written);
+// with WebP out, the chip of Compress takes it, and the WebP arrives there with the note of where it came from.
+const SMALL_PHOTO = readFileSync(resolve('fixtures/images', 'gen-jpg-01-orientacao6.jpg')); // 1200 × 1600 on screen, with GPS
+
+async function converted(page: Page, to: 'webp' | 'avif'): Promise<void> {
+  await visit(page, server, '/convert-to-webp/');
+  if (to === 'avif') await page.locator('.fo-seg__opt', { hasText: 'AVIF' }).click();
+  await expect(page.locator(`input[name="cw-format"][value="${to}"]`)).toBeChecked();
+  await page.setInputFiles('#fo-tool-root input[type="file"]', { name: 'photo.jpg', mimeType: 'image/jpeg', buffer: SMALL_PHOTO });
+  await expect(page.locator('.fo-result .fo-btn--download')).toBeFocused({ timeout: 60_000 });
+  await expect(page.locator('.fo-btn--download')).toHaveAttribute('download', `photo.${to}`);
+}
+
+test('Convert to WebP: with AVIF out no chip takes the file, they only open their page; with WebP out the chip of Compress takes it', async ({ page }) => {
+  if (await workerOff(page, server)) return;
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await visit(page, server, '/', { island: false });
+  await controlled(page);
+
+  await converted(page, 'avif');
+  const chips = page.locator('nav.fo-next a.fo-chip');
+  await expect(chips, 'the chips of Convert to WebP').toHaveCount(2);
+  for (const [href, name] of [['/resize-image/', 'Resize image'], ['/compress-image/', 'Compress image']] as const) {
+    const chip = page.locator(`nav.fo-next a.fo-chip[href="${href}"]`);
+    await expect(chip, `${href}: an AVIF is not for it, so the chip only links`).not.toHaveAttribute('data-carry', '');
+    await expect(chip, `${href}: the plain name of the tool`).toHaveText(name);
+  }
+  await expect(page.locator('.fo-band__now .fo-carry'), 'no line says the file goes along').toHaveCount(0);
+  await page.locator('nav.fo-next a.fo-chip[href="/compress-image/"]').click();
+  await page.waitForURL('**/compress-image/');
+  await hydrated(page);
+  await expect(page.locator('#fo-tool-root .fo-drop'), 'Compress opens empty').toBeVisible();
+  await expect(page.locator('.fo-drop[data-state="lost"]'), 'no empty box: nothing was sent').toHaveCount(0);
+  await expect(page.locator('.fo-result')).toHaveCount(0);
+  expect(await inboxState(page), 'nothing was written').toEqual({ inbox: false, choice: null });
+
+  await converted(page, 'webp');
+  const compress = page.locator('nav.fo-next a.fo-chip[href="/compress-image/"]');
+  await expect(compress, 'a WebP is for Compress image: the chip takes it').toHaveAttribute('data-carry', '');
+  await expect(compress).toHaveText(en.carry.chips['compress-image'].one);
+  await expect(page.locator('.fo-band__now .fo-carry')).toHaveText(en.carry.line);
+  await compress.click();
+  await page.waitForURL('**/compress-image/');
+  await hydrated(page);
+  await expect(page.locator('.fo-result .fo-btn--download')).toBeFocused({ timeout: 60_000 });
+  await expect(page.locator('.fo-result__from')).toHaveText(fmt(en.carry.from, { tool: 'Convert to WebP' }));
+  await expect(page.locator('.fo-btn--download')).toHaveAttribute('download', 'photo.webp');
+  expect(await inboxState(page), 'the inbox and the note are gone').toEqual({ inbox: false, choice: null });
+});
+
 test('Merge PDF, then "Compress this PDF": the merged PDF arrives in Compress PDF with the note', async ({ page }) => {
   if (await workerOff(page, server)) return;
   await page.setViewportSize({ width: 1280, height: 800 });
