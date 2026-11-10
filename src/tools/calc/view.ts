@@ -73,7 +73,7 @@ export function duration(months: number, s: CalcSharedTexts): string {
   return parts.length ? parts.join(s.duration.join) : s.duration.none;
 }
 
-/** A number field's value as the PDF lists it: money with cents, a rate, a count or a measure with its unit. */
+/** A number field's value as the card says it: money with cents, a rate, a count or a measure with its unit. */
 function valueText(kind: 'money' | 'rate' | 'int' | 'dec', value: number, lang: NumberLang, suffix?: string, decimals?: number): string {
   if (kind === 'money') return money(value, lang);
   if (kind === 'rate') return ratePercent(value, lang);
@@ -81,6 +81,18 @@ function valueText(kind: 'money' | 'rate' | 'int' | 'dec', value: number, lang: 
   // A percent sticks to its number (10%); any other unit follows a space (12.5 ft).
   return suffix ? (suffix === '%' ? `${number}%` : `${number} ${suffix}`) : number;
 }
+
+/**
+ * A number field's value as the PDF and the worked example list it (F16, item 6; DECISOES § 690): the card's, and a rate
+ * whose unit says more than "%" with the rest of it, as the field writes it on the screen ("14% a.m.", "1% of value"; F6 g-2).
+ */
+function listedText(kind: 'money' | 'rate' | 'int' | 'dec', value: number, lang: NumberLang, suffix?: string, decimals?: number): string {
+  const text = valueText(kind, value, lang, suffix, decimals);
+  return kind === 'rate' && suffix && suffix !== '%' ? `${text} ${suffix.replace(/^%\s*/, '')}` : text;
+}
+
+/** A field's label inside a line of values ("balance $4,800.00"): its first letter in lower case, unless it is an acronym ("APR"). */
+const inline = (label: string, lang: NumberLang): string => (/^\p{Lu}\p{Ll}/u.test(label) ? `${label.charAt(0).toLocaleLowerCase(lang)}${label.slice(1)}` : label);
 
 /**
  * The value of one field as the PDF lists it, by its key in the link (a row's field as "d0b"): what "Last result that worked:
@@ -133,7 +145,11 @@ export function lineWidth(text: string): number {
 /** A text of a list (a row's name): the calculator's own ("Area {n}", F7), else the shared one ("Debt {n}"). */
 const rowName = (data: CalcPanelData): string => data.texts.view['row'] ?? data.t.row;
 
-/** What the person entered, label and value, for the PDF (only the fields on screen). */
+/**
+ * What the person entered, label and value, for the PDF and the worked example (only the fields on screen). A row of a list
+ * says each value with its label, the one of the row's option when there is one ("Circle: diameter 24.5 ft", "Debt 1 |
+ * balance $4,800.00, APR 24.99%, minimum payment $120.00"; F7 a-6, F4 COR-16, F6 g-2; F16, DECISOES § 690), and a rate its period.
+ */
 export function inputRows(specs: readonly FieldSpec[], values: Values, data: CalcPanelData): [string, string][] {
   const lang = data.lang as NumberLang;
   const out: [string, string][] = [];
@@ -146,9 +162,13 @@ export function inputRows(specs: readonly FieldSpec[], values: Values, data: Cal
       const pick = spec.pick;
       rows.forEach((row, index) => {
         const at = pick ? (row[pick.key] ?? 0) : 0;
-        const items = spec.item.filter((item) => !pick?.hide?.[item.key]?.includes(at));
-        const parts = items.map((item) => valueText(item.kind, row[item.key] ?? 0, lang, data.texts.fields[item.key]?.suffix, item.decimals));
         const option = pick ? (pick.options[at] ?? '') : '';
+        const items = spec.item.filter((item) => !pick?.hide?.[item.key]?.includes(at));
+        const parts = items.map((item) => {
+          const field = (option ? data.texts.fields[`${item.key}-${option}`] : undefined) ?? data.texts.fields[item.key];
+          const shown = listedText(item.kind, row[item.key] ?? 0, lang, field?.suffix, item.decimals);
+          return field?.label ? `${inline(field.label, lang)} ${shown}` : shown;
+        });
         const value = pick ? `${data.texts.options?.[pick.key]?.[option] ?? option}: ${parts.join(' × ')}` : parts.join(', ');
         out.push([fmt(rowName(data), { n: index + 1 }), value]);
       });
@@ -159,7 +179,7 @@ export function inputRows(specs: readonly FieldSpec[], values: Values, data: Cal
       const value = String(values[spec.key]);
       out.push([label, data.texts.options?.[spec.key]?.[value] ?? value]);
     } else if (spec.kind === 'date') out.push([label, longDate(String(values[spec.key]), data.lang)]);
-    else out.push([label, valueText(spec.kind, Number(values[spec.key]), lang, texts?.suffix, 'decimals' in spec ? spec.decimals : undefined)]);
+    else out.push([label, listedText(spec.kind, Number(values[spec.key]), lang, texts?.suffix, 'decimals' in spec ? spec.decimals : undefined)]);
   }
   return out;
 }
