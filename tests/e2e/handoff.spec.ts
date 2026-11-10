@@ -68,8 +68,12 @@ test('Compress image, then "Resize this image": Resize image shows the result at
   if (await workerOff(page, server)) return;
   await compressed(page);
   const chips = page.locator('nav.fo-next a.fo-chip');
-  await expect(chips).toHaveText(['Resize this image', 'Turn this image into a PDF']);
+  // F17 (decision 5; DECISOES § 707): Convert to WebP is the third chip of Compress image again, as in the F2; it takes
+  // the JPG along too (§ 497).
+  await expect(chips).toHaveText(['Resize this image', 'Turn this image into a PDF', 'Convert this image to WebP']);
   await expect(chips.first()).toHaveAttribute('data-carry', '');
+  await expect(chips.nth(2)).toHaveAttribute('data-carry', '');
+  await expect(chips.nth(2)).toHaveAttribute('href', '/convert-to-webp/');
   await expect(page.locator('.fo-band__now .fo-carry')).toHaveText(en.carry.line);
   await chips.first().click();
   await arrived(page);
