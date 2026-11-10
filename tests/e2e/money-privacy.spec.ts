@@ -14,7 +14,7 @@ import enShared from '../../src/tools/calc/i18n/en.ts';
 import ptShared from '../../src/tools/calc/i18n/pt.ts';
 import esShared from '../../src/tools/calc/i18n/es.ts';
 import { DEFS } from '../../src/tools/calc/defs/index.ts';
-import { display } from '../../src/tools/calc/form.ts';
+import { SETTLE_MS, display } from '../../src/tools/calc/form.ts';
 import type { FieldSpec, NumberSpec, Values } from '../../src/tools/calc/types.ts';
 import { dataLayer, dismissCookies, hydrated } from './lib/page.ts';
 
@@ -216,5 +216,156 @@ for (const { id, lang } of PAGES) {
     // The copied link is where the numbers are: the first money sentinel, in cents.
     const money = kept.find((entry) => entry.kind === 'money');
     if (money) expect(copied).toContain(String(Math.round(Number(money.text) * 100)));
+  });
+}
+
+// F16 (criterion 5 of the run's prompt; review F16, d-1): the decimals message, the hint of the separator, the draft that does
+// not read, the card's voice, the focus that leaves a wrong last field and the new CSV in the path of this spec. The price is
+// typed key by key, as a person types it, four times: in the other language's format ("683.917,45" in English: the range and
+// the hint), cut where it does not read ("683,91": the draft, then the hint), with too many decimals ("683,917.4555": the
+// decimals message) and right. The last main field takes a number with too many decimals and the Tab (the Download leaves, the
+// focus goes to Copy link, § 686), then a right one. Then the CSV, which makes no request, and the PDF, which only fetches the
+// PDF maker from the page origin. No form of the price (683917 with or without a separator, in cents, the draft 683,91 read
+// either way) is in a request, the address, the title, the storage, the cookies, the dataLayer or the names of the files; nor,
+// in Portuguese, the rate (13,5791). The expected messages are written by hand (DECISOES § 689).
+const DECIMALS_PATH = [
+  {
+    lang: 'en',
+    path: moneyPage('mortgage-calculator', 'en')?.path ?? '(no mortgage in en)',
+    price: { other: '683.917,45', draft: '683,91', many: '683,917.4555', right: '683,917.45' },
+    hint: 'Use a dot for the decimals, like 6.5.',
+    two: 'Use up to 2 decimal places.',
+    last: { id: 'fo-calc-t', many: '29.5', right: '30', message: 'Use a whole number.' },
+  },
+  {
+    lang: 'es',
+    path: moneyPage('mortgage-calculator', 'es')?.path ?? '(no mortgage in es)',
+    price: { other: '683.917,45', draft: '683,91', many: '683,917.4555', right: '683,917.45' },
+    hint: 'Usa punto en los decimales, como 6.5.',
+    two: 'Usa hasta 2 decimales.',
+    last: { id: 'fo-calc-t', many: '29.5', right: '30', message: 'Usa un número entero.' },
+  },
+  {
+    lang: 'pt',
+    path: moneyPage('br-sac-price', 'pt')?.path ?? '(no SAC × PRICE in pt)',
+    price: { other: '683,917.45', draft: '683.91', many: '683.917,4555', right: '683.917,45' },
+    hint: 'Use vírgula nos decimais, como 11,5.',
+    two: 'Use até 2 casas decimais.',
+    last: { id: 'fo-calc-r', many: '13,57915', right: '13,5791', message: 'Use até 4 casas decimais.' },
+  },
+] as const;
+
+/** Every form of the typed numbers: a run of digits that starts with them, with or without a separator, not glued to a digit. */
+const DECIMALS_FORMS = [/(?<![0-9])683[.,]?91/, /(?<![0-9])13[.,]?5791/];
+
+for (const c of DECIMALS_PATH) {
+  test(`${c.lang}: the decimals message, the hint, the draft, the voice and the new CSV in the path: no typed number leaves the device`, async ({ page, context, browserName }) => {
+    test.setTimeout(60_000);
+    const outgoing: { method: string; url: string; body: string }[] = [];
+    context.on('request', (request) => outgoing.push({ method: request.method(), url: request.url(), body: request.postData() ?? '' }));
+    expect((await page.goto(c.path))?.status(), c.path).toBe(200);
+    await hydrated(page);
+    await dismissCookies(page);
+    const origin = new URL(page.url()).origin;
+    // WebKit's Tab skips buttons, as Safari does by default: there the walk is Option+Tab (docs/claude/playwright.md, F13b).
+    const tab = browserName === 'webkit' ? 'Alt+Tab' : 'Tab';
+    const error = page.locator('#fo-rhero-error');
+    const download = page.locator('.fo-rhero .fo-btn--download');
+    // The card's one voice (the p.fo-sr[aria-live] of .fo-rhero, § 102): every text it says from now on.
+    await page.evaluate(() => {
+      const region = document.querySelector('.fo-rhero p.fo-sr[aria-live]');
+      if (!region) throw new Error('no live region in the card');
+      const said: string[] = [];
+      (window as unknown as { __said: string[] }).__said = said;
+      new MutationObserver(() => {
+        const text = (region.textContent ?? '').trim();
+        if (text !== '') said.push(text);
+      }).observe(region, { childList: true, characterData: true, subtree: true });
+    });
+    const voices = () => page.evaluate(() => (window as unknown as { __said: string[] }).__said.length);
+    /** Waits until the card says `text` in a voice after the first `from` ones (the region speaks once a value settles). */
+    const says = (from: number, text: string) =>
+      expect.poll(() => page.evaluate((start) => (window as unknown as { __said: string[] }).__said.slice(start).join(' | '), from), { timeout: 5_000 }).toContain(text);
+    /** Selects the whole text of a field and types `text` key by key, as a person does. */
+    const retype = async (id: string, text: string) => {
+      const field = page.locator(`#${id}`);
+      await field.focus();
+      await field.evaluate((input: HTMLInputElement) => input.select());
+      await page.keyboard.type(text, { delay: 30 });
+    };
+    const price = page.locator('#fo-calc-p');
+
+    // The other language's format: the range, with how the page writes the decimals.
+    let from = await voices();
+    await retype('fo-calc-p', c.price.other);
+    await expect(error).toContainText(c.hint);
+    await says(from, c.hint);
+    await retype('fo-calc-p', c.price.right);
+    await expect(error).toHaveCount(0);
+    // Cut where it does not read: the card's region waits (the draft, § 685), then the error says the hint.
+    from = await voices();
+    await retype('fo-calc-p', c.price.draft);
+    await page.waitForTimeout(SETTLE_MS + 200);
+    await expect(error).toContainText(c.hint);
+    await expect(price).toHaveAttribute('aria-invalid', 'true');
+    await says(from, c.hint);
+    // Written right with more decimals than the field keeps: the decimals message, in the card and in its voice (§ 684).
+    from = await voices();
+    await retype('fo-calc-p', c.price.many);
+    await expect(error).toContainText(c.two);
+    await says(from, c.two);
+    await retype('fo-calc-p', c.price.right);
+    await price.blur();
+    await expect(error).toHaveCount(0);
+    await expect(price).toHaveValue(c.price.right);
+
+    // The last main field with too many decimals, then the Tab: the Download leaves, the focus goes to Copy link (§ 686).
+    from = await voices();
+    await retype(c.last.id, c.last.many);
+    await page.keyboard.press(tab);
+    await expect(error).toContainText(c.last.message);
+    await expect(download).toHaveCount(0);
+    await expect
+      .poll(() => page.evaluate(() => (document.activeElement === document.body ? 'BODY' : (document.activeElement?.textContent ?? '').trim())))
+      .toBe(SHARED[c.lang].island.copyLink);
+    await says(from, c.last.message);
+    await retype(c.last.id, c.last.right);
+    await page.locator(`#${c.last.id}`).blur();
+    await expect(error).toHaveCount(0);
+    await expect(download).toHaveCount(1);
+
+    // The CSV is made on the page: no request at all. The PDF fetches only the PDF maker, a GET of the page origin with no query.
+    const own = moneyPage(c.lang === 'pt' ? 'br-sac-price' : 'mortgage-calculator', c.lang);
+    const csv = page.locator('.fo-export .fo-btn').nth(0);
+    await expect(csv).toBeEnabled();
+    const names: string[] = [];
+    let mark = outgoing.length;
+    const saving = page.waitForEvent('download');
+    await csv.click();
+    names.push((await saving).suggestedFilename());
+    expect(outgoing.slice(mark).filter((request) => !/^(blob|data):/.test(request.url)), 'the CSV makes no request').toEqual([]);
+    mark = outgoing.length;
+    const printing = page.waitForEvent('download');
+    await download.click();
+    names.push((await printing).suggestedFilename());
+    const pdf = outgoing.slice(mark).filter((request) => !/^(blob|data):/.test(request.url));
+    expect(
+      pdf.filter((request) => request.method !== 'GET' || new URL(request.url).origin !== origin || new URL(request.url).search !== ''),
+      'the PDF fetches only from the page origin, by GET, with no query',
+    ).toEqual([]);
+    expect(names).toEqual([`${own?.file}.csv`, `${own?.file}.pdf`]);
+
+    expect(page.url(), 'the address has neither a query nor a #').not.toMatch(/[?#]/);
+    const haystack = [
+      ...outgoing.map((request) => `${request.method} ${request.url}\n${request.body}`),
+      JSON.stringify(await dataLayer(page)),
+      await everywhere(page),
+      page.url(),
+      ...names,
+    ].join('\n');
+    expect(
+      DECIMALS_FORMS.filter((form) => form.test(haystack)).map(String),
+      'the typed numbers out of the device',
+    ).toEqual([]);
   });
 }
