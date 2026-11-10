@@ -5,7 +5,8 @@
 // page that fails the 1,110 px there is fixed here or in the view, never in the limit.
 //
 // The model, calibrated on the dist/ of the F12 at 360 × 740 with the fonts loaded (the estimate of each block of <main>
-// against its real height, on the 184 pages with ads): the column is 328 px wide (360 minus the 16 px gutters); the
+// against its real height, on the 184 pages with ads of then; 190 since the F17, all of them measured by that test): the
+// column is 328 px wide (360 minus the 16 px gutters); the
 // running text, Figtree 16/26, with 48 characters a line at 328 px (the site averages 44); a list item at its 304 px;
 // a heading in Fredoka 24/30 with 34 a line; a question of the FAQ, 17/24 bold, with 36 a line in its 280 px; a table
 // row 17 px of padding and border plus 22 px a line of its longest cell, which gets the column but 82 px a cell; a

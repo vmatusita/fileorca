@@ -43,7 +43,10 @@ export function moldOf(route: RouteDef): Mold {
   return route.adArea === 'dinheiro' ? 'calc-dinheiro' : 'calc-casa-saude';
 }
 
-/** Every page with ads, in the three languages, from the route map (184 since the F12: the 178 of before, the homes and the guides hubs). */
+/**
+ * Every page with ads, in the three languages, from the route map (184 since the F12: the 178 of before, the homes and the
+ * guides hubs; 190 since the F17: AVIF to JPG and Convert to WebP in the three languages).
+ */
 export const AD_PAGES: AdPage[] = ROUTES.filter((route) => route.adArea).flatMap((route) =>
   LANGS.flatMap((lang) => {
     const path = route.paths[lang];
