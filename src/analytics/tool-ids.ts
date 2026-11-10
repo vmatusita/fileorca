@@ -11,6 +11,8 @@ export const IMAGE_EVENT_TOOLS = [
   'heic-to-jpg',
   'webp-to-jpg',
   'png-to-jpg',
+  'avif-to-jpg',
+  'convert-to-webp',
   'image-to-pdf',
   'compress-image-to-100kb',
   'compress-image-to-1mb',

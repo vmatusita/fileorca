@@ -12,6 +12,8 @@ export const IMAGE_TOOL_IDS = [
   'heic-to-jpg',
   'webp-to-jpg',
   'png-to-jpg',
+  'avif-to-jpg',
+  'convert-to-webp',
   'image-to-pdf',
 ] as const;
 export type ImageToolId = (typeof IMAGE_TOOL_IDS)[number];
@@ -110,6 +112,22 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
     related: ['webp-to-jpg', 'heic-to-jpg', 'compress-image', 'resize-image', 'image-to-pdf', 'crop-image'],
     beforeAfter: 'lossy',
   },
+  'avif-to-jpg': {
+    id: 'avif-to-jpg',
+    accepts: ['avif'],
+    icon: 'convert',
+    next: ['compress-image', 'resize-image', 'image-to-pdf'],
+    related: ['webp-to-jpg', 'heic-to-jpg', 'png-to-jpg', 'convert-to-webp', 'compress-image', 'resize-image'],
+    beforeAfter: 'lossy',
+  },
+  'convert-to-webp': {
+    id: 'convert-to-webp',
+    accepts: ['jpeg', 'png'],
+    icon: 'convert',
+    next: ['resize-image', 'compress-image'],
+    related: ['compress-image', 'webp-to-jpg', 'avif-to-jpg', 'png-to-jpg', 'resize-image', 'heic-to-jpg'],
+    beforeAfter: 'lossy',
+  },
   'image-to-pdf': {
     id: 'image-to-pdf',
     accepts: PHOTO,
@@ -155,7 +173,7 @@ export function presetsOf(tool: ImageToolId): ImagePresetId[] {
 }
 
 /**
- * Where a refused format can go instead. Only HEIC has a converter in this release: an AVIF refused by
- * another tool gets the "Try JPG, PNG or WebP" line with no link (AVIF to JPG is run 2b).
+ * Where a refused format can go instead: the converter that opens it (F17, decision 7). A HEIC or an AVIF dropped on a
+ * tool that does not take it is refused with a link to its converter, in the language of the page.
  */
-export const CONVERTER_FOR: Partial<Record<ImageFormat, ImageToolId>> = { heic: 'heic-to-jpg' };
+export const CONVERTER_FOR: Partial<Record<ImageFormat, ImageToolId>> = { heic: 'heic-to-jpg', avif: 'avif-to-jpg' };

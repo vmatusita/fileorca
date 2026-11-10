@@ -1012,6 +1012,20 @@ export interface SaveAsOptionsTexts {
   help: string;
 }
 
+/** Convert to WebP (F17; the F2 shape, DECISOES § 85): the output format and the level, at sight or under "Adjust". */
+export interface ConvertToOptionsTexts {
+  formatLegend: string;
+  webp: string;
+  avif: string;
+  levelLegend: string;
+  recommended: string;
+  recommendedHelp: string;
+  strong: string;
+  strongHelp: string;
+  /** What "Adjust ·" says: the format and the level ("{format} · {level}" gives "WebP · Recommended"). */
+  now: string;
+}
+
 export interface PdfOptionsTexts {
   legend: string;
   image: string;
