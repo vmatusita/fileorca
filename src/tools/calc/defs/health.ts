@@ -25,16 +25,13 @@ import {
   type OvulationInput,
   type OvulationResult,
 } from '../../../calc/health.ts';
-import { count, measure, num, say, text } from './shared.ts';
-import type { CalcDef, CalcPanelTexts, Cell, DateSpec, FieldSpec, Table, Values } from '../types.ts';
+import { count, csvNumber as n, measure, num, say, text } from './shared.ts';
+import { itemPairs, itemTable, type ItemLine } from '../view.ts';
+import type { CalcDef, CalcPanelTexts, Cell, DateSpec, FieldSpec, Values } from '../types.ts';
 
 const plain = (value: string): Cell => ({ text: value });
 const tenth = (value: number, l: NumberLang): string => formatScaled(value, 1, l, { min: 1 });
 const whole = (value: number, l: NumberLang): string => formatScaled(value, 0, l);
-
-function twoColumns(caption: string, head: [string, string], lines: readonly [string, string][]): Table {
-  return { caption, head: [...head], rows: lines.map(([item, amount]) => [plain(item), plain(amount)]) };
-}
 
 /** The days a date field takes: fixed, so the range never moves with the day the page is opened (DECISOES § 262). */
 export const DAY_RANGE = { min: '2000-01-01', max: '2099-12-31' } as const;
@@ -69,6 +66,20 @@ const bodyInput = (values: Values): BodyInput => ({
 /** The CDC's adult categories, in order, with the BMI each one covers as the CDC calculator writes it (one decimal). */
 export const BMI_CATEGORIES: readonly BmiCategory[] = ['underweight', 'healthy', 'overweight', 'obesity-1', 'obesity-2', 'obesity-3'];
 
+/**
+ * The BMI each category covers, in tenths, both ends in it, as the CSV writes the band (F16, DECISOES § 688): "below 18.5"
+ * is up to 18.4, since the BMI is rounded to one decimal, and an open end is empty. The engine's `bmiCategory` is the rule;
+ * tests/unit/calc-csv.test.ts checks every end against it.
+ */
+export const BMI_BANDS: Readonly<Record<BmiCategory, readonly [from: number | null, to: number | null]>> = {
+  underweight: [null, 184],
+  healthy: [185, 249],
+  overweight: [250, 299],
+  'obesity-1': [300, 349],
+  'obesity-2': [350, 399],
+  'obesity-3': [400, null],
+};
+
 export const BMI_EXAMPLE: Values = { u: 'us', ft: 5, in: 90, lb: 1600, cm: 1750, kg: 700, ag: 35 };
 
 export const bmiDef: CalcDef<BodyInput, BmiResult> = {
@@ -77,22 +88,33 @@ export const bmiDef: CalcDef<BodyInput, BmiResult> = {
   initial: BMI_EXAMPLE,
   toInput: bodyInput,
   compute: bmi,
-  view(r, _values, t, _s, lang) {
+  view(r, _values, t, s, lang) {
     const l = lang as NumberLang;
     const v = t.view;
     const value = tenth(r.bmi, l);
     const name = (category: BmiCategory) => text(v, `cat-${category}`);
     const band = (category: BmiCategory) => text(v, `band-${category}`);
+    const end = (tenths: number | null) => (tenths === null ? null : n(tenths, 1));
     return {
       hero: { label: text(v, 'label'), value, sentence: say(text(v, 'sentence'), { bmi: value, category: name(r.category), band: band(r.category) }) },
       placard: { n: value, l: text(v, 'label') },
       open: true,
       // The CDC categories, with the person's BMI in the row of its category (in words in the cell, never by colour), so the
-      // CSV and the PDF carry the result too.
+      // CSV and the PDF carry the result too. The CSV writes the band in two columns, from and to (F16, DECISOES § 688).
       table: () => ({
         caption: text(v, 'caption'),
         head: [text(v, 'colCategory'), text(v, 'colBmi'), text(v, 'colYours')],
-        rows: BMI_CATEGORIES.map((category) => [plain(name(category)), plain(band(category)), plain(category === r.category ? value : '')]),
+        rows: BMI_CATEGORIES.map((category) => [
+          plain(name(category)),
+          { text: band(category), csv: [end(BMI_BANDS[category][0]), end(BMI_BANDS[category][1])] },
+          category === r.category ? { text: value, csv: [n(r.bmi, 1)] } : plain(''),
+        ]),
+        csv: [
+          { head: text(v, 'colCategory'), kind: 'text' },
+          { head: fmt(s.csvFrom, { label: text(v, 'colBmi') }), kind: 'number' },
+          { head: fmt(s.csvTo, { label: text(v, 'colBmi') }), kind: 'number' },
+          { head: text(v, 'colYours'), kind: 'number' },
+        ],
       }),
       summary: [
         [text(v, 'label'), value],
@@ -119,25 +141,30 @@ export const calorieDef: CalcDef<CalorieInput, CalorieResult> = {
   initial: CALORIE_EXAMPLE,
   toInput: (values) => ({ ...bodyInput(values), sex: values['sx'] === 'male' ? 'male' : 'female', age: num(values, 'ag'), pal: num(values, 'pa') }),
   compute: calorie,
-  view(r, values, t, _s, lang) {
+  view(r, values, t, s, lang) {
     const l = lang as NumberLang;
     const v = t.view;
     const tdee = whole(r.tdee, l);
     const ree = whole(r.ree, l);
     const pal = formatScaled(num(values, 'pa'), 2, l);
     const unit = text(v, 'unit');
-    const lines: [string, string][] = [
-      [text(v, 'ree'), `${ree} ${unit}`],
-      [text(v, 'pal'), pal],
-      [text(v, 'label'), `${tdee} ${unit}`],
+    // In the CSV, a number and its unit in two columns, with no thousands separator (F16, DECISOES § 688).
+    const lines: ItemLine[] = [
+      { item: text(v, 'ree'), amount: `${ree} ${unit}`, csv: [n(r.ree, 0), { text: unit }] },
+      { item: text(v, 'pal'), amount: pal, csv: [n(num(values, 'pa'))] },
+      { item: text(v, 'label'), amount: `${tdee} ${unit}`, csv: [n(r.tdee, 0), { text: unit }] },
     ];
     return {
       // The sentence says which formula made the number: the sex comes after the result on a phone (review F7, g-3; DECISOES § 281).
       hero: { label: text(v, 'label'), value: tdee, unit, sentence: say(text(v, 'sentence'), { sex: text(v, values['sx'] === 'male' ? 'male' : 'female'), ree, pal, tdee }) },
       placard: { n: tdee, l: text(v, 'label') },
       open: true,
-      table: () => twoColumns(text(v, 'caption'), [text(v, 'colItem'), text(v, 'colAmount')], lines),
-      summary: lines,
+      table: () =>
+        itemTable(text(v, 'caption'), [text(v, 'colItem'), text(v, 'colAmount')], lines, [
+          { head: text(v, 'colAmount'), kind: 'number' },
+          { head: s.csvUnit, kind: 'text' },
+        ]),
+      summary: itemPairs(lines),
       premises: t.premises,
     };
   },
@@ -153,7 +180,7 @@ export const ovulationDef: CalcDef<OvulationInput, OvulationResult> = {
   initial: OVULATION_EXAMPLE,
   toInput: (values) => ({ lmp: String(values['d']), cycle: num(values, 'c') }),
   compute: ovulation,
-  view(r, _values, t, _s, lang) {
+  view(r, _values, t, s, lang) {
     const v = t.view;
     const day = (iso: string) => longDate(iso, lang);
     const first = r.cycles[0];
@@ -168,17 +195,23 @@ export const ovulationDef: CalcDef<OvulationInput, OvulationResult> = {
       open: true,
       // Three columns, so the table fits a 320 px phone: a cycle starts on the previous row's next period, and the first
       // one on the day typed in (review F7, f-2; DECISOES § 275). F13b (F7 obs 2; DECISOES § 550): fixed columns, and the
-      // screen writes the short dates ("Oct 26 to 31, 2026"), which never break between the month and the day; the CSV and
-      // the PDF keep the long ones.
+      // screen writes the short dates ("Oct 26 to 31, 2026"), which never break between the month and the day; the PDF keeps
+      // the long ones. The CSV writes the days as YYYY-MM-DD, the window in two columns, from and to (F16, DECISOES § 688).
       table: () => ({
         caption: text(v, 'caption'),
         head: [text(v, 'colWindow'), text(v, 'colOvulation'), text(v, 'colNext')],
         rows: r.cycles.map((cycle) => [
-          { text: window(cycle), short: tableRange(cycle.fertileStart, cycle.ovulation, lang, text(v, 'rangeTo')) },
-          { text: day(cycle.ovulation), short: tableDate(cycle.ovulation, lang) },
-          { text: day(cycle.nextPeriod), short: tableDate(cycle.nextPeriod, lang) },
+          { text: window(cycle), short: tableRange(cycle.fertileStart, cycle.ovulation, lang, text(v, 'rangeTo')), csv: [{ day: cycle.fertileStart }, { day: cycle.ovulation }] },
+          { text: day(cycle.ovulation), short: tableDate(cycle.ovulation, lang), csv: [{ day: cycle.ovulation }] },
+          { text: day(cycle.nextPeriod), short: tableDate(cycle.nextPeriod, lang), csv: [{ day: cycle.nextPeriod }] },
         ]),
         even: true,
+        csv: [
+          { head: fmt(s.csvFrom, { label: text(v, 'colWindow') }), kind: 'date' },
+          { head: fmt(s.csvTo, { label: text(v, 'colWindow') }), kind: 'date' },
+          { head: text(v, 'colOvulation'), kind: 'date' },
+          { head: text(v, 'colNext'), kind: 'date' },
+        ],
       }),
       summary: first
         ? [
@@ -236,31 +269,39 @@ export const bodyFatDef: CalcDef<BodyFatInput, BodyFatResult> = {
     const l = lang as NumberLang;
     const v = t.view;
     const male = values['sx'] === 'male';
+    // In the CSV, the value is a number (the percent glued to it) and the equation a text in a column of its own; the "—" of a
+    // problem is an empty cell (F16, DECISOES § 688).
+    const table = (lines: readonly ItemLine[]) => () =>
+      itemTable(text(v, 'caption'), [text(v, 'colItem'), text(v, 'colAmount')], lines, [
+        { head: text(v, 'colAmount'), kind: 'number' },
+        { head: text(v, 'method'), kind: 'text' },
+      ]);
     if ('error' in r) {
       const problem = text(v, r.error === 'domain' ? (male ? 'domainMale' : 'domainFemale') : 'range');
+      const lines: ItemLine[] = [{ item: text(v, 'label'), amount: '—', csv: [] }];
       return {
         // A dash, as in the other calculators' problems: "0 %" read as a body fat (review F7, f-7; DECISOES § 281).
         hero: { label: text(v, 'label'), value: '-', sentence: [] },
         problem,
         placard: { n: '-', l: text(v, 'label') },
         open: true,
-        table: () => twoColumns(text(v, 'caption'), [text(v, 'colItem'), text(v, 'colAmount')], [[text(v, 'label'), '—']]),
-        summary: [[text(v, 'label'), '—']],
+        table: table(lines),
+        summary: itemPairs(lines),
         premises: t.premises,
       };
     }
     const percent = tenth(r.percent, l);
     const formula = text(v, male ? 'formulaMale' : 'formulaFemale');
-    const lines: [string, string][] = [
-      [text(v, 'method'), formula],
-      [text(v, 'label'), `${percent}%`],
+    const lines: ItemLine[] = [
+      { item: text(v, 'method'), amount: formula, csv: [null, { text: formula }] },
+      { item: text(v, 'label'), amount: `${percent}%`, csv: [{ scaled: r.percent, decimals: 1, percent: true }] },
     ];
     return {
       hero: { label: text(v, 'label'), value: percent, unit: '%', sentence: say(text(v, 'sentence'), { sex: text(v, male ? 'male' : 'female'), percent }) },
       placard: { n: `${percent}%`, l: text(v, 'label') },
       open: true,
-      table: () => twoColumns(text(v, 'caption'), [text(v, 'colItem'), text(v, 'colAmount')], lines),
-      summary: lines,
+      table: table(lines),
+      summary: itemPairs(lines),
       premises: t.premises,
     };
   },
@@ -297,19 +338,21 @@ export const dueDateDef: CalcDef<DueDateInput, DueDateResult> = {
     const day = (iso: string) => longDate(iso, lang);
     const due = day(r.due);
     const today = r.status === 'pregnant' && r.age ? fmt(text(v, 'today'), { age: weeksText(r.age, v, l) }) : text(v, r.status === 'before' ? 'before' : 'after');
-    const lines: [string, string][] = [
-      [text(v, 'trimester1'), day(r.trimesters[0])],
-      [text(v, 'trimester2'), day(r.trimesters[1])],
-      [text(v, 'trimester3'), day(r.trimesters[2])],
-      [text(v, 'fullTerm'), day(r.fullTerm)],
-      [text(v, 'label'), due],
+    // In the CSV, each day as YYYY-MM-DD (F16, DECISOES § 688).
+    const milestone = (key: string, iso: string): ItemLine => ({ item: text(v, key), amount: day(iso), csv: [{ day: iso }] });
+    const lines: ItemLine[] = [
+      milestone('trimester1', r.trimesters[0]),
+      milestone('trimester2', r.trimesters[1]),
+      milestone('trimester3', r.trimesters[2]),
+      milestone('fullTerm', r.fullTerm),
+      milestone('label', r.due),
     ];
     return {
       hero: { label: text(v, 'label'), value: due, sentence: say(text(v, 'sentence'), { lmp: day(r.lmp), today }) },
       placard: { n: due, l: text(v, 'label') },
       open: true,
-      table: () => twoColumns(text(v, 'caption'), [text(v, 'colMilestone'), text(v, 'colDate')], lines),
-      summary: [...lines, [text(v, 'todayLabel'), today]],
+      table: () => itemTable(text(v, 'caption'), [text(v, 'colMilestone'), text(v, 'colDate')], lines, [{ head: text(v, 'colDate'), kind: 'date' }]),
+      summary: [...itemPairs(lines), [text(v, 'todayLabel'), today]],
       premises: t.premises,
     };
   },

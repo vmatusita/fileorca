@@ -20,6 +20,8 @@ interface Props {
   set: (values: Values) => void;
   /** The store's record of the fields that show an error (DECISOES § 116 and § 276; the message goes to the card, F13b). */
   report?: ((id: string, error: FieldError | null) => void) | undefined;
+  /** The store's record of the fields whose text does not read now, which the card's region waits for (F16; DECISOES § 685). */
+  drafting?: ((id: string, on: boolean) => void) | undefined;
   /** The field a problem of the account points to (CalcView.problemField, F4 ACE-11), by its key in the link. */
   flagged?: string | undefined;
   /** The id of the field whose error the card says (the first in error, or the one a problem points to; review F13b b-2). */
@@ -69,12 +71,14 @@ function NumberInput(props: Props & {
       error={texts.error}
       over={problems[keyName] === 'over' ? texts.over : undefined}
       hint={data.t.decimalHint}
+      decimalsTexts={data.t}
       prefix={texts.prefix}
       suffix={texts.suffix}
       tag={spec.example ? data.t.example : undefined}
       half={spec.half}
       wide={spec.wide}
       report={props.report}
+      drafting={props.drafting}
       flagged={props.flagged === keyName}
       named={props.named === fieldId(keyName)}
       flagMessage={props.flagged === keyName ? props.flagMessage : undefined}
@@ -286,9 +290,11 @@ export function Field(props: Props & { spec: FieldSpec }) {
           error={percent ? (data.texts.fields[spec.percentKey]?.error ?? texts.error) : texts.error}
           over={props.problems[spec.key] === 'over' ? texts.over : undefined}
           hint={data.t.decimalHint}
+          decimalsTexts={data.t}
           half={spec.half}
           unit={unit}
           report={props.report}
+          drafting={props.drafting}
           flagged={props.flagged === spec.key}
           named={props.named === fieldId(spec.key)}
           flagMessage={props.flagged === spec.key ? props.flagMessage : undefined}

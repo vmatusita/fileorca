@@ -32,7 +32,7 @@ import {
 } from '../../../calc/br.ts';
 import type { DebtPayoffResult } from '../../../calc/debts.ts';
 import { debtPayoffDef } from './debts.ts';
-import { duration, loanTable } from '../view.ts';
+import { columns, duration, loanTable } from '../view.ts';
 import { count, downOf, money, num, rate, say, text } from './shared.ts';
 import type { CalcDef, CalcPanelTexts, CalcSharedTexts, CalcView, Cell, Part, Table, Values } from '../types.ts';
 
@@ -48,7 +48,7 @@ function problemView(label: string, problem: string, premises: string[], field?:
     problem,
     ...(field ? { problemField: field } : {}),
     placard: { n: '-', l: label },
-    table: () => ({ caption: label, head: [label], rows: [] }),
+    table: () => ({ caption: label, head: [label], rows: [], csv: columns([label], 'text') }),
     summary: [[label, problem]],
     premises,
   };
@@ -83,7 +83,8 @@ function plansTable(
     }
   }
   const head = [s.columns.number, s.columns.payment, s.columns.principal, s.columns.interest, ...(fees && fees.cents > 0 ? [fees.head] : []), s.columns.balance];
-  return { caption, head: extraHead ? [...head, extraHead] : head, rows, groups, endColumn: head.length - 1 };
+  const all = extraHead ? [...head, extraHead] : head;
+  return { caption, head: all, rows, groups, endColumn: head.length - 1, csv: columns(all) };
 }
 
 // --- SAC x PRICE ------------------------------------------------------------------------------------------
@@ -432,10 +433,12 @@ export const brCompoundDef: CalcDef<BrCompoundInput, BrCompoundResult> = {
     const ln = l(lang);
     const v = t.view;
     if ('error' in r) return problemView(text(v, 'label'), text(v, 'tooLarge'), t.premises);
+    const head = [text(v, 'year'), text(v, 'deposits'), text(v, 'interest'), text(v, 'balance')];
     const table = (): Table => ({
       caption: text(v, 'caption'),
-      head: [text(v, 'year'), text(v, 'deposits'), text(v, 'interest'), text(v, 'balance')],
+      head,
       rows: r.years.map(([year, deposits, interest, balance]) => [{ text: String(year) }, { cents: deposits }, { cents: interest }, { cents: balance }]),
+      csv: columns(head),
     });
     return {
       hero: {
@@ -501,10 +504,12 @@ export const brRentOrBuyDef: CalcDef<RentOrBuyInput, RentOrBuyResult> = {
     const v = t.view;
     const years = num(values, 'y');
     const gap = r.buyerFinal - r.renterFinal;
+    const head = [text(v, 'year'), text(v, 'buying'), text(v, 'renting')];
     const table = (): Table => ({
       caption: text(v, 'caption'),
-      head: [text(v, 'year'), text(v, 'buying'), text(v, 'renting')],
+      head,
       rows: r.buyer.map((buyer, index) => [{ text: String(index + 1) }, { cents: buyer }, { cents: r.renter[index] ?? 0 }]),
+      csv: columns(head),
     });
     const side = (net: number, paid: number, paidLabel: string): [string, string][] => [
       [fmt(text(v, 'netAfter'), { n: years }), dollars(net, ln)],

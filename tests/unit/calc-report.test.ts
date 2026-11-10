@@ -6,13 +6,13 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { PDFDocument, StandardFonts } from '@cantoo/pdf-lib';
 import { buildReport, columnLayout, winAnsi } from '../../src/engine/pdf/report.ts';
-import { CALC_PAGE_IDS, LIFE_CALC_IDS, type AnyCalcId, type LifeCalcId } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, CALC_PAGE_IDS, LIFE_CALC_IDS, moneyPage, type AnyCalcId, type LifeCalcId } from '../../src/tools/calc/registry.ts';
 import type { Values } from '../../src/tools/calc/types.ts';
 import { DEFS } from '../../src/tools/calc/defs/index.ts';
 import { panelData } from '../../src/tools/calc/page.ts';
 import { viewOf } from '../../src/tools/calc/store.ts';
 import { reportInput } from '../../src/tools/calc/exports.ts';
-import { cellText, inputRows } from '../../src/tools/calc/view.ts';
+import { cellText, fieldText, inputRows } from '../../src/tools/calc/view.ts';
 import { parsePdf, strictPdf } from '../e2e/lib/pdf.ts';
 import { pdfTextLines } from '../e2e/lib/pdf-text.ts';
 import { readWithPdfjs } from '../e2e/lib/pdfjs-read.ts';
@@ -324,6 +324,114 @@ describe('the columns of the calculator PDF', () => {
         end = rightOf(index);
       }
       expect(end).toBeLessThanOrEqual(48 + width + 0.01);
+    }
+  });
+});
+
+// F16, item 6 (DECISOES § 690): what the PDF and the worked example of the page list as entered. F7 a-6: the circle of the
+// square footage says its measure is the diameter, by the label of its option, and the other shapes name their sides. F6 g-2:
+// a rate whose unit says more than "%" keeps its period ("14% a.m.", "1% of value"), and a row of a list says each value with
+// its label; F4 COR-16: a label on every row and every value of the PDF, and one "you" among the numbers of the Savings goal.
+// The card's line of the last result that worked keeps the value as before. The expected texts are written here by hand.
+describe('what the calculator PDF lists as entered (F16, item 6)', () => {
+  const NBSP = String.fromCharCode(0xa0);
+  type PageLang = 'en' | 'pt' | 'es';
+  const inputsOf = (id: AnyCalcId, lang: PageLang, values?: Values): [string, string][] => inputRows(DEFS[id].fields, values ?? DEFS[id].initial, panelData(id, lang));
+  const linesOf = async (id: AnyCalcId, lang: PageLang, values?: Values): Promise<string[]> => {
+    const def = DEFS[id];
+    const data = panelData(id, lang);
+    const start = values ?? def.initial;
+    const view = viewOf(def, data, start);
+    const input = reportInput(
+      { title: data.name, inputs: inputRows(def.fields, start, data), results: view.summary, premises: view.premises, table: view.table(), notice: data.notice, cell: cellText(lang) },
+      data.t,
+      lang,
+    );
+    return pdfTextLines(await buildReport(input));
+  };
+  const pick = (rows: [string, string][], labels: readonly string[]) => rows.filter(([label]) => labels.includes(label));
+
+  it('says the circle of the square footage is measured by its diameter, and names the sides of the other shapes (F7 a-6)', async () => {
+    const values: Values = { a: [{ s: 2, x: 2450, y: 1000 }, { s: 1, x: 1000, y: 800 }, { s: 0, x: 1500, y: 1200 }] };
+    expect(inputsOf('square-footage-calculator', 'en', values)).toEqual([
+      ['Area 1', 'Circle: diameter 24.5 ft'],
+      ['Area 2', 'Triangle: base 10 ft × height 8 ft'],
+      ['Area 3', 'Rectangle: length 15 ft × width 12 ft'],
+    ]);
+    const lines = await linesOf('square-footage-calculator', 'en', values);
+    for (const text of ['Circle: diameter 24.5 ft', 'Triangle: base 10 ft x height 8 ft', 'Rectangle: length 15 ft x width 12 ft']) expect(lines, text).toContain(text);
+  });
+
+  it('writes the period of a rate whose unit says more than "%", in the PDF and not in the card (F6 g-2)', async () => {
+    expect(pick(inputsOf('br-credit-card', 'pt'), ['Rotativo', 'Parcelado'])).toEqual([
+      ['Rotativo', '14% a.m.'],
+      ['Parcelado', '8% a.m.'],
+    ]);
+    expect(pick(inputsOf('rent-vs-buy-calculator', 'en'), ['Upkeep per year', 'Cost to sell'])).toEqual([
+      ['Upkeep per year', '1% of value'],
+      ['Cost to sell', '6% of value'],
+    ]);
+    expect(pick(inputsOf('rent-vs-buy-calculator', 'es'), ['Mantenimiento al año', 'Costo de vender'])).toEqual([
+      ['Mantenimiento al año', `1${NBSP}% del valor`],
+      ['Costo de vender', `6${NBSP}% del valor`],
+    ]);
+    // A rate whose unit is just "%" stays as it was.
+    expect(pick(inputsOf('mortgage-calculator', 'en'), ['Rate'])).toEqual([['Rate', '6.5%']]);
+    for (const text of ['14% a.m.', '8% a.m.']) expect(await linesOf('br-credit-card', 'pt'), text).toContain(text);
+    expect(await linesOf('rent-vs-buy-calculator', 'en')).toContain('1% of value');
+    // The card's line of the last result that worked keeps what the field writes in its box: the value, its unit beside it.
+    const card = (id: AnyCalcId, lang: PageLang, key: string) => fieldText(DEFS[id].fields, DEFS[id].initial, key, panelData(id, lang));
+    expect(card('br-credit-card', 'pt', 'rr')).toBe('14%');
+    expect(card('rent-vs-buy-calculator', 'en', 'mt')).toBe('1%');
+    expect(card('rent-vs-buy-calculator', 'es', 'sc')).toBe(`6${NBSP}%`);
+    expect(card('debt-payoff-calculator', 'en', 'd0b')).toBe('$4,800.00');
+    expect(card('square-footage-calculator', 'en', 'a0x')).toBe('15 ft');
+  });
+
+  it('says each value of a row of a list with its label, in the three languages (F6 g-2, F4 COR-16)', async () => {
+    expect(pick(inputsOf('debt-payoff-calculator', 'en'), ['Debt 1'])).toEqual([['Debt 1', 'balance $4,800.00, APR 24.99%, minimum payment $120.00']]);
+    expect(pick(inputsOf('debt-payoff-calculator', 'es'), ['Deuda 1'])).toEqual([['Deuda 1', `saldo $4,800.00, APR 24.99${NBSP}%, pago mínimo $120.00`]]);
+    expect(pick(inputsOf('debt-consolidation-calculator', 'en'), ['Debt 1'])).toEqual([['Debt 1', 'balance $5,200.00, APR 24.99%, monthly payment $180.00']]);
+    expect(pick(inputsOf('br-debt-payoff', 'pt'), ['Dívida 1'])).toEqual([['Dívida 1', `saldo R$${NBSP}4.000,00, juros ao mês 12%, pagamento mínimo R$${NBSP}600,00`]]);
+    expect(await linesOf('debt-payoff-calculator', 'en')).toContain('balance $4,800.00, APR 24.99%, minimum payment $120.00');
+  });
+
+  it('puts a label on every row of what was entered and of the results, and on every value of a row of a list (F4 COR-16)', () => {
+    const pages: [AnyCalcId, PageLang][] = [
+      ...CALC_PAGE_IDS.flatMap((id) => (['en', 'es'] as const).filter((lang) => moneyPage(id, lang) !== null).map((lang): [AnyCalcId, PageLang] => [id, lang])),
+      ...BR_CALC_IDS.map((id): [AnyCalcId, PageLang] => [id, 'pt']),
+      ...LIFE_CALC_IDS.map((id): [AnyCalcId, PageLang] => [id, 'en']),
+    ];
+    let lists = 0;
+    for (const [id, lang] of pages) {
+      const def = DEFS[id];
+      const data = panelData(id, lang);
+      const view = viewOf(def, data, def.initial);
+      for (const [label, value] of [...inputRows(def.fields, def.initial, data), ...view.summary]) {
+        expect(label.trim(), `${id} ${lang}: ${value}`).not.toBe('');
+        expect(value.trim(), `${id} ${lang}: ${label}`).not.toBe('');
+      }
+      const listKeys = def.fields.filter((field) => field.kind === 'list').length;
+      if (listKeys === 0) continue;
+      const rowLabel = (data.texts.view['row'] ?? data.t.row).replace('{n}', '');
+      for (const [label, value] of inputRows(def.fields, def.initial, data).filter(([label]) => label.startsWith(rowLabel))) {
+        const parts = value.replace(/^[^:]+:\s/, '').split(/, | × /);
+        for (const part of parts) expect(part, `${id} ${lang} ${label}`).toMatch(/^\p{L}[\p{L} ]*\s[-−$R\d]/u);
+        lists += 1;
+      }
+    }
+    expect(lists).toBeGreaterThan(8);
+  });
+
+  it('has one "you" among the numbers of the Savings goal PDF: your deposits, the "from you" of the sentence (F4 COR-16)', () => {
+    for (const lang of ['en', 'es'] as const) {
+      const def = DEFS['savings-goal-calculator'];
+      const data = panelData('savings-goal-calculator', lang);
+      const view = viewOf(def, data, def.initial);
+      const yours = view.summary.filter(([label, value]) => /\b(?:you|your|tus?)\b/i.test(label) && /\d[.,]\d{2}$/.test(value));
+      expect(yours, lang).toEqual([[data.texts.view['deposited'], expect.stringMatching(/^\$16,731\.72$/)]]);
+      const sentence = view.hero.sentence.map((part) => (typeof part === 'string' ? part : part.b)).join('');
+      expect(sentence, lang).toMatch(/\$16,732 (?:from you|tuyos)/);
     }
   });
 });

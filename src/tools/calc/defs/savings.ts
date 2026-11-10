@@ -16,7 +16,7 @@ import {
   type SimpleInterestInput,
   type SimpleInterestResult,
 } from '../../../calc/savings.ts';
-import { duration } from '../view.ts';
+import { columns, duration } from '../view.ts';
 import { count, money, num, rate, say, text } from './shared.ts';
 import type { CalcDef, CalcPanelTexts, Table } from '../types.ts';
 
@@ -55,16 +55,18 @@ export const compoundDef: CalcDef<CompoundInput, CompoundResult> = {
         hero: { label: text(v, 'label'), value: '-', sentence: [] },
         problem: text(v, 'tooLarge'),
         placard: { n: '-', l: text(v, 'placard') },
-        table: () => ({ caption: text(v, 'caption'), head: [text(v, 'year')], rows: [] }),
+        table: () => ({ caption: text(v, 'caption'), head: [text(v, 'year')], rows: [], csv: columns([text(v, 'year')]) }),
         summary: [[text(v, 'label'), text(v, 'tooLarge')]],
         premises: t.premises,
       };
     }
     const years = num(values, 'y');
+    const head = [text(v, 'year'), text(v, 'deposits'), text(v, 'interest'), text(v, 'balance')];
     const table = (): Table => ({
       caption: text(v, 'caption'),
-      head: [text(v, 'year'), text(v, 'deposits'), text(v, 'interest'), text(v, 'balance')],
+      head,
       rows: r.years.map(([year, deposits, interest, balance]) => [{ text: String(year) }, { cents: deposits }, { cents: interest }, { cents: balance }]),
+      csv: columns(head),
     });
     return {
       hero: {
@@ -120,7 +122,7 @@ export const savingsGoalDef: CalcDef<SavingsInput, SavingsResult> = {
         // A deposit that never reaches the goal is the field to change (F4 ACE-11; F13b, DECISOES § 545).
         ...(r.error === 'too-long' ? { problemField: 'dep' } : {}),
         placard: { n: '-', l: text(v, 'placardTime') },
-        table: () => ({ caption: text(v, 'caption'), head: [text(v, 'month')], rows: [] }),
+        table: () => ({ caption: text(v, 'caption'), head: [text(v, 'month')], rows: [], csv: columns([text(v, 'month')]) }),
         summary: [[text(v, 'labelTime'), problem]],
         premises: t.premises,
       };
@@ -142,11 +144,13 @@ export const savingsGoalDef: CalcDef<SavingsInput, SavingsResult> = {
         const to = Math.min(from + 12, r.rows.length);
         groups.push({ label: fmt(s.year, { n: year }), end: { cents: r.rows[to - 1]![3] }, from, to });
       }
+      const head = [text(v, 'month'), text(v, 'deposit'), text(v, 'interest'), text(v, 'balance')];
       return {
         caption: text(v, 'caption'),
-        head: [text(v, 'month'), text(v, 'deposit'), text(v, 'interest'), text(v, 'balance')],
+        head,
         rows: r.rows.map(([month, deposit, interest, balance]) => [{ text: String(month) }, { cents: deposit }, { cents: interest }, { cents: balance }]),
         groups,
+        csv: columns(head),
       };
     };
     return {
@@ -200,13 +204,15 @@ export const simpleInterestDef: CalcDef<SimpleInterestInput, SimpleInterestResul
       const marks: number[] = [];
       for (let time = perYear; time < input.time; time += perYear) marks.push(time);
       marks.push(input.time);
+      const head = [fmt(text(v, 'after'), { unit: unitWord }), text(v, 'interest'), text(v, 'total')];
       return {
         caption: text(v, 'caption'),
-        head: [fmt(text(v, 'after'), { unit: unitWord }), text(v, 'interest'), text(v, 'total')],
+        head,
         rows: marks.map((time) => {
           const at = simpleInterest({ ...input, time });
           return [{ text: String(time) }, { cents: at.interest }, { cents: at.total }];
         }),
+        csv: columns(head),
       };
     };
     return {
@@ -259,11 +265,20 @@ export const aprApyDef: CalcDef<AprApyInput, AprApyResult> = {
         }),
       },
       placard: { n: result, l: text(v, toApy ? 'placardApy' : 'placardApr') },
-      table: () => ({
-        caption: text(v, 'caption'),
-        head: [text(v, 'compounding'), text(v, toApy ? 'labelApy' : 'labelApr')],
-        rows: r.table.map(([comp, value]) => [{ text: compoundingWord(t, String(comp)) }, { text: hundredthsPercent(value, l) }]),
-      }),
+      table: () => {
+        const compounding = text(v, 'compounding');
+        const rateHead = text(v, toApy ? 'labelApy' : 'labelApr');
+        return {
+          caption: text(v, 'caption'),
+          head: [compounding, rateHead],
+          // The CSV writes the percent glued to its number in every language ("5.13%"; languages adjustment, C-5; F16, § 687).
+          rows: r.table.map(([comp, value]) => [{ text: compoundingWord(t, String(comp)) }, { text: hundredthsPercent(value, l), csv: [{ scaled: value, decimals: 2, percent: true }] }]),
+          csv: [
+            { head: compounding, kind: 'text' },
+            { head: rateHead, kind: 'number' },
+          ],
+        };
+      },
       summary: [
         [text(v, toApy ? 'labelApy' : 'labelApr'), result],
         ...r.table.map(([comp, value]): [string, string] => [compoundingWord(t, String(comp)), hundredthsPercent(value, l)]),

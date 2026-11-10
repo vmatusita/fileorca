@@ -7,39 +7,46 @@
 import { formatScaled } from '../../calc/parse.ts';
 import type { ReportInput } from '../../engine/pdf/report.ts';
 import type { Lang } from '../../i18n/routes.ts';
-import type { CalcSharedTexts, Cell, Table } from './types.ts';
+import type { CalcSharedTexts, Cell, CsvValue, Table } from './types.ts';
 
 /** The separator of the CSV columns: a semicolon where the decimal is a comma (Portuguese), a comma elsewhere. */
 export const CSV_SEPARATOR: Record<Lang, string> = { en: ',', pt: ';', es: ',' };
 
 /**
- * A cell as the CSV writes it: cents as 1896.20 (1896,20 in Portuguese; no thousands separator, ASCII minus), a measure with
- * its decimals (1234.50, F7), text as it is, except that a percent is glued to its number: the no-break space Spanish puts
- * before the "%" on the screen and in the PDF (DECISOES § 213) stays out of the file, which is written like the English one
- * ("5.00%", so a spreadsheet reads a number; review of the languages adjustment, C-5).
+ * A value as the CSV writes it (F16, item 5; DECISOES § 687): money as 1896.20 and a number with the decimals of its cell
+ * (1896,20 in Portuguese; no thousands separator, ASCII minus, a percent glued to its number), a day as it is (2026-11-02),
+ * a text as it is, and nothing as an empty cell.
  */
-export function csvCell(cell: Cell, lang: Lang = 'en'): string {
+function csvValue(value: CsvValue, lang: Lang): string {
+  if (value === null) return '';
   const numbers = lang === 'pt' ? 'pt' : 'en';
-  if ('cents' in cell) return formatScaled(cell.cents, 2, numbers, { min: 2, group: false, minus: '-' });
-  if ('scaled' in cell) return formatScaled(cell.scaled, cell.decimals, numbers, { min: cell.decimals, group: false, minus: '-' });
-  return cell.text.replace(/(\d)\u00A0%/g, '$1%');
+  if ('cents' in value) return formatScaled(value.cents, 2, numbers, { min: 2, group: false, minus: '-' });
+  if ('scaled' in value) return `${formatScaled(value.scaled, value.decimals, numbers, { min: value.decimals, group: false, minus: '-' })}${value.percent ? '%' : ''}`;
+  return 'day' in value ? value.day : value.text;
+}
+
+/**
+ * What a cell writes in the CSV, one value per column: cents and a measure as numbers (F7), a text cell its `csv` values
+ * (F16), else its text with a percent glued to its number: the no-break space Spanish puts before the "%" on the screen and
+ * in the PDF (DECISOES § 213) stays out of the file ("5.00%", so a spreadsheet reads a number; languages adjustment, C-5).
+ */
+export function csvCells(cell: Cell, lang: Lang = 'en'): string[] {
+  if ('cents' in cell || 'scaled' in cell) return [csvValue(cell, lang)];
+  return cell.csv ? cell.csv.map((value) => csvValue(value, lang)) : [cell.text.replace(/(\d)\u00A0%/g, '$1%')];
 }
 
 function quote(text: string, separator: string): string {
   return text.includes(separator) || /["\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
 }
 
-/** The CSV of a table: grouped tables get the year as a first column. */
+/** The CSV of a table: the header of its CSV columns and the rows of the screen; grouped tables get the year as a first column. */
 export function csvText(table: Table, yearHeading: string, lang: Lang = 'en'): string {
   const separator = CSV_SEPARATOR[lang];
-  const lines: string[][] = [];
-  if (table.groups) {
-    lines.push([yearHeading, ...table.head]);
-    for (const group of table.groups) for (const cells of table.rows.slice(group.from, group.to)) lines.push([group.label, ...cells.map((cell) => csvCell(cell, lang))]);
-  } else {
-    lines.push([...table.head]);
-    for (const cells of table.rows) lines.push(cells.map((cell) => csvCell(cell, lang)));
-  }
+  const head = table.csv.map((column) => column.head);
+  const row = (cells: readonly Cell[]): string[] => cells.flatMap((cell) => csvCells(cell, lang));
+  const lines: string[][] = table.groups
+    ? [[yearHeading, ...head], ...table.groups.flatMap((group) => table.rows.slice(group.from, group.to).map((cells) => [group.label, ...row(cells)]))]
+    : [head, ...table.rows.map(row)];
   return `﻿${lines.map((line) => line.map((text) => quote(text, separator)).join(separator)).join('\r\n')}\r\n`;
 }
 

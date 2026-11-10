@@ -93,11 +93,24 @@ export interface Scenario {
   rows: [label: string, value: string][];
 }
 
+/** What a CSV column holds (F16, item 5; DECISOES § 687): numbers (no grouping, ASCII minus, a % glued to its number), days (YYYY-MM-DD) or text. */
+export type CsvKind = 'number' | 'date' | 'text';
+
+/** One value a cell writes in the CSV: a number at a scale, money, a day, a text, or nothing (an empty cell). */
+export type CsvValue = { scaled: number; decimals: number; percent?: boolean } | { cents: number } | { day: string } | { text: string } | null;
+
+/** A column of the CSV: its header (with the unit of its numbers, "Area (sq ft)") and what it holds. */
+export interface CsvColumn {
+  head: string;
+  kind: CsvKind;
+}
+
 /**
  * A cell of the schedule: money (cents), a measure (a whole number of 10^-decimals, F7), or plain text. The CSV writes cents
- * as 1896.20 and a measure with its decimals, never with a thousands separator.
+ * as 1896.20 and a measure with its decimals, never with a thousands separator. A text cell may say what it writes in the CSV
+ * (`csv`, one value per CSV column it spans): the screen and the PDF read `text` (or `short`), the CSV reads `csv` (F16).
  */
-export type Cell = { cents: number } | { text: string; short?: string } | { scaled: number; decimals: number };
+export type Cell = { cents: number } | { text: string; short?: string; csv?: readonly CsvValue[] } | { scaled: number; decimals: number };
 
 export interface Table {
   caption: string;
@@ -109,6 +122,12 @@ export interface Table {
   even?: boolean;
   /** The column of the balance, where a year row shows the balance at its end; the last one when not given (DECISOES § 256). */
   endColumn?: number;
+  /**
+   * The columns of the CSV after the year of a grouped table (F16, item 5; DECISOES § 687): the header of each, with its unit
+   * ("Area (sq ft)"), and the kind of what it holds. A text cell with `csv` writes its values in that many columns; every
+   * other cell writes one. Every table declares them, so a new table cannot leave its CSV to the screen's text.
+   */
+  csv: readonly CsvColumn[];
 }
 
 /** What the result looks like for one set of values (CalcDef.view). */
@@ -193,6 +212,18 @@ export interface CalcSharedTexts {
   lastWorked: string;
   /** Added to a field's error when what is typed is not a number of the page's language: how it writes decimals. */
   decimalHint: string;
+  /**
+   * The message of a number written right that has more decimals than its field keeps (F16, item 2; DECISOES § 684): with the
+   * {n} of the field (two or more), with one, and with none. It replaces the range and the hint while the value with the extra
+   * decimals cut off is in the range.
+   */
+  decimalsMany: string;
+  decimalsOne: string;
+  decimalsNone: string;
+  /** The CSV's own words (F16, item 5; DECISOES § 687): the column of the units of a column that mixes them, and the two ends of a range ("{label} (from)"). */
+  csvUnit: string;
+  csvFrom: string;
+  csvTo: string;
   nextLabel: string;
   scheduleHeading: string;
   /** "Year {n}" (a loan year, never a calendar year) and "{n}" for a payment number. */

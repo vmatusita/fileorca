@@ -47,6 +47,9 @@ export default {
       colBag: 'Bag',
       colYield: 'Yield (cu ft)',
       colBags: 'Bags to buy',
+      // The bag by its weight, a number in the CSV (F16, DECISOES § 688).
+      colWeight: 'Bag weight',
+      weightUnit: 'lb',
     },
     premises: [
       'A slab or footing is length × width × thickness ÷ 12, with the thickness in inches; a round column is pi × diameter² × height ÷ 4 ÷ 1,728, all in inches.',

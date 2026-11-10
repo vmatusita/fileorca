@@ -14,7 +14,7 @@ import {
   type DebtPayoffResult,
   type PayoffPlan,
 } from '../../../calc/debts.ts';
-import { duration, loanTable } from '../view.ts';
+import { columns, duration, loanTable } from '../view.ts';
 import { count, money, num, rate, say, text } from './shared.ts';
 import type { CalcDef, CalcSharedTexts, CalcView, Part, Table, Values } from '../types.ts';
 
@@ -28,7 +28,7 @@ function problemView(label: string, problem: string, premises: string[], field?:
     problem,
     ...(field ? { problemField: field } : {}),
     placard: { n: '-', l: label },
-    table: () => ({ caption: label, head: [label], rows: [] }),
+    table: () => ({ caption: label, head: [label], rows: [], csv: columns([label], 'text') }),
     summary: [[label, problem]],
     premises,
   };
@@ -127,14 +127,16 @@ export const debtPayoffDef: CalcDef<DebtPayoffInput, DebtPayoffResult> = {
     const interestPart = r.interestDiff === 0 ? text(v, 'sameInterest') : fmt(text(v, r.interestDiff > 0 ? 'lessInterest' : 'moreInterest'), { x: dollars(Math.abs(r.interestDiff), l) });
     const timePart = r.monthsDiff === 0 ? text(v, 'sameTime') : fmt(text(v, r.monthsDiff > 0 ? 'sooner' : 'later'), { x: duration(Math.abs(r.monthsDiff), s) });
     const diff: Part[] = say(text(v, 'diff'), { interestPart, timePart });
+    const head = [text(v, 'year'), text(v, 'snowball'), text(v, 'avalanche')];
     const table = (): Table => ({
       caption: text(v, 'caption'),
-      head: [text(v, 'year'), text(v, 'snowball'), text(v, 'avalanche')],
+      head,
       rows: Array.from({ length: Math.max(r.snowball.yearEnd.length, r.avalanche.yearEnd.length) }, (_, index) => [
         { text: String(index + 1) },
         { cents: r.snowball.yearEnd[index] ?? 0 },
         { cents: r.avalanche.yearEnd[index] ?? 0 },
       ]),
+      csv: columns(head),
     });
     return {
       hero: {

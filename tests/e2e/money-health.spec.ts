@@ -15,6 +15,7 @@ import calorieTexts from '../../src/tools/calorie-calculator/i18n/en.ts';
 import ovulationTexts from '../../src/tools/ovulation-calculator/i18n/en.ts';
 import bodyFatTexts from '../../src/tools/body-fat-calculator/i18n/en.ts';
 import dueTexts from '../../src/tools/due-date-calculator/i18n/en.ts';
+import enShared from '../../src/tools/calc/i18n/en.ts';
 import { pdfTextLines } from './lib/pdf-text.ts';
 import { strictPdf } from './lib/pdf.ts';
 import { settle } from './lib/page.ts';
@@ -40,10 +41,17 @@ import {
 interface Result {
   hero: string;
   sentence: string;
+  /** The rows the PDF writes, and the screen too unless `screen` says otherwise. */
   rows: Cell[][];
-  /** The rows the screen writes, when they are shorter than the CSV's (the ovulation's dates; F13b, DECISOES § 550). */
+  /** The rows the screen writes, when they are shorter than the PDF's (the ovulation's dates; F13b, DECISOES § 550). */
   screen?: Cell[][];
+  /** The rows of the CSV (F16, DECISOES § 688): as many as the screen's, one thing in each cell, days as YYYY-MM-DD. */
+  csv: Cell[][];
 }
+
+const UNIT = enShared.island.csvUnit;
+const from = (label: string): string => filled(enShared.island.csvFrom, { label });
+const to = (label: string): string => filled(enShared.island.csvTo, { label });
 
 const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 /** A day as the narrow table writes it, by hand: "2027-06-14" → "Jun 14, 2027", the month glued to its day. */
@@ -65,11 +73,15 @@ interface Health<I, E> {
   /** A corner of the oracle's grid and a random draw (and more), typed in the fields. */
   cases: readonly string[];
   head: readonly string[];
+  /** The head of the CSV: the units in it, and the columns a cell unfolds into (F16, DECISOES § 688). */
+  csvHead: readonly string[];
   fill: (page: Page, input: I) => Promise<void>;
   result: (input: I, expected: E) => Result;
 }
 
 const tenth = (value: number): string => scaled(value, 1, 1);
+/** A number of the CSV with its decimals (no thousands comma). */
+const num = (value: number, decimals: number): Cell => ({ scaled: value, decimals });
 
 /** The height and weight of the unit system the case uses; the other system's fields keep their own values. */
 async function fillBody(page: Page, input: BodyInput, weight = true): Promise<void> {
@@ -90,11 +102,24 @@ const bv = bmiTexts.panel.view;
 const CATEGORIES = ['underweight', 'healthy', 'overweight', 'obesity-1', 'obesity-2', 'obesity-3'] as const;
 const categoryName = (category: BmiResult['category']): string => bv[`cat-${category}`];
 const categoryBand = (category: BmiResult['category']): string => bv[`band-${category}`];
+/**
+ * The CDC's bands in the CSV, by hand (F16, DECISOES § 688): both ends in the category at one decimal ("below 18.5" is up to
+ * 18.4), an open end empty.
+ */
+const BANDS: Record<BmiResult['category'], [string, string]> = {
+  underweight: ['', '18.4'],
+  healthy: ['18.5', '24.9'],
+  overweight: ['25.0', '29.9'],
+  'obesity-1': ['30.0', '34.9'],
+  'obesity-2': ['35.0', '39.9'],
+  'obesity-3': ['40.0', ''],
+};
 
 const bmi: Health<BodyInput, BmiResult> = {
   id: 'bmi-calculator',
   cases: ['grid-001', 'random-001'],
   head: [bv.colCategory, bv.colBmi, bv.colYours],
+  csvHead: [bv.colCategory, from(bv.colBmi), to(bv.colBmi), bv.colYours],
   fill: (page, input) => fillBody(page, input),
   result(_input, expected) {
     const value = tenth(expected.bmi);
@@ -103,6 +128,7 @@ const bmi: Health<BodyInput, BmiResult> = {
       sentence: filled(bv.sentence, { bmi: value, category: categoryName(expected.category), band: categoryBand(expected.category) }),
       // The table is the CDC's categories, with the BMI in the row of the oracle's category.
       rows: CATEGORIES.map((category) => [categoryName(category), categoryBand(category), category === expected.category ? value : '']),
+      csv: CATEGORIES.map((category) => [categoryName(category), ...BANDS[category], category === expected.category ? num(expected.bmi, 1) : '']),
     };
   },
 };
@@ -115,6 +141,7 @@ const calorie: Health<CalorieInput, CalorieResult> = {
   id: 'calorie-calculator',
   cases: ['grid-032', 'random-001'],
   head: [cv.colItem, cv.colAmount],
+  csvHead: [cv.colItem, cv.colAmount, UNIT],
   async fill(page, input) {
     await fillBody(page, input);
     await type(page, 'ag', String(input.age));
@@ -133,6 +160,11 @@ const calorie: Health<CalorieInput, CalorieResult> = {
         [cv.pal, pal],
         [cv.label, `${tdee} ${cv.unit}`],
       ],
+      csv: [
+        [cv.ree, num(expected.ree, 0), cv.unit],
+        [cv.pal, num(input.pal, 2), ''],
+        [cv.label, num(expected.tdee, 0), cv.unit],
+      ],
     };
   },
 };
@@ -145,6 +177,7 @@ const ovulation: Health<OvulationInput, OvulationResult> = {
   id: 'ovulation-calculator',
   cases: ['grid-001', 'random-001'],
   head: [ov.colWindow, ov.colOvulation, ov.colNext],
+  csvHead: [from(ov.colWindow), to(ov.colWindow), ov.colOvulation, ov.colNext],
   async fill(page, input) {
     await type(page, 'd', input.lmp);
     await type(page, 'c', String(input.cycle));
@@ -160,8 +193,10 @@ const ovulation: Health<OvulationInput, OvulationResult> = {
         longDay(cycle.ovulation),
         longDay(cycle.nextPeriod),
       ]),
-      // F13b (F7 obs 2; DECISOES § 550): the screen writes the short dates; the CSV keeps the long ones.
+      // F13b (F7 obs 2; DECISOES § 550): the screen writes the short dates; the PDF keeps the long ones.
       screen: expected.cycles.map((cycle) => [shortRange(cycle.fertileStart, cycle.ovulation), shortDay(cycle.ovulation), shortDay(cycle.nextPeriod)]),
+      // F16 (DECISOES § 688): the CSV writes the oracle's days as they are, the window in two columns.
+      csv: expected.cycles.map((cycle) => [cycle.fertileStart, cycle.ovulation, cycle.ovulation, cycle.nextPeriod]),
     };
   },
 };
@@ -174,6 +209,7 @@ const bodyFat: Health<BodyFatInput, { percent: number }> = {
   id: 'body-fat-calculator',
   cases: ['page-example-male', 'grid-050', 'random-001'],
   head: [fv.colItem, fv.colAmount],
+  csvHead: [fv.colItem, fv.colAmount, fv.method],
   async fill(page, input) {
     await chooseOption(page, 'u', input.unit);
     if (input.unit === 'us') {
@@ -198,6 +234,11 @@ const bodyFat: Health<BodyFatInput, { percent: number }> = {
         [fv.method, input.sex === 'male' ? fv.formulaMale : fv.formulaFemale],
         [fv.label, `${percent}%`],
       ],
+      // The value a number, the equation a text of its own column.
+      csv: [
+        [fv.method, '', input.sex === 'male' ? fv.formulaMale : fv.formulaFemale],
+        [fv.label, `${percent}%`, ''],
+      ],
     };
   },
 };
@@ -217,6 +258,7 @@ const dueDate: Health<DueDateInput, DueDateResult> = {
   id: 'due-date-calculator',
   cases: [],
   head: [dv.colMilestone, dv.colDate],
+  csvHead: [dv.colMilestone, dv.colDate],
   async fill(page, input) {
     await page.locator('#fo-calc-m').selectOption(input.method);
     await type(page, 'd', input.date);
@@ -232,6 +274,13 @@ const dueDate: Health<DueDateInput, DueDateResult> = {
         [dv.trimester3, longDay(expected.trimesters[2])],
         [dv.fullTerm, longDay(expected.fullTerm)],
         [dv.label, longDay(expected.due)],
+      ],
+      csv: [
+        [dv.trimester1, expected.trimesters[0]],
+        [dv.trimester2, expected.trimesters[1]],
+        [dv.trimester3, expected.trimesters[2]],
+        [dv.fullTerm, expected.fullTerm],
+        [dv.label, expected.due],
       ],
     };
   },
@@ -262,10 +311,12 @@ async function today(page: Page, day: string): Promise<void> {
 }
 
 async function expectResult<I, E>(page: Page, calc: Health<I, E>, input: I, expected: E): Promise<void> {
-  const { hero, sentence, rows, screen } = calc.result(input, expected);
+  const { hero, sentence, rows, screen, csv } = calc.result(input, expected);
   await expectHero(page, hero, sentence);
   await expectTable(page, calc.head, screen ?? rows);
-  await expectCsv(page, calc.id, calc.head, rows);
+  // F16 (DECISOES § 696): the CSV has its own head and rows, as many rows as the screen's.
+  expect(csv).toHaveLength(rows.length);
+  await expectCsv(page, calc.id, calc.csvHead, csv);
 }
 
 for (const calc of HEALTH) {

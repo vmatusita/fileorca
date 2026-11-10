@@ -18,7 +18,8 @@ export const SCHEDULE_HEADING_ID = 'fo-schedule-heading';
 export default function CalcSchedule({ data, view }: { data: CalcPanelData; view: CalcView }) {
   const [open, setOpen] = useState(false);
   const heading = data.texts.view['scheduleHeading'] ?? data.t.scheduleHeading;
-  // A text cell may carry a shorter form for the screen (the dates of the ovulation; the CSV and the PDF keep the long one).
+  // A text cell may carry a shorter form for the screen (the dates of the ovulation): the PDF keeps the long one, and the CSV
+  // writes the cell's `csv` values, the days as YYYY-MM-DD (F16, DECISOES § 688).
   const long = cellText(data.lang as NumberLang);
   const cell = (value: Cell) => ('text' in value && value.short !== undefined ? value.short : long(value));
   if (view.open) {

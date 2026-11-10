@@ -5,7 +5,7 @@ import { expect, test } from '@playwright/test';
 import { allPages, fileForPath } from '../../scripts/lib/dist.ts';
 import { imageSize, sniff } from './lib/images.ts';
 import { expectNoMetadata, fixtureFile, takeDownload, watchRequests } from './lib/matrix.ts';
-import { dismissCookies, hydrated } from './lib/page.ts';
+import { dismissCookies, hydrated, jpegBatch, openAdjust } from './lib/page.ts';
 import { thumbnail } from './lib/pixels.ts';
 
 // Privacy and isolation of the image phase (criteria 8, 9 and 10): no page is cross-origin isolated and
@@ -209,4 +209,50 @@ test('the list of Image to PDF and the field of Compress image in the path: noth
   expect(page.url(), 'the address has no query').not.toContain('?');
   const kept = await page.evaluate(() => JSON.stringify([{ ...localStorage }, { ...sessionStorage }, (window as unknown as { dataLayer?: unknown[] }).dataLayer ?? []]));
   expect(kept, 'the storage and the dataLayer never have the limit').not.toMatch(/(^|\D)9,?137(\D|$)/);
+});
+
+// F16 (criterion 5 of the run's prompt; review F16, d-1): the Tab out of a number field in a batch, after the result (item 8;
+// DECISOES § 692), in the path of this spec. Compress image with "Up to a size" and three photos; once every row is ready, a
+// limit typed key by key and the Tab (Alt+Tab in WebKit, whose Tab skips buttons): the blur takes the value, the batch is made
+// again, the focus lands on the first row, never on the page, and the ZIP is saved. No request leaves the page origin and none
+// writes (every one is a GET), none has a query, and the typed limit is in no request, nor in the address, the storage or the
+// dataLayer. The limit is 8,642 KB: four digits that no time stamp, year or port of the page holds (DECISOES § 680).
+test('the Tab out of the limit of Compress image in a batch of three, after the result: nothing leaves the browser', async ({ page, browserName }) => {
+  test.setTimeout(120_000);
+  const tab = browserName === 'webkit' ? 'Alt+Tab' : 'Tab';
+  const requests = watchRequests(page);
+  await page.goto('/compress-image/');
+  await hydrated(page);
+  await dismissCookies(page);
+  await page.locator('.fo-seg__opt', { has: page.locator('input[name="ci-level"][value="size"]') }).click();
+  await page.setInputFiles('input[type="file"]', await jpegBatch(page, 3));
+  const root = page.locator('#fo-tool-root');
+  const download = root.locator('.fo-btn--download');
+  const bins = root.locator('.fo-filelist__remove');
+  await expect(download).toBeVisible({ timeout: 60_000 });
+  await expect(bins, 'every row of the batch is ready').toHaveCount(3, { timeout: 60_000 });
+  await openAdjust(page);
+
+  const href = await download.getAttribute('href');
+  const field = page.locator('#ci-max');
+  await field.focus();
+  await field.evaluate((input: HTMLInputElement) => input.select());
+  await page.keyboard.type('8642', { delay: 30 });
+  await page.keyboard.press(tab);
+  await expect(download, 'the batch was made again with the typed limit').not.toHaveAttribute('href', href ?? '', { timeout: 60_000 });
+  await expect(bins, 'every row is ready again').toHaveCount(3, { timeout: 60_000 });
+  await expect(page.locator('details.fo-adjust > summary')).toHaveText(/Up to 8,642 KB$/);
+  // The focus went on to the first row (the button that picks its photo), never to the page.
+  await expect
+    .poll(() => page.evaluate(() => (document.activeElement === document.body ? 'BODY' : document.activeElement?.closest('.fo-filelist__row') === document.querySelector('#fo-tool-root .fo-filelist__row') ? 'first row' : (document.activeElement?.outerHTML.slice(0, 80) ?? 'none'))))
+    .toBe('first row');
+  expect((await takeDownload(page)).name, 'the ZIP of the batch').toMatch(/\.zip$/);
+
+  expect(requests.outside(), 'no request leaves the page origin').toEqual([]);
+  expect(requests.writes, 'every request is a GET').toEqual([]);
+  expect(requests.urls.filter((url) => /^https?:/.test(url) && new URL(url).search !== ''), 'no request has a query string').toEqual([]);
+  expect(requests.urls.filter((url) => /(^|\D)8,?642(\D|$)/.test(url)), 'no request has the limit').toEqual([]);
+  expect(page.url(), 'the address has neither a query nor a #').not.toMatch(/[?#]/);
+  const kept = await page.evaluate(() => JSON.stringify([document.title, { ...localStorage }, { ...sessionStorage }, document.cookie, (window as unknown as { dataLayer?: unknown[] }).dataLayer ?? []]));
+  expect(kept, 'the title, the storage, the cookies and the dataLayer never have the limit').not.toMatch(/(^|\D)8,?642(\D|$)/);
 });

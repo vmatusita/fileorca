@@ -1,0 +1,581 @@
+# Fase 16: calculadoras, digitar sem tropeço e exportar números de verdade
+
+## Prompt (copie o bloco inteiro)
+
+```text
+ultracode
+
+# Missão
+
+Rode a F16 do FileOrca, "Calculadoras: digitar sem tropeço e exportar números de verdade", a terceira das cinco runs do `PLANO-UX-QV.md`. As calculadoras são as páginas de RPM mais alto do site. O campo tem de aceitar o que a pessoa digita no formato da página e só reclamar de valor fora da faixa. A região viva tem de falar uma vez por digitação. E o CSV tem de abrir no Excel e no Google Planilhas com números que somam.
+
+Ao terminar:
+
+- no campo de número das calculadoras, o separador de milhar seguido de três dígitos é milhar em qualquer lugar da parte inteira ("3755,000" na hipoteca em inglês lê 3.755.000), e o campo volta ao formato do idioma ao sair;
+- um número bem formado que só passa nas casas do campo recebe "Use até {n} casas decimais.", sem a faixa e sem a dica do separador;
+- a região viva do card fala uma vez por valor digitado, nunca o resultado de um prefixo seguido do erro;
+- quando o Baixar PDF sai do DOM com o foco a caminho dele, o foco vai ao controle seguinte, nunca ao `body`;
+- o CSV de toda calculadora, em en, pt e es, tem uma coisa só por célula: número sem milhar, sem unidade e com o menos ASCII, data AAAA-MM-DD ou texto; a unidade vai no cabeçalho;
+- o PDF diz que a medida do círculo é o diâmetro, dá o período da taxa mensal e põe rótulo em toda linha;
+- o Tab para fora do campo de número das ferramentas de imagem, num lote e depois do resultado, também nunca deixa o foco no `body` (o F15 R-b-1);
+- nenhum número de resultado muda: o motor, os oráculos e as fixtures das calculadoras ficam como estão;
+- nada sai do aparelho, nenhum número digitado vai para a URL depois do `?`, para o storage ou para o GA4, o card não cresce, e o CLS sem gesto continua 0;
+- o `docs/design/`, o `docs/claude/` e o `docs/PENDENCIAS.md` estão em dia;
+- o relatório está em `docs/relatorios/fase-16.md` e a revisão em `docs/relatorios/REVISAO-F16.md`;
+- a PR da branch `fase-16` sai pronta, com o CI completo verde, e o CI a mescla sozinho.
+
+# Contexto
+
+Você está na raiz do clone de `vmatusita/fileorca`, numa máquina Windows, com o Git Bash. A main está em `ee767e2` (a F15, PR 31, que veio depois das partes do CI, PR 30) ou num commit mais novo. Confira com `git log --oneline -5` e guarde no plano o SHA da `origin/main` do começo da run: ele é o "ponto de partida".
+
+No clone, sem commit:
+
+- `docs/prompts/prompt-fase-16.md` e `docs/prompts/prompt-fase-16.txt` (este prompt);
+- talvez o `PLANO-FILEORCA.md` modificado com uma linha só, posta pelo Victor antes da run (decisão 2);
+- a pasta `Claude outputs/`, que fica fora de tudo.
+
+O que você precisa saber antes de planejar:
+
+- **A ficha da F16** está no `PLANO-UX-QV.md`, em "Fichas para a prompt-ultracode" → "F16 · Calculadoras: digitar sem tropeço e exportar números de verdade": a missão, as entradas, os 7 itens de "Dentro", o "Fora", os 7 critérios, a válvula e o destino. O diagnóstico (D13 e D14) diz o que foi medido e onde. Leia as duas partes inteiras, e também "O que não entra, e por quê" e "Regras de todas as runs deste plano".
+- **O item 8 não está na ficha.** Em 10/nov/2026, o Victor escolheu somar à F16 o F15 R-b-1 do grupo 25 do `docs/PENDENCIAS.md`: o Tab para fora do `NumberField` de imagem, num lote, deixa o foco no `body`. É o mesmo defeito do item 4 noutro campo. Ele entra como item 8 desta run, com a válvula da decisão 10.
+- **O que mudou desde o plano.** Ele foi escrito em 9/nov/2026, antes da F14 e da F15. Nenhuma das duas tocou nas calculadoras: a F14 mexeu na ilha de PDF; a F15, na ilha de imagem, no `src/share/` e no QR. As linhas D13 e D14 continuam valendo. Confira cada uma no código do ponto de partida antes de planejar (reproduza o D13 na `/mortgage-calculator/` do `dist-base`) e registre no plano o que achar diferente.
+- **O campo das calculadoras hoje:**
+  - `src/calc/parse.ts`: o `parseScaled` (o `PATTERNS` de cada idioma exige de 1 a 3 dígitos antes do primeiro separador de milhar: é o D13), o `formatScaled` e as funções que escrevem dinheiro e taxa;
+  - `src/tools/calc/CalcField.tsx`: o rascunho (`draft`), o `read()`, o `SETTLE_MS` de 800 ms antes do erro de faixa, o `onBlur` (que mostra o erro na hora e escreve o número no formato do idioma), a dica do separador (`swapped` e `unreadable`, § 251 e § 254) e o `report` ao store;
+  - `src/tools/calc/form.ts` (o `SETTLE_MS`, o `DECIMALS`, o `decimalsOf`, o `display`, o `inRange` e o link do cenário depois do `#`, § 114); `store.ts` (os `errors`, o `stale` e o `good`); `CalcPanel.tsx` (o `heroReserves` e o `nudges`, § 595); `ResultHero.tsx` (o Baixar, a mensagem `#fo-rhero-error`, a região `p.fo-sr[aria-live="polite"]` e o `SPEAK_AFTER_MS` de 500 ms, que o `input` da ilha reinicia); `ExportBar.tsx` (o CSV `disabled` com o resultado velho e o Copiar link); `Fields.tsx` (os campos de lista e da entrada, que usam o `CalcField`);
+  - os textos que todas as calculadoras dividem, em `src/tools/calc/i18n/{en,pt,es}.ts` (`decimalHint`, `stale` e `lastWorked`), com o tipo `CalcSharedTexts` em `src/tools/calc/types.ts`.
+- **O CSV e o PDF hoje:**
+  - `src/tools/calc/exports.ts`: o `csvCell`, o `csvText`, o separador de cada idioma, o BOM e o `reportInput`;
+  - `src/tools/calc/view.ts`: o `cellText`, o `valueText` e o `inputRows`;
+  - os tipos `Cell` e `Table` em `types.ts`;
+  - as tabelas de cada definição em `src/tools/calc/defs/`. As de casa e de saúde (`house.ts` e `health.ts`) gravam o texto da tela com `plain()`: é o D14;
+  - o PDF em `src/engine/pdf/report.ts` (só WinAnsi).
+- **O campo de número das imagens (item 8):** `src/tools/image/NumberField.tsx` (o `commit` no `blur` e depois da pausa) e o `ImagePanel.tsx` (o `render()` que troca a linha, e o `bandFocus` e o `rowFocus`, que já devolvem o foco depois de um render). Os campos são o "Tamanho máximo" do Comprimir em "Até um tamanho", a largura e a altura do Redimensionar e o que o Cortar tiver.
+- **As páginas:** as calculadoras de dinheiro em en e es (`CALC_PAGE_IDS`), as do Brasil em pt (`BR_CALC_IDS`) e as de casa e saúde só em en (`LIFE_CALC_IDS`), todas em `src/tools/calc/registry.ts`. Casa e saúde em pt e es esperam o gatilho de 31/jan/2027: não crie nenhuma.
+- **O próximo § livre do `DECISOES.md` é o 681.** Escreva os § na ordem. O grupo novo do `docs/PENDENCIAS.md` é o 26.
+- **A linha de base,** do relatório da F15: o Vitest com 133 arquivos e 2.103 testes; o `--list` do Playwright com 2.377 testes por navegador, em 81 arquivos; 25 partes no `pnpm verificar --partes` (o build, os portões, o Lighthouse, 8 do Chromium e 14 do WebKit), somando 3.140,8 s. Confira tudo no ponto de partida e use os seus números.
+- **O tempo das partes no CI não é o da máquina** (§ 648 e a seção F14 do `docs/claude/ci.md`). Use os tempos de teste da execução completa da PR 31 (ache o id com `gh pr checks 31` ou `gh run list --branch fase-15 --limit 10`), com os scripts `.cache/f14/ci-durations.mjs` e `.cache/f14/part-files.mjs`. Se eles não estiverem no `.cache/`, refaça os dois pela descrição do `docs/claude/ci.md`.
+- **O rótulo `ci` não existia na F15** (§ 666), e criá-lo é só do Victor. As notas da regra 1 do `CLAUDE.md` e a decisão 19 dizem o que fazer nos dois casos.
+- **O repositório é público** (§ 338): tudo o que você commita, a PR, os logs e os artefatos ficam públicos.
+- **O CI roda por classe** (F9): a PR em rascunho roda o job leve; a PR pronta roda tudo e, como esta run não mexe em `.github/`, é mesclada sozinha.
+
+Leia antes de planejar, nesta ordem de autoridade:
+
+1. **A ficha da F16 e este prompt.** Os dois juntos são a ficha da run: este prompt detalha e fecha o que a ficha deixa aberto, soma o item 8 e nunca afrouxa um critério dela. Se parecerem conflitar, vale o mais rigoroso, com um §.
+2. **O `PLANO-UX-QV.md`** (o D13, o D14, as regras de todas as runs e a ficha), o `PLANO-MELHORIAS.md` (as regras de toda run) e o `PLANO-FILEORCA.md` ("Execução por IA", as "Decisões fechadas" e a "Regra das calculadoras").
+3. **O `CLAUDE.md`,** inteiro.
+4. **De `docs/claude/`:**
+   - o `calculadoras.md`, o `playwright.md` e o `windows-git-bash.md`, inteiros;
+   - do `idiomas.md`, o que fala do `lint:texto` e do glossário, e as seções da F6, do ajuste de idiomas e da F13b;
+   - do `ci.md`, as pegadinhas gerais da F1a e as seções da F9 e da F14;
+   - do `imagem.md`, as seções da F13a e da F15 (o item 8);
+   - do `design-e-oli.md`, as pegadinhas gerais e a seção da F13b.
+5. **Do `DECISOES.md`, só buscando o §:** § 102, § 111, § 114, § 115, § 116, § 123, § 124, § 137, § 139, § 213, § 251, § 254, § 276, § 279, § 305, § 321 (o C-5 do CSV), § 341, § 510, § 545, § 555, § 593 a § 595, § 598, § 600, § 601, § 648, § 663, § 666, § 676, § 679 e o que elas citarem.
+6. **Do `docs/design/`:** os README do NumberField, do ResultHero e da ExportBar, e, no `README.md`, "Layout e anúncios".
+7. **Do `docs/PENDENCIAS.md`:** "Como ler", o Resumo, os grupos 2, 3, 23, 24 e 25, "Registrados" e "Já corrigidos"; e o `tests/unit/pendencias.test.ts`, que confere o arquivo. Dos relatórios de revisão, só as linhas que a run fecha: `REVISAO-F4.md` (DES-3 e COR-16), `REVISAO-F6.md` (g-2), `REVISAO-F7.md` (a-3, a-4 e a-6), `REVISAO-F13b.md` (b-1 e b-3) e `REVISAO-F15.md` (b-1).
+8. **Do `docs/i18n/`:** o glossário de pt e o de es.
+
+# Escopo
+
+Dentro: os 7 itens da ficha e o item 8, com estes arquivos:
+
+- `src/calc/parse.ts`, só a leitura do que se digita (o `parseScaled` e o que precisar ao lado dele para dizer por que um texto não lê). A escrita (`formatScaled`, `money`, `dollars`, `ratePercent` e `hundredthsPercent`) não muda;
+- `src/tools/calc/`: o `CalcField.tsx`, o `form.ts`, o `store.ts`, o `CalcPanel.tsx` (as reservas do card), o `ResultHero.tsx`, o `ExportBar.tsx`, o `Fields.tsx`, o `exports.ts`, o `view.ts`, o `types.ts`, as tabelas e os rótulos do PDF nas definições de `defs/`, e os textos de `i18n/`;
+- os textos das páginas de calculadora (`src/tools/<calculadora>/i18n/{en,pt,es}.ts`) que o comportamento novo desminta, e os rótulos novos de coluna e de PDF;
+- `src/engine/pdf/report.ts`, só se o item 6 precisar (os rótulos), sem mudar o que a § 115 fixa;
+- `src/tools/image/NumberField.tsx` e o `ImagePanel.tsx`, só o foco do item 8;
+- os testes:
+  - specs novos;
+  - os specs e os Vitest que fixam o formato de hoje do campo, da fala, do foco e do CSV (os `money-*.spec.ts`, os `calc-*.spec.ts`, o `axe-calc-states.spec.ts`, o `calc-defs.test.ts` e os outros que a exploração achar);
+- os documentos:
+  - os README do `docs/design/` que a F16 desmentir;
+  - uma seção nova no fim do `docs/claude/calculadoras.md` (e do `playwright.md` ou do `imagem.md`, se houver pegadinha deles);
+  - o `docs/PENDENCIAS.md` e o `DECISOES.md`.
+
+Fora (não toque): o "Fora" da ficha inteiro, e mais:
+
+- `src/calc/` além do `parse.ts`: nenhuma fórmula e nenhum motor;
+- `scripts/oracle/` e `fixtures/` inteiros: o `calc-oracle.test.ts` confere o SHA-256 dos scripts e as fixtures;
+- nenhum número de resultado, de tabela ou de PDF muda: só o jeito de escrevê-lo no CSV e os rótulos do item 6;
+- os itens do grupo 2 que mexem em conta (F4 COR-7, COR-10, COR-11, COR-12, COR-14, COR-17 e F6 a-6): continuam com a run de ajuste de contas;
+- o layout do card da F13b, a ordem dos campos, a ordem de Tab (§ 555), a tela das tabelas e os textos do resultado na tela;
+- nenhum campo, botão ou controle novo;
+- o link do cenário (`LINK_VERSION`, `linkHash` e `readLink`): o número continua só depois do `#`, nunca depois do `?`;
+- chave nova no `localStorage`, no `sessionStorage` ou no IndexedDB; evento ou parâmetro novo no GA4; dependência nova; `import()` novo que crie arquivo JS;
+- a ilha de imagem além do foco do item 8; a ilha de PDF; o QR; o `src/share/`; o `src/sw/`; a busca (o D16 é do Victor);
+- casa e saúde em pt e es (o gatilho de 31/jan/2027);
+- `.github/`, o `.githooks/`, o `.claude/settings.json`, o `lighthouserc.json` e as fixtures; nenhum teste novo no `clearance.spec.ts` (F14 m-5);
+- o `PLANO-FILEORCA.md` (decisão 2), o `PLANO-MELHORIAS.md`, o `PLANO-UX-QV.md` e o `CLAUDE.md`;
+- os § antigos do `DECISOES.md` e as seções antigas de `docs/claude/`: só se acrescenta, nunca se apaga nem se reescreve.
+
+# Decisões já tomadas (registre cada uma no DECISOES.md, a partir do § 681)
+
+1. **A especificação.** A ficha é contrato, palavra por palavra: as regras dos itens 1 a 7, os casos dos critérios e os textos. Os textos do pt que este prompt fixa também são contrato. O item 8 é escolha do Victor (10/nov/2026) e segue a decisão 10. O que nenhum dos dois diz, você decide pela régua de "Autonomia e decisões", com um §.
+
+2. **Os planos e a linha do `PLANO-FILEORCA.md`.**
+   - Nenhum plano muda. Achado que desminta o plano vai num §, nunca no texto dele.
+   - A linha que a F14 deixou como "Victor faz" (F14 m-1, no grupo 24) ainda faltava no fim da F15 e pode ter sido posta pelo Victor antes desta run. **Não edite o arquivo por nenhum caminho** (ferramenta de edição, shell, script ou `git apply`): o `.claude/settings.json` nega. No começo, rode `git diff -- PLANO-FILEORCA.md`:
+     - se a diferença for só a linha do F14 m-1 acrescentada (com, no máximo, uma linha em branco junto), ela entra no primeiro commit, ao lado do prompt, e o F14 m-1 vai para "Já corrigidos", com o §;
+     - se não houver diferença, siga sem ela: o F14 m-1 continua aberto;
+     - se houver qualquer outra diferença, deixe o arquivo como está, fora dos commits, e registre.
+   - O `CLAUDE.md` não muda nesta run.
+
+3. **O formato enquanto se digita (item 1; F4 DES-3).** Em cada idioma, G é o separador de milhar (a vírgula em en e es, o ponto em pt), e D é o decimal (o ponto em en e es, a vírgula em pt).
+   - **Na parte inteira do texto** (antes do D, ou o texto inteiro quando não há D), cada G:
+     - seguido de exatamente 3 dígitos, e depois deles de outro G, do D ou do fim do texto, é milhar, qualquer que seja o tamanho do grupo antes dele: "3755,000" em en e "3755.000" em pt leem 3.755.000, e "1,234" lê 1.234, como hoje;
+     - seguido de 1 ou 2 dígitos e do fim do texto, é o caso de hoje: o texto não lê, e o erro da faixa leva a dica do separador decimal ("6,5" na taxa em en; "3,755,00");
+     - em qualquer outra posição, é ignorado: seguido de 4 dígitos ou mais ("375,0005" lê 3.750.005), seguido de 1 ou 2 dígitos e de outro G ou do D, no começo do texto ou no fim dele ("375," lê 375 enquanto a pessoa digita "375,000").
+   - **Um G depois do D não é ignorado:** o texto não lê ("1.234,56" na página em inglês, "1,234.56" na página em português), e a dica vem pela regra de hoje.
+   - **A dica do separador decimal** aparece, como hoje, só em campo com casas, e em dois casos: quando o texto termina num G seguido de 1 ou 2 dígitos, sem D antes; ou quando o texto com os separadores trocados lê no idioma (§ 251 e § 254).
+   - **O resto do `parseScaled` não muda:** o sinal da moeda e o % ignorados, o menos só no campo que aceita negativo, o limite de 15 dígitos e as casas do campo.
+   - **Ao sair do campo,** o valor volta ao formato do idioma (o `display` de hoje).
+   - **O link do cenário** (`readLink`) continua lendo só números inteiros sem separador.
+
+4. **O erro de casas (item 2; F7 a-4).**
+   - Um texto pode ser um número bem formado do idioma (pela decisão 3) e ter mais casas do que o campo guarda. Se o valor com as casas cortadas está na faixa, a mensagem é a de casas, sem a faixa e sem a dica. Se não está, a mensagem é a da faixa, como hoje.
+   - O n é o do campo (`decimalsOf`): 2 no dinheiro, 4 na taxa, 0 na contagem e o da medida.
+   - No pt, como contrato, com o ponto final das outras mensagens do card: "Use até {n} casas decimais." (n ≥ 2), "Use até 1 casa decimal." (n = 1) e "Use um número inteiro." (n = 0). O en e o es saem pelo glossário e vão num § com os três idiomas lado a lado.
+   - A mensagem vai pelo mesmo caminho do erro de hoje (o `report`, o card, o `aria-invalid` e o `aria-describedby`, § 545 e § 593), e a mais longa de cada página entra nas reservas do card (`heroReserves`, § 595): o card não cresce com ela.
+
+5. **Uma fala por digitação (item 3; F13b R-b-3).**
+   - Um campo tem um "rascunho que não lê" desde o primeiro texto que não dá um valor na faixa até o `SETTLE_MS` acabar (o erro aparece) ou a pessoa sair do campo.
+   - Enquanto algum campo está assim, a região do card espera: o tempo de 500 ms que estiver correndo para, e o resultado do prefixo não é dito.
+   - Quando o rascunho lê de novo, ou vira erro, a região fala uma vez o que vale então: o resultado novo, ou o erro com o "Último resultado que valeu".
+   - O estado do rascunho muda só na passagem (de lê para não lê, e de volta), nunca a cada tecla, e não repinta a ilha: os 16 ms por tecla (o critério 6) mandam.
+   - Nada muda no que a região diz nem nos 500 ms contados da última tecla (§ 102 e a revisão da F4, ACE-1).
+
+6. **O foco quando o Baixar sai (item 4; F13b R-b-1).**
+   - O mecanismo de hoje (REVISAO-F13b, b-1): o Tab do último campo principal leva o foco ao Baixar PDF; o `blur` do campo mostra o erro; o Baixar sai do DOM com o foco nele, e o foco cai no `body`.
+   - A regra: quando o Baixar sai do DOM com o foco nele ou a caminho dele (o `relatedTarget` do `blur` do campo), o foco vai ao controle seguinte que existe na ordem de tabulação, depois do lugar do Baixar. Com o resultado velho, o CSV fica `disabled`, então hoje esse controle é o Copiar link: confira e registre.
+   - O campo não prende o foco: nada de devolver o foco a ele, nada de `preventDefault` no Tab. O Shift+Tab de lá volta ao campo, porque a ordem do DOM não muda.
+   - Vale para todo campo cujo erro tira o Baixar, a 360 e a 1280 (a ordem de Tab da § 555), nos dois navegadores, sem mudar a fala do erro (uma, pela região).
+
+7. **O CSV (item 5; F7 a-3).** Cada célula guarda uma coisa só:
+   - **um número,** no formato do CSV do idioma, como o `csvCell` de hoje escreve o dinheiro: sem milhar, com o menos ASCII e as casas da célula (`-1234.50` em en e es, `-1234,50` em pt). O % fica colado ao número ("5.00%", como a § 321 decidiu no C-5): o Excel e o Planilhas o leem como número, e ele não conta como unidade neste critério;
+   - **uma data,** em AAAA-MM-DD;
+   - **ou um texto:** o nome da linha, da categoria ou do item, ou o rótulo do grupo ("Year 1").
+
+   E mais:
+
+   - **A unidade sai da célula.** Quando a coluna tem uma unidade só, ela vai para o cabeçalho ("Area (sq ft)"). Quando a coluna mistura unidades (as tabelas de duas colunas, item e valor, de casa e de saúde), o CSV ganha, logo depois dela, a coluna "Unidade" (o nome nos três idiomas pelo glossário), com a unidade de cada linha como a tela a escreve. O dinheiro numa coluna assim leva o código da moeda (USD; BRL no pt).
+   - **Um intervalo** (a janela fértil da Ovulation, a faixa do BMI) vira duas colunas no CSV, "de" e "até", com o lado aberto vazio. Uma célula sem valor ("—") fica vazia.
+   - **As linhas são as da tabela da tela:** só as colunas podem se desdobrar no CSV. A tela e o PDF não mudam por este item.
+   - **O separador** (a vírgula em en e es, o ponto e vírgula em pt), as aspas da RFC 4180, o CRLF e o BOM de hoje não mudam.
+   - **A forma:** o `Cell` e o `Table` ganham o que o CSV precisa (por exemplo, a forma do CSV ao lado do texto da tela, e o tipo de cada coluna). Decida no plano, com um §.
+
+8. **O resto do grupo 3 (item 6).** As correções propostas no `docs/PENDENCIAS.md`:
+   - F7 a-6: o PDF da Square footage diz que a medida do círculo é o diâmetro ("Circle: diameter 24.5 ft"), pelo rótulo da opção, como o `DebtList` faz com `textKey`;
+   - F6 g-2: no PDF e no "Exemplo resolvido", a taxa com sufixo que não é só "%" leva o período como o sufixo do campo o escreve na tela ("14% a.m."); na linha de lista (as dívidas), cada valor vai com o rótulo;
+   - F4 COR-16: rótulo em toda linha do PDF, e um "você" só na Savings goal.
+
+   Cada uma com um teste sobre o `inputRows` ou o `reportInput` que reprova sem ela.
+
+9. **Os bytes em inglês (item 7).** Um § lista, para cada calculadora em inglês cujo CSV ou PDF mudou:
+   - o cabeçalho e as três primeiras linhas do CSV do exemplo, antes e depois;
+   - as linhas de texto do PDF do exemplo que mudaram, antes e depois.
+
+   Os números do resultado são os mesmos dos dois lados.
+
+10. **O foco no campo de número das imagens (item 8; F15 R-b-1).**
+    - O mecanismo (REVISAO-F15, b-1): num lote de dois arquivos ou mais, depois do resultado, o Tab para fora do campo confirma o valor no `blur`, o lote refaz, e o `render()` troca a linha antes de o foco pousar no controle seguinte, que sai do DOM.
+    - A regra: no `blur`, o campo guarda o `relatedTarget`. Depois do `render()`, o foco vai a ele, ou ao mesmo lugar na linha nova quando ele foi trocado, como a ilha já faz com o `bandFocus` e o `rowFocus`. Nunca o `body`, e o campo não prende o foco.
+    - Vale no "Tamanho máximo" do Comprimir, na largura e na altura do Redimensionar, e no campo do Cortar se ele refizer o lote.
+    - **A válvula:** os itens 6 e 8 podem sair para uma F16b, cada um com um § e a linha "Run F16b" no grupo 26. Se o item 8 sair, o F15 R-b-1 continua no grupo 25.
+
+11. **Os textos.**
+    - Os do pt das decisões 4 e 7 entram sem mudar uma palavra. Os que nenhuma decisão traz (os cabeçalhos com a unidade, "de" e "até", os rótulos do PDF) você escreve no pt, no registro do site.
+    - Os de en e es saem pelo glossário de `docs/i18n/` e vão num § com os três idiomas lado a lado.
+    - Procure com `grep`, nos textos das calculadoras, dos guias e das páginas institucionais, toda frase que o comportamento novo desminta (um "digite sem separador", um CSV que "traz o texto da tela") e corrija nos três idiomas. A frase que ele torna verdadeira ("abre no Excel") fica, com a conferência no relatório.
+    - O `lint:texto` dá 0 erro, e o `english-leak.test.ts`, o `glossary.test.ts`, o `gate:conteudo` e o `gate:dinheiro-saude` passam.
+
+12. **O orçamento.**
+    - As páginas de calculadora e de imagem carregam os mesmos arquivos JS e as mesmas requisições do ponto de partida (o `budgets.spec.ts` e o `i18n-budgets.spec.ts`, sem mudar número), medido arquivo a arquivo contra o `dist-base`. O limite de 80 KB com gzip do JS inicial nunca passa.
+    - O crescimento da ilha das calculadoras vai num § com o número: a F13b levou um achado médio por 3,5 KB sem § (§ 600).
+    - Se ela passar de 4 KB com gzip, tire código primeiro. O que sobrar vai num § e numa linha do grupo 26, sem cortar os itens 1 a 5 e 7.
+
+13. **O card, o CLS e os anúncios.**
+    - **O card não cresce:** o "the card keeps its height…" do `money-card.spec.ts` passa com as mensagens novas.
+    - **O `nudges` do card (§ 595) usa o `parseScaled`.** Com a decisão 3, o "um zero a mais" de um valor com milhar ("375,0000") passa a ler, e a reserva da frase pode crescer. Meça a altura do card na carga em todas as páginas de calculadora, no `dist-base` e no novo, a 320, a 360 e a 1280.
+      - Se alguma mudar, mantenha no `nudges` os valores de hoje, com um §.
+      - A exceção: a reserva nova resolve o F13b c-3 sem levar nenhum número para baixo da dobra (§ 124 e o "the number ends above the cookie notice…"). Nesse caso, registre num § e conte no relatório.
+    - **O CLS sem gesto continua 0** na carga e na digitação (o `layout-shift.spec.ts` sem mudança de número).
+    - **Nenhum controle novo, então nenhum alvo novo de anúncio:** o `ads.spec.ts`, o `fo-ad-map.spec.ts` e o `ads-coffee.spec.ts` continuam verdes no build de teste.
+
+14. **Os testes.** Cada critério da ficha e o item 8 têm um teste ou uma medida com evidência. Cada teste que mede algo que já existia reprova no `dist-base` (o controle negativo vai no relatório, com a mensagem de erro).
+    - **Critério 1:** Vitest do `parse.ts` com os casos da ficha nos três idiomas e os da decisão 3 ("375," lê 375; "1.234,56" em en não lê, com a dica; "1,234.56" em pt também; um G depois do D), e os negativos de sempre (letras, dois D, o menos num campo sem negativo, 16 dígitos, vazio). E a mensagem de casas com n = 0, 1, 2 e 4 (a taxa). Os esperados são escritos à mão no teste, nunca tirados do `parseScaled`.
+    - **Critério 2:** na `/mortgage-calculator/` e numa calculadora de pt e de es com um valor de milhar, o cursor vai para o meio do número (`setSelectionRange`) e a tecla é digitada como uma pessoa digita (`page.keyboard`, nunca `fill`). Trocar "375,000" por "3755,000" não mostra erro, e a parcela muda para o que o card mostra com "3,755,000" digitado do zero.
+    - **Critério 3:** um registro da região do card (o `p.fo-sr[aria-live]` do `.fo-rhero`) com um `MutationObserver`, contando uma fala por valor digitado: "99" na taxa (en), com 120 ms entre as teclas; "3755,000" no lugar de "375,000"; "425000" do zero; e o mesmo em pt e es. No `dist-base`, o "99" dá duas falas.
+    - **Critério 4:** o Tab (Alt+Tab no WebKit, como o `money-card.spec.ts` faz) depois de um valor errado no último campo principal da hipoteca em en, de uma calculadora de pt e de uma de es, e num campo de lista (as dívidas). O `document.activeElement` é o controle seguinte, nunca o `body`, a 360 e a 1280, nos dois navegadores, e o Shift+Tab volta ao campo.
+    - **Critério 5:**
+      - um Vitest gera o CSV de toda calculadora em cada idioma que ela tem (pelo registro), com os valores do exemplo, com os do `nudges`, com um caso de número negativo (o ajuste do BTU) e com um de data;
+      - cada coluna tem o tipo declarado (número, data ou texto);
+      - cada célula de número casa com `^-?\d+(\.\d+)?%?$` (en e es) ou `^-?\d+(,\d+)?%?$` (pt), e cada data com `^\d{4}-\d{2}-\d{2}$`;
+      - nenhuma célula de texto tem U+2212, número com separador de milhar, unidade de campo ou de tabela, nem nome de mês dos três idiomas (os de `src/i18n/dates.ts`);
+      - nas calculadoras de casa e de saúde (as do F7 a-3), os números do CSV do exemplo são os da fixture `page-example` do oráculo, lidos do JSON, onde ela os traz;
+      - um spec baixa o CSV de uma calculadora de cada tipo (dinheiro em en, casa, saúde, Brasil em pt, dinheiro em es), nos dois navegadores, e confere que os bytes são os do Vitest;
+      - o `money-privacy.spec.ts` e o `money-life-privacy.spec.ts` continuam verdes.
+    - **Critério 6:** o `money-speed.spec.ts` no Chromium, em três rodadas alternadas entre o `dist-base` e o novo, na mesma máquina e na mesma sessão. Em cada caso, a mediana dos p95 do novo não passa a do `dist-base` em mais de 1 ms.
+    - **Critério 7:** o `git diff --stat <ponto de partida> -- src/calc scripts/oracle fixtures` mostra só o `src/calc/parse.ts`; os três oráculos com `--check` dão zero; o `calc-oracle.test.ts` não muda.
+    - **Item 8:** num lote de três no Comprimir (em "Até um tamanho") e no Redimensionar, depois do resultado, o Tab para fora do campo leva o foco ao controle seguinte, nunca ao `body`, nos dois navegadores. O Shift+Tab volta, e o lote refaz uma vez (o contador do `tests/e2e/lib/workers.ts`). No `dist-base`, o foco cai no `body`.
+    - **A lógica pura** (a leitura, a mensagem de casas, o estado do rascunho, o foco seguinte e o CSV de cada tipo de célula) ganha Vitest.
+
+    Cada spec novo tem nome e parte escolhidos pelos tempos de teste da execução completa da PR 31 e pelas partes do `.github/workflows/ci.yml` (`docs/claude/playwright.md` e `docs/claude/ci.md`), com o alvo de 700 s por parte. Se for preciso redividir as partes, a mudança em `.github/workflows/` vai numa PR separada, de merge do Victor, e esta run segue sem ela. Os testes antigos que mudam (os que fixam os bytes do CSV, o `csvNumber` do `money-es.spec.ts`, a dica de hoje) vão num § no formato da § 341: o que pedia, o que pede, por quê e o que continua protegido.
+
+15. **O design system.** Nenhum componente, ícone ou token novo. Os README mudam só onde a F16 os desmentir, com o texto de antes e o de depois no §:
+    - o do NumberField: o formato enquanto se digita, a mensagem de casas e o foco do item 8;
+    - o do ResultHero: a fala que espera o rascunho e o foco quando o Baixar sai;
+    - o da ExportBar: o CSV com uma coisa só por célula.
+
+    Nenhuma regra do design system muda.
+
+16. **O `docs/claude/`.** Uma seção nova no fim do `calculadoras.md`, "F16: digitar sem tropeço e exportar números de verdade": a leitura do campo, a mensagem de casas, o rascunho que cala a região, o foco quando o Baixar sai, o CSV e as pegadinhas que você achar. Pegadinha de Playwright ou do campo das imagens vai numa seção nova no fim do `playwright.md` ou do `imagem.md`. As seções antigas não mudam.
+
+17. **O `docs/PENDENCIAS.md`.**
+    - Saem das tabelas abertas para "Já corrigidos", com a run e o § (no formato `| F3 c-04: … | F12, § 428: … |`):
+      - do grupo 2, o F4 DES-3 e o F7 a-4;
+      - do grupo 3, o F7 a-3, e o F7 a-6, o F6 g-2 e o F4 COR-16 se o item 6 entrar;
+      - do grupo 23, o F13b R-b-1 e o R-b-3;
+      - do grupo 25, o F15 R-b-1, se o item 8 entrar;
+      - o F14 m-1, só no caso que a decisão 2 permite.
+
+      Nenhum id some do arquivo: o `pendencias.test.ts` procura os baixos das revisões (§ 341 e § 447).
+    - O grupo 3, se ficar vazio, mantém o título e ganha uma linha dizendo que a F16 o fechou, como os grupos 5 e 6.
+    - Entra o grupo novo "## 26. O que a F16 deixou", no formato dos grupos 22 a 25 (seis colunas), com o que a run deixar:
+      - os itens 6 e 8, se a válvula os cortar ("Run F16b");
+      - o orçamento, se passar;
+      - o F13b c-3, se a decisão 13 o tocar;
+      - os baixos que a revisão deixar.
+    - O Resumo e o Total acompanham.
+
+18. **As imagens.** JPG de qualidade 80 em `docs/relatorios/fase-16/`, tiradas do `dist/` com o Chromium do Playwright, a 1x e com movimento reduzido, por um script em `.cache/f16/` (o `pnpm screenshots` quebra nas calculadoras, F13b c-1):
+    - `hipoteca-3755-360-antes` e `hipoteca-3755-360-depois`: o "3755,000" no preço, com o erro antes e o resultado depois;
+    - `casas-decimais-360-pt`: a mensagem de casas no card, numa calculadora do Brasil;
+    - `foco-copiar-link-1280`: o foco no Copiar link depois do Tab, com o erro no card.
+
+19. **A PR e o CI.**
+    - **A PR abre em rascunho** logo depois do primeiro push, e cada push roda o job leve.
+    - **Uma conferência no Linux, no meio da run,** depois da junção das frentes (a fatia 3 de "Como trabalhar"). O WebKit e as fontes de lá diferem do Windows (§ 305), e esta run mexe no foco, na fala e na altura do card. Faça o push, espere a execução leve terminar e rode `gh pr edit <n> --add-label ci`:
+      - se o rótulo existir, acompanhe a execução completa, leia os logs, corrija o que só falhou lá e tire o rótulo (`gh pr edit <n> --remove-label ci`);
+      - se não existir, pule a conferência e registre num §: a execução final faz esse papel. Nunca use como atalho o `gh pr ready` seguido do `--undo` com o `ci-ok` a caminho do verde.
+    - **No fim,** com tudo commitado (o relatório, a revisão e as imagens), faça o push, espere a execução leve terminar verde, e só então rode o `gh pr ready`. Acompanhe a execução completa até o fim. Se ela falhar: `gh pr ready --undo`, corrija, commite, faça o push, espere a leve e rode o `gh pr ready` de novo. A falha e a correção vão no relatório.
+    - **As partes:** se a execução completa mostrar uma parte acima de 700 s por causa dos specs desta run, faça como a F14 (§ 648): projete a divisão com os tempos dessa execução e abra a PR separada; o merge dela é do Victor.
+    - **O custo:** o `pnpm ci:custo` da execução final vai na descrição da PR (`gh pr edit <n> --body-file <arquivo>`), mesmo depois do merge.
+
+# Armadilhas conhecidas
+
+- **O `build.format` do Astro** faz de toda página um `.../index.astro`, e o `exactOptionalPropertyTypes` pega campo opcional pela metade: rode o `pnpm tipos` cedo (ele confere também os specs).
+- **Duas esperas se cruzam:** o `SETTLE_MS` de 800 ms do campo (o erro de faixa) e o `SPEAK_AFTER_MS` de 500 ms do card, que o `input` da ilha reinicia. É o mecanismo do R-b-3. A prova conta as falas com teclas espaçadas (120 ms), nunca com `fill`. Teste que espera o erro usa o `expect` (que espera), nunca a leitura na hora (`docs/claude/calculadoras.md`, F8).
+- **A região do card não é `[role="status"]`:** é o `p.fo-sr[aria-live="polite"]` do `.fo-rhero`. O `tests/e2e/lib/status.ts` da F15 grava só os `[role="status"]` do `#fo-tool-root`. Estenda-o sem mudar o que ele grava hoje, ou escreva o registro do card ao lado.
+- **O erro não mora no campo** (§ 545 e § 593): a mensagem está no `#fo-rhero-error`, e só o campo que o card nomeia aponta para ela. Com dois campos errados, o outro aponta para o próprio `#<id>-error`.
+- **O Baixar sai do DOM** (conte com `toHaveCount(0)`, nunca com `toBeDisabled`), e o CSV fica `disabled`, fora da ordem de tabulação, enquanto o resultado é velho.
+- **No WebKit, o Tab não vai a botão:** os specs usam Alt+Tab lá (`money-card.spec.ts`). E o clique tira o foco de onde ele estava: dê `focus()` antes de usar o teclado.
+- **O `relatedTarget` do `blur`** é o alvo do Tab. Confira nos dois navegadores que ele vem (no WebKit, com o Alt+Tab) antes de depender dele, e tenha a ordem do DOM como reserva.
+- **O `useEffect` do Preact roda depois da pintura** (§ 510): o foco que se move depois de o Baixar sair espera o alvo existir.
+- **O card guarda o lugar de cada peça** (§ 595): mensagem nova entra no `heroReserves`, e o `nudges` usa o `parseScaled` (decisão 13). Texto novo no card passa pelo "the card keeps its height with other values…" do `money-card.spec.ts`.
+- **O número no celular tem 4 px de folga** (§ 124, § 544 e § 601): rode o "the number ends above the cookie notice…" e o "the number keeps 2px from the edge of the card…" do `money-card.spec.ts`.
+- **O `lint:texto` preenche os `{placeholders}`** com amostras (`MONEY_SAMPLES`, § 123). O `{n}` da mensagem de casas precisa de amostra que deixe a frase certa nos três idiomas; um placeholder sem amostra vira "$1,234".
+- **O PDF só desenha WinAnsi** (o `winAnsi()` do `report.ts`): texto novo do PDF com caractere de fora some.
+- **Datas:** o "hoje" é o do aparelho. Fixe o relógio com `page.clock` e o fuso no contexto (`docs/claude/calculadoras.md`, F7). As datas por extenso de cada idioma estão em `src/i18n/dates.ts`, e o mês abreviado do es é o do CLDR ("sept").
+- **Um número que um teste procura no `dataLayer` ou no storage pode estar lá por acaso** (a hora do gtag, a porta 4173; § 680): digite 4 algarismos que nenhuma hora ou porta tenha, e procure o número inteiro, com e sem o separador de milhar.
+- **Os oráculos rodam pelo `uv`,** que fica fora do PATH nesta máquina (`docs/claude/windows-git-bash.md`).
+- **O `money-speed.spec.ts` só afirma no Chromium:** o WebKit mede de 1 em 1 ms e só imprime.
+- **O Playwright do Windows pode não sair depois do último teste** (`docs/claude/playwright.md`, "Ajuste da largura do cabeçalho"): veja o que fazer lá.
+- **Frentes que acrescentam blocos no fim do mesmo spec** dão conflito na junção (`docs/claude/windows-git-bash.md`, F15). A guarda da worktree isolada recusa heredoc com `node` ou `git` no mesmo `&&`: grave o arquivo com a ferramenta de escrita e rode cada comando sozinho.
+- **A máquina não mostra o tempo do CI:** use os tempos de teste da execução completa para pôr um spec numa parte (`docs/claude/ci.md`, F14). Os specs pesados vêm juntos na ordem dos nomes.
+- **O "antes":** monte o `dist/` da `origin/main` numa worktree à parte (`dist-base`), nunca trocando a branch do clone principal.
+
+# Critérios de aceitação (cada um com evidência no relatório)
+
+1. Os 7 critérios da ficha da F16, um por um, com a saída real do teste ou da medida, e nenhum afrouxado; o item 8 com a prova da decisão 14.
+2. Os 7 itens de "Dentro" e o item 8 feitos; os itens 6 e 8, se a válvula os cortar, com o § e a linha "Run F16b".
+3. Nenhum item do "Fora" da ficha ou deste prompt foi tocado, e nenhum número de resultado mudou (o critério 7 da ficha).
+4. O card não cresce em nenhuma página, e o CLS sem gesto continua 0 (decisão 13).
+5. Nada sai do aparelho, e nenhum número digitado vai para a URL depois do `?`, para o storage ou para o GA4: o `money-privacy.spec.ts`, o `money-life-privacy.spec.ts`, o `events.spec.ts` e o `image-privacy.spec.ts` passam, com a mensagem de casas, a fala e o CSV novos no caminho.
+6. O `lint:texto` dá 0 erro; o `gate:conteudo`, o `gate:dinheiro-saude`, o `english-leak.test.ts`, o `glossary.test.ts`, o `claude-md.test.ts` e o `pendencias.test.ts` passam.
+7. Os documentos das decisões 15 e 16 e o `PENDENCIAS.md` da 17 estão em dia.
+8. Os testes antigos que mudaram estão num §, um por um; nenhum teste foi pulado, desligado ou afrouxado.
+9. O `pnpm verificar --partes` passou na máquina, com a saída real no relatório; os specs novos não levam nenhuma parte do CI acima de 700 s (ou a PR separada da decisão 19 está aberta); o CI completo está verde.
+10. A revisão adversarial está em `docs/relatorios/REVISAO-F16.md`, sem achado alto ou médio aberto.
+
+# Verificação: rode de verdade
+
+- **A linha de base, antes de mudar código.** No `dist-base`:
+  - `pnpm install --frozen-lockfile` e `pnpm build`;
+  - o `budgets.spec.ts` e o `i18n-budgets.spec.ts` no Chromium, com a saída em `.cache/f16/antes/`;
+  - o número de testes do Vitest e o `pnpm exec playwright test --list` de cada navegador, a lista dos JS de `dist/_astro/` e o tamanho da ilha das calculadoras e da de imagem com gzip;
+  - o D13 reproduzido (o "3755,000" na hipoteca em en e o equivalente em pt e es) e o "99" na taxa com as duas falas: os controles negativos dos critérios 2 e 3;
+  - o foco no `body` do critério 4 e do item 8;
+  - o CSV de toda calculadora em cada idioma, com os valores do exemplo, em `.cache/f16/antes/csv/`, e o texto do PDF do exemplo em inglês, para a decisão 9;
+  - a altura do card na carga em toda página de calculadora, a 320, a 360 e a 1280 (decisão 13);
+  - as imagens do "antes".
+- **Em cada fatia:** `pnpm tipos`, `pnpm lint`, `pnpm build`, o Vitest dos arquivos tocados e os specs que a fatia toca, nos dois projetos (`--project=chromium` e `--project=webkit`):
+  - no mínimo o `money-calc.spec.ts`, o `money-card.spec.ts`, o `money-es.spec.ts`, o `money-home.spec.ts`, o `money-health.spec.ts`, o `money-pix.spec.ts`, o `money-privacy.spec.ts`, o `money-life-privacy.spec.ts`, o `calc-form.spec.ts`, o `calc-labels.spec.ts`, o `axe-calc-states.spec.ts`, o `a11y.spec.ts`, o `layout-shift.spec.ts` e os specs novos;
+  - no item 8, o `image-list.spec.ts`, o `image-target.spec.ts`, o `image-crop.spec.ts`, o `tool.spec.ts` e o `tool-slot.spec.ts`.
+
+  Leia a falha, corrija a causa e repita até passar.
+- **Nunca afrouxe um limite** para um teste passar: o limite é o da ficha, o deste prompt e o do projeto.
+- **Os 16 ms (critério 6):** no fim, as três rodadas do `money-speed.spec.ts` no Chromium, alternando o `dist-base` e o novo, com a máquina livre.
+- **Os oráculos (critério 7):** `uv run --no-project --python 3.13 --with numpy-financial==1.1.0 python scripts/oracle/calc.py --check`, o mesmo com o `calc_br.py` e o `python -I scripts/oracle/calc_home_health.py --check` (os comandos exatos estão nas tabelas do `CLAUDE.md`): os três dão zero.
+- **O `pnpm verificar --partes` roda uma vez,** no último commit de código, com a máquina livre. Se uma parte falhar, rode a mesma parte no ponto de partida, numa worktree. Se ela falhar igual, a falha não é desta run: registre num § e no relatório, e siga. Se não, ache o que esta run mudou e corrija.
+- **No CI:** acompanhe com `gh pr checks <n> --watch` e leia os logs com `gh run view <id> --log`. O `pnpm ci:custo <id>` da última execução vai no relatório (regra 5).
+
+# Autonomia e decisões
+
+Você está rodando sozinho, e ninguém vai responder. Não pare para perguntar nem espere confirmação, em hipótese nenhuma.
+
+Régua de decisão:
+
+1. A ficha da F16 e este prompt.
+2. O D13, o D14 e as regras de todas as runs do `PLANO-UX-QV.md`.
+3. O `PLANO-MELHORIAS.md`, o `PLANO-FILEORCA.md`, o `CLAUDE.md`, o `docs/claude/` e o `docs/design/`.
+4. O `DECISOES.md` e o código.
+5. Na dúvida, a opção mais simples e mais reversível que não piore os 16 ms, a acessibilidade, o orçamento nem o anúncio.
+
+Toda decisão que não está escrita aqui vira um § no `DECISOES.md`, com as alternativas e o porquê. Exemplos: a forma do `Cell` e do `Table` no CSV; o tipo de cada coluna; o nome da coluna "Unidade" e de "de" e "até" em en e es; o controle seguinte quando o Copiar link não existe; onde mora o estado do rascunho; o `nudges` da decisão 13; o nome e a parte de cada spec novo; cada teste antigo que mudou.
+
+Anti-loop: depois de três tentativas com a mesma falha, mude de abordagem e registre a troca.
+
+Bloqueio real não para a run: siga com o resto e registre a pendência, com o que falta para resolver. Exemplos:
+
+- o rótulo `ci` não existe (decisão 19);
+- a main muda no meio da run: `git fetch` e `git merge origin/main` na branch, nunca rebase, renumerando os § se colidirem;
+- o Lighthouse oscila numa URL: rode a parte de novo uma vez e, se cair de novo, ache a causa;
+- o `uv` não acha o Python: siga a pegadinha do `docs/claude/windows-git-bash.md`.
+
+Válvula de estouro, se o tempo ou o limite apertar: só os itens 6 (o resto do grupo 3) e 8 (o campo das imagens) podem sair, para uma F16b, cada um com um § e a linha "Run F16b" no grupo 26. Nunca corte os itens 1 a 5 e 7, os testes dos critérios nem a revisão adversarial final.
+
+# Git e segurança
+
+- **Começo:**
+  - `git switch main` e `git pull --ff-only`;
+  - o `git status` pode mostrar, sem rastreio, os dois arquivos do prompt e a pasta `Claude outputs/`, e, modificado, o `PLANO-FILEORCA.md` (decisão 2). Qualquer outra coisa: não mexa, não commite e registre;
+  - `git switch -c fase-16`. O primeiro commit leva os dois arquivos do prompt e o `PLANO-FILEORCA.md` só no caso que a decisão 2 permite;
+  - se os arquivos do prompt não estiverem lá, grave este prompt, exatamente como o recebeu, em `docs/prompts/prompt-fase-16.txt`.
+- **Commits** pequenos e frequentes, com mensagem em inglês no padrão da main. Adicione por caminho, nunca `git add -A`.
+- **A PR em rascunho** abre logo depois do primeiro push, num comando separado do push: `gh pr create --draft --base main --head fase-16`, com o título "F16: calculadoras, digitar sem tropeço e exportar números de verdade". O título e a descrição vão em português, e a descrição diz que o merge é do CI.
+- **Push da branch nos marcos.** O Workers Builds publica a prévia de cada push (`https://fase-16-fileorca.vmatusita.workers.dev/`), que é o build padrão: mostra o campo, o card e o CSV novos, nunca anúncio.
+- **Agentes em worktree** (regra 6 do `CLAUDE.md`): o primeiro passo de cada um é `git merge --ff-only fase-16`, e todo merge de volta leva o trailer `Co-Authored-By` (`git merge --no-ff -F <arquivo>`). As worktrees são removidas no fim com `git worktree remove`.
+- **No GitHub, a run só faz isto:**
+  - o push da branch;
+  - na PR dela, `gh pr create`, `gh pr ready`, `gh pr edit` (só a descrição e o rótulo `ci`) e o `gh pr ready --undo` só depois de uma execução final vermelha;
+  - leitura (`gh run`, `gh pr checks`, `gh pr view`, `gh label list` e `gh api` sem método);
+  - um `gh run rerun` por falha que pareça instável, registrado;
+  - e, só se a decisão 19 pedir, a PR separada das partes do CI.
+- **Na web, nada.** Esta run não precisa de página de fora.
+- **Nunca:**
+  - push na main, force push, `git reset --hard`, `--amend` ou `--no-verify`; mexer em `core.hooksPath` ou em `.githooks/`;
+  - `gh pr merge`, `gh label` (além do `list`), `gh api` com método de escrita, `gh secret`, `gh variable` ou `gh repo`;
+  - editar o `PLANO-FILEORCA.md` por qualquer caminho;
+  - postar, criar conta ou subir arquivo para qualquer serviço;
+  - `wrangler deploy` em qualquer forma.
+
+  O `.claude/settings.json` nega boa parte disso. Não tente contornar.
+
+# Como trabalhar
+
+1. **Explorar,** com subagentes Sonnet em paralelo, cada um voltando só com um resumo:
+   - (a) a ficha e este prompt num checklist "requisito → onde vai ficar → que teste ou comando prova";
+   - (b) o campo: o `parse.ts`, o `CalcField.tsx`, o `form.ts`, o `store.ts`, o `ResultHero.tsx`, o `CalcPanel.tsx` (o `heroReserves` e o `nudges`), o `Fields.tsx` e o `ExportBar.tsx`; o caminho de uma tecla até o card e a região; o caminho do foco no Tab;
+   - (c) o CSV e o PDF: o `exports.ts`, o `view.ts`, o `types.ts`, cada tabela de `defs/` (o tipo de cada coluna, a unidade, as datas, os intervalos), o `report.ts` e as fixtures `page-example` das calculadoras de casa e de saúde (as do F7 a-3);
+   - (d) o campo das imagens (item 8): o `NumberField.tsx`, o `render()` do `ImagePanel.tsx`, o `bandFocus` e o `rowFocus`, e onde o campo aparece;
+   - (e) os testes que fixam o desenho de hoje (os `money-*`, os `calc-*`, o `axe-calc-states`, o `a11y`, o `layout-shift`, o `calc-defs.test.ts` e os testes do `lint:texto`), com o que cada um lê;
+   - (f) o orçamento, os anúncios e as partes do CI: as medidas do `budgets.spec.ts`, o `.github/workflows/ci.yml`, o `--list` e os tempos da execução completa da PR 31;
+   - (g) os textos e os documentos: os `i18n` das calculadoras, o glossário, as amostras do `lint:texto`, os README do `docs/design/` da decisão 15 e o formato do `PENDENCIAS.md`.
+2. **A linha de base** (seção "Verificação").
+3. **Planejar.** Escreva `docs/relatorios/fase-16-plano.md`, autossuficiente. Ele é o gabarito da revisão final e traz:
+   - o ponto de partida e a linha de base;
+   - os § reservados;
+   - a interface que as frentes dividem: as chaves dos textos, a forma do `Cell` e do `Table` no CSV, e o estado do rascunho;
+   - quem faz o quê, a ordem das fatias e os arquivos de cada frente;
+   - cada critério ligado a um teste ou comando.
+4. **Implementar** em fatias, cada uma com as verificações verdes antes da próxima:
+   1. **O agente principal:** o primeiro commit, o push e a PR em rascunho. Depois, a base: as chaves de texto novas (decisões 4, 7 e 8) nos tipos e nos três idiomas, a forma nova do `Cell` e do `Table` (decisão 7) só no tipo, e os § reservados. Commit e push.
+   2. **Três frentes ao mesmo tempo,** cada uma num agente `opus` na sua worktree, a partir desse commit:
+      - **N (o número, a voz e o foco):** os itens 1 a 4, no `parse.ts`, no `CalcField.tsx`, no `form.ts`, no `store.ts`, no `ResultHero.tsx` e no `CalcPanel.tsx` (as reservas e o `nudges`), com os testes dos critérios 1 a 4 e 6 e a medida da decisão 13;
+      - **X (a exportação):** os itens 5, 6 e 7, no `exports.ts`, no `view.ts`, nas tabelas de `defs/` e nos rótulos do PDF, com os testes do critério 5 e do item 6, a conferência com o oráculo e o § dos bytes;
+      - **I (o campo das imagens):** o item 8, com o teste dele.
+
+      A N e a X podem tocar o `types.ts` e as definições: o plano diz quem é dono de cada parte, e a junção resolve o resto. Ao mesmo tempo, o agente principal faz o que não colide com elas: os textos das páginas (as frases desmentidas), os README do `docs/design/`, o `docs/claude/`, o `PENDENCIAS.md` e os §.
+   3. **O agente principal junta N, X e I,** resolve os conflitos, deixa o `pnpm tipos` verde, roda os specs das três frentes nos dois navegadores e os de anúncio no build de teste, e faz a conferência no Linux (decisão 19).
+   4. **O agente principal fecha:** o orçamento contra o `dist-base`, as três rodadas dos 16 ms, a altura do card, os oráculos com `--check`, as imagens e as tabelas do relatório.
+5. **A revisão adversarial final,** no método da F3 (`docs/claude/windows-git-bash.md`):
+   - sobre um commit fixo e registrado da branch, numa worktree só de leitura, com o próprio `pnpm install --frozen-lockfile`, o próprio `pnpm build` e o próprio build de teste;
+   - contra a ficha, este prompt e o plano;
+   - cada lente com o próprio `FO_PORT`, escrevendo só no `.cache/lente-<x>/` da worktree.
+
+   A F16 mexe no que a calculadora de dinheiro e a de saúde leem e exportam, na voz e no foco: são seis lentes Sonnet em contexto limpo (regra 3), apontando só lacunas de correção ou de requisito, nunca preferência de estilo:
+   - (a) **o número e a conta:** a leitura contra a decisão 3, caso a caso, nos três idiomas; a mensagem de casas contra a decisão 4; nenhum número de resultado mudado; os oráculos; o link do cenário; o `nudges`;
+   - (b) **acessibilidade:** uma fala por valor digitado; o foco seguinte, nunca o `body` e sem armadilha; o Shift+Tab; o `aria-invalid`, o `aria-describedby` e a § 593; o axe nos dois temas e nos dois navegadores; o item 8;
+   - (c) **o CSV e o PDF:** cada calculadora em cada idioma; o tipo de cada coluna; a unidade; as datas; os intervalos; o separador e o BOM; o PDF (a-6, g-2 e COR-16) e o WinAnsi; o § dos bytes; a leitura dos números por uma planilha;
+   - (d) **privacidade e anúncios:** nada para a URL depois do `?`, para o storage ou para o GA4; o CSV e o PDF feitos no aparelho, com os nomes de arquivo fixos; o link do `#`; os anúncios verdes;
+   - (e) **desempenho e layout:** os 16 ms; o card que não cresce; a regra dos 740 px; o CLS; o orçamento e as partes do CI;
+   - (f) **textos, idiomas e documentos:** os textos contra as decisões; en e es pelo glossário; as frases desmentidas; o `lint:texto`; os README, o `docs/claude/`, o `PENDENCIAS.md` e os §.
+
+   Cada achado médio ou acima tem um cético próprio, que tenta refutá-lo, com a regra "na dúvida, refutado"; os baixos de cada lente vão a um cético só. As correções ficam num agente só (`opus`), e uma segunda passada das lentes dos achados corrigidos revisa o diff delas. Os baixos que sobrarem vão para o grupo 26 do `docs/PENDENCIAS.md`. Tudo fica em `docs/relatorios/REVISAO-F16.md`.
+6. **Fechar:** o `pnpm verificar --partes`, o relatório e a sequência de fim da decisão 19.
+
+# Relatório final
+
+Escreva `docs/relatorios/fase-16.md` em português, no formato do `fase-15.md`, commitado na branch antes do `gh pr ready`. Ele traz:
+
+- o resumo: o que muda para a pessoa no campo, na fala, no foco, no CSV, no PDF e no campo das imagens, em até cinco linhas;
+- o que entrou, por item (os 7 da ficha e o 8), com os arquivos e os §;
+- a evidência de cada um dos 7 critérios e do item 8, com a saída real dos comandos e dos specs, e os controles negativos com a mensagem de erro;
+- as tabelas:
+  - a leitura: cada caso do Vitest (o texto, o idioma, o campo, o valor ou a mensagem antes e depois);
+  - as falas: cada sequência digitada, com o número de falas e o texto, antes e depois, nos dois navegadores;
+  - o foco: onde ele pousa depois do Tab, antes e depois, por página, largura e navegador, e o mesmo no item 8;
+  - o CSV: por calculadora e idioma, as colunas e o tipo de cada uma; em inglês, o cabeçalho e as três primeiras linhas antes e depois (o § da decisão 9);
+  - o PDF: as linhas que mudaram (item 6);
+  - os 16 ms: o p50 e o p95 de cada caso, nas três rodadas de cada lado, com a mediana;
+  - a altura do card na carga (decisão 13): as páginas que mudaram, se alguma;
+  - o orçamento: os JS e as requisições de cada página tocada, antes e depois, e o tamanho de cada ilha com gzip;
+- o número de testes do Vitest e do `--list` de cada navegador, antes e depois, e os testes antigos que mudaram, com o § de cada um;
+- a saída real do `pnpm verificar --partes`, com o tempo de cada parte e a soma;
+- a saída dos três oráculos com `--check`;
+- o custo (regra 5): o `pnpm ci:custo` da última execução antes do relatório; o da execução final vai na descrição da PR;
+- o que a conferência no Linux achou, ou o § que diz por que ela não houve;
+- o resumo da revisão, apontando para o `REVISAO-F16.md`;
+- as imagens de `docs/relatorios/fase-16/`;
+- o link da prévia (`https://fase-16-fileorca.vmatusita.workers.dev/`);
+- as decisões novas, apontando os §, e o que a válvula cortou, se cortou;
+- **a lista do que é do Victor, em passos:**
+  1. `git pull` e, na prévia ou no fileorca.com depois do deploy, na hipoteca em inglês, apagar e digitar no meio do número ("3755,000" no lugar de "375,000"); numa calculadora do Brasil, o mesmo com o ponto; e, num campo de dinheiro de lá, digitar um valor com três casas ("1.234,567") para ler a mensagem de casas.
+  2. Baixar três CSV (uma calculadora de dinheiro em inglês, uma de casa ou saúde e uma do Brasil), abrir no Google Planilhas e no Excel e somar uma coluna (o do Brasil numa planilha em português).
+  3. Com um leitor de tela (NVDA no computador ou TalkBack no Android), digitar "99" na taxa e ouvir uma fala só.
+  4. Se a linha do `PLANO-FILEORCA.md` ainda faltar, pô-la (o texto está no grupo 24, F14 m-1).
+  5. Criar o rótulo `ci` (Issues → Labels), se ainda não existir.
+  6. Se a decisão 19 abriu a PR das partes do CI, mesclá-la depois da execução completa dela.
+  7. Gerar o prompt da F17 com a skill, com o SHA da main e o grupo 26 do `docs/PENDENCIAS.md`.
+
+Termine a resposta final com um resumo de cinco linhas em português, o link da PR, o estado do CI (mesclada ou esperando, e por quê) e os passos do Victor.
+
+# Idioma
+
+Em português: a narrativa, o plano, a revisão, o relatório, o `DECISOES.md`, o `docs/PENDENCIAS.md`, os README do `docs/design/`, o `docs/claude/` e a descrição da PR. O site fala inglês, português e espanhol, nos arquivos de tradução de cada idioma.
+
+Em inglês: o código, os nomes de arquivo, os identificadores, as classes do CSS e os commits.
+```
+
+## Como executar
+
+São quatro etapas: o pré-voo, a run, o acompanhamento e a volta.
+
+### 1. Pré-voo (uns 10 min)
+
+Os arquivos `prompt-fase-16.md` e `prompt-fase-16.txt` já estão em `docs\prompts\` no seu clone, sem commit. A run põe os dois no primeiro commit dela.
+
+No PowerShell:
+
+```powershell
+cd C:\Users\vmatusita\projetos\fileorca
+git switch main
+git pull --ff-only
+git log -1 --oneline        # ee767e2 (a F15) ou mais novo
+git status                  # sem rastreio: os dois arquivos do prompt e "Claude outputs\"
+git config core.hooksPath   # tem que responder .githooks
+gh auth status              # logado
+claude --version            # o modo auto pede 2.1.83 ou mais
+```
+
+Depois:
+
+1. **Ponha a linha do `PLANO-FILEORCA.md` (1 min, opcional).** Ela ainda falta: conferi o arquivo hoje. É o F14 m-1, que só você pode fazer, porque o `.claude/settings.json` proíbe as runs de editar esse arquivo. Abra o `PLANO-FILEORCA.md` no editor. Depois da linha 3 (a que começa com "29/out/2026") e da linha em branco que vem depois dela, cole esta linha e mais uma linha em branco:
+
+   ```text
+   **Plano de UX e qualidade de vida (9/nov/2026):** as fichas da F14 à F18 estão no PLANO-UX-QV.md. Até a F17 ele não muda nada deste plano; a única mudança no contrato (a linha 15, o catálogo) entra na F18, pela tabela "Mudanças no contrato" do PLANO-MELHORIAS.md.
+   ```
+
+   Salve em UTF-8 e confira com `git diff --stat`: tem que dar `PLANO-FILEORCA.md | 2 ++`. A run confere o diff e commita a linha junto com o prompt. Se você pular este passo, a run segue sem a linha, e ela continua como pendência sua.
+2. **Crie o rótulo `ci`, se ainda não criou (30 s, recomendado).** No GitHub, abra Issues → Labels → New label, com o nome `ci`. Com ele, a run confere o WebKit do Linux no meio, depois de juntar as frentes. Esta run mexe no foco, na fala e na altura do card. Sem o rótulo, uma falha que só aparece no Linux custa uma volta a mais no fim (foi o que aconteceu na F14 e na F15).
+3. **A energia:** `powercfg /change standby-timeout-ac 0`. Volte ao normal depois da run.
+4. **O disco:** a run faz o build do site e o build de teste várias vezes, em até cinco worktrees (a base, as três frentes e a revisão). Deixe uns 20 GB livres.
+
+### 2. Rodar
+
+```powershell
+claude --model opus --permission-mode auto -n fase-16
+```
+
+Cole o conteúdo inteiro de `docs\prompts\prompt-fase-16.txt`, que começa por `ultracode`, e deixe rodar.
+
+Opcional, logo depois de colar:
+
+```text
+/goal os itens 1 a 8 da F16 feitos e os 7 critérios da ficha e o do item 8 com evidência no relatório, o pnpm verificar --partes verde, docs/relatorios/REVISAO-F16.md sem achado alto ou médio aberto e a PR da fase-16 pronta, com o ci-ok verde
+```
+
+Um avaliador separado confere essa condição a cada turno.
+
+Se cair ou o limite acabar, retome com `claude --resume fase-16` e mande: "continue de onde parou: leia docs/relatorios/fase-16-plano.md, o git log da branch fase-16 e o estado da PR, e siga".
+
+Headless, se preferir disparar e sair:
+
+```powershell
+$OutputEncoding = [System.Text.UTF8Encoding]::new()
+Get-Content -Raw -Encoding utf8 docs\prompts\prompt-fase-16.txt |
+  claude -p --model opus --permission-mode auto --output-format json > $HOME\run-fase-16.json
+(Get-Content $HOME\run-fase-16.json | ConvertFrom-Json).session_id   # guarde: é o único jeito de retomar
+```
+
+**Por que o modo `auto`.** A run faz muita coisa sem perguntar:
+
+- builda o site e o build de teste e roda o Playwright em várias portas, também em worktrees;
+- cria e remove as worktrees das frentes e da revisão;
+- roda os três oráculos pelo `uv` (só o `--check`), o LanguageTool local e o Lighthouse;
+- faz push da branch, abre a PR em rascunho, põe e tira o rótulo `ci` (se existir) e marca a PR como pronta.
+
+O `auto` deixa isso passar e barra o que parece arriscado. As regras `deny` do `.claude/settings.json` valem em qualquer modo (push na main, `gh pr merge`, `gh api` com método, `wrangler deploy`, reset, amend e a edição do `PLANO-FILEORCA.md`), e o prompt não pede nada disso. A run não usa a web.
+
+**O tamanho da run.** Menor que a F15 em interface e maior em teste:
+
+- duas frentes grandes (o campo e o CSV) e uma pequena (o campo das imagens), mais a junção;
+- o CSV de toda calculadora em cada idioma vira Vitest, e o critério 5 confere as de casa e saúde contra o oráculo;
+- o `money-speed.spec.ts` roda seis vezes (três de cada lado), e a altura do card é medida em todas as páginas de calculadora, em três larguras;
+- a revisão tem seis lentes, com céticos (a run mexe no que a calculadora de dinheiro e a de saúde leem e exportam);
+- o `pnpm verificar --partes` local leva uns 55 min (foram 52 na F15).
+
+Comece com folga no limite semanal do Claude Code. Se apertar, a válvula manda o resto do grupo 3 (item 6) e o campo das imagens (item 8) para uma F16b. O resto nunca sai.
+
+### 3. Acompanhar
+
+- **Não mexa no clone durante a run.** Ela está na branch `fase-16` dessa pasta.
+- **A PR aparece cedo, em rascunho.** Cada push roda só o job leve (uns 4 min).
+- **A prévia** (`https://fase-16-fileorca.vmatusita.workers.dev/`) é o build padrão: dá para digitar no meio do número e baixar o CSV novo, mas ela nunca mostra anúncio.
+- **Não marque a PR como pronta.** O `gh pr ready` é o último passo da run. Depois dele, o CI roda tudo e mescla sozinho.
+
+### 4. Ao voltar
+
+1. **Atualize a main:** `git switch main` e `git pull --ff-only`. Se a PR não foi mesclada, o relatório e a resposta final dizem por quê.
+2. **Confira no navegador,** na prévia ou no fileorca.com depois do deploy:
+   - na hipoteca em inglês, ponha o cursor depois do "375" e digite um 5: tem que dar a parcela de 3.755.000, sem erro;
+   - numa calculadora do Brasil, o mesmo com o ponto, e um valor com três casas ("1.234,567") para ver a mensagem de casas.
+3. **Abra três CSV** (dinheiro em inglês, casa ou saúde, e Brasil) no Google Planilhas e no Excel e some uma coluna. O do Brasil, numa planilha em português.
+4. **Com o NVDA ou o TalkBack,** digite "99" na taxa e confira que sai uma fala só.
+5. **Leia `docs\relatorios\fase-16.md`** e confira as evidências:
+   - a tabela da leitura: os casos da ficha nos três idiomas;
+   - as falas: uma por valor digitado, e duas no "antes";
+   - o foco: nenhum `body` na tabela do "depois";
+   - o CSV: nenhuma célula com milhar, unidade ou data por extenso, e as de casa e saúde batendo com o oráculo;
+   - os 16 ms: a mediana do p95 no máximo 1 ms acima da do ponto de partida;
+   - os oráculos com `--check` zerados, o `pnpm verificar --partes` verde e o veredito do `REVISAO-F16.md`.
+6. **Olhe as imagens** de `docs\relatorios\fase-16\`, sobretudo `hipoteca-3755-360-antes.jpg` contra `hipoteca-3755-360-depois.jpg`.
+7. **Depois, pelo plano:** gere o prompt da F17 com a skill (o SHA da main e o grupo 26 do `docs\PENDENCIAS.md`).
+
+Se o resultado vier errado: depois de duas correções que não resolvem, não emende. Peça um prompt novo de run curta, com o que aprendeu.
+
+## Suposições que fiz
+
+- **A main está em `ee767e2`,** com a F15 mesclada (PR 31). O próximo § livre é o 681, e o grupo novo do PENDENCIAS é o 26.
+- **O F15 R-b-1 entra como item 8,** como você escolheu, feito por uma frente pequena e cortável pela válvula, junto com o item 6.
+- **O "3,755,00" ganha a dica do separador.** A ficha diz que ele "continua com a dica", mas hoje ele não a mostra: a dica só aparece quando o texto com os separadores trocados lê, e "3.755.00" não lê. Escrevi a regra para a dica aparecer também quando o texto termina num separador de milhar seguido de 1 ou 2 dígitos.
+- **Um separador de milhar depois do decimal não é ignorado.** Senão, "1.234,56" digitado na página em inglês viraria um erro de casas em vez da dica de usar ponto.
+- **A mensagem de casas leva ponto final,** como as outras mensagens do card. A ficha a escreve sem ponto.
+- **O % fica colado ao número no CSV** ("5.00%"), como o ajuste de idiomas decidiu (§ 321, C-5). O Excel e o Planilhas o leem como número, então não o tratei como unidade.
+- **Uma coluna que mistura unidades ganha a coluna "Unidade" no CSV.** É o caso das tabelas de duas colunas (item e valor) de casa e saúde. O dinheiro nela leva o código da moeda (USD; BRL no pt). Um intervalo (a janela fértil, a faixa do BMI) vira duas colunas, "de" e "até". A tela e o PDF não mudam. A ficha não diz o que fazer com uma coluna de unidades mistas, e esse foi o jeito mais simples que deixa cada célula com um número só.
+- **O rótulo do grupo ("Year 1", "Ano 1") continua texto.** A ficha não o pede como número, e mudá-lo mexeria nos bytes de todas as calculadoras com cronograma.
+- **O `nudges` do card (§ 595) passa a ler valores com milhar.** Hoje, o "um zero a mais" de "375,000" não lê, então a reserva nunca contou com ele. Se a altura do card mudar em alguma página, a run volta os valores de hoje, a menos que a reserva nova resolva o F13b c-3 sem levar nenhum número para baixo da dobra.
+- **Os 16 ms comparam a mediana dos p95** de três rodadas de cada lado, alternadas, na mesma máquina. Um p95 só oscila demais para valer como critério de 1 ms.
+- **O critério 2 compara o card com o "3,755,000" digitado do zero,** nunca com um número tirado do motor. A ficha só pede que a parcela mude; essa comparação prova que o valor lido é o certo.
+- **A revisão tem seis lentes,** o teto da regra 3, porque a run mexe no que a calculadora de dinheiro e a de saúde leem e exportam.
+- **O merge é automático:** a PR não mexe em `.github/`. Se as partes do CI precisarem de nova divisão, isso vai numa PR separada, com merge seu.

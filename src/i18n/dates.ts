@@ -56,7 +56,7 @@ export function mediumDate(iso: string, lang: Lang): string {
 // abbreviated and kept with its day by a no-break space, so a narrow column breaks a date only after its comma ("Nov 1," and
 // "2026"), never inside "Nov 1". A range says its year once: "Oct 26 to 31, 2026", "Oct 26 to Nov 1, 2026", "Dec 30, 2026 to
 // Jan 4, 2027", what Intl.DateTimeFormat#formatRange gives in Node with the month short, with the word of the page for the
-// dash (the test compares them). The CSV and the PDF keep the long date.
+// dash (the test compares them). The PDF keeps the long date; the CSV writes the day as YYYY-MM-DD (F16, DECISOES § 688).
 const NBSP = ' ';
 
 /** A day of a narrow table: "Oct 31, 2026" (the medium date with the month glued to its day). */

@@ -22,8 +22,8 @@
 //
 // State lives in one mutable model (the run loop is async and must see the latest values); every change
 // calls render(). Outputs are kept as Blobs, object URLs are revoked when replaced and at "Start over".
-import { useEffect, useRef, useState } from 'preact/hooks';
-import type { ComponentChildren, JSX, TargetedMouseEvent } from 'preact';
+import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
+import type { ComponentChildren, JSX, TargetedFocusEvent, TargetedMouseEvent } from 'preact';
 import type { ImagePanelTexts } from '../../i18n/types.ts';
 import { fileSize, fmt, percent } from '../../i18n/format.ts';
 import { browserLabel, track } from '../../analytics/events.ts';
@@ -39,6 +39,7 @@ import { bringIntoView, catchDrops, filesOf, imageFilesOf, pasteBelongsToElement
 import { carries, plainClick, storeForNext, takeInbox, workerControls, type Outgoing } from './inbox.ts';
 import { acceptAttribute, batchOutcome, batchPercent, codecOf, isLossy, totals, worthSaying, type Ready } from './summary.ts';
 import { bundleKey, moved, putBack, successor } from './batch.ts';
+import { landingMove, landingSpent } from './landing.ts';
 import type { ChipData, FileInfo, ImagePanelData, ImageTool, SelectedFile } from './types.ts';
 import alertIcon from '../../../docs/design/assets/Icons/alert.svg?raw';
 import arrowIcon from '../../../docs/design/assets/Icons/arrow-right.svg?raw';
@@ -177,6 +178,12 @@ interface Model {
   wantDownload: boolean;
   /** F15 (DECISOES § 667): a chip of Image to PDF was pressed while the PDF was being made again; it takes the new one. */
   wantFollow: ChipData | null;
+  /**
+   * F16 (item 8; DECISOES § 692): Tab left a number field of the options for a control of a row (landing.ts). The row, the
+   * kind of the control (its tag and classes), the control itself, and the place the island gave the focus since (null:
+   * none yet). Spent when the batch is done, dropped when the person puts the focus anywhere else.
+   */
+  landing: { row: number; tag: string; kind: string; node: HTMLElement; placed: HTMLElement | null } | null;
 }
 
 function newModel(): Model {
@@ -185,7 +192,7 @@ function newModel(): Model {
     selected: null, expanded: false, announce: '', coffee: '', completeSent: false, newUse: false, focusDownload: false, broken: new Set(),
     rowFocus: null, slotFocus: false, bandFocus: false, successors: [], focusRowId: null, compareOpen: false, coffeeRoom: false, bandLock: null,
     from: null, lost: null, carrying: false, undo: null, focusUndo: false, focusBin: null, focusMove: null, hush: 0, wantDownload: false,
-    wantFollow: null,
+    wantFollow: null, landing: null,
   };
 }
 
@@ -315,6 +322,22 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     setTick((tick) => tick + 1);
   };
   /**
+   * F16 (item 8; F15 R-b-1; DECISOES § 692): Tab out of a number field of the options (the NumberField: "Maximum size" of
+   * Compress, the width and height of Resize, the box of Crop) toward a control of a row. The field commits on blur, the
+   * batch is made again, and the render that follows, in a microtask before the focus lands, swaps that control. The
+   * capture phase of the blur, on the island, comes before the field's own handler, with the control still in its row: its
+   * focusout comes after the render, with the control already out (measured in Chromium and WebKit). The field keeps no
+   * focus: the mark only follows the place the focus was going to.
+   */
+  const noteLanding = (event: TargetedFocusEvent<HTMLDivElement>) => {
+    const field = event.target;
+    const next = event.relatedTarget;
+    if (!(field instanceof HTMLInputElement) || field.type !== 'text' || !bandRef.current?.contains(field)) return;
+    if (!(next instanceof HTMLElement) || !listRef.current?.contains(next)) return;
+    const row = next.closest<HTMLElement>('[data-row]');
+    if (row) m.landing = { row: Number(row.dataset['row']), tag: next.tagName.toLowerCase(), kind: next.className, node: next, placed: null };
+  };
+  /**
    * F15 (DECISOES § 659): a gesture of the list says its sentence through the status region, emptied first and set 50 ms
    * later (a live region speaks only when its text changes), as say() of the PDF island. A run that a change started
    * after the result (an option) adds no "Done!" of its own when a move speaks during it (§ 629).
@@ -377,6 +400,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     m.items = [];
     m.focusMove = null;
     m.focusBin = null;
+    m.landing = null;
     m.wantDownload = false;
     m.wantFollow = null;
     dropBundle();
@@ -911,6 +935,40 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     return want.length === have.length && want.every((id, index) => id === have[index]);
   }
 
+  /**
+   * F16 (item 8; DECISOES § 692): the mark of noteLanding, after every render and before the paint (a layout effect, in the
+   * same microtask as the render), so the page never holds the focus in between: the control of the same kind in the same
+   * row when it is there, the row itself while it waits without it, and the row's first control if the batch ends without
+   * it (landing.ts). The mark is spent when the batch is done (§ 510: only with its target on screen), never at the end of
+   * any other run of the effect (the F13a pitfall of docs/claude/imagem.md), and dropped as soon as the person puts the
+   * focus anywhere else: nothing brings it back to the field.
+   */
+  useLayoutEffect(() => {
+    const landing = m.landing;
+    if (!landing) return;
+    const active = document.activeElement;
+    const here = landing.placed ?? landing.node;
+    const row = listRef.current?.querySelector<HTMLElement>(`[data-row="${landing.row}"]`) ?? null;
+    const control = landing.node.isConnected
+      ? landing.node
+      : ([...(row?.querySelectorAll<HTMLElement>(landing.tag) ?? [])].find((node) => node.className === landing.kind) ?? null);
+    const seen = {
+      lost: !active || active === document.body || active === document.documentElement,
+      onHere: active === here,
+      hereConnected: here.isConnected,
+      row: row !== null,
+      control: control !== null,
+      busy: m.phase === 'processing',
+    };
+    const move = landingMove(seen);
+    const next = move === 'control' ? control : move === 'row' ? row : move === 'first' ? (row?.querySelector<HTMLElement>('button, a[href]') ?? row) : null;
+    if (next) {
+      if (next !== active) next.focus();
+      landing.placed = next;
+    }
+    if (landingSpent(seen, move)) m.landing = null;
+  });
+
   useEffect(() => {
     if (m.phase === 'done' && m.focusDownload && downloadRef.current) {
       m.focusDownload = false;
@@ -946,9 +1004,11 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
     // the options that gave way to the result's row come back folded: the focus goes to "Adjust".
     // The WaterLevel takes the focus without scrolling: it is the rectangle itself, 356px tall, already in view, and on a
     // first visit the browser scrolled its foot over the cookie notice (DECISOES § 514).
+    // F16 (§ 692): while the mark of a number field holds (the layout effect above), it has the last word; an effect of an
+    // earlier render that runs at the start of the next one (§ 510) finds the page with the focus in the middle of the blur.
     const level = levelRef.current;
     const active = document.activeElement;
-    if (!active || active === document.body || active === document.documentElement) {
+    if (!m.landing && (!active || active === document.body || active === document.documentElement)) {
       if (m.rowFocus !== null) {
         const wanted = [m.rowFocus, ...m.successors];
         if (!wanted.some(focusRow)) {
@@ -1599,7 +1659,7 @@ export default function ImagePanel<S extends object, O>(props: ImagePanelProps<S
   const roomLabel = (carry: NonNullable<ChipData['carry']>): string => (pdf ? carry.one : fmt(carry.many, { count: 10 }));
 
   return (
-    <div class="fo-tool-island" ref={rootRef} data-state={islandState}>
+    <div class="fo-tool-island" ref={rootRef} data-state={islandState} onBlurCapture={noteLanding}>
       <div class="fo-slot" ref={slotRef} onPointerEnter={warmOnce} data-coffee={m.coffeeRoom ? '' : undefined}>
         <Oli pose={pose} class="fo-slot__oli" />
         {panel}
