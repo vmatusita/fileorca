@@ -2,9 +2,10 @@
 // scenario link. The link keeps the numbers after the # (the part the browser never sends): the page
 // reads it once, after hydration, and never writes to the URL (no pushState, no replaceState, no
 // location.hash =); the Copy link button only builds the text (DECISOES § 114).
-import { formatScaled, type NumberLang } from '../../calc/parse.ts';
+import { formatScaled, parseScaled, readNumber as readTyped, scaledOf, type NumberLang } from '../../calc/parse.ts';
 import { dayOf } from '../../calc/dates.ts';
-import type { DateSpec, FieldSpec, ListSpec, NumberSpec, Values } from './types.ts';
+import { fmt } from '../../i18n/format.ts';
+import type { CalcSharedTexts, DateSpec, FieldSpec, ListSpec, NumberSpec, Values } from './types.ts';
 
 export const LINK_VERSION = '1';
 
@@ -41,6 +42,55 @@ export function dayInRange(spec: Pick<DateSpec, 'min' | 'max'>, iso: string): bo
 
 export function inRange(spec: { min: number; max: number }, value: number): boolean {
   return Number.isSafeInteger(value) && value >= spec.min && value <= spec.max;
+}
+
+/** The three texts of the decimals message (F16, item 2; DECISOES § 684). */
+export type DecimalsTexts = Pick<CalcSharedTexts, 'decimalsMany' | 'decimalsOne' | 'decimalsNone'>;
+
+/** The decimals message of a field that keeps `n` decimals: "Use up to 2 decimal places.", "…1 decimal place.", "Use a whole number." */
+export function decimalsMessage(texts: DecimalsTexts, n: number): string {
+  if (n === 0) return texts.decimalsNone;
+  return n === 1 ? texts.decimalsOne : fmt(texts.decimalsMany, { n });
+}
+
+/** What a number field needs to say about a text: its kind and decimals, its fixed range and whether it takes a minus. */
+export interface FieldRule {
+  kind: NumberSpec['kind'];
+  decimals?: number | undefined;
+  min: number;
+  max: number;
+  negative?: boolean | undefined;
+}
+
+/** The words of one field: its range, how the page writes decimals (the hint) and the decimals message. */
+export interface FieldTexts extends DecimalsTexts {
+  error: string;
+  hint?: string | undefined;
+}
+
+/**
+ * The message of a text typed in a number field (F16, items 1 and 2; DECISOES § 683 and § 684):
+ * - none when it reads and is in the range;
+ * - the range alone when it reads and is out of the range ("99" in a rate);
+ * - the decimals message when it is a number of the language with more decimals than the field keeps and the value with those
+ *   decimals cut off is in the range, with no range and no hint ("6.55555" in a rate, "30.5" in a term);
+ * - else the range, and in a field that has decimals the hint of how the page writes them when the text ends in a thousands
+ *   separator and one or two digits ("6,5" in English) or reads with the two separators swapped ("1.234,56" in English,
+ *   "375.000" in an English price; DECISOES § 251 and § 254).
+ */
+export function fieldMessage(text: string, lang: NumberLang, field: FieldRule, texts: FieldTexts): string | undefined {
+  const places = decimalsOf(field.kind, field.decimals);
+  const negative = field.negative === true;
+  const typed = readTyped(text, lang, negative);
+  const value = typeof typed === 'string' ? null : scaledOf(typed, places);
+  if (value !== null) return inRange(field, value) ? undefined : texts.error;
+  if (typeof typed !== 'string' && typed.fraction.length > places) {
+    const cut = scaledOf({ ...typed, fraction: typed.fraction.slice(0, places) }, places);
+    if (cut !== null && inRange(field, cut)) return decimalsMessage(texts, places);
+  }
+  if (texts.hint === undefined || places === 0) return texts.error;
+  const swapped = text.replace(/[.,]/g, (mark) => (mark === '.' ? ',' : '.'));
+  return typed === 'separator' || parseScaled(swapped, lang, places, negative) !== null ? `${texts.error} ${texts.hint}` : texts.error;
 }
 
 /** A field whose value passes the one it depends on: key → the problem ('over'). */

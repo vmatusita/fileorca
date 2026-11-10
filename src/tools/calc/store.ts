@@ -35,8 +35,21 @@ export interface CalcStore {
   /** New values; `byPerson` is false for the scenario link read at load. */
   set(values: Values, byPerson: boolean): void;
   subscribe(listener: () => void): () => void;
-  /** The field with this id shows an error (its message and label), or no longer does (null). */
+  /**
+   * The field with this id shows an error (its message and label), or no longer does (null). An error ends the field's draft
+   * that does not read first (F16): the region of the card then says the error once.
+   */
   wrong(id: string, error: FieldError | null): void;
+  /**
+   * The field with this id has a text that does not read now (on), from the first one until the error shows or the person
+   * leaves the field, or reads again (off) (F16, item 3; DECISOES § 685). Only the passages count, and nothing repaints: the
+   * listeners of `subscribe` are never called for it.
+   */
+  draft(id: string, on: boolean): void;
+  /** Some field has a draft that does not read now: the card's region waits. */
+  drafting(): boolean;
+  /** Called when `drafting()` changes, never on a key that keeps it; the island does not repaint for it. */
+  onDraft(listener: () => void): () => void;
 }
 
 export function viewOf(def: CalcDef, data: CalcPanelData, values: Values): CalcView {
@@ -58,6 +71,16 @@ export function createStore(def: CalcDef, data: CalcPanelData, initial: Values):
   const notify = () => {
     for (const listener of listeners) listener();
   };
+  // The fields whose text does not read now (F16): kept apart from the state, so a key that starts or ends a draft never
+  // repaints the island (the 16 ms of a key, DECISOES § 600).
+  const drafts = new Set<string>();
+  const waiting = new Set<() => void>();
+  const draft = (id: string, on: boolean) => {
+    const was = drafts.size > 0;
+    if (on) drafts.add(id);
+    else drafts.delete(id);
+    if (was !== drafts.size > 0) for (const listener of waiting) listener();
+  };
   return {
     get: () => state,
     set(values, byPerson) {
@@ -76,6 +99,8 @@ export function createStore(def: CalcDef, data: CalcPanelData, initial: Values):
       notify();
     },
     wrong(id, error) {
+      // The draft becomes the error: the region stops waiting, and the notify below brings the error it says.
+      if (error) draft(id, false);
       const now = state.errors.get(id);
       if (now?.message === error?.message && now?.label === error?.label) return;
       const errors = new Map(state.errors);
@@ -88,6 +113,12 @@ export function createStore(def: CalcDef, data: CalcPanelData, initial: Values):
     subscribe(listener) {
       listeners.add(listener);
       return () => listeners.delete(listener);
+    },
+    draft,
+    drafting: () => drafts.size > 0,
+    onDraft(listener) {
+      waiting.add(listener);
+      return () => waiting.delete(listener);
     },
   };
 }

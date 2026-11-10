@@ -18,7 +18,7 @@ import ExportBar from './ExportBar.tsx';
 import ScenarioCompare from './ScenarioCompare.tsx';
 import CalcSchedule from './CalcSchedule.tsx';
 import { createStore, firstError, useCalc, viewOf, type CalcStore } from './store.ts';
-import { decimalsOf, display, inRange, linkHash, problems, visible } from './form.ts';
+import { decimalsMessage, decimalsOf, display, inRange, linkHash, problems, visible } from './form.ts';
 import { csvText, reportInput, reportPdf, save } from './exports.ts';
 import { cellText, fieldText, inputRows, lineWidth, widen } from './view.ts';
 import type { CalcDef, CalcPanelData, CalcView, NumberSpec, Values } from './types.ts';
@@ -88,8 +88,8 @@ export function nudges(def: CalcDef, data: CalcPanelData, start: Values): Values
  * text of the page (the screen reader and the words of gate:prontidao do not read it), and is worked out once, from the
  * values the page starts with, so it never changes while the person types:
  * - `get`, the room of the Download: the longest message the card may put there, the range of any field (with the hint of
- *   the decimals and the "over" line) and every problem of the account (CalcDef.problems), its numbers as wide as the
- *   largest amount of the example;
+ *   the decimals and the "over" line), the decimals message of each number field (F16) and every problem of the account
+ *   (CalcDef.problems), its numbers as wide as the largest amount of the example;
  * - `sentence`, the room of the sentence: the widest of the sentences of the example and of the example with one main field
  *   nudged as a person types it (one zero more, one digit less), every digit drawn as the widest one and the bold words in
  *   capitals (the reserve is drawn in one weight, and the capitals are wider than the bold);
@@ -101,7 +101,10 @@ export function heroReserves(def: CalcDef, data: CalcPanelData, start: Values): 
   const view = viewOf(def, data, start);
   // The messages of the fields and of the problems.
   const messages: string[] = [];
-  const addField = (key: string, decimals: boolean) => {
+  // The decimals message of each number field, by the decimals it keeps (F16, item 2; DECISOES § 684).
+  const places = new Set<number>();
+  const addField = (key: string, decimals: boolean, n?: number) => {
+    if (n !== undefined) places.add(n);
     const texts = data.texts.fields[key];
     if (!texts) return;
     if (texts.error) messages.push(texts.error, ...(decimals ? [`${texts.error} ${data.t.decimalHint}`] : []));
@@ -112,21 +115,23 @@ export function heroReserves(def: CalcDef, data: CalcPanelData, start: Values): 
     if (spec.kind === 'choice' || spec.kind === 'select') continue;
     if (spec.kind === 'list') {
       for (const item of spec.item) {
-        addField(item.key, item.kind !== 'int');
+        addField(item.key, item.kind !== 'int', decimalsOf(item.kind, item.decimals));
         for (const option of spec.pick?.options ?? []) addField(`${item.key}-${option}`, item.kind !== 'int');
         if (item.kind === 'money') for (const row of start[spec.key] as Record<string, number>[]) largest = Math.max(largest, row[item.key] ?? 0);
       }
       continue;
     }
     if (spec.kind === 'down') {
-      addField(spec.key, true);
-      addField(spec.percentKey, true);
+      addField(spec.key, true, decimalsOf('money'));
+      addField(spec.percentKey, true, decimalsOf('rate'));
       largest = Math.max(largest, Number(start[spec.key]) || 0);
       continue;
     }
-    addField(spec.key, spec.kind !== 'int' && spec.kind !== 'date');
+    if (spec.kind === 'money' || spec.kind === 'rate' || spec.kind === 'int' || spec.kind === 'dec') addField(spec.key, spec.kind !== 'int', decimalsOf(spec.kind, spec.decimals));
+    else addField(spec.key, false);
     if (spec.kind === 'money') largest = Math.max(largest, Number(start[spec.key]) || 0);
   }
+  for (const n of places) messages.push(decimalsMessage(data.t, n));
   const amount = widen(money(largest, lang), lang);
   for (const key of def.problems ?? []) {
     const template = data.texts.view[key];
@@ -223,7 +228,7 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
   const cell = cellText(lang);
   // The field the card speaks for (review F13b b-2; DECISOES § 593): the first in error, else the one a problem points to.
   const named = wrongField?.[0] ?? (view.problem !== undefined && view.problemField !== undefined ? `fo-calc-${view.problemField}` : undefined);
-  const fieldProps = { values, problems: state.problems, data, set, report: store.wrong, flagged: view.problem !== undefined ? view.problemField : undefined, flagMessage: view.problem, named, latest: () => store.get().values };
+  const fieldProps = { values, problems: state.problems, data, set, report: store.wrong, drafting: store.draft, flagged: view.problem !== undefined ? view.problemField : undefined, flagMessage: view.problem, named, latest: () => store.get().values };
   const off = view.problem !== undefined || state.stale;
 
   const pdf = async () => {
@@ -266,6 +271,7 @@ export default function CalcPanel({ data, store: shared }: CalcIslandProps) {
           last={last}
           reserves={reserves}
           touched={state.touched}
+          drafts={store}
           pose={pose}
           download={{ label: data.t.pdf, icon: data.icons.pdf, busy, onClick: () => void pdf() }}
           alert={data.icons.alert}

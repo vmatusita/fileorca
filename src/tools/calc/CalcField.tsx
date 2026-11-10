@@ -16,7 +16,7 @@ import type { ComponentChildren } from 'preact';
 import Icon from '../../icons/Icon.tsx';
 import alertIcon from '../../../docs/design/assets/Icons/alert.svg?raw';
 import { parseScaled, type NumberLang } from '../../calc/parse.ts';
-import { SETTLE_MS, decimalsOf, display, inRange } from './form.ts';
+import { SETTLE_MS, decimalsOf, display, fieldMessage, inRange, type DecimalsTexts } from './form.ts';
 import type { FieldError } from './store.ts';
 import type { NumberSpec } from './types.ts';
 
@@ -45,6 +45,8 @@ export interface CalcFieldProps {
   over?: string | undefined;
   /** How the page writes decimals, added to the error when the text is not a number of its language. */
   hint?: string | undefined;
+  /** The message of a number written right with more decimals than the field keeps (F16, item 2; DECISOES § 684). */
+  decimalsTexts: DecimalsTexts;
   prefix?: string | undefined;
   suffix?: string | undefined;
   /** The "example" tag of a typed rate. */
@@ -56,6 +58,11 @@ export interface CalcFieldProps {
   unit?: ComponentChildren;
   /** Tells the calculator the error the field shows, or null: the result on screen is then stale (§ 116) and the card says it. */
   report?: ((id: string, error: FieldError | null) => void) | undefined;
+  /**
+   * Tells the calculator the field's text does not read now (true), from the first such key until the error shows or the
+   * person leaves the field, or reads again (false): the card's region waits meanwhile (F16, item 3; DECISOES § 685).
+   */
+  drafting?: ((id: string, on: boolean) => void) | undefined;
   /** A problem of the account points to this field (F4 ACE-11): marked as in error, with no message of its own. */
   flagged?: boolean | undefined;
   /**
@@ -70,20 +77,28 @@ export interface CalcFieldProps {
 }
 
 export default function CalcField(props: CalcFieldProps) {
-  const { id, kind, decimals, min, max, negative = false, value, onValue, lang, label, help, desc, error, over, hint, prefix, suffix, tag, half, wide, unit, report, flagged = false, named = false, flagMessage, cardLabel } = props;
+  const { id, kind, decimals, min, max, negative = false, value, onValue, lang, label, help, desc, error, over, hint, decimalsTexts, prefix, suffix, tag, half, wide, unit, report, drafting, flagged = false, named = false, flagMessage, cardLabel } = props;
   const places = decimalsOf(kind, decimals);
   const [draft, setDraft] = useState(() => display(kind, value, lang, decimals));
   const [wrong, setWrong] = useState(false);
+  // Whether the error shows now, read in the key's handler: the state of the render may be a key behind (F16, item 3).
+  const shown = useRef(false);
+  const show = (on: boolean) => {
+    shown.current = on;
+    setWrong(on);
+  };
   const input = useRef<HTMLInputElement>(null);
   const settle = useRef<number | undefined>(undefined);
   useEffect(() => () => window.clearTimeout(settle.current), []);
+  // A field that leaves the page (a row removed, a block closed) holds no voice of the card.
+  useEffect(() => () => drafting?.(id, false), [drafting, id]);
 
   // A value that changes from outside (the scenario link, the unit of the down payment) shows in the
   // field, unless the person is typing in it right now.
   useEffect(() => {
     if (document.activeElement !== input.current) {
       setDraft(display(kind, value, lang, decimals));
-      setWrong(false);
+      show(false);
     }
   }, [value, kind, lang, decimals]);
 
@@ -92,13 +107,10 @@ export default function CalcField(props: CalcFieldProps) {
     return parsed !== null && inRange({ min, max }, parsed) ? parsed : null;
   };
 
-  // A number written with the other separators ("11.5" in Portuguese, "6,5" in Spanish) gets the range and how to write the
-  // decimals; anything else (a number out of the range, an empty field, letters, a whole-number field) gets the range alone
-  // (review F6, d-1; DECISOES § 251 and § 254).
-  const swapped = draft.replace(/[.,]/g, (mark) => (mark === '.' ? ',' : '.'));
-  const unreadable =
-    wrong && hint !== undefined && places > 0 && parseScaled(draft, lang, places, negative) === null && parseScaled(swapped, lang, places, negative) !== null;
-  const message = wrong ? (unreadable ? `${error} ${hint}` : error) : over;
+  // The range in words, the decimals message for a number written right with more decimals than the field keeps (F16, item 2),
+  // and, for a number written with the other separators ("11.5" in Portuguese, "6,5" in Spanish), how to write the decimals
+  // (review F6, d-1; DECISOES § 251, § 254, § 683 and § 684).
+  const message = (wrong ? fieldMessage(draft, lang, { kind, decimals, min, max, negative }, { ...decimalsTexts, error, hint }) : undefined) ?? over;
   // An error marks the result as the last one, with no PDF and the CSV off (DECISOES § 116; review F7, g-1: an age under the
   // minimum kept an adult's result and printed the example's age in the PDF; DECISOES § 276), and the card says it (F13b).
   useEffect(() => {
@@ -155,14 +167,25 @@ export default function CalcField(props: CalcFieldProps) {
               const parsed = read(text);
               // A value out of the range is said after a pause, not on the way to a valid one (DECISOES § 305).
               window.clearTimeout(settle.current);
-              if (parsed === null) settle.current = window.setTimeout(() => setWrong(true), SETTLE_MS);
-              else setWrong(false);
+              if (parsed === null) {
+                settle.current = window.setTimeout(() => {
+                  show(true);
+                  drafting?.(id, false);
+                }, SETTLE_MS);
+                // The card's region waits while the text does not read, so the result of a prefix ("9" of "99") is never said
+                // before the error (F16, item 3; review F13b b-3). Not while the error shows: the card has said it.
+                if (!shown.current) drafting?.(id, true);
+              } else {
+                show(false);
+                drafting?.(id, false);
+              }
               if (parsed !== null && parsed !== value) onValue(parsed);
             }}
             onBlur={(event) => {
               const parsed = read(event.currentTarget.value);
               window.clearTimeout(settle.current);
-              setWrong(parsed === null);
+              show(parsed === null);
+              drafting?.(id, false);
               if (parsed !== null) setDraft(display(kind, parsed, lang, decimals));
             }}
           />
