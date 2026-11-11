@@ -3,11 +3,11 @@ import { QR_ID, moneyHubId, routeById, type Lang, type RouteId } from '../../src
 import { BR_CALC_IDS, CALC_PAGES, CALC_PAGE_IDS, GUIDES, GUIDE_IDS, guidePathIn, moneyPage } from '../../src/tools/calc/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID } from '../../src/tools/guides/registry.ts';
 import { IMAGE_PAGES, type ImagePageId } from '../../src/tools/image/registry.ts';
-import { PDF_HUB_ID, PDF_PAGES as PDF_PAGES_OF, PDF_PRESET_IDS, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { PDF_HUB_ID, PDF_PAGES as PDF_PAGES_OF, type PdfPageId } from '../../src/tools/pdf/registry.ts';
 import { expectInitialBudget, expectNextPage, settler } from './lib/budgets.ts';
 
 // The performance budgets of the Portuguese and Spanish pages (F6, decision 4 and criterion 9), with the measures of
-// budgets.spec.ts (tests/e2e/lib/budgets.ts): every image tool and preset, PDF tool and preset (F18), calculator, hub and support page in
+// budgets.spec.ts (tests/e2e/lib/budgets.ts): every image tool and preset, PDF tool, calculator, hub and support page in
 // pt and es (since the languages adjustment, also the QR code generator, the file guides and, in Spanish, the money
 // guides), read from the registries and the route map, held to the budgets and to the number of files of its English
 // pair (budgets.spec.ts keeps the two Compress image pages it already had). Then each one loads the very same JS files,
@@ -20,9 +20,9 @@ const pathOf = (id: RouteId, lang: Lang): string => routeById(id).paths[lang] ??
 const IMAGE_IDS = Object.keys(IMAGE_PAGES) as ImagePageId[];
 const ALREADY = ['/pt/comprimir-imagem/', '/es/comprimir-imagen/'];
 const TOOL_PAGES = TRANSLATED.flatMap((lang) => IMAGE_IDS.map((id) => pathOf(id, lang))).filter((path) => !ALREADY.includes(path));
-// F18 (decision 5; DECISOES § 725): the PDF presets are PDF pages with the same island and entry as the tools, so their pt
-// and es pages are held to the same budget and to the files of their English page, as the image presets are.
-const PDF_IDS = [...PDF_TOOL_IDS, ...PDF_PRESET_IDS];
+// F18 (decision 18; DECISOES § 741): every PDF page of the registry, so the two PDF presets come in with the tools, as the
+// image presets come in with IMAGE_IDS: two files, nothing of the engine before the first file, the files of the English page.
+const PDF_IDS = Object.keys(PDF_PAGES_OF) as PdfPageId[];
 const PDF_PAGES = TRANSLATED.flatMap((lang) => PDF_IDS.map((id) => pathOf(id, lang)));
 // Languages adjustment (decision 8): every calculator and preset in Spanish (the 18 of the English list) and the five money
 // guides in Spanish, each with the one calculator entry and the island chunk, as in English (budgets.spec.ts CALC_PAGES);
@@ -65,6 +65,11 @@ for (const [first, second] of [
   [moneyPage('br-sac-price', 'pt')?.path ?? '', moneyPage('br-vehicle-loan', 'pt')?.path ?? ''],
   [moneyPage('mortgage-calculator', 'es')?.path ?? '', pathOf('compress-pdf', 'es')],
   ['/pt/', '/pt/apoie/'],
+  // F18 (decision 18): a tool to the new tool or preset of its kind, in each language.
+  [pathOf('reorder-pdf-pages', 'pt'), pathOf('organize-pdf', 'pt')],
+  [pathOf('split-pdf', 'es'), pathOf('split-pdf-extract-pages', 'es')],
+  [pathOf('rotate-image', 'es'), pathOf('rotate-image-flip', 'es')],
+  [pathOf('image-tools', 'pt'), pathOf('remove-exif-data', 'pt')],
 ] as const) {
   test(`requests: ${first} then ${second}`, async ({ page, baseURL }) => {
     await expectNextPage(page, new URL(baseURL ?? 'http://127.0.0.1:4173').origin, first, second);

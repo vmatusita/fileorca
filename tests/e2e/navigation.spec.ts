@@ -6,7 +6,7 @@ import esCommon from '../../src/i18n/es/common.ts';
 import enCommon from '../../src/i18n/en/common.ts';
 import { IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 import { BR_CALC_IDS, CALC_PAGE_IDS, GUIDE_IDS, LIFE_CALC_IDS, LIFE_CALC_PAGES, guidePathIn, moneyPage, type LifeCalcId } from '../../src/tools/calc/registry.ts';
-import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { PDF_PRESET_IDS, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS, type FileGuideId } from '../../src/tools/guides/registry.ts';
 import { filterEntries, type SearchEntry } from '../../src/search/search.ts';
 
@@ -100,8 +100,9 @@ test('tool search loads on first use, finds synonyms in any language and opens t
 // F2: the index has every image tool and preset, and each language shows only the pages it has. F6: Portuguese has the
 // image and PDF tools and the Brazilian calculators, read from the route map, and still never offers a page that exists
 // only in English (DECISOES § 233). F7: and the home and health calculators and the QR code generator, English only, read
-// from the registry and the route map (the English count grows by construction, DECISOES § 259).
-const SEARCHED = new Set<string>([...IMAGE_TOOL_IDS, ...IMAGE_PRESET_IDS, ...PDF_TOOL_IDS, ...CALC_PAGE_IDS, ...BR_CALC_IDS, ...GUIDE_IDS, ...FILE_GUIDE_IDS, ...LIFE_CALC_IDS, QR_ID]);
+// from the registry and the route map (the English count grows by construction, DECISOES § 259). F18 (decision 5; DECISOES
+// § 743): and the PDF presets, in the three languages, after the PDF tools.
+const SEARCHED = new Set<string>([...IMAGE_TOOL_IDS, ...IMAGE_PRESET_IDS, ...PDF_TOOL_IDS, ...PDF_PRESET_IDS, ...CALC_PAGE_IDS, ...BR_CALC_IDS, ...GUIDE_IDS, ...FILE_GUIDE_IDS, ...LIFE_CALC_IDS, QR_ID]);
 const searchedIn = (lang: Lang): number => ROUTES.filter((route) => SEARCHED.has(route.id) && route.paths[lang]).length;
 // The names a row of each language may start with, read from its common texts. Languages adjustment: the file guides and the
 // QR code generator in both languages, and the money guides in Spanish (its calculators are the 18 of the English list).
@@ -256,9 +257,9 @@ test('the search box lists every page on a phone and scrolls, so the Close butto
   const dialog = page.locator('#fo-search-dialog');
   // F4: the English search also lists the calculators, their presets and the guides (DECISOES § 125); F5a: and the PDF tools;
   // F5b: and the file guides (DECISOES § 190). F7: and the 11 home and health calculators and the QR code generator, read from
-  // the registry and the route map (the count grows by construction, DECISOES § 259).
+  // the registry and the route map (the count grows by construction, DECISOES § 259). F18: and the PDF presets.
   const utilities = ROUTES.filter((route) => route.id === QR_ID && route.paths.en).length;
-  const pages = IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length + PDF_TOOL_IDS.length + CALC_PAGE_IDS.length + GUIDE_IDS.length + FILE_GUIDE_IDS.length + LIFE_CALC_IDS.length + utilities;
+  const pages = IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length + PDF_TOOL_IDS.length + PDF_PRESET_IDS.length + CALC_PAGE_IDS.length + GUIDE_IDS.length + FILE_GUIDE_IDS.length + LIFE_CALC_IDS.length + utilities;
   await expect(dialog.getByRole('option')).toHaveCount(pages);
   const close = dialog.getByRole('button', { name: 'Close' });
   await expect(close).toBeInViewport({ ratio: 1 });

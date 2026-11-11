@@ -2,7 +2,7 @@ import { expect, test, type Page, type Request } from '@playwright/test';
 import { routeById } from '../../src/i18n/routes.ts';
 import { IMAGE_PAGES, type ImagePageId } from '../../src/tools/image/registry.ts';
 import { IMAGE_PANEL_TEXTS, IMAGE_TOOL_TEXTS } from '../../src/tools/image/texts.ts';
-import { PDF_TOOL_IDS, type PdfToolId } from '../../src/tools/pdf/registry.ts';
+import { PDF_PRESET_IDS, PDF_TOOL_IDS, type PdfToolId } from '../../src/tools/pdf/registry.ts';
 import { PDF_PANEL_TEXTS, PDF_TOOL_TEXTS } from '../../src/tools/pdf/texts.ts';
 import { imageSize, sniff } from './lib/images.ts';
 import { fixtureFile } from './lib/matrix.ts';
@@ -39,7 +39,8 @@ const IMAGE_INPUT: Record<ImagePageId, string[]> = {
   'avif-to-jpg': ['gen-avif.avif'],
   'convert-to-webp': [JPG],
   'image-to-pdf': [JPG, JPG_2],
-  // F18 placeholder: the fronts confirm the inputs of the new pages.
+  // F18 (decision 19): the JPG with its GPS and Orientation 8 in the Exif, what Remove EXIF data is for; Flip image mirrors it
+  // as it shows (the orientation applied first), as Rotate image turns it.
   'remove-exif-data': [JPG],
   'rotate-image-flip': [JPG],
 };
@@ -177,10 +178,47 @@ for (const lang of LANGS) {
       expectOnlyOwnGets(seen, new URL(baseURL ?? 'http://127.0.0.1:4173').origin);
     });
   }
+
+  // F18 (decision 5; DECISOES § 743): the two PDF presets, as the image presets above: a real PDF in, the result in the words
+  // of the language and the file named in it. Extract pages opens on the grid (decision 7): two pages picked, one PDF out with
+  // the suffix of the preset; PDF to PNG draws the one page of a scan when it arrives, a PNG named with the page word.
+  for (const id of PDF_PRESET_IDS) {
+    const path = routeById(id).paths[lang] ?? '';
+    test(`${path}: a real PDF in, the result and the file in ${lang}`, async ({ page, baseURL }) => {
+      const texts = PDF_TOOL_TEXTS[lang][id];
+      const files = PDF_PANEL_TEXTS[lang].files;
+      const seen = watch(page);
+      await openInLanguage(page, path, lang, texts);
+      const root = page.locator('#fo-tool-root');
+      if (id === 'split-pdf-extract-pages') {
+        await page.setInputFiles('#fo-tool-root input[type="file"]', [pdfFile(`${MIXED}.pdf`)]);
+        const cells = root.locator('.fo-pages__grid .fo-page');
+        await expect(cells).toHaveCount(8, { timeout: 30_000 });
+        await cells.nth(0).locator('.fo-page__main').click();
+        await cells.nth(2).locator('.fo-page__main').click();
+        await expect(root.locator('.fo-page[data-selected="true"]')).toHaveCount(2);
+        await root.locator('.fo-ready:not(.fo-ready--reading) .fo-btn--brand').click();
+      } else {
+        await page.setInputFiles('#fo-tool-root input[type="file"]', [pdfFile(`${SCAN}.pdf`)]);
+      }
+      await expect(root.locator('.fo-btn--download')).toBeVisible({ timeout: 60_000 });
+      await expectNoEnglish(page, englishSentences(PDF_TOOL_TEXTS.en[id].panel, PDF_PANEL_TEXTS.en), path);
+      const out = await takePdfDownload(page);
+      if (id === 'split-pdf-extract-pages') {
+        expect(out.name, path).toBe(`${MIXED}-${texts.panel.suffix ?? ''}.pdf`);
+        expect((await soundPdf(out.bytes)).pages, 'the two pages picked').toHaveLength(2);
+      } else {
+        expect(out.name, path).toBe(`${SCAN}-${files.page}-1.png`);
+        expect(sniff(out.bytes), out.name).toBe('png');
+      }
+      expectOnlyOwnGets(seen, new URL(baseURL ?? 'http://127.0.0.1:4173').origin);
+    });
+  }
 }
 
 type PdfFileWords = (typeof PDF_PANEL_TEXTS)['pt']['files'];
 const MIXED = 'gen-paginas-mistas';
+const SCAN = 'pdf-escaneado-01-pagina-livro-cor';
 /** The name each walk hands out (pdf-states.ts: the files it chooses and the options it picks), with the words of the language. */
 const EXPECTED_NAME: Record<PdfToolId, (suffix: string, files: PdfFileWords) => RegExp> = {
   'merge-pdf': (suffix) => new RegExp(`^${MIXED}-${suffix}\\.pdf$`),
@@ -193,7 +231,8 @@ const EXPECTED_NAME: Record<PdfToolId, (suffix: string, files: PdfFileWords) => 
   'sign-pdf': (suffix) => new RegExp(`^${MIXED}-${suffix}\\.pdf$`),
   'protect-pdf': (suffix) => new RegExp(`^${MIXED}-${suffix}\\.pdf$`),
   'unlock-pdf': (suffix) => new RegExp(`^gen-cifrado-aes256-${suffix}\\.pdf$`),
-  // F18 placeholder: front O confirms the walk of Organize PDF (tests/e2e/lib/pdf-states.ts).
+  // F18 (decision 6): one PDF of the 8-page file, with its suffix ("-organized" in English), as Reorder PDF pages; the walk
+  // that reaches it is the case of Organize PDF in tests/e2e/lib/pdf-states.ts (front O).
   'organize-pdf': (suffix) => new RegExp(`^${MIXED}-${suffix}\\.pdf$`),
   'reorder-pdf-pages': (suffix) => new RegExp(`^${MIXED}-${suffix}\\.pdf$`),
   'watermark-pdf': (suffix) => new RegExp(`^${MIXED}-${suffix}\\.pdf$`),
@@ -226,10 +265,11 @@ for (const lang of LANGS) {
   });
 }
 
-// The language is what changes the name: the English walk of the same tool would hand out the English words.
+// The language is what changes the name: the English walk of the same tool would hand out the English words. F18: and the
+// suffix of a PDF preset ("-extracted" in English).
 test('the file words of pt and es differ from the English ones', () => {
   for (const lang of LANGS) {
-    for (const id of PDF_TOOL_IDS) {
+    for (const id of [...PDF_TOOL_IDS, ...PDF_PRESET_IDS]) {
       const [own, english] = [PDF_TOOL_TEXTS[lang][id].panel.suffix, PDF_TOOL_TEXTS.en[id].panel.suffix];
       if (english !== undefined) expect(own, `${lang} ${id}`).not.toBe(english);
     }

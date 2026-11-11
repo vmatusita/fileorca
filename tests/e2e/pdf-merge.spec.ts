@@ -5,7 +5,7 @@ import { PDF_PANEL_TEXTS, PDF_TOOL_TEXTS } from '../../src/tools/pdf/texts.ts';
 import type { MergeTexts } from '../../src/tools/pdf/option-texts.ts';
 import { violationsEverywhere } from './lib/axe.ts';
 import { dragOver, hydrated, slowEngine } from './lib/page.ts';
-import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { PDF_PAGES, type PdfPageId } from '../../src/tools/pdf/registry.ts';
 import { choosePdfs, openTool, pdfFile } from './lib/pdf-tools.ts';
 
 // F13a (UX-04 A, tool-a-merge; DECISOES § 479 and § 489): the Merge list lives in the rectangle. Its tests:
@@ -201,7 +201,8 @@ test('D-27: a reading held past 400 ms (the CPU 6 times slower) shows the WaterL
 });
 
 // UX-04 A: the rectangle of every PDF tool is 356 px on the phone and 340 px from 768 px at rest, with a file over it and in
-// the error, in the three languages (with the round seal of the ficha, § 456; DECISOES § 478).
+// the error, in the three languages (with the round seal of the ficha, § 456; DECISOES § 478). F18 (decision 19; DECISOES
+// § 743): every PDF page of the registry, so the two PDF presets too, as tool-slot.spec.ts holds the image presets.
 for (const viewport of [PHONE, { width: 1280, height: 800 }]) {
   test(`the rectangle of the PDF tools has one height at rest, with a file over it and in the error, at ${viewport.width} px`, async ({ page }) => {
     test.slow();
@@ -209,7 +210,7 @@ for (const viewport of [PHONE, { width: 1280, height: 800 }]) {
     const wanted = viewport.width < 768 ? 356 : 340;
     const wrong: string[] = [];
     for (const lang of LANGS) {
-      for (const id of PDF_TOOL_IDS) {
+      for (const id of Object.keys(PDF_PAGES) as PdfPageId[]) {
         expect((await page.goto(routeById(id).paths[lang] ?? ''))?.status()).toBe(200);
         await hydrated(page);
         const slot = page.locator('#fo-tool-root .fo-slot');

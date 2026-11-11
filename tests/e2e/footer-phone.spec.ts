@@ -84,8 +84,9 @@ test.describe('the footer on the phone: the hub in sight and the tools in a disc
       const common = TEXTS[lang].common.footer;
       const summary = footer.locator('details.fo-footer__tools > summary').first();
       const shown = (await summary.locator(':scope > span').evaluate((span) => span.firstChild?.textContent ?? '')).trim();
-      // F17 (DECISOES § 716): the ten image tools of the registry (eight before AVIF to JPG and Convert to WebP).
-      expect(shown).toBe(common.tools.all.replace('{n}', '10'));
+      // F17 (DECISOES § 716): the ten image tools of the registry (eight before AVIF to JPG and Convert to WebP). F18 (DECISOES
+      // § 743): eleven, with Remove EXIF data (a preset is no tool: Flip image does not count).
+      expect(shown).toBe(common.tools.all.replace('{n}', '11'));
       await expect(summary).toHaveAccessibleName(`${shown} ${common.tools.image}`);
       // Enter and Space open and close it (the details of the browser, no script).
       await summary.focus();

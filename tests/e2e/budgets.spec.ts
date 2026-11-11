@@ -1,9 +1,9 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Browser, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { CALC_PAGES as CALC_PAGES_OF, CALC_PAGE_IDS, GUIDES, GUIDE_IDS, HEALTH_HUB_ID, HOUSE_HUB_ID, LIFE_CALC_IDS, LIFE_CALC_PAGES } from '../../src/tools/calc/registry.ts';
 import { routeById } from '../../src/i18n/routes.ts';
 import { BUNDLE_RECORD, type BundleRecord } from '../../src/platform/bundle-record.ts';
-import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { PDF_HUB_ID, PDF_PAGES, PDF_PRESET_IDS, toolOf, type PdfPageId } from '../../src/tools/pdf/registry.ts';
 import { chooseImage, dismissCookies, hydrated, startOver } from './lib/page.ts';
 import { choosePdfs, pdfFile } from './lib/pdf-tools.ts';
 import imagesTexts from '../../src/tools/pdf-to-jpg/i18n/en.ts';
@@ -35,6 +35,9 @@ const TOOL_PAGES = [
   '/avif-to-jpg/',
   '/convert-to-webp/',
   '/image-to-pdf/',
+  // F18 (decision 18; DECISOES § 741): the tool and the preset of the run, on the same rules as their sisters.
+  '/remove-exif-data/',
+  '/rotate-image/flip/',
 ];
 // The hubs have no island: they are held to the same JS and request budgets, with at most the two files of a tool page.
 // F7: the home and health hubs too, read from the registry. F11 (decision 5; DECISOES § 399): and the guides hub, with no
@@ -51,7 +54,9 @@ const CALC_JS_FILES = 2;
 // own: one entry shared by all of them (PdfIsland) and the shared island chunk, exactly two files. TOOL_PAGES and
 // CALC_PAGES do not change. Before the first file a PDF page asks for nothing of the engine: no worker, no Comlink, no
 // .wasm, no pdf-lib, no PDF.js, no qpdf (the lazy chunks all have these names in dist/_astro).
-const PDF_PAGES_LIST = PDF_TOOL_IDS.map((id) => PDF_PAGES[id].path);
+// F18 (decision 18; DECISOES § 741): read from every PDF page of the registry, so the two PDF presets come in with the tools,
+// as the image presets are in TOOL_PAGES: the same island, the same two files and nothing of the engine before the first file.
+const PDF_PAGES_LIST = (Object.keys(PDF_PAGES) as PdfPageId[]).map((id) => PDF_PAGES[id].path);
 const PDF_JS_FILES = 2;
 // What only the tools that need it may fetch: qpdf (Compress, Protect, Unlock) and PDF.js (page drawing).
 // F5b (prompt decision 4): the ten file guides, read from their registry and in a list of their own. Each embeds its tool
@@ -81,25 +86,55 @@ for (const path of [...TOOL_PAGES, QR_PAGE, ...HUB_PAGES, ...CALC_PAGES, ...PDF_
 // F17 (decision 12; DECISOES § 714): each new tool page asks for what its sister WebP to JPG asks for, request for request,
 // in a fresh browser each: the page, the shared island chunk and styles, the same fonts, and its own entry in the place
 // of the sister's (the one name that differs). So the two JS files and the requests of the sisters, and nothing more.
+// F18 (decision 18; DECISOES § 741): Remove EXIF data against the same sister, and Flip image against its parent Rotate image
+// (a preset has an entry of its own too, FlipPage, as To100kbPage of the Compress image presets).
 const entryOf = (url: string): boolean => /^\/_astro\/\w+Page\.astro_astro_type_script_index_0_lang\.[\w-]+\.js$/.test(url);
-for (const path of ['/avif-to-jpg/', '/convert-to-webp/']) {
-  test(`${path} asks for the same requests as its sister /webp-to-jpg/, with its own entry in the place of the sister's`, async ({ browser, baseURL }) => {
+
+/** What a fresh browser asks for on `target`, sorted: the page itself as 'the page', and `rename` applied to the rest. */
+async function askedOn(browser: Browser, origin: string, target: string, rename: (url: string) => string): Promise<string[]> {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  const urls = track(page, origin);
+  const { settled } = settler(page);
+  expect((await page.goto(target))?.status(), `${target} exists`).toBe(200);
+  await settled();
+  const seen = [...urls].map((url) => (url === target ? 'the page' : rename(url))).sort();
+  await context.close();
+  return seen;
+}
+
+for (const [path, sister] of [
+  ['/avif-to-jpg/', '/webp-to-jpg/'],
+  ['/convert-to-webp/', '/webp-to-jpg/'],
+  ['/remove-exif-data/', '/webp-to-jpg/'],
+  ['/rotate-image/flip/', '/rotate-image/'],
+] as const) {
+  test(`${path} asks for the same requests as its sister ${sister}, with its own entry in the place of the sister's`, async ({ browser, baseURL }) => {
     const origin = new URL(baseURL ?? 'http://127.0.0.1:4173').origin;
-    const asked = async (target: string): Promise<string[]> => {
-      const context = await browser.newContext();
-      const page = await context.newPage();
-      const urls = track(page, origin);
-      const { settled } = settler(page);
-      expect((await page.goto(target))?.status(), `${target} exists`).toBe(200);
-      await settled();
-      const seen = [...urls].map((url) => (url === target ? 'the page' : entryOf(url) ? 'its own entry' : url)).sort();
-      await context.close();
-      return seen;
-    };
-    const sister = await asked('/webp-to-jpg/');
-    const own = await asked(path);
-    expect(sister.filter((url) => url === 'its own entry'), 'the sister has one entry of its own').toHaveLength(1);
-    expect(own, `${path}: the requests of the sister`).toEqual(sister);
+    const rename = (url: string): string => (entryOf(url) ? 'its own entry' : url);
+    const theirs = await askedOn(browser, origin, sister, rename);
+    const own = await askedOn(browser, origin, path, rename);
+    expect(theirs.filter((url) => url === 'its own entry'), 'the sister has one entry of its own').toHaveLength(1);
+    expect(own, `${path}: the requests of the sister`).toEqual(theirs);
+  });
+}
+
+// F18 (decision 18; DECISOES § 741): a PDF page has no entry of its own. The 13 PDF tools and the PDF presets load the one
+// entry of the PDF island (PdfIsland) and the shared island chunk, so the new PDF tool asks for the very requests of its
+// sister Reorder PDF pages, and each PDF preset for those of its parent, name and hash, the page itself apart.
+const PDF_SISTERS: [page: PdfPageId, sister: PdfPageId][] = [
+  ['organize-pdf', 'reorder-pdf-pages'],
+  ...PDF_PRESET_IDS.map((id): [PdfPageId, PdfPageId] => [id, toolOf(id)]),
+];
+for (const [id, sisterId] of PDF_SISTERS) {
+  const [path, sister] = [PDF_PAGES[id].path, PDF_PAGES[sisterId].path];
+  test(`${path} asks for the very requests of its sister ${sister}, the entry of the PDF island included`, async ({ browser, baseURL }) => {
+    const origin = new URL(baseURL ?? 'http://127.0.0.1:4173').origin;
+    const theirs = await askedOn(browser, origin, sister, (url) => url);
+    const own = await askedOn(browser, origin, path, (url) => url);
+    expect(theirs.filter((url) => /^\/_astro\/PdfIsland\.astro_astro_type_script_index_0_lang\.[\w-]+\.js$/.test(url)), 'the sister loads the entry of the PDF island').toHaveLength(1);
+    expect(theirs.filter(entryOf), 'no entry of a page of its own').toEqual([]);
+    expect(own, `${path}: the requests of ${sister}`).toEqual(theirs);
   });
 }
 
@@ -154,6 +189,17 @@ for (const [first, second] of [
   ['/', '/guides/'],
   ['/guides/', '/guides/jpg-vs-png/'],
   ['/guides/refinance-break-even/', '/guides/'],
+  // F18 (decision 18; DECISOES § 741): from a tool to its preset, the HTML and the preset's own entry (image) or the HTML only
+  // (PDF: one entry for every PDF page); from a PDF tool to Organize PDF, the HTML only; from a hub to the new tools, the HTML
+  // and the two files; from Remove EXIF data to the guide on the location of photos, and back.
+  ['/rotate-image/', '/rotate-image/flip/'],
+  ['/split-pdf/', '/split-pdf/extract-pages/'],
+  ['/pdf-to-jpg/', '/pdf-to-jpg/to-png/'],
+  ['/reorder-pdf-pages/', '/organize-pdf/'],
+  ['/image-tools/', '/remove-exif-data/'],
+  ['/pdf-tools/', '/organize-pdf/'],
+  ['/remove-exif-data/', '/guides/remove-location-from-photos/'],
+  ['/guides/remove-location-from-photos/', '/remove-exif-data/'],
 ] as const) {
   test(`requests: ${first} then ${second}`, async ({ page, baseURL }) => {
     await expectNextPage(page, new URL(baseURL ?? 'http://127.0.0.1:4173').origin, first, second);

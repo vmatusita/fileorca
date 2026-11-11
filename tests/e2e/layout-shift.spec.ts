@@ -251,6 +251,31 @@ test('F17: the six pages of AVIF to JPG and Convert to WebP load with no layout 
   expect(wrong).toEqual([]);
 });
 
+// F18 (decision 19; DECISOES § 742): the fifteen pages of the run, read from the route map, the same first visit as the F17
+// block: in Chromium the CLS of the load is 0 (0.001 for the rounding), and in both browsers the trail, the H1, the notice and
+// the tool stay where the first paint put them. One test per page and its two translations, so the fifteen visits are spread
+// over the parts of the CI (one WebKit visit is 3 to 7 s).
+const F18_IDS = ['organize-pdf', 'split-pdf-extract-pages', 'pdf-to-jpg-to-png', 'rotate-image-flip', 'remove-exif-data'] as const;
+const F18_PAGES = F18_IDS.flatMap((id) => LANGS.map((lang) => routeById(id).paths[lang] ?? `(${id} sem página em ${lang})`));
+for (const id of F18_IDS) {
+  const pages = LANGS.map((lang) => routeById(id).paths[lang] ?? `(${id} sem página em ${lang})`);
+  test(`F18: ${pages.join(', ')} load with no layout shift at 360 px, Figtree late`, async ({ browser, browserName }) => {
+    test.setTimeout(120_000);
+    expect(F18_PAGES).toHaveLength(15);
+    const wrong: string[] = [];
+    const seen: string[] = [];
+    for (const path of pages) {
+      const visit = await firstVisit(browser, browserName, path, 360);
+      seen.push(`${path} ${visit.cls.toFixed(3)}`);
+      if (browserName === 'chromium' && visit.cls > 0.001) wrong.push(`${path}: CLS ${visit.cls.toFixed(3)} (${visit.moved.join('; ')})`);
+      if (JSON.stringify(visit.after) !== JSON.stringify(visit.before)) wrong.push(`${path}: a trilha, o H1 ou o aviso saíram do lugar`);
+      if (JSON.stringify(visit.tool.after) !== JSON.stringify(visit.tool.before)) wrong.push(`${path}: a ferramenta foi de ${visit.tool.before.join(', ')} a ${visit.tool.after.join(', ')}`);
+    }
+    if (browserName === 'chromium') console.log(`[cls] ${browserName} F18 360: ${seen.join(', ')}`);
+    expect(wrong).toEqual([]);
+  });
+}
+
 // F12 (decision 11 and criterion 11; DECISOES § 422): the same first visits on the test build, with the boxes of the ad
 // map (the 37 units of the worst case), which reserve their room in the HTML from the first paint: nothing above them moves
 // either, and the shift of each page is printed next to the one of the default build.

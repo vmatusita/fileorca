@@ -39,6 +39,10 @@ const TOOL_PAGES = [
   '/avif-to-jpg/',
   '/convert-to-webp/',
   '/image-to-pdf/',
+  // F18 (decision 19; DECISOES § 742): the image tool and the image preset of the run; their pt and es pages come in below,
+  // from the registry. The PDF tool and the PDF presets are walked in clearance.spec.ts, with the other PDF pages.
+  '/remove-exif-data/',
+  '/rotate-image/flip/',
 ];
 // F6 (decision 9): the same pages in Portuguese and Spanish, read from the route map, with the same states and the
 // same targets as the English page (SMALL_OF and ON_SCREEN are read through the English path of each one).
@@ -61,6 +65,9 @@ const ON_SCREEN: Record<string, string[]> = {
   // F17: both lose quality on purpose (beforeAfter 'lossy'), so the comparison is on screen with the result.
   '/avif-to-jpg/': ['.fo-ba'],
   '/convert-to-webp/': ['.fo-ba'],
+  // F18: Flip image keeps the quality (beforeAfter 'never', as Rotate image), and its one choice, Horizontal or Vertical, is in
+  // "Adjust" with the result. Remove EXIF data has no field and no comparison: the card, the band and the queue.
+  '/rotate-image/flip/': ['.fo-adjust .fo-seg'],
 };
 
 // One load per page and browser, walked through four states: at rest, while the first file is processed (the
