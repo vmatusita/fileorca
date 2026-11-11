@@ -207,3 +207,8 @@ Pegadinhas que a F13b achou no card das calculadoras e no QR code, no guia de ar
 ## F17: a projeção das partes
 
 - **A chave dos tempos do CI (`.cache/f14/ci-durations.mjs`) leva o número da linha do teste:** depois de editar um spec, case sem a linha (`file:linha ›` vira `file ›`). E o log do CI não traz tempo para todo teste (três blocos do `money-card.spec.ts` não aparecem): uma projeção que dá a média a quem não tem tempo infla a parte; separe o que é da run.
+
+## F18: ferramentas novas que passaram na regra
+
+- **O limite de 5 s do Vitest e o portão num subprocesso:** os testes do `conteudo.test.ts` que rodam o portão duas ou três vezes passam dos 5 s com a máquina carregada (outras frentes, ou o `--list` do Playwright ao lado) e passam sozinhos; o ponto de partida da F18 já estourou num deles (6.289 ms). A F18 deu a três deles os 60 s que o teste do hub de guias do mesmo arquivo e o `pdf-site.test.ts` têm desde a F11, sem mudar asserção (§ 743). Um teste novo que roda o portão mais de uma vez nasce com os 60 s; um que estoure sob carga se confere sozinho antes de se mexer nele.
+- **Um `Record` exaustivo deixa os commits do meio vermelhos no `pnpm tipos`:** os textos (`Record<…, Record<Lang, …>>`), os cartões de `common.ts` e até o `SUCCESS` do `consent.test.ts` (indexado por `PDF_TOOL_IDS`) pedem todas as chaves de uma vez, então uma página nova só compila com os três idiomas e cada lista que o tipo cobra. A fatia 1 da F18 deixou commits do meio que não passam sozinhos; o último passa.
