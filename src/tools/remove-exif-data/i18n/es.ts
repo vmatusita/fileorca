@@ -26,7 +26,7 @@ export default {
       ['Rotated photos', 'A JPG that is stored sideways keeps a tiny Exif block with only its orientation, so it still shows upright. Nothing else of the Exif data stays.'],
       ['Extra pictures', 'Some phones put more inside a JPG after the photo, such as a second picture or the video of a motion photo, each with its own metadata. That part is left out, and the photo stays.'],
       ['Animation', 'An animated WebP stays animated, with every frame.'],
-      ['Output', 'The same format as the file you dropped, a little smaller by the size of what was taken out.'],
+      ['Output', 'The same format as the file you dropped. It is smaller by the size of what was taken out, and the same when there was nothing to take out.'],
       ['Batch', 'No limit on the number of photos. One photo downloads directly, and several come in one ZIP.'],
     ],
   },
