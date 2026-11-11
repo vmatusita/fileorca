@@ -34,13 +34,15 @@ export interface PageCellProps {
   /** The page in the file (0-based) and its place in the grid. */
   index: number;
   position: number;
-  mode: 'select' | 'order' | 'rotate';
+  mode: 'select' | 'order' | 'rotate' | 'organize';
   /** The name of the page's button, already put together by the grid. */
   label: string;
   selected: boolean;
   /** The grid of Delete: a picked page is one that comes out (F14, item 4). */
   removes: boolean;
-  /** Quarter turns the person added (rotate mode). */
+  /** F18, Organize PDF: the page comes out of the new PDF (Delete's look, a state of its own beside the pick). */
+  out: boolean;
+  /** Quarter turns the person added (rotate and organize modes). */
   turn: number;
   /** Width over height of the sheet. */
   ratio: number;
@@ -106,7 +108,7 @@ function Thumb({ index, thumbnails, turn, ratio, width, children }: { index: num
   );
 }
 
-const KEYS: readonly (keyof PageCellProps)[] = ['index', 'position', 'mode', 'label', 'selected', 'removes', 'turn', 'ratio', 'active', 'grabbed', 'first', 'last', 'width', 'thumbnails', 'texts', 'icons', 'actions'];
+const KEYS: readonly (keyof PageCellProps)[] = ['index', 'position', 'mode', 'label', 'selected', 'removes', 'out', 'turn', 'ratio', 'active', 'grabbed', 'first', 'last', 'width', 'thumbnails', 'texts', 'icons', 'actions'];
 
 export default class PageCell extends Component<PageCellProps> {
   override shouldComponentUpdate(next: PageCellProps): boolean {
@@ -114,16 +116,19 @@ export default class PageCell extends Component<PageCellProps> {
   }
 
   override render() {
-    const { index, position, mode, label, selected, removes, turn, ratio, active, grabbed, first, last, width, thumbnails, texts, icons, actions } = this.props;
+    const { index, position, mode, label, selected, removes, out, turn, ratio, active, grabbed, first, last, width, thumbnails, texts, icons, actions } = this.props;
+    // F18: Organize PDF picks like the select mode and moves like the order mode; its turns show like Rotate's.
+    const picks = mode === 'select' || mode === 'organize';
+    const moves = mode === 'order' || mode === 'organize';
     return (
       <li
         class="fo-page fo-dogear fo-cat--pdf"
         data-position={position}
         data-page={index}
         data-selected={selected ? 'true' : undefined}
-        data-leaving={removes && selected ? 'true' : undefined}
+        data-leaving={(removes && selected) || out ? 'true' : undefined}
         data-grabbed={grabbed ? 'true' : undefined}
-        draggable={mode === 'order'}
+        draggable={moves}
         onDragStart={(event) => actions.dragStart(index, position, event)}
         onDragOver={(event) => actions.dragOver(event)}
         onDrop={(event) => actions.drop(position, event)}
@@ -133,24 +138,30 @@ export default class PageCell extends Component<PageCellProps> {
           type="button"
           class="fo-page__main"
           tabindex={active ? 0 : -1}
-          aria-pressed={mode === 'select' ? selected : mode === 'order' ? grabbed : undefined}
+          aria-pressed={picks ? selected : mode === 'order' ? grabbed : undefined}
           aria-label={label}
           onClick={(event) => actions.press(index, position, event)}
           onKeyDown={(event) => actions.key(event, index, position)}
           onFocus={() => actions.focus(position)}
           onBlur={(event) => actions.blur(index, position, event)}
         >
-          <Thumb index={index} thumbnails={thumbnails} turn={mode === 'rotate' ? turn : 0} ratio={ratio} width={width}>
+          <Thumb index={index} thumbnails={thumbnails} turn={mode === 'rotate' || mode === 'organize' ? turn : 0} ratio={ratio} width={width}>
             {mode === 'rotate' && (
               <span class="fo-page__badge" aria-hidden="true">
                 <Icon inner={icons.rotate} class="fo-icon--sm" />
+              </span>
+            )}
+            {/* F18: in Organize a page that comes out has Delete's trash in a brand circle, on the sheet, beside the check. */}
+            {out && (
+              <span class="fo-page__badge fo-page__badge--out" aria-hidden="true">
+                <Icon inner={icons.trash} class="fo-icon--sm" />
               </span>
             )}
           </Thumb>
           {/* F13a (D-7): a picked page has the check in a brand circle before its number, not only the colour of its border.
               F14 (item 4, § 627): in Delete the circle has the trash, since a picked page comes out. */}
           <span class="fo-page__n" aria-hidden="true">
-            {mode === 'select' && <span class="fo-page__check">{removes ? <Icon inner={icons.trash} /> : <Icon raw={checkIcon} />}</span>}
+            {picks && <span class="fo-page__check">{removes ? <Icon inner={icons.trash} /> : <Icon raw={checkIcon} />}</span>}
             {index + 1}
           </span>
         </button>
@@ -165,7 +176,7 @@ export default class PageCell extends Component<PageCellProps> {
         >
           <Icon inner={icons.zoom} />
         </button>
-        {mode === 'order' && (
+        {moves && (
           <span class="fo-page__moves">
             <button
               type="button"

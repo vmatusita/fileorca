@@ -67,6 +67,11 @@ export type PdfOperation =
   | { kind: 'split'; parts: number[][] }
   | { kind: 'delete'; remove: number[] }
   | { kind: 'reorder'; order: number[] }
+  /**
+   * Organize PDF (F18): the pages of the new PDF in this order, each with its quarter turns clockwise (0 to 3) on top of
+   * its own /Rotate. A page not in the list comes out; an index out of the file or named twice is left out of the list.
+   */
+  | { kind: 'organize'; pages: { index: number; turn: number }[] }
   /** Quarter turns clockwise per page (0 to 3); an empty list turns every page by `all`. */
   | { kind: 'rotate'; all: number; pages: Record<number, number> }
   /** `page` and `of` are the words of the page's language ("Página", "de"); without them, "Page" and "of". */

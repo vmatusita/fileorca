@@ -30,6 +30,7 @@ import numbersTexts from '../../src/tools/add-page-numbers-to-pdf/i18n/en.ts';
 import watermarkTexts from '../../src/tools/watermark-pdf/i18n/en.ts';
 import signTexts from '../../src/tools/sign-pdf/i18n/en.ts';
 import reorderTexts from '../../src/tools/reorder-pdf-pages/i18n/en.ts';
+import organizeTexts from '../../src/tools/organize-pdf/i18n/en.ts';
 import deleteTexts from '../../src/tools/delete-pdf-pages/i18n/en.ts';
 import mergeTexts from '../../src/tools/merge-pdf/i18n/en.ts';
 import panelTexts from '../../src/tools/pdf/i18n/en.ts';
@@ -664,6 +665,74 @@ for (const fixture of BIG) {
   test(`Reorder PDF pages: the reversed order of ${fixture}`, async ({ page, browserName }) => {
     await openTool(page, '/reorder-pdf-pages/');
     await oneByOne(page, `reorder-${bigCase(fixture)}`, { tool: 'reorder-pdf-pages', browser: browserName }, [fixture], () => reverseOrder(page, fixture, BIG_WAIT));
+  });
+}
+
+// ---- Organize PDF (F18, decisions 6 and 15) ---------------------------------------------------------------------
+
+/** A page told from the others whatever its turn: its marker, or its images and first words (its size turns with it). */
+const turnFree = (p: ReadPage): string => p.marker ?? `${p.images} images "${p.texts.map((t) => t.str).join(' ').replace(/\s+/g, ' ').trim().slice(0, 40)}"`;
+
+/**
+ * The deterministic plan of Organize PDF on the grid, as a person does it: page 2 one place earlier (the arrow of its cell),
+ * pages 1 and N picked by number and turned right with the bar, then page 3 picked by number and taken out. Two pages:
+ * the move and the turn. One page: the turn. The output is read in Node: the pages in the plan's order (by marker, or by
+ * images and words), each /Rotate the page's own plus the turn, against what PDF.js reads of the fixture.
+ */
+async function organizePlan(page: Page, fixture: string, timeout?: number): Promise<string> {
+  await ready(page, organizeTexts, timeout);
+  const n = pages(fixture);
+  const pick = async (typed: string) => {
+    await page.getByLabel('Pick pages by number').fill(typed);
+    await page.getByRole('button', { name: 'Pick these' }).click();
+  };
+  const bar = (which: 'right' | 'out') => page.locator(`#fo-tool-root .fo-pages__act--${which}`).click();
+  if (n >= 2) await page.getByRole('button', { name: 'Move page 2 earlier', exact: true }).click();
+  await pick(n === 1 ? '1' : `1, ${n}`);
+  await bar('right');
+  if (n >= 3) {
+    await pick('3');
+    await bar('out');
+    await expect(page.locator('#fo-tool-root .fo-page[data-leaving="true"]')).toHaveCount(1);
+  }
+  await actionButton(page, organizeTexts).click();
+  const read = await soundPdf(await onlyOutput(page, fixture, 'organized', timeout));
+  const plan = (n === 1 ? [1] : [2, 1, ...Array.from({ length: n - 2 }, (_, i) => i + 3)]).filter((p) => n < 3 || p !== 3);
+  const turned = new Set(n === 1 ? [1] : [1, n]);
+  // The order by the oracle's markers where the fixture has them, else by what PDF.js reads of it; the /Rotate of the oracle.
+  const before = (await original(fixture)).pages;
+  const known = markers(fixture);
+  const keyOf = (p: number) => known[p - 1] ?? turnFree(before[p - 1] as ReadPage);
+  const rotate = pdfOracle(fixture).rotate ?? [];
+  expect(read.pages, `${fixture}: the count`).toHaveLength(plan.length);
+  expect(read.pages.map(turnFree), `${fixture}: the order`).toEqual(plan.map(keyOf));
+  expect(read.pages.map((p) => p.rotate), `${fixture}: the turns`).toEqual(plan.map((p) => ((rotate[p - 1] ?? 0) + (turned.has(p) ? 90 : 0)) % 360));
+  return n === 1 ? 'ok: its only page turned right' : n === 2 ? 'ok: page 2 moved first, pages 1 and 2 turned' : `ok: page 2 moved first, pages 1 and ${n} turned, page 3 out, ${plan.length} pages`;
+}
+
+test('Organize PDF: the plan on each small fixture, one file after the other, the refused ones in the middle', async ({ page, browserName }) => {
+  await openTool(page, '/organize-pdf/');
+  const who = { tool: 'organize-pdf', browser: browserName };
+  // As oneByOne, but a refused file leaves no "Start over" (the panel offers to choose another): the next file goes in.
+  await recordEach('organize-small', who, [], withBroken(SMALL), async (fixture) => {
+    const again = page.getByRole('button', { name: 'Start over' });
+    if (await again.isVisible()) await again.click();
+    await choosePdfs(page, [pdfFile(fixture)]);
+    if ((BROKEN_PDFS as readonly string[]).includes(fixture)) {
+      const reason = await rowReason(page, fixture);
+      expect(reason, fixture).toMatch(REFUSAL_TEXT[fixture as (typeof BROKEN_PDFS)[number]]);
+      return `refused: ${reason}`;
+    }
+    return organizePlan(page, fixture);
+  });
+  const errors = (await dataLayer(page)).filter((entry) => entry[0] === 'event' && entry[1] === 'tool_error').map((entry) => (entry[2] as { reason?: string }).reason);
+  expect(errors.sort()).toEqual(['empty', 'not-pdf', 'not-pdf', 'truncated']);
+});
+
+for (const fixture of BIG) {
+  test(`Organize PDF: the plan on ${fixture}`, async ({ page, browserName }) => {
+    await openTool(page, '/organize-pdf/');
+    await oneByOne(page, `organize-${bigCase(fixture)}`, { tool: 'organize-pdf', browser: browserName }, [fixture], () => organizePlan(page, fixture, BIG_WAIT));
   });
 }
 

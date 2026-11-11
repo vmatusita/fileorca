@@ -1,14 +1,14 @@
 import type { PdfToolTexts } from '../../../i18n/types.ts';
-import type { ReorderTexts } from '../../pdf/option-texts.ts';
+import type { OrganizeTexts } from '../../pdf/option-texts.ts';
 
 // Organize PDF page blocks (data-content: how, specs, faq, privacy, related) and the panel bits the shared PDF island shows
 // (F18, decision 6), in Portuguese (docs/i18n/pt.md; the name is "Gerenciar páginas do PDF", since "Organizar páginas do
 // PDF" is Reorder's, decision 4). The new PDF is built the way Delete PDF pages builds it (the engine's assemble.ts,
 // DECISOES § 145), so the rows on forms, bookmarks and links follow that tool's. The specs rows state the real behaviour of
 // the engine, as the English file does: when it changes there, change them here and in en.ts. The suffix is "gerenciado":
-// "organizado" is Reorder's (DECISOES § 724). F18 placeholder: the option texts are Reorder's shape until front O gives
-// the grid mode its own (OrganizeTexts).
-const texts: PdfToolTexts<ReorderTexts> = {
+// "organizado" is Reorder's (DECISOES § 724).
+// Front O wrote the option texts (OrganizeTexts) of the grid mode.
+const texts: PdfToolTexts<OrganizeTexts> = {
   title: 'Gerenciar páginas do PDF: mova, gire e tire páginas no navegador',
   description:
     'Mova, gire e tire as páginas de um PDF numa grade de miniaturas e salve um PDF novo. Tudo acontece no seu navegador, e nada é enviado.',
@@ -73,9 +73,8 @@ const texts: PdfToolTexts<ReorderTexts> = {
     action: 'Salvar as mudanças',
     options: {
       help: 'Marque páginas para girar ou tirar, e mova uma página com as setas dela.',
-      reverse: 'Inverter a ordem',
-      reversed: 'Páginas invertidas.',
       unchanged: 'Mova, gire ou tire uma página para salvar um PDF novo.',
+      allOut: 'Um PDF precisa de pelo menos uma página: devolva uma.',
     },
   },
 };

@@ -8,7 +8,7 @@ import FieldError from './FieldError.tsx';
 import Icon from '../../icons/Icon.tsx';
 import OptionGroup, { type OptionGroupProps } from '../image/OptionGroup.tsx';
 import PageGrid from './PageGrid.tsx';
-import { countOf, setOf } from './grid-math.ts';
+import { countOf, markedCount, organizePages, setOf } from './grid-math.ts';
 import PasswordField from './PasswordField.tsx';
 import SignatureArea, { fitBox, type SignatureBox, type SignatureImage } from './SignatureArea.tsx';
 import TextField from './TextField.tsx';
@@ -21,6 +21,7 @@ import type {
   ImagesTexts,
   MergeTexts,
   NumbersTexts,
+  OrganizeTexts,
   PasswordToolTexts,
   PngTexts,
   ReorderTexts,
@@ -39,7 +40,7 @@ const pageCount = (props: { file: { info: { pages: number } | null } | null }): 
  * The "pick pages by number" field above a grid: it sets the grid's selection and says the count once, in Delete's
  * form where a picked page comes out (F14, d-2; DECISOES § 629). The grid keeps no anchor after it (§ 628).
  */
-function RangePicker({ id, total, onPick, panel, announce, removes = false }: { id: string; total: number; onPick: (pages: number[]) => void; panel: PdfOptionsProps<unknown, unknown>['panel']; announce: (message: string) => void; removes?: boolean }) {
+function RangePicker({ id, total, onPick, panel, announce, removes = false, count }: { id: string; total: number; onPick: (pages: number[]) => void; panel: PdfOptionsProps<unknown, unknown>['panel']; announce: (message: string) => void; removes?: boolean; count?: (picked: number) => string }) {
   const [text, setText] = useState('');
   const [wrong, setWrong] = useState(false);
   const apply = (value: string) => {
@@ -48,7 +49,8 @@ function RangePicker({ id, total, onPick, panel, announce, removes = false }: { 
     if (!ranges) return;
     const pages = pagesOf(ranges);
     onPick(pages);
-    announce(countOf(panel.grid, pages.length, total, removes));
+    // F18: Organize says its own count, the one of its bar.
+    announce(count ? count(pages.length) : countOf(panel.grid, pages.length, total, removes));
   };
   return (
     <TextField
@@ -756,9 +758,71 @@ const watermark: PdfToolDef<WatermarkState, WatermarkTexts> = {
 
 // ---- F18: Organize PDF and the two PDF presets ---------------------------------------------------------------
 
-// F18 placeholder: front O replaces with the organize operation and grid mode. Until then, Reorder's definition (the
-// order grid, the action button), with its own outcome.
-const organize: PdfToolDef<ReorderState, ReorderTexts> = { ...reorder, success: 'organized' };
+// F18 (decision 6 of the prompt): Organize PDF. One grid in the organize mode: the person picks pages, turns them or takes
+// them out with the bar over the grid (or in the page view), and moves them with the arrows of each cell or the mouse.
+// The request is the grid's order without the pages that come out, each with its turns (grid-math.ts, organizePages).
+
+interface OrganizeState {
+  /** Page indices in the grid's order; null until the first move. */
+  order: number[] | null;
+  picked: number[];
+  /** The pages that come out of the new PDF (they stay in the grid, faded, until put back). */
+  out: number[];
+  /** Quarter turns the person gave each page, 0 to 3, on top of its /Rotate. */
+  turns: Record<number, number>;
+}
+
+function OrganizeOptions(props: PdfOptionsProps<OrganizeState, OrganizeTexts>) {
+  const { state, update, texts, panel, file } = props;
+  if (!file?.info) return <p class="fo-field__help">{texts.help}</p>;
+  const total = file.info.pages;
+  const order = state.order ?? Array.from({ length: total }, (_, i) => i);
+  const allOut = total > 0 && state.out.length >= total;
+  return (
+    <div class="fo-options-stack">
+      <p class="fo-field__help">{texts.help}</p>
+      <RangePicker id="fo-organize-pick" total={total} panel={panel} announce={props.announce} count={(picked) => markedCount(panel.grid, picked, total - state.out.length)} onPick={(picked) => update({ picked })} />
+      <PageGrid
+        id="fo-organize-grid"
+        view={{ texts: panel.view, action: 'organize' }}
+        name={file.name}
+        boxes={file.info.boxes}
+        mode="organize"
+        texts={panel.grid}
+        icons={props.icons}
+        thumbnails={props.thumbnails}
+        announce={props.announce}
+        order={order}
+        onMove={(from, to) => {
+          const next = [...order];
+          const [moved] = next.splice(from, 1);
+          if (moved !== undefined) next.splice(to, 0, moved);
+          update({ order: next });
+        }}
+        selected={setOf(state.picked)}
+        onSelect={(picked) => update({ picked })}
+        out={setOf(state.out)}
+        turns={state.turns}
+        onOrganize={(change) => update(change)}
+      />
+      {/* Delete's error when every page comes out, adapted: the action does not run (the request is null). */}
+      {allOut && <FieldError>{texts.allOut}</FieldError>}
+      {props.showErrors && !allOut && organizePages(total, state.order, state.out, state.turns) === null && <FieldError>{texts.unchanged}</FieldError>}
+    </div>
+  );
+}
+
+const organize: PdfToolDef<OrganizeState, OrganizeTexts> = {
+  initial: { order: null, picked: [], out: [], turns: {} },
+  success: 'organized',
+  warm: [],
+  grid: () => true,
+  operation: (state, file) => {
+    const pages = organizePages(file.info?.pages ?? 0, state.order, state.out, state.turns);
+    return pages ? { kind: 'organize', pages } : null;
+  },
+  Options: OrganizeOptions,
+};
 
 /**
  * F18 (decision 7; DECISOES § 728): Extract pages from PDF is Split in its Pick mode alone. The grid, the magnifier and the

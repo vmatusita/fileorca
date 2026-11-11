@@ -201,6 +201,7 @@ describe('the reason each fixture gives', () => {
     ['split', { kind: 'split', parts: [[0]] }],
     ['delete', { kind: 'delete', remove: [0] }],
     ['reorder', { kind: 'reorder', order: [0] }],
+    ['organize', { kind: 'organize', pages: [{ index: 0, turn: 1 }] }],
     ['rotate', { kind: 'rotate', all: 1, pages: {} }],
     ['numbers', { kind: 'numbers', position: 'bottom-center', format: 'n', start: 1, skipFirst: false }],
     ['watermark', { kind: 'watermark', text: 'Draft', size: 'medium', opacity: 'light', direction: 'diagonal' }],

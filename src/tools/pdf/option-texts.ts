@@ -138,6 +138,15 @@ export interface ReorderTexts {
   unchanged: string;
 }
 
+/** F18, Organize PDF (decision 6 of the prompt). The bar, the count and the view say the rest (PdfPanelTexts grid and view). */
+export interface OrganizeTexts {
+  help: string;
+  /** Nothing would change yet: "Move, turn or take out a page to save a new PDF." */
+  unchanged: string;
+  /** Every page comes out, Delete's error adapted: "A PDF needs at least one page: put one back." */
+  allOut: string;
+}
+
 export interface WatermarkTexts {
   textLabel: string;
   textHelp: string;

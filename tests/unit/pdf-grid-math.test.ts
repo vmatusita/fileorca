@@ -2,6 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { THUMB_CAP, VIEW_FIT_CAP, VIEW_ZOOM_CAP, askWidth, pageRatio, quarters, samePages, sheetRatio, span } from '../../src/tools/pdf/grid-math.ts';
 import { countOf, inverted, leavingCount, setOf, spanned } from '../../src/tools/pdf/grid-math.ts';
+import { markedCount, organizePages, outAfter, quarter, turnedBy } from '../../src/tools/pdf/grid-math.ts';
 import enPanel from '../../src/tools/pdf/i18n/en.ts';
 import esPanel from '../../src/tools/pdf/i18n/es.ts';
 import ptPanel from '../../src/tools/pdf/i18n/pt.ts';
@@ -143,5 +144,68 @@ describe("the sentence of the count, and Delete's that says what comes out (§ 6
     expect(countOf(forms.en, 3, 12, false)).toBe('3 of 12 pages picked');
     expect(countOf(forms.pt, 1, 12, false)).toBe('1 de 12 páginas marcadas');
     expect(countOf(forms.es, 0, 8, false)).toBe('0 de 8 páginas elegidas');
+  });
+});
+
+// F18 (decision 6 of the prompt; DECISOES § 727): the grid of Organize PDF.
+describe('Organize PDF: the span by place, the count, the bar and the request', () => {
+  const forms = { en: enPanel.grid, pt: ptPanel.grid, es: esPanel.grid };
+
+  it('spans by place in the grid’s order once pages moved, and by page number without an order', () => {
+    const order = [1, 0, 3, 2, 4];
+    expect(span(1, 3, order)).toEqual([1, 0, 3]);
+    expect(span(3, 1, order)).toEqual([1, 0, 3]);
+    expect(span(2, 4, order)).toEqual([2, 4]);
+    expect(span(1, 3)).toEqual([1, 2, 3]);
+    // A page not in the order (it cannot happen in the grid) falls back to page numbers.
+    expect(span(1, 9, order)).toEqual(span(1, 9));
+    expect(spanned([4], 1, 3, true, order)).toEqual([4, 1, 0, 3]);
+    expect(spanned([1, 0, 3, 2], 3, 1, false, order)).toEqual([2]);
+  });
+
+  it('says "{count} picked · the new PDF keeps {left} pages" with the forms of one, in en, pt and es', () => {
+    expect(markedCount(forms.en, 3, 9)).toBe('3 picked · the new PDF keeps 9 pages');
+    expect(markedCount(forms.en, 1, 1)).toBe('1 picked · the new PDF keeps 1 page');
+    expect(markedCount(forms.pt, 3, 9)).toBe('3 marcadas · o PDF novo fica com 9 páginas');
+    expect(markedCount(forms.pt, 1, 1)).toBe('1 marcada · o PDF novo fica com 1 página');
+    expect(markedCount(forms.es, 0, 12)).toBe('0 elegidas · el PDF nuevo queda con 12 páginas');
+    expect(markedCount(forms.es, 1, 0)).toBe('1 elegida · el PDF nuevo queda con 0 páginas');
+    expect(markedCount(forms.en, 2, -1)).toBe('2 picked · the new PDF keeps 0 pages');
+  });
+
+  it('turns the picked pages right and left on top of their turns, from 0 to 3', () => {
+    expect(turnedBy({}, [0, 2], 1)).toEqual({ 0: 1, 2: 1 });
+    expect(turnedBy({ 0: 3, 5: 2 }, [0], 1)).toEqual({ 0: 0, 5: 2 });
+    expect(turnedBy({ 1: 1 }, [1, 4], 3)).toEqual({ 1: 0, 4: 3 });
+    expect(quarter(-1)).toBe(3);
+    expect(quarter(9)).toBe(1);
+  });
+
+  it('takes the picked pages out, and puts them back when every one of them already comes out', () => {
+    expect(outAfter([], [3, 1])).toEqual([3, 1]);
+    expect(outAfter([5], [3, 5])).toEqual([5, 3]);
+    expect(outAfter([5, 3, 7], [3, 5])).toEqual([7]);
+    expect(outAfter([5], [])).toEqual([5]);
+  });
+
+  it('asks for the grid’s order without the pages out, each with its turns; nothing when nothing changes or every page goes', () => {
+    expect(organizePages(4, null, [], {})).toBeNull();
+    expect(organizePages(4, [0, 1, 2, 3], [], { 2: 4 })).toBeNull();
+    expect(organizePages(4, [1, 0, 2, 3], [], {})).toEqual([
+      { index: 1, turn: 0 },
+      { index: 0, turn: 0 },
+      { index: 2, turn: 0 },
+      { index: 3, turn: 0 },
+    ]);
+    expect(organizePages(4, null, [2], { 0: 1, 2: 1, 3: 7 })).toEqual([
+      { index: 0, turn: 1 },
+      { index: 1, turn: 0 },
+      { index: 3, turn: 3 },
+    ]);
+    expect(organizePages(3, [2, 1, 0], [0, 1, 2], {})).toBeNull();
+    expect(organizePages(2, null, [], { 1: -1 })).toEqual([
+      { index: 0, turn: 0 },
+      { index: 1, turn: 3 },
+    ]);
   });
 });

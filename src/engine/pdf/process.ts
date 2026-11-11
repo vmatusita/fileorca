@@ -202,13 +202,15 @@ async function pageImages(bytes: Uint8Array, op: Extract<PdfOperation, { kind: '
 /** Every page index of a document, in order. */
 const allPages = (doc: PDFDocument): number[] => Array.from({ length: doc.getPageCount() }, (_, i) => i);
 
-async function structural(files: readonly Uint8Array[], op: Extract<PdfOperation, { kind: 'merge' | 'split' | 'delete' }>): Promise<PdfSuccess> {
+async function structural(files: readonly Uint8Array[], op: Extract<PdfOperation, { kind: 'merge' | 'split' | 'delete' | 'organize' }>): Promise<PdfSuccess> {
   const opened: OpenedPdf[] = [];
   for (const bytes of files) opened.push(await openUnlocked(bytes));
   const notes: PdfNote[] = opened.some((file) => file.repaired) ? ['repaired'] : [];
-  const build = async (sources: PageSource[], index?: number): Promise<PdfOutput> => {
+  /** `turns`: quarter turns by position in the new document, applied to its pages before it is saved. */
+  const build = async (sources: PageSource[], index?: number, turns?: Record<number, number>): Promise<PdfOutput> => {
     const { doc, report } = await assemble(sources);
     if (report.xfaDropped) notes.push('xfa-removed');
+    if (turns) rotatePages(doc, 0, turns);
     return { bytes: await saveDoc(doc), kind: 'pdf', pages: sources.length, ...(index === undefined ? {} : { index }) };
   };
   const first = opened[0];
@@ -223,6 +225,15 @@ async function structural(files: readonly Uint8Array[], op: Extract<PdfOperation
     const keep = allPages(first.doc).filter((index) => !remove.has(index));
     if (keep.length === 0 || remove.size === 0) throw new PdfEngineError('encode');
     return done([await build(keep.map((index) => ({ doc: first.doc, index })))], notes);
+  }
+  if (op.kind === 'organize') {
+    // One pass of assemble (DECISOES § 145): the sources in the new order without the pages that come out, so links,
+    // fields, bookmarks and the XFA follow the rules of Delete; then the turns on the pages of the new document.
+    const seen = new Set<number>();
+    const pages = op.pages.filter(({ index }) => valid(index) && !seen.has(index) && Boolean(seen.add(index)));
+    if (pages.length === 0) throw new PdfEngineError('encode');
+    const turns = Object.fromEntries(pages.map(({ turn }, position) => [position, Number.isInteger(turn) ? ((turn % 4) + 4) % 4 : 0]));
+    return done([await build(pages.map(({ index }) => ({ doc: first.doc, index })), undefined, turns)], notes);
   }
   const parts = op.parts.map((part) => [...new Set(part.filter(valid))]).filter((part) => part.length > 0);
   if (parts.length === 0) throw new PdfEngineError('encode');
@@ -268,6 +279,7 @@ export async function processPdf(op: PdfOperation, files: readonly Uint8Array[],
       case 'merge':
       case 'split':
       case 'delete':
+      case 'organize':
         return await structural(files, op);
       case 'compress':
         return await compress(first, op.mode, openRenderer);
