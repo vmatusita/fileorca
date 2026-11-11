@@ -27,6 +27,12 @@ export interface SplitTexts {
   pickNone: string;
 }
 
+/**
+ * F18 (decision 7; DECISOES § 728): Extract pages from PDF, Split in its Pick mode alone. No segment of the three modes,
+ * so only the help above the grid ("Pick the pages you want…") and the error of the action pressed with no page picked.
+ */
+export type ExtractTexts = Pick<SplitTexts, 'pickHelp' | 'pickNone'>;
+
 export interface ImagesTexts {
   formatLegend: string;
   jpg: string;
@@ -46,6 +52,12 @@ export interface ImagesTexts {
   rangeHelp: string;
   rangeError: string;
 }
+
+/**
+ * F18 (decision 8; DECISOES § 729): PDF to PNG, PDF to JPG with the format fixed. No format choice, so no legend and no
+ * "JPG": `png` names the format in the "Adjust · PNG · 150 ppi" line, and `formatHelp` says it once above the fields.
+ */
+export type PngTexts = Omit<ImagesTexts, 'formatLegend' | 'jpg'>;
 
 export interface CompressPdfTexts {
   legend: string;

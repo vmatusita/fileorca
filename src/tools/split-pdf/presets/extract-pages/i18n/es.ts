@@ -4,9 +4,9 @@
 // The specs rows state the real behaviour of the PDF engine (src/engine/pdf/): when it changes there, change them here and
 // in en.ts. F18: front P refines the option texts (no mode segment).
 import type { PdfToolTexts } from '../../../../../i18n/types.ts';
-import type { SplitTexts } from '../../../../pdf/option-texts.ts';
+import type { ExtractTexts } from '../../../../pdf/option-texts.ts';
 
-const texts: PdfToolTexts<SplitTexts> = {
+const texts: PdfToolTexts<ExtractTexts> = {
   title: 'Extraer páginas de PDF: guarda las que elijas en un PDF nuevo',
   description:
     'Extrae páginas de un PDF en tu navegador: elígelas en una cuadrícula de miniaturas o escribe números como 2-4, 7, y recíbelas en un PDF nuevo. No se sube nada.',
@@ -67,13 +67,6 @@ const texts: PdfToolTexts<SplitTexts> = {
     doneMany: '¡Listo! Oli hizo {count} PDF a partir de tu archivo.',
     action: 'Extraer páginas',
     options: {
-      legend: 'Dividir por',
-      each: 'Cada página',
-      ranges: 'Rangos de páginas',
-      pick: 'Elegir páginas',
-      rangesLabel: 'Páginas de cada archivo',
-      rangesHelp: 'Un archivo por cada rango, por ejemplo 1-3, 5, 8-10',
-      rangesError: 'Escribe números de página como 1-3, 5, 8-10, solo con páginas que tenga el PDF.',
       pickHelp: 'Elige las páginas que quieres. Van juntas a un PDF nuevo, en el orden de tu archivo.',
       pickNone: 'Primero elige al menos una página.',
     },

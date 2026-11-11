@@ -17,10 +17,12 @@ import type { CompressMode, NumberFormat, Position } from '../../engine/pdf/type
 import type {
   CompressPdfTexts,
   DeleteTexts,
+  ExtractTexts,
   ImagesTexts,
   MergeTexts,
   NumbersTexts,
   PasswordToolTexts,
+  PngTexts,
   ReorderTexts,
   RotatePdfTexts,
   SignTexts,
@@ -162,12 +164,15 @@ function rangeFor(text: string, total: number): number[] | null {
  */
 const mostPages = (files: readonly { info: { pages: number } | null }[]): number => (files.length > 0 ? Math.max(...files.map((file) => file.info?.pages ?? 0)) : Number.MAX_SAFE_INTEGER);
 
-function ImagesOptions(props: PdfOptionsProps<ImagesState, ImagesTexts>) {
+/**
+ * The resolution and the pages of PDF to JPG, the fields its PNG preset keeps (F18, decision 8): one place, so the two
+ * pages ask the same way.
+ */
+function ImagesFields(props: PdfOptionsProps<ImagesState, PngTexts>) {
   const { state, update, texts } = props;
   const wrong = state.pages === 'range' && state.range.trim() !== '' && parseRanges(state.range, mostPages(props.files)) === null;
   return (
-    <div class="fo-options-stack">
-      <OptionGroup name="fo-images-format" legend={texts.formatLegend} value={state.format} note={texts.formatHelp} noteId="fo-images-format-note" choices={[{ value: 'jpeg', label: texts.jpg }, { value: 'png', label: texts.png }]} onChange={(format) => update({ format })} />
+    <>
       <OptionGroup
         name="fo-images-ppi"
         legend={texts.resolutionLegend}
@@ -181,9 +186,22 @@ function ImagesOptions(props: PdfOptionsProps<ImagesState, ImagesTexts>) {
       />
       <OptionGroup name="fo-images-pages" legend={texts.pagesLegend} value={state.pages} choices={[{ value: 'all', label: texts.all }, { value: 'range', label: texts.range }]} onChange={(pages) => update({ pages })} />
       {state.pages === 'range' && <TextField id="fo-images-range" label={texts.rangeLabel} value={state.range} onCommit={(range) => update({ range })} help={texts.rangeHelp} error={wrong ? texts.rangeError : null} />}
+    </>
+  );
+}
+
+function ImagesOptions(props: PdfOptionsProps<ImagesState, ImagesTexts>) {
+  const { state, update, texts } = props;
+  return (
+    <div class="fo-options-stack">
+      <OptionGroup name="fo-images-format" legend={texts.formatLegend} value={state.format} note={texts.formatHelp} noteId="fo-images-format-note" choices={[{ value: 'jpeg', label: texts.jpg }, { value: 'png', label: texts.png }]} onChange={(format) => update({ format })} />
+      <ImagesFields {...props} />
     </div>
   );
 }
+
+/** "150 ppi": the resolution in the "Adjust" line of PDF to JPG and of its PNG preset. */
+const ppiOf = (state: ImagesState, texts: PngTexts): string => (state.ppi === 72 ? texts.low : state.ppi === 300 ? texts.high : texts.medium);
 
 const images: PdfToolDef<ImagesState, ImagesTexts> = {
   initial: { format: 'jpeg', ppi: 150, pages: 'all', range: '' },
@@ -196,7 +214,7 @@ const images: PdfToolDef<ImagesState, ImagesTexts> = {
     const pages = rangeFor(state.range, file.info?.pages ?? 0);
     return pages ? { kind: 'images', format: state.format, ppi: state.ppi, pages } : null;
   },
-  summary: (state, texts) => `${state.format === 'png' ? texts.png : texts.jpg} · ${state.ppi === 72 ? texts.low : state.ppi === 300 ? texts.high : texts.medium}`,
+  summary: (state, texts) => `${state.format === 'png' ? texts.png : texts.jpg} · ${ppiOf(state, texts)}`,
   Options: ImagesOptions,
 };
 
@@ -742,13 +760,70 @@ const watermark: PdfToolDef<WatermarkState, WatermarkTexts> = {
 // order grid, the action button), with its own outcome.
 const organize: PdfToolDef<ReorderState, ReorderTexts> = { ...reorder, success: 'organized' };
 
-// F18: front P refines (no mode segment). Split PDF in its Pick mode from the start (decision 7): one PDF with the marked
-// pages, named with the preset's suffix ("-extracted").
-const extract: PdfToolDef<SplitState, SplitTexts> = { ...split, initial: { mode: 'pick', ranges: '', picked: [] }, success: 'split' };
+/**
+ * F18 (decision 7; DECISOES § 728): Extract pages from PDF is Split in its Pick mode alone. The grid, the magnifier and the
+ * typed range are Split's, without the segment of the three modes: the help says what comes out, and the count is Split's
+ * ("picked", never Delete's "come out"). The request is the parent's for the Pick mode, one PDF with the picked pages in
+ * the order of the file, named with the preset's suffix ("-extracted"; the panel names a Split part only on Split's page).
+ */
+function ExtractOptions(props: PdfOptionsProps<SplitState, ExtractTexts>) {
+  const { state, update, texts, panel, file } = props;
+  if (!file?.info) return <p class="fo-field__help">{texts.pickHelp}</p>;
+  return (
+    <div class="fo-options-stack">
+      <p class="fo-field__help">{texts.pickHelp}</p>
+      <RangePicker id="fo-extract-pick" total={pageCount(props)} panel={panel} announce={props.announce} onPick={(picked) => update({ picked })} />
+      <PageGrid
+        id="fo-extract-grid"
+        view={{ texts: panel.view, action: 'mark' }}
+        name={file.name}
+        boxes={file.info.boxes}
+        mode="select"
+        texts={panel.grid}
+        icons={props.icons}
+        thumbnails={props.thumbnails}
+        announce={props.announce}
+        selected={setOf(state.picked)}
+        onSelect={(picked) => update({ picked })}
+      />
+      {props.showErrors && state.picked.length === 0 && <FieldError>{texts.pickNone}</FieldError>}
+    </div>
+  );
+}
 
-// F18: front P refines (no format choice). PDF to JPG with PNG from the start (decision 8): the resolution and the pages
-// stay as in the parent, and the summary of "Adjust" already says "PNG · <resolution>".
-const png: PdfToolDef<ImagesState, ImagesTexts> = { ...images, initial: { ...images.initial, format: 'png' }, success: 'converted' };
+// The parent's definition with the Pick mode fixed (decision 5: a preset starts from its parent and changes only what its
+// decision says): the same grid rule and the same request, with the options above.
+const extract: PdfToolDef<SplitState, ExtractTexts> = {
+  initial: { ...split.initial, mode: 'pick' },
+  success: split.success,
+  warm: split.warm,
+  ...(split.grid ? { grid: split.grid } : {}),
+  operation: split.operation,
+  Options: ExtractOptions,
+};
+
+/**
+ * F18 (decision 8; DECISOES § 729): PDF to PNG is PDF to JPG with PNG fixed, so it has no format choice: a line says the
+ * format, then the parent's resolution and pages. The output is the parent's (a PNG per page, a ZIP of images for more
+ * than one; the panel names the ZIP by the base tool), and "Adjust" says "PNG · <resolution>".
+ */
+function PngOptions(props: PdfOptionsProps<ImagesState, PngTexts>) {
+  return (
+    <div class="fo-options-stack">
+      <p class="fo-field__help">{props.texts.formatHelp}</p>
+      <ImagesFields {...props} />
+    </div>
+  );
+}
+
+const png: PdfToolDef<ImagesState, PngTexts> = {
+  initial: { ...images.initial, format: 'png' },
+  success: images.success,
+  warm: images.warm,
+  operation: images.operation,
+  summary: (state, texts) => `${texts.png} · ${ppiOf(state, texts)}`,
+  Options: PngOptions,
+};
 
 export const PDF_TOOLS = {
   'merge-pdf': merge,

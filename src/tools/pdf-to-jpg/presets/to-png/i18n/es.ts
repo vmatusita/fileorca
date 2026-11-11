@@ -4,9 +4,9 @@
 // of the PDF engine (src/engine/pdf/): when it changes there, change them here and in en.ts. Every sentence on the size of
 // the files is checked against the matrix (front P). F18: front P refines the option texts (no format choice).
 import type { PdfToolTexts } from '../../../../../i18n/types.ts';
-import type { ImagesTexts } from '../../../../pdf/option-texts.ts';
+import type { PngTexts } from '../../../../pdf/option-texts.ts';
 
-const texts: PdfToolTexts<ImagesTexts> = {
+const texts: PdfToolTexts<PngTexts> = {
   title: 'PDF a PNG: convierte páginas de PDF en imágenes nítidas en tu navegador',
   description:
     'Convierte las páginas de un PDF en PNG a 72, 150 o 300 ppp en tu navegador. El PNG deja nítidos el texto y las líneas finas. Sin subir nada, sin Exif ni GPS.',
@@ -68,8 +68,6 @@ const texts: PdfToolTexts<ImagesTexts> = {
     done: '¡Listo! Oli convirtió tu PDF en una imagen PNG.',
     doneMany: '¡Listo! Oli convirtió las páginas en {count} imágenes PNG.',
     options: {
-      formatLegend: 'Formato de imagen',
-      jpg: 'JPG',
       png: 'PNG',
       formatHelp: 'Cada página sale como PNG, guardado sin pérdida.',
       resolutionLegend: 'Resolución',

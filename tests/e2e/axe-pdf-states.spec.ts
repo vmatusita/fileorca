@@ -1,6 +1,5 @@
 import { expect, test } from '@playwright/test';
 import { routeById } from '../../src/i18n/routes.ts';
-import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { violationsEverywhere } from './lib/axe.ts';
 import { PDF_WALKS, walkPdfTool, type PdfState } from './lib/pdf-states.ts';
 
@@ -15,6 +14,7 @@ import { PDF_WALKS, walkPdfTool, type PdfState } from './lib/pdf-states.ts';
 // a11y.spec.ts they all fell in the first part of each browser, which went over the 700 s target; in a file of their own,
 // right after ads.spec.ts, the split by count puts them in the lighter parts.
 // F13a (UX-04 A, D-21): the Merge list with a row taken out, the Undo in its place.
+// F18 (decision 5; DECISOES § 725): the two PDF presets too, in the three languages (PDF_WALKS has them): 45 walks.
 const PDF_AXE_STATES: ReadonlySet<PdfState> = new Set<PdfState>(['rest', 'list', 'removed', 'grid', 'password', 'signature', 'result']);
 const TRANSLATED = ['pt', 'es'] as const;
 
@@ -42,7 +42,7 @@ test.describe('axe nos estados das ferramentas de PDF em pt e es, a 360 e 1280px
   test.use({ reducedMotion: 'reduce' });
 
   for (const lang of TRANSLATED) {
-    for (const id of PDF_TOOL_IDS) {
+    for (const { id } of PDF_WALKS) {
       test(`${routeById(id).paths[lang] ?? ''}: at rest, with its options and with the result`, async ({ page }) => {
         const found: string[] = [];
         await walkPdfTool(
