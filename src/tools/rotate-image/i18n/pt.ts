@@ -53,6 +53,13 @@ export default {
   privacyNote:
     'Suas imagens são giradas no seu aparelho e nunca são enviadas a um servidor. As cópias salvas deixam de fora os metadados da foto, inclusive a localização GPS.',
   relatedHeading: 'Mais ferramentas de imagem',
+  // F18 placeholder: front T writes the pt text.
+  // F18 (decision 5; DECISOES § 725): the table of the presets of this tool, with their links.
+  presets: {
+    heading: 'Ready-made settings',
+    caption: 'Presets of Rotate image and what each one does',
+    head: ['Preset', 'What it does'],
+  },
   panel: {
     formats: 'JPG, PNG ou WebP',
     progressLabel: 'Girando as imagens',

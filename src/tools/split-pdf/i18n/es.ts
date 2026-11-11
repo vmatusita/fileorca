@@ -59,6 +59,13 @@ const texts: PdfToolTexts<SplitTexts> = {
   privacyHeading: 'Privacidad',
   privacyNote: 'Tu PDF se lee y se corta en tu dispositivo y nunca se envía a un servidor. Cada parte también se crea en tu navegador.',
   relatedHeading: 'Herramientas relacionadas',
+  // F18 placeholder: front T writes the es text.
+  // F18 (decision 5; DECISOES § 725): the table of the presets of this tool, with their links.
+  presets: {
+    heading: 'Ready-made settings',
+    caption: 'Presets of Split PDF and what each one does',
+    head: ['Preset', 'What it does'],
+  },
   panel: {
     suffix: 'dividido',
     note: 'un PDF a la vez',

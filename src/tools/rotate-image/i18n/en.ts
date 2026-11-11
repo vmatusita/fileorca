@@ -53,6 +53,12 @@ export default {
   privacyNote:
     'Your images are rotated on your device and never sent to a server. The saved copies leave out the photo metadata, including the GPS location.',
   relatedHeading: 'More image tools',
+  // F18 (decision 5; DECISOES § 725): the table of the presets of this tool, with their links.
+  presets: {
+    heading: 'Ready-made settings',
+    caption: 'Presets of Rotate image and what each one does',
+    head: ['Preset', 'What it does'],
+  },
   panel: {
     formats: 'JPG, PNG or WebP',
     progressLabel: 'Rotating images',

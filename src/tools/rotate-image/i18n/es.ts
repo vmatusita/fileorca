@@ -53,6 +53,13 @@ export default {
   privacyNote:
     'Tus imágenes se rotan en tu navegador, y tus archivos nunca salen de tu dispositivo ni llegan a un servidor. Las copias guardadas omiten los metadatos de la foto, incluida la ubicación GPS.',
   relatedHeading: 'Más herramientas de imagen',
+  // F18 placeholder: front T writes the es text.
+  // F18 (decision 5; DECISOES § 725): the table of the presets of this tool, with their links.
+  presets: {
+    heading: 'Ready-made settings',
+    caption: 'Presets of Rotate image and what each one does',
+    head: ['Preset', 'What it does'],
+  },
   panel: {
     formats: 'JPG, PNG o WebP',
     progressLabel: 'Rotando las imágenes',

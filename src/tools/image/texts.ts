@@ -46,6 +46,13 @@ import esConvert from '../convert-to-webp/i18n/es.ts';
 import enPdf from '../image-to-pdf/i18n/en.ts';
 import ptPdf from '../image-to-pdf/i18n/pt.ts';
 import esPdf from '../image-to-pdf/i18n/es.ts';
+// F18 (decisions 9 and 10): Remove EXIF data and Flip image, a preset of Rotate image.
+import enExif from '../remove-exif-data/i18n/en.ts';
+import ptExif from '../remove-exif-data/i18n/pt.ts';
+import esExif from '../remove-exif-data/i18n/es.ts';
+import enFlip from '../rotate-image/presets/flip/i18n/en.ts';
+import ptFlip from '../rotate-image/presets/flip/i18n/pt.ts';
+import esFlip from '../rotate-image/presets/flip/i18n/es.ts';
 
 /** Page blocks and panel bits of any tool: the option texts are each tool's own shape. */
 export type AnyToolTexts = ImageToolTexts<object>;
@@ -64,6 +71,8 @@ export const IMAGE_TOOL_TEXTS: Record<ImagePageId, Record<Lang, AnyToolTexts>> =
   'avif-to-jpg': { en: enAvif, pt: ptAvif, es: esAvif },
   'convert-to-webp': { en: enConvert, pt: ptConvert, es: esConvert },
   'image-to-pdf': { en: enPdf, pt: ptPdf, es: esPdf },
+  'remove-exif-data': { en: enExif, pt: ptExif, es: esExif },
+  'rotate-image-flip': { en: enFlip, pt: ptFlip, es: esFlip },
 };
 
 /** The texts of a page in a language. */

@@ -59,6 +59,13 @@ const texts: PdfToolTexts<ImagesTexts> = {
   privacyHeading: 'Privacidad',
   privacyNote: 'Tus PDF se dibujan en tu dispositivo y nunca se envían a un servidor. Las imágenes salen sin datos Exif ni ubicación GPS.',
   relatedHeading: 'Herramientas relacionadas',
+  // F18 placeholder: front T writes the es text.
+  // F18 (decision 5; DECISOES § 725): the table of the presets of this tool, with their links.
+  presets: {
+    heading: 'Ready-made settings',
+    caption: 'Presets of PDF to JPG and what each one does',
+    head: ['Preset', 'What it does'],
+  },
   panel: {
     suffix: 'pagina',
     note: 'Archivos PDF, todos los que quieras',
