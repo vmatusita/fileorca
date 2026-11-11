@@ -8451,3 +8451,19 @@ Três README do `docs/design/components/` ganharam uma seção "Mudança de regr
 - **O que faz o papel dela:** a execução completa final, depois do `gh pr ready`. Ela é a primeira vez que as cinco páginas novas e as matrizes delas rodam no WebKit do Linux; o relatório e a descrição da PR dizem o que ela achou.
 - **O F17 m-1 (decisão 16):** a frase foi decidida pelas três rodadas da máquina (§ 739), então o `[webp 12 MP]` e o `[avif 12 MP]` do runner, lidos no log da execução completa final, vão para a descrição da PR só como registro.
 - **O que fica para o Victor:** criar o rótulo `ci` (Issues → Labels), como na lista do relatório.
+
+## § 747 · As partes do CI com os testes da F18, e a divisão por cima da de 15 (F18, decisões 20 e 25 do prompt; § 648, § 717 e § 720)
+
+- **O método** (`.cache/f18/proj/`, só `playwright test --list --shard`): os tempos por teste das execuções completas mais novas, a da PR 34 (`42908729924`, Chromium em 8 e WebKit em 15) e a da F17 (`42903419182`, WebKit em 14); o teste sem tempo de CI ganha o do mesmo teste na página irmã, ou a mediana do spec; os specs e blocos novos (o `pdf-presets`, o `island-pdf-organize`, o `ads-organize`, o `image-webp-speed` e os blocos da F18 nas matrizes, no `events`, no `layout-shift` e no `a11y`) ganham o tempo medido pelas frentes na máquina vezes a razão CI/máquina do spec mais parecido; o total de uma parte é a soma dos testes dividida pelos 2 workers mais a constante do job, calibrada nas partes da própria execução; o "pessimista" soma a cada parte o pior resíduo da execução (+196 s, o do `money-card` na 12/15), o que exagera nas outras partes.
+- **Depois da fatia 1** (os testes que entraram sozinhos pelos registros): a maior parte foi a 6/14 do WebKit, com 648 s (§ 745 e o plano).
+- **Com todos os testes do `8a1d1c1`** (212 testes novos no Chromium, 699 s de soma; 220 no WebKit, 1.092 s de soma em 14 partes e 1.129 s em 15):
+
+  | Configuração | Parte mais justa | Central | Pessimista | Acima de 700 s |
+  | --- | --- | ---: | ---: | --- |
+  | Chromium em 8 | 4/8 | 620 s | 634 s | nenhuma |
+  | WebKit em 14 (o `ci.yml` desta branch e da main) | 6/14 | 666 s | 796 s | nenhuma no central; 6/14 (796) e 4/14 (764) no pessimista |
+  | WebKit em 15 (a PR 34, aberta) | 7/15 | 726 s | 922 s | a 7/15 no central (o `fo-ad-map` inteiro cai nela, 892 s de soma, mais o `guide-page` e o `fo-wall`); a 4/15 (722) e a 11/15 (701) no pessimista |
+
+- **A leitura:** o CI desta PR roda com 14 partes no WebKit, e nenhuma parte passa de 700 s no central; a decisão 25 pede a divisão quando uma parte passa de 700 s por causa dos testes desta run, e é o que acontece com a de 15 (a da PR 34): a 7/15 dava 592 s depois da fatia 1 e passa a 726 s com os testes da F18. Como a PR 34 está aberta e mexe no mesmo `.github/workflows/ci.yml`, esta run não abre uma segunda PR (decisão 25): a divisão fica registrada aqui e numa linha do grupo 28, para o Victor aplicar depois de mesclar a PR 34.
+- **A divisão por cima da de 15:** com 16 partes no WebKit, a maior é a 7/16, com 671 s (folga de 29 s, de novo com o `fo-ad-map` inteiro), e a 5/16 fica em 614 s com o `clearance` inteiro; com 17, a maior é a 5/17, com 657 s (folga de 43 s), e a 7/17 cai para 551 s. A recomendação é **17 partes no WebKit**: 16 já cabem pelo central, com a folga fina de 29 s numa parte que leva sozinha um spec de 57 testes. A mudança é a da PR 34 (`--shard=k/15` → `k/17`, as duas linhas novas da matriz e o `tests/unit/verificar.test.ts`), com a execução completa dela para conferir.
+- **O custo das presets no `clearance`** (§ 742): 6 testes por navegador entram pelo passeio de estados; o `clearance` inteiro fica na 5/16 ou na 4/14, abaixo de 700 s no central.

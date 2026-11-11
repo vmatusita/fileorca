@@ -44,9 +44,9 @@ Conferido em 2 de novembro de 2026 sobre a `main` em `29afbce` (a F7), na F8 (DE
 | 25. O que a F15 deixou | 3 | O Victor e runs de ajuste |
 | 26. O que a F16 deixou | 5 | O Victor e runs de ajuste |
 | 27. O que a F17 deixou | 1 | O Victor e runs de ajuste |
-| 28. O que a F18 deixou | 1 | Run de ajuste do motor de imagem |
+| 28. O que a F18 deixou | 2 | O Victor e runs de ajuste |
 
-Total: 189 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 2 (oráculo antes), 7, 8, 9, 10, 12 (os grupos 5 e 6 a F13b fechou, o 3 a F16 e o 13 a F17).
+Total: 190 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 2 (oráculo antes), 7, 8, 9, 10, 12 (os grupos 5 e 6 a F13b fechou, o 3 a F16 e o 13 a F17).
 
 ## 1. Saúde e fontes (YMYL)
 
@@ -428,6 +428,7 @@ O que a F18 (o Organizar PDF e o Remover dados EXIF, as presets Extrair páginas
 | Id | Fonte | Sev. | Defeito | Correção proposta | Quem resolve |
 | --- | --- | --- | --- | --- | --- |
 | F18 m-1 | DECISOES § 732 | baixo | Um PNG com `eXIf` girado perde a Orientation no `stripPng` (e uma WebP com `EXIF` girado, no `stripWebp`), e o Chromium, que aplica a Orientation do `eXIf` de um PNG, mostra a saída como guardada: deitada onde a entrada aparecia em pé. O WebKit não aplica a do PNG, e nenhum dos dois aplica a da WebP, então neles nada muda na tela. Vale para toda ferramenta que passa pelo strip (o Remover dados EXIF, o Comprimir de PNG, o Redimensionar a 100 %, o Cortar da imagem inteira, o "sem ganho"), desde a § 33 e a § 100. Nenhuma fixture tem esse PNG, e a página promete a Orientation só no JPG. Fica a medir, na mesma correção: se o caminho com decodificação das outras ferramentas, no Chromium, também diverge para esse PNG. | Um `eXIf` mínimo só com a Orientation no `stripPng`, com o CRC, como o bloco mínimo do JPG e sem dependência nova, e o `tagMayStay` do `expectNoMetadata` também no PNG, com um Vitest que reprova sem a correção. Mexe no motor de todas as ferramentas de imagem, então pede as cinco lentes. | Run de ajuste do motor de imagem |
+| F18 m-2 | DECISOES § 747 | baixo | Com os testes da F18, a parte 7/15 do WebKit (a divisão da PR 34, `ajuste-ci-partes-f17`, ainda aberta no fim da F18) projeta 726 s, acima do alvo de 700 s: o `fo-ad-map.spec.ts` inteiro cai nela. O CI desta run rodou com 14 partes (nenhuma acima de 700 s na projeção central), e a run não abriu uma segunda PR no mesmo `ci.yml` (decisão 25). | Depois de mesclar a PR 34, passar o WebKit de 15 para 17 partes (`--shard=k/17`, as duas linhas novas da matriz e o `tests/unit/verificar.test.ts`), numa PR separada com a execução completa para conferir; a projeção dá a maior parte em 657 s (16 partes dariam 671 s, com folga de 29 s). | Victor faz |
 
 ## Registrados (escolhas, não defeitos)
 
