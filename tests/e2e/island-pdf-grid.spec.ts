@@ -17,8 +17,9 @@ const cells = (page: Page) => root(page).locator('.fo-pages__grid > li');
 const option = (page: Page, label: string) => root(page).locator('.fo-seg__opt').filter({ hasText: label }).first().click();
 const optionsOf = (id: string): Record<string, string> => (PDF_TOOL_TEXTS.en[id as 'split-pdf'].panel as unknown as { options: Record<string, string> }).options;
 
-type GridTool = 'delete-pdf-pages' | 'split-pdf' | 'rotate-pdf' | 'sign-pdf' | 'reorder-pdf-pages';
-const GRID_TOOLS: readonly GridTool[] = ['delete-pdf-pages', 'split-pdf', 'rotate-pdf', 'sign-pdf', 'reorder-pdf-pages'];
+// F18 (decision 6): Organize PDF is a grid tool too; its targets and turns are measured in island-pdf-organize.spec.ts.
+type GridTool = 'delete-pdf-pages' | 'split-pdf' | 'rotate-pdf' | 'sign-pdf' | 'reorder-pdf-pages' | 'organize-pdf';
+const GRID_TOOLS: readonly GridTool[] = ['delete-pdf-pages', 'split-pdf', 'rotate-pdf', 'sign-pdf', 'reorder-pdf-pages', 'organize-pdf'];
 
 /** Opens a grid tool with a file and brings its page grid on screen. */
 async function toGrid(page: Page, id: GridTool, file = MIXED, pages = 8): Promise<void> {

@@ -6,6 +6,7 @@ import { choosePdfs, openTool, pdfFile } from './lib/pdf-tools.ts';
 // F14 (PLANO-UX-QV.md, criterion 11; DECISOES § 624 to § 626): axe with the page view open, in "Fit" and in "Enlarge", at
 // 360 and 1280 px, in the dark and the light theme, in the five grid tools, on the result ("View the new PDF") and on a
 // row of the Merge list. A spec of its own, as the walks of axe-pdf-states.spec.ts (§ 307): its name falls in a light part.
+// F18: and in Organize PDF, with its two actions.
 
 const MIXED = 'gen-paginas-mistas.pdf';
 const root = (page: Page) => page.locator('#fo-tool-root');
@@ -55,6 +56,23 @@ test.describe('axe with the page view open, in "Fit" and "Enlarge", at 360 and 1
       expect(await bothModes(page)).toEqual([]);
     });
   }
+
+  // F18 (decision 19): Organize PDF, with its two actions, the page turned and taken out (the pressed state measured too).
+  test('organize-pdf: the view of a page of the grid, turned and taken out', async ({ page }) => {
+    await openTool(page, '/organize-pdf/');
+    await choosePdfs(page, [pdfFile(MIXED)]);
+    await expect(root(page).locator('.fo-ready:not(.fo-ready--reading)')).toBeVisible({ timeout: 30_000 });
+    const cells = root(page).locator('.fo-pages__grid > li');
+    await expect(cells).toHaveCount(8, { timeout: 30_000 });
+    await cells.nth(3).locator('.fo-page__zoom').click();
+    await view(page).getByRole('button', { name: texts.turn, exact: true }).click();
+    await expect(view(page).locator('.fo-pview__img')).toHaveAttribute('data-turn', '1', { timeout: 30_000 });
+    const remove = view(page).getByRole('button', { name: texts.remove, exact: true });
+    await remove.click();
+    await expect(remove).toHaveAttribute('aria-pressed', 'true');
+    await view(page).locator('.fo-pview__title').focus();
+    expect(await bothModes(page)).toEqual([]);
+  });
 
   test('the view of the result, from "View the new PDF"', async ({ page }) => {
     await openTool(page, '/add-page-numbers-to-pdf/');

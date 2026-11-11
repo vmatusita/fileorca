@@ -218,6 +218,28 @@ export async function walkPdfTool(page: Page, id: PdfToolId, visit: VisitPdf, op
       await result('unlocked');
       break;
     }
+    case 'organize-pdf': {
+      // F18 (decision 6): the grid with its bar, first with no page picked (the buttons aria-disabled, the help), then with
+      // two pages picked and turned, one taken out (faded, with the trash) and one moved; the result is one PDF.
+      await enter([MIXED]);
+      await waitReady();
+      await expect(cells).toHaveCount(MIXED_PAGES);
+      await expect(root.locator('.fo-pages__act[aria-disabled="true"]')).toHaveCount(3);
+      await seen('grid', 'nothing picked: the bar waits for a pick');
+      await cells.nth(1).locator('.fo-page__main').click();
+      await cells.nth(3).locator('.fo-page__main').click();
+      await root.locator('.fo-pages__act--right').click();
+      await root.getByRole('button', { name: grid.selectNone, exact: true }).click();
+      await cells.nth(5).locator('.fo-page__main').click();
+      await root.locator('.fo-pages__act--out').click();
+      await root.getByRole('button', { name: fmt(grid.moveLater, { n: 1 }) }).click();
+      await expect(root.locator('.fo-page[data-leaving="true"]')).toHaveCount(1);
+      await expect(root.locator('.fo-pages__act--out')).toHaveText(grid.putBack);
+      await seen('grid', 'two pages turned, one out, page 1 moved');
+      await action.click();
+      await result('organized');
+      break;
+    }
     case 'reorder-pdf-pages': {
       await enter([MIXED]);
       await waitReady();
