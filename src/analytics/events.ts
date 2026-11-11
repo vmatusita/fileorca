@@ -3,7 +3,7 @@
 import type { Lang } from '../i18n/routes.ts';
 import type { ImagePageId, ImageToolId } from '../tools/image/registry.ts';
 import type { AnyCalcId } from '../tools/calc/registry.ts';
-import type { ImageNeighbour, PdfToolId } from '../tools/pdf/registry.ts';
+import type { ImageNeighbour, PdfPageId } from '../tools/pdf/registry.ts';
 import { EVENT_TOOLS } from './tool-ids.ts';
 
 export const EVENT_PARAMS = {
@@ -23,12 +23,14 @@ export const EVENT_PARAMS = {
 export type EventName = keyof typeof EVENT_PARAMS;
 
 /** Every image, calculator and PDF page and the QR code (the registries); the id is a page name, never a file name or a number. */
-export type ToolId = ImagePageId | AnyCalcId | PdfToolId | 'qr-code-generator';
+export type ToolId = ImagePageId | AnyCalcId | PdfPageId | 'qr-code-generator';
 /** What a batch ended with: the tool's own success word, 'unchanged' when nothing got better, 'failed' when no file came out. */
 export const OUTCOMES = [
   'smaller', 'unchanged', 'converted', 'resized', 'cropped', 'rotated', 'pdf', 'failed',
   // The PDF tools (F5a, DECISOES § 151).
   'merged', 'split', 'deleted', 'numbered', 'reordered', 'watermarked', 'signed', 'protected', 'unlocked',
+  // F18: values of the existing outcome parameter (Organize PDF and Remove EXIF data), not a new parameter.
+  'organized', 'cleaned',
 ] as const;
 export type Outcome = (typeof OUTCOMES)[number];
 /**
@@ -67,7 +69,7 @@ export interface EventMap {
   tool_start: { tool: ToolId; lang: Lang };
   tool_complete: { tool: ToolId; lang: Lang; outcome: Outcome };
   download: { tool: ToolId; lang: Lang };
-  next_step_click: { tool: ToolId; lang: Lang; target: ImageToolId | AnyCalcId | PdfToolId | ImageNeighbour | 'home' };
+  next_step_click: { tool: ToolId; lang: Lang; target: ImageToolId | AnyCalcId | PdfPageId | ImageNeighbour | 'home' };
   tool_error: { tool: ToolId; lang: Lang; browser: string; codec: Codec; reason: ErrorReason };
   donate_click: { place: DonatePlace; lang: Lang };
   /** Once per page load, on the first valid change the person makes (never on load, never from the # link). */

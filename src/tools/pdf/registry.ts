@@ -1,6 +1,8 @@
-// The PDF tools (F5a; PLANO "Catálogo por fase"; the 12 PDF rows of data/keywords.csv, all `entra`): the order of the
+// The PDF tools (F5a; PLANO "Catálogo por fase"; the PDF rows of data/keywords.csv, all `entra`): the order of the
 // hub, what each one takes, its icon, how it runs, the next-step chips and the related grid. The pages, the island,
 // the hub, the search, the gates and the tests read this list, so a tool is declared once (DECISOES § 148).
+// F18 (decision 5; DECISOES § 725): and the PDF presets, pages of a parent tool with their own behaviour, in the
+// design of the image presets (src/tools/image/registry.ts): the path is /<parent>/<name>/ and the id <parent>-<name>.
 // Plain data: no route, text or component is imported here.
 import type { IconName } from '../../icons/svg.ts';
 
@@ -16,10 +18,19 @@ export const PDF_TOOL_IDS = [
   'sign-pdf',
   'protect-pdf',
   'unlock-pdf',
+  // F18 (decision 4; DECISOES § 724): right before Reorder, whose search it shares ("organize pdf").
+  'organize-pdf',
   'reorder-pdf-pages',
   'watermark-pdf',
 ] as const;
 export type PdfToolId = (typeof PDF_TOOL_IDS)[number];
+
+/** F18 (decision 5): the PDF presets with `entra` in data/keywords.csv, in catalogue order. */
+export const PDF_PRESET_IDS = ['split-pdf-extract-pages', 'pdf-to-jpg-to-png'] as const;
+export type PdfPresetId = (typeof PDF_PRESET_IDS)[number];
+
+/** A PDF page: a tool or a preset. */
+export type PdfPageId = PdfToolId | PdfPresetId;
 
 export const PDF_HUB_ID = 'pdf-tools';
 
@@ -27,7 +38,9 @@ export const PDF_HUB_ID = 'pdf-tools';
 export type ImageNeighbour = 'image-to-pdf' | 'compress-image';
 
 export interface PdfPageDef {
-  id: PdfToolId;
+  id: PdfPageId;
+  /** F18 (decision 5): the tool a preset belongs to. */
+  parent?: PdfToolId;
   path: string;
   icon: IconName;
   /** batch: every file on its own (a ZIP for two or more); merge: all files into one; single: one file at a time. */
@@ -35,9 +48,9 @@ export interface PdfPageDef {
   /** auto: runs when the file arrives and again when an option changes (the image tools' way); action: waits for the button. */
   run: 'auto' | 'action';
   /** Next-step chips: 2 to 4 pages that exist. */
-  next: readonly (PdfToolId | ImageNeighbour)[];
+  next: readonly (PdfPageId | ImageNeighbour)[];
   /** Related grid: up to 6 pages that exist. */
-  related: readonly (PdfToolId | ImageNeighbour)[];
+  related: readonly (PdfPageId | ImageNeighbour)[];
   /** Suffix of the output name: "<original>-<suffix>.pdf". */
   suffix: string;
 }
@@ -53,7 +66,16 @@ const def = (id: PdfToolId, icon: IconName, files: PdfPageDef['files'], run: Pdf
   suffix,
 });
 
-export const PDF_PAGES: Record<PdfToolId, PdfPageDef> = {
+/**
+ * F18 (decision 5): a preset at /<parent>/<name>/, with the parent's icon (decision 12) and its own chips, related grid
+ * and suffix. `files` and `run` are the parent's unless the preset's decision says otherwise.
+ */
+const preset = (id: PdfPresetId, parent: PdfToolId, name: string, suffix: string, next: PdfPageDef['next'], related: PdfPageDef['related']): PdfPageDef => {
+  const base = PDF_TOOL_DEFS[parent];
+  return { id, parent, path: `/${parent}/${name}/`, icon: base.icon, files: base.files, run: base.run, next, related, suffix };
+};
+
+const PDF_TOOL_DEFS: Record<PdfToolId, PdfPageDef> = {
   'merge-pdf': def('merge-pdf', 'merge', 'merge', 'action', 'merged', ['add-page-numbers-to-pdf', 'compress-pdf', 'image-to-pdf'], ['split-pdf', 'compress-pdf', 'reorder-pdf-pages', 'delete-pdf-pages', 'add-page-numbers-to-pdf', 'image-to-pdf']),
   'split-pdf': def('split-pdf', 'split', 'single', 'action', 'split', ['compress-pdf', 'merge-pdf'], ['merge-pdf', 'delete-pdf-pages', 'reorder-pdf-pages', 'pdf-to-jpg', 'compress-pdf', 'rotate-pdf']),
   'pdf-to-jpg': def('pdf-to-jpg', 'image', 'batch', 'auto', 'page', ['compress-image', 'image-to-pdf'], ['image-to-pdf', 'compress-pdf', 'split-pdf', 'merge-pdf', 'compress-image', 'rotate-pdf']),
@@ -64,6 +86,34 @@ export const PDF_PAGES: Record<PdfToolId, PdfPageDef> = {
   'sign-pdf': def('sign-pdf', 'sign', 'single', 'action', 'signed', ['protect-pdf', 'compress-pdf'], ['watermark-pdf', 'protect-pdf', 'add-page-numbers-to-pdf', 'merge-pdf', 'compress-pdf', 'image-to-pdf']),
   'protect-pdf': def('protect-pdf', 'lock', 'batch', 'action', 'protected', ['compress-pdf', 'merge-pdf'], ['unlock-pdf', 'sign-pdf', 'watermark-pdf', 'compress-pdf', 'merge-pdf', 'split-pdf']),
   'unlock-pdf': def('unlock-pdf', 'unlock', 'single', 'auto', 'unlocked', ['compress-pdf', 'merge-pdf', 'split-pdf'], ['protect-pdf', 'compress-pdf', 'merge-pdf', 'split-pdf', 'pdf-to-jpg', 'rotate-pdf']),
+  // F18 (decision 6): one file, the action button, "-organized". The icon is a temporary one that no card uses, and the
+  // chips and the related grid are a first list: front S draws the icon (decision 12) and finalizes the lists (decision 11).
+  'organize-pdf': def('organize-pdf', 'menu', 'single', 'action', 'organized', ['compress-pdf', 'add-page-numbers-to-pdf'], ['reorder-pdf-pages', 'delete-pdf-pages', 'rotate-pdf', 'merge-pdf', 'split-pdf', 'compress-pdf']),
   'reorder-pdf-pages': def('reorder-pdf-pages', 'reorder', 'single', 'action', 'reordered', ['add-page-numbers-to-pdf', 'compress-pdf'], ['delete-pdf-pages', 'rotate-pdf', 'merge-pdf', 'split-pdf', 'add-page-numbers-to-pdf', 'compress-pdf']),
   'watermark-pdf': def('watermark-pdf', 'watermark', 'batch', 'action', 'watermarked', ['protect-pdf', 'compress-pdf'], ['sign-pdf', 'add-page-numbers-to-pdf', 'protect-pdf', 'compress-pdf', 'merge-pdf', 'rotate-pdf']),
 };
+
+/** Every PDF page, the tools in hub order and then the presets (the order of PDF_EVENT_TOOLS and of the search). */
+export const PDF_PAGES: Record<PdfPageId, PdfPageDef> = {
+  ...PDF_TOOL_DEFS,
+  // F18 (decisions 5 and 7): Split PDF in the Pick mode only, one PDF named "-extracted". F18 placeholder: front S
+  // finalizes the chips and the related grid (decision 11).
+  'split-pdf-extract-pages': preset('split-pdf-extract-pages', 'split-pdf', 'extract-pages', 'extracted', ['compress-pdf', 'merge-pdf'], ['split-pdf', 'delete-pdf-pages', 'organize-pdf', 'merge-pdf', 'pdf-to-jpg', 'compress-pdf']),
+  // F18 (decisions 5 and 8): PDF to JPG with PNG fixed; the output is the parent's, one PNG per page. F18 placeholder:
+  // front S finalizes the chips and the related grid (decision 11).
+  'pdf-to-jpg-to-png': preset('pdf-to-jpg-to-png', 'pdf-to-jpg', 'to-png', 'page', ['compress-image', 'image-to-pdf'], ['pdf-to-jpg', 'image-to-pdf', 'compress-image', 'split-pdf', 'compress-pdf', 'merge-pdf']),
+};
+
+/** F18 (decision 5): the presets of a PDF tool, in catalogue order (presetsOf of the image registry). */
+export function presetsOf(tool: PdfToolId): PdfPresetId[] {
+  return PDF_PRESET_IDS.filter((id) => PDF_PAGES[id].parent === tool);
+}
+
+/**
+ * F18 (decision 5; DECISOES § 725): the tool a page is, for what the tool does: the parent of a preset, the page itself
+ * for a tool. The island compares this (`base` in PdfPanelData) where it means "this tool" (the restricted PDF that PDF to
+ * JPG takes, the name of its ZIP), and the page id where it means "this page" (events, the inbox, the suffix).
+ */
+export function toolOf(id: PdfPageId): PdfToolId {
+  return PDF_PAGES[id].parent ?? (id as PdfToolId);
+}

@@ -15,11 +15,13 @@ export const IMAGE_TOOL_IDS = [
   'avif-to-jpg',
   'convert-to-webp',
   'image-to-pdf',
+  // F18 (decision 10; DECISOES § 724): the metadata remover, after the ten tools of before.
+  'remove-exif-data',
 ] as const;
 export type ImageToolId = (typeof IMAGE_TOOL_IDS)[number];
 
 /** Presets with `entra` in data/keywords.csv: pages of the parent tool, with their own behaviour. */
-export const IMAGE_PRESET_IDS = ['compress-image-to-100kb', 'compress-image-to-1mb', 'resize-image-youtube-thumbnail'] as const;
+export const IMAGE_PRESET_IDS = ['compress-image-to-100kb', 'compress-image-to-1mb', 'resize-image-youtube-thumbnail', 'rotate-image-flip'] as const;
 export type ImagePresetId = (typeof IMAGE_PRESET_IDS)[number];
 
 export type ImagePageId = ImageToolId | ImagePresetId;
@@ -141,6 +143,18 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
     beforeAfter: 'never',
     pdf: true,
   },
+  'remove-exif-data': {
+    id: 'remove-exif-data',
+    // F18 (decision 10): the formats strip.ts cleans without decoding; HEIC and AVIF are refused with the link to their
+    // converter (CONVERTER_FOR), which leaves the metadata out too.
+    accepts: PHOTO,
+    // F18 placeholder: a temporary icon that no card uses; front S draws or picks the final one (decision 12).
+    icon: 'shield',
+    // F18 placeholder: front S finalizes the chips and the related grid (decision 11).
+    next: ['compress-image', 'resize-image', 'image-to-pdf'],
+    related: ['compress-image', 'resize-image', 'heic-to-jpg', 'crop-image', 'rotate-image', 'image-to-pdf'],
+    beforeAfter: 'never',
+  },
   'compress-image-to-100kb': {
     id: 'compress-image-to-100kb',
     parent: 'compress-image',
@@ -167,6 +181,17 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
     next: ['crop-image', 'compress-image'],
     related: ['resize-image', 'crop-image', 'compress-image', 'rotate-image', 'heic-to-jpg', 'png-to-jpg'],
     beforeAfter: 'always',
+  },
+  'rotate-image-flip': {
+    id: 'rotate-image-flip',
+    parent: 'rotate-image',
+    accepts: PHOTO,
+    icon: 'rotate',
+    // F18 placeholder: front S finalizes the chips and the related grid (decision 11).
+    next: ['crop-image', 'compress-image', 'image-to-pdf'],
+    related: ['rotate-image', 'crop-image', 'resize-image', 'compress-image', 'image-to-pdf', 'heic-to-jpg'],
+    // F18 (decision 9): as the parent.
+    beforeAfter: 'never',
   },
 };
 

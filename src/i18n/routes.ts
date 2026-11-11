@@ -20,7 +20,7 @@ import {
   type GuideId,
   type LifeCalcId,
 } from '../tools/calc/registry.ts';
-import { PDF_HUB_ID, PDF_TOOL_IDS, type PdfToolId } from '../tools/pdf/registry.ts';
+import { PDF_HUB_ID, PDF_PAGES, PDF_PRESET_IDS, PDF_TOOL_IDS, type PdfPageId } from '../tools/pdf/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID, type FileGuideId } from '../tools/guides/registry.ts';
 
 export const LANGS = ['en', 'pt', 'es'] as const;
@@ -48,12 +48,14 @@ export type RouteId =
   | 'avif-to-jpg'
   | 'convert-to-webp'
   | 'image-to-pdf'
+  | 'remove-exif-data'
+  | 'rotate-image-flip'
   | typeof MONEY_HUB_ID
   | CalcPageId
   | typeof BR_HUB_ID
   | BrCalcId
   | typeof PDF_HUB_ID
-  | PdfToolId
+  | PdfPageId
   | GuideId
   | typeof GUIDES_HUB_ID
   | FileGuideId
@@ -109,12 +111,20 @@ const TRANSLATED_PATHS: Partial<Record<RouteId, { pt: string; es: string }>> = {
   'avif-to-jpg': { pt: '/pt/avif-para-jpg/', es: '/es/avif-a-jpg/' },
   'convert-to-webp': { pt: '/pt/converter-para-webp/', es: '/es/convertir-a-webp/' },
   'image-to-pdf': { pt: '/pt/imagem-para-pdf/', es: '/es/imagen-a-pdf/' },
+  // F18 (decision 4; DECISOES § 724): the names and paths of the glossaries ("Espelhar"/"Reflejar", "metadados"/"metadatos").
+  'remove-exif-data': { pt: '/pt/remover-metadados-foto/', es: '/es/quitar-metadatos-foto/' },
+  'rotate-image-flip': { pt: '/pt/girar-imagem/espelhar/', es: '/es/rotar-imagen/reflejar/' },
   'pdf-tools': { pt: '/pt/ferramentas-pdf/', es: '/es/herramientas-pdf/' },
   'merge-pdf': { pt: '/pt/juntar-pdf/', es: '/es/unir-pdf/' },
   'split-pdf': { pt: '/pt/dividir-pdf/', es: '/es/dividir-pdf/' },
   'rotate-pdf': { pt: '/pt/girar-pdf/', es: '/es/rotar-pdf/' },
   'delete-pdf-pages': { pt: '/pt/excluir-paginas-pdf/', es: '/es/eliminar-paginas-pdf/' },
   'reorder-pdf-pages': { pt: '/pt/organizar-paginas-pdf/', es: '/es/ordenar-paginas-pdf/' },
+  // F18 (decision 4): "Gerenciar páginas do PDF" in pt, because Reorder is already "Organizar páginas do PDF" there.
+  'organize-pdf': { pt: '/pt/gerenciar-paginas-pdf/', es: '/es/organizar-pdf/' },
+  // F18 (decision 5): the PDF presets, under the path of their parent in each language.
+  'split-pdf-extract-pages': { pt: '/pt/dividir-pdf/extrair-paginas/', es: '/es/dividir-pdf/extraer-paginas/' },
+  'pdf-to-jpg-to-png': { pt: '/pt/pdf-para-jpg/para-png/', es: '/es/pdf-a-jpg/a-png/' },
   'pdf-to-jpg': { pt: '/pt/pdf-para-jpg/', es: '/es/pdf-a-jpg/' },
   'add-page-numbers-to-pdf': { pt: '/pt/numerar-paginas-pdf/', es: '/es/numerar-paginas-pdf/' },
   'watermark-pdf': { pt: '/pt/marca-dagua-pdf/', es: '/es/marca-de-agua-pdf/' },
@@ -158,7 +168,7 @@ export const ROUTES: readonly RouteDef[] = [
   ...moneyRoutes(),
   // The Brazilian money hub and the eight calculators adapted to Brazil, only in Portuguese (F6, decision 5).
   ...brMoneyRoutes(),
-  // The PDF hub and the 12 PDF tools exist in the three languages (F6).
+  // The PDF hub, the PDF tools and, since the F18, the PDF presets exist in the three languages (F6).
   ...pdfRoutes(),
   // F11 (decision 5): the guides hub, in the three languages, right before the file guides, the way each hub comes before
   // its pages; it lists them and the money guides. F12 · o mapa de anúncios (decision 3; DECISOES § 419): with ads, in
@@ -263,11 +273,13 @@ function imageToolRoutes(): RouteDef[] {
     ['avif-to-jpg', 'avif-to-jpg'],
     ['convert-to-webp', 'convert-to-webp'],
     ['image-to-pdf', 'image-to-pdf'],
+    ['remove-exif-data', 'remove-exif-data'],
   ];
   const presets: [RouteId, string, string][] = [
     ['compress-image-to-100kb', 'compress-image', 'to-100kb'],
     ['compress-image-to-1mb', 'compress-image', 'to-1mb'],
     ['resize-image-youtube-thumbnail', 'resize-image', 'youtube-thumbnail'],
+    ['rotate-image-flip', 'rotate-image', 'flip'],
   ];
   return [
     ...tools.map(([id, slug]): RouteDef => ({
@@ -364,8 +376,10 @@ function brMoneyRoutes(): RouteDef[] {
 }
 
 /**
- * The PDF pages (F5a), in the three languages since the F6: the hub and the 12 tools, all from the PDF registry. Every tool shares one mold and one
+ * The PDF pages (F5a), in the three languages since the F6: the hub and the tools, all from the PDF registry. Every tool shares one mold and one
  * island (src/tools/pdf/); its page blocks live in src/tools/<slug>/i18n/{lang}.ts, next to the shared panel texts.
+ * F18 (decision 5; DECISOES § 725): then the PDF presets, at the path of the registry (/<parent>/<name>/), with the same
+ * mold and island and their page blocks in src/tools/<parent>/presets/<name>/i18n/{lang}.ts, as the image presets.
  */
 function pdfRoutes(): RouteDef[] {
   return [
@@ -385,6 +399,18 @@ function pdfRoutes(): RouteDef[] {
       texts: [`src/tools/${id}/i18n/{lang}.ts`, 'src/tools/pdf/i18n/{lang}.ts'],
       adArea: 'arquivos',
     })),
+    ...PDF_PRESET_IDS.map((id): RouteDef => {
+      const [parent, name] = PDF_PAGES[id].path.split('/').filter(Boolean);
+      const folder = `src/tools/${parent ?? ''}/presets/${name ?? ''}/`;
+      return {
+        id,
+        paths: { en: PDF_PAGES[id].path, ...TRANSLATED_PATHS[id] },
+        indexable: true,
+        view: 'src/tools/pdf/',
+        texts: [`${folder}i18n/{lang}.ts`, 'src/tools/pdf/i18n/{lang}.ts'],
+        adArea: 'arquivos',
+      };
+    }),
   ];
 }
 
