@@ -7740,3 +7740,45 @@ Três README do `docs/design/components/` ganharam uma seção "Mudança de regr
 - **O que as lentes rodaram, em resumo:** a, a matriz e as presets nos dois navegadores (58), seis specs das ferramentas nos dois (118) e sondas próprias (a saída AVIF com e sem alfa e sem GPS, o AVIF to JPG em pt e es, a recusa em 14 páginas dos três idiomas, nada fora do 127.0.0.1); b, os portões de SEO, links e conteúdo, 18 arquivos do Vitest (306), o `lint:texto` (0 erro), cinco specs de site no Chromium (146), o `dist/` das seis páginas e o kit recontado; c, os orçamentos nos dois navegadores (710), a comparação do `dist/` com o `dist-base` página por página, o `island`, os anúncios, o CLS e o axe das páginas da F17 e dos hubs (120), o Lighthouse de duas páginas, os ícones e o `--list --shard` das 22 partes.
 - **A segunda passada** (a lente b, sobre o diff dos documentos depois do `c4002c6`): nenhum achado. O b-1 resolvido (o § 719 depois do § 718, e a referência do `docs/claude/imagem.md` confere); o contraste do § 706 recalculado à mão pela luminância relativa da WCAG (6,9438, ou 6,94:1, com o `on-cat` #0F1B2D e o `turquesa` #14B8A6 de valor único nos dois temas, no `.fo-tool__icon` e no `.fo-chip__dot`); o § 719 e o `REVISAO-F17.md` iguais entre si e com o passo 5 do prompt; o `claude-md.test.ts` e o `pendencias.test.ts` verdes (20 testes).
 - O relato inteiro está em `docs/relatorios/REVISAO-F17.md`. Nenhum baixo novo foi para o grupo 27.
+
+## § 721 · A tabela do Keyword Planner e a regra da seção E: as cinco candidatas entram (F18, decisão 0 do prompt; seção E do PLANO-UX-QV.md)
+
+- **De onde vieram os números:** o Victor colou o prompt da F18 com a tabela em branco (os dois arquivos, `docs/prompts/prompt-fase-18.md` e `.txt`, com `<PREENCHER>`) e pediu, na conversa de 11/nov/2026, que a run perguntasse cada célula com opções. A run perguntou uma célula por vez, oferecendo só os valores que o `data/README.md` aceita (as faixas de volume e os três valores do Trends), sem sugerir nenhum, e o Victor escolheu cada um. Os lances ele deixou vazios. Nada foi estimado, buscado na web nem tirado do Keyword Planner ou do Google Trends pela run. A tabela preenchida entrou no `docs/prompts/prompt-fase-18.txt`, no primeiro commit da branch; o `.md` ficou com ela em branco, como o próprio prompt prevê.
+- **A tabela:**
+
+  | Candidata | Termo | Tipo | Volume EUA | Lance mín. | Lance máx. | Trends EUA, 12 meses |
+  | --- | --- | --- | --- | --- | --- | --- |
+  | Organizar PDF | organize pdf | ferramenta | 10K-100K | vazio | vazio | estavel |
+  | Extrair páginas do PDF | extract pages from pdf | preset do Dividir | 10K-100K | vazio | vazio | subindo |
+  | PDF para PNG | pdf to png | preset do PDF para JPG | 10K-100K | vazio | vazio | estavel |
+  | Espelhar imagem | flip image | preset do Girar imagem | 10K-100K | vazio | vazio | subindo |
+  | Remover dados EXIF | remove exif data | ferramenta | 10K-100K | vazio | vazio | subindo |
+
+- **A regra** (seção E do `PLANO-UX-QV.md`): ferramenta nova entra com volume `10K-100K` ou maior e Trends diferente de `caindo`; preset entra com `1K-10K` ou maior, Trends diferente de `caindo` e os quatro testes da regra da página programática do `PLANO-FILEORCA.md`.
+- **As decisões:**
+  - **Organizar PDF, `entra`:** ferramenta, `10K-100K` é o piso da regra, e o Trends é `estavel`.
+  - **Remover dados EXIF, `entra`:** ferramenta, `10K-100K`, Trends `subindo`.
+  - **Extrair páginas do PDF, `entra`:** preset, `10K-100K` passa do piso de `1K-10K`, Trends `subindo`. Os quatro testes: (1) a demanda é esta linha; (2) o comportamento muda a ferramenta, não só o título: o Dividir com um modo só (o `pick`) e uma saída só (decisão 7); (3) o conteúdo, ao menos três blocos que as irmãs não têm, conferido pelo `gate:conteudo`; (4) a geografia é a dos EUA, a da tabela.
+  - **PDF para PNG, `entra`:** preset, `10K-100K`, Trends `estavel`. Teste 2: sem a escolha de formato, e o PNG como saída (decisão 8). Os testes 1, 3 e 4 como na Extrair.
+  - **Espelhar imagem, `entra`:** preset, `10K-100K`, Trends `subindo`. Teste 2: o pai não tem como só espelhar, e a preset tira o giro (decisão 9). Os testes 1, 3 e 4 como na Extrair.
+- **O que segue:** a F18 inteira, na branch `fase-18`, com as decisões 1 a 26 do prompt para as cinco. Nenhuma candidata `fora`, então o caminho curto (`ajuste-keywords-f18`) não acontece.
+
+## § 722 · A linha 15 do PLANO-MELHORIAS.md e o teto do catálogo (F18, decisão 2 do prompt; "Mudança no contrato" do PLANO-UX-QV.md)
+
+- **A linha 15** entrou na tabela "Mudanças no contrato" do `PLANO-MELHORIAS.md`, com o texto exato da seção "Mudança no contrato (a partir da F18)" do `PLANO-UX-QV.md`, nas quatro colunas (`15`, `Catálogo`, o "Antes" e o "Agora"). Nenhuma outra linha do arquivo mudou.
+- **O que ela abre:** o teto do catálogo ("48 ferramentas em quatro áreas", "o catálogo é o teto") abriu só para as cinco candidatas da seção E que passaram na regra (§ 721): o Organizar PDF, a Extrair páginas do PDF, a PDF para PNG, a Espelhar imagem e o Remover dados EXIF. As três presets não somam ferramenta ao catálogo; as duas ferramentas somam.
+- **O "remover metadados" do backlog com gatilho:** o gatilho dele no `PLANO-FILEORCA.md` foi substituído pela regra da seção E, que o Remover dados EXIF cumpriu. O "Fora do escopo" e os outros itens do backlog (favicon, paleta, Base64, foto de passaporte, vídeo e áudio, remover fundo) não mudam.
+- **O `PLANO-FILEORCA.md`:** o `git diff -- PLANO-FILEORCA.md` do começo da run saiu vazio. A linha que a F14 deixou como "Victor faz" (F14 m-1, grupo 24 do `docs/PENDENCIAS.md`) continua faltando, então o F14 m-1 continua aberto, e o arquivo não entrou em nenhum commit (o `.claude/settings.json` nega editá-lo, e a run não tentou).
+- **O § 720** é da PR das partes do CI da F17 (vmatusita/fileorca#34, a branch `ajuste-ci-partes-f17`), aberta e sem merge no começo desta run; esta run não o usa, e a numeração dela começa no 721.
+
+## § 723 · O keywords.csv e o data/README.md da F18 (F18, decisão 3 do prompt)
+
+- **As cinco linhas** entraram no fim do `data/keywords.csv`, na ordem da tabela da § 721, com `fase` `F18`, os números da tabela, os lances vazios e a decisão `entra`:
+  - `organize-pdf,pdf,F18,ferramenta-pdf,organize pdf,10K-100K,,,estavel,entra`
+  - `split-pdf/extract-pages,pdf,F18,preset-pdf,extract pages from pdf,10K-100K,,,subindo,entra`
+  - `pdf-to-jpg/to-png,pdf,F18,preset-pdf,pdf to png,10K-100K,,,estavel,entra`
+  - `rotate-image/flip,imagem,F18,preset-imagem,flip image,10K-100K,,,subindo,entra`
+  - `remove-exif-data,imagem,F18,ferramenta-imagem,remove exif data,10K-100K,,,subindo,entra`
+- **O `data/README.md`:** a coluna `fase` ganhou o `F18`, e a coluna `tipo` o `preset-pdf`. A "Regra da decisão" ganhou duas linhas: as ferramentas da F18 entram com `10K-100K` ou maior e Trends diferente de `caindo` (a seção E do `PLANO-UX-QV.md` e a linha 15 do `PLANO-MELHORIAS.md`); a `preset-pdf` entra como a `preset-imagem`. A linha "`ferramenta-imagem` e `ferramenta-pdf` · sempre" passou a dizer "sempre, até a F17". Editado como texto.
+- **Uma frase a mais:** a primeira linha do README dizia "62 linhas", que as cinco novas desmentiam; passou a "67 linhas". A decisão 3 diz que "o resto não muda", e a regra "Texto" do `PLANO-UX-QV.md` manda corrigir na mesma run a frase que o comportamento novo desmente: vale a mais rigorosa (§ 701), que deixa o arquivo verdadeiro.
+- **Os testes:** nenhum teste lê o `keywords.csv` nem o `data/README.md` (só comentários os citam, em `src/tools/*/registry.ts`, `src/tools/guides/hub.ts`, `scripts/lib/design-checks.ts` e `tests/unit/routes.test.ts`), então a mudança de teste no formato da § 341 que a decisão 3 previa não tem alvo. A regra da decisão vive no README e nos § 721 e 723.
