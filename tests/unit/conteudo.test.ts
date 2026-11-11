@@ -1512,6 +1512,8 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     expect(result.output).toMatch(/\/mortgage-calculator\/biweekly\/: só \d bloco\(s\) próprio/);
   });
 
+  // The gate runs twice or more in a subprocess here: the limit of 60 s of the F11 (the guides hub above, and pdf-site.test.ts),
+  // since the 5 s of Vitest were near on this machine with other agents reading the disk (DECISOES § 743).
   it('counts the 13 PDF tools, the 2 PDF presets and the hub in each of their languages, read from the PDF registry and the route map', () => {
     const dir = join(root, 'pdf-count');
     build(dir);
@@ -1524,7 +1526,7 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     expect(result.output).toContain(`${routeById('split-pdf').paths.es}: a página não existe no dist`);
     expect(result.output).toContain(`${routeById('pdf-to-jpg-to-png').paths.pt}: a página não existe no dist`);
     expect(result.output).toContain(`${pdfCount - 2} página(s) de PDF conferida(s), o mapa de rotas tem ${pdfCount}`);
-  });
+  }, 60_000);
 
   // F18 (decision 5; DECISOES § 725): a PDF preset has, in each language, at least MIN_OWN_BLOCKS blocks that neither its
   // parent nor a sibling preset has, as an image preset; and the page it is compared with must be in the dist.
@@ -1571,6 +1573,8 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     expect(result.output).toContain('/pdf-tools/: faltam os cartões de /unlock-pdf/');
   });
 
+  // The gate runs twice or more in a subprocess here: the limit of 60 s of the F11 (the guides hub above, and pdf-site.test.ts),
+  // since the 5 s of Vitest were near on this machine with other agents reading the disk (DECISOES § 743).
   it('checks the ten file guides of the registry, and fails when one loses its tool or is missing (F5b)', () => {
     expect(guideCount).toBe(FILE_GUIDE_IDS.length * LANGS.length);
     const dir = join(root, 'guides');
@@ -1583,7 +1587,7 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     expect(result.output).toContain('/guides/jpg-vs-png/: sem a ferramenta embutida (#fo-tool-root)');
     expect(result.output).toContain('/guides/split-pdf-file-size/: a página não existe no dist');
     expect(result.output).toContain(`${guideCount - 1} guia(s) de arquivo conferido(s), o registro tem ${guideCount}`);
-  });
+  }, 60_000);
 
   // F12, Mudança 10 (DECISOES § 418): the default build has no ad box, and the blocks are read on the build with the ads.
   it('fails a file guide with an ad box in the default build, or with no AdSlot in the build with the ads', () => {
@@ -1646,6 +1650,8 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     expect(run(dir).output).toContain(`${pt}: a página não existe no dist`);
   }, 60_000);
 
+  // The gate runs twice or more in a subprocess here: the limit of 60 s of the F11 (the guides hub above, and pdf-site.test.ts),
+  // since the 5 s of Vitest were near on this machine with other agents reading the disk (DECISOES § 743).
   it('checks the QR code generator from the route map, and fails when it loses a block or is missing (F7)', () => {
     expect(qrCount).toBe(3);
     const dir = join(root, 'qr');
@@ -1660,7 +1666,7 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     expect(lost.output).toContain(`${path}: sem o bloco privacy`);
     rmSync(join(dir, fileForPath(path)));
     expect(run(dir).output).toContain(`${path}: a página não existe no dist`);
-  });
+  }, 60_000);
 
   it('checks the QR code generator in Portuguese and Spanish with the phrases of each language (the languages adjustment)', () => {
     const dir = join(root, 'qr-languages');
