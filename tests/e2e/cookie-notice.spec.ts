@@ -6,6 +6,7 @@ import ptCommon from '../../src/i18n/pt/common.ts';
 import enImage from '../../src/tools/image/i18n/en.ts';
 import esImage from '../../src/tools/image/i18n/es.ts';
 import ptImage from '../../src/tools/image/i18n/pt.ts';
+import { LANGS, routeById } from '../../src/i18n/routes.ts';
 import { hydrated } from './lib/page.ts';
 
 // F13a · o aviso compacto (UX-09; DECISOES § 458). On a first visit (no fo-consent) the card is two lines of the small
@@ -231,6 +232,9 @@ test.describe('first visit at 320 × 640: the Choose button of the presets', () 
     '/compress-image/to-100kb/', '/pt/comprimir-imagem/para-100kb/', '/es/comprimir-imagen/a-100kb/',
     '/compress-image/to-1mb/', '/pt/comprimir-imagem/para-1mb/', '/es/comprimir-imagen/a-1mb/',
     '/resize-image/youtube-thumbnail/', '/pt/redimensionar-imagem/miniatura-youtube/', '/es/redimensionar-imagen/miniatura-youtube/',
+    // F18 (decision 19; DECISOES § 743): the presets of the run, with the trail of four steps that leaves out its hub under
+    // 360 px (§ 582): the image one and the two PDF ones (the first of the site, with the same trail since the F18).
+    ...(['rotate-image-flip', 'split-pdf-extract-pages', 'pdf-to-jpg-to-png'] as const).flatMap((id) => LANGS.map((lang) => routeById(id).paths[lang] ?? `(${id} sem página em ${lang})`)),
   ];
   const LEFT = ['/es/eliminar-paginas-pdf/', '/es/numerar-paginas-pdf/', '/es/ordenar-paginas-pdf/'];
   for (const font of ['Figtree', 'fallback'] as const) {
