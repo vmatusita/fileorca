@@ -1,15 +1,17 @@
 import type { ImageToolsTexts } from '../types.ts';
 
 export default {
-  title: 'Image tools: ten free tools, no upload',
+  // F18 (decision 13): eleven with Remove EXIF data; the presets are not counted.
+  title: 'Image tools: eleven free tools, no upload',
   description:
-    'Compress, resize, crop, rotate, convert and turn images into a PDF. Ten free image tools that run in your browser, with no upload and no account.',
+    'Compress, resize, crop, rotate, convert and clean images, or turn them into a PDF. Eleven free image tools that run in your browser, with no upload.',
   eyebrow: 'Image tools',
-  h1: 'Ten image tools, zero uploads',
-  intro: 'Ten tools to compress, resize, crop, rotate, convert and combine images, all in your browser, and nothing is uploaded.',
+  h1: 'Eleven image tools, zero uploads',
+  intro: 'Eleven tools to compress, resize, crop, rotate, convert, clean and combine images, all in your browser, and nothing is uploaded.',
   toolsHeading: 'All image tools',
-  presetsHeading: 'Common sizes and limits',
-  presetsCaption: 'Ready-made settings for common sizes and file limits',
+  // F18: Flip image is neither a size nor a limit, so the heading says what every preset is.
+  presetsHeading: 'Ready-made settings',
+  presetsCaption: 'Ready-made settings for common sizes, file limits and mirrored photos',
   presetsHead: ['Preset', 'What you get'],
   guideHeading: 'Which tool do you need?',
   guideIntro:
@@ -25,6 +27,7 @@ export default {
     { before: 'An image saved from a website came as AVIF:', tool: 'avif-to-jpg', after: 'turns it into a JPG.' },
     { before: 'A web page needs lighter images:', tool: 'convert-to-webp', after: 'turns JPG and PNG into smaller WebP or AVIF files.' },
     { before: 'Several pictures have to go as one document:', tool: 'image-to-pdf', after: 'puts them in one PDF, one image per page.' },
+    { before: 'A photo should go out without its location or camera details:', tool: 'remove-exif-data', after: 'takes the metadata out and leaves every pixel as it was.' },
   ],
   guideOutro:
     'Each tool also leaves the photo metadata out of the copy you download, so the GPS location of a phone photo stays with you.',

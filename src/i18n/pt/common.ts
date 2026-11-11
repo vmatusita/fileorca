@@ -131,6 +131,12 @@ export default {
       description: 'Junte suas imagens num PDF só, uma imagem por página.',
       synonyms: ['pdf', 'jpg para pdf', 'png para pdf', 'foto para pdf', 'juntar imagens', 'juntar fotos', 'jpg', 'png', 'imagem'],
     },
+    // F18 placeholder: front T writes the pt text (the name is the contract's, decision 4).
+    'remove-exif-data': {
+      name: 'Remover metadados da foto',
+      description: 'Take the location, date and camera out of a photo.',
+      synonyms: ['exif', 'metadata', 'gps', 'location', 'remove exif', 'remove metadata', 'exif remover', 'photo', 'image', 'jpg', 'jpeg', 'png', 'webp'],
+    },
     'compress-image-to-100kb': {
       name: 'Comprimir imagem para 100 KB',
       description: 'Um JPG de até 100 KB, para formulários com limite de tamanho.',
@@ -145,6 +151,12 @@ export default {
       name: 'Miniatura do YouTube',
       description: 'Um JPG de 1280 × 720 com menos de 2 MB, pronto para o vídeo do YouTube.',
       synonyms: ['youtube', 'miniatura', 'thumbnail', 'capa do vídeo', '1280x720', '1280 x 720', '16:9', 'vídeo', 'jpg'],
+    },
+    // F18 placeholder: front T writes the pt text (the name is the contract's, decision 4).
+    'rotate-image-flip': {
+      name: 'Espelhar imagem',
+      description: 'Mirror a photo left to right or top to bottom.',
+      synonyms: ['flip', 'mirror', 'flip image', 'mirror image', 'flip horizontally', 'flip vertically', 'photo', 'image', 'jpg', 'jpeg', 'png', 'webp'],
     },
   },
   pdf: {
@@ -198,6 +210,12 @@ export default {
       description: 'Tire a senha ou as restrições de um PDF que você consegue abrir.',
       synonyms: ['tirar senha', 'remover senha', 'desbloquear pdf', 'descriptografar pdf', 'tirar restrições', 'pdf'],
     },
+    // F18 placeholder: front T writes the pt text (the name is the contract's, decision 4).
+    'organize-pdf': {
+      name: 'Gerenciar páginas do PDF',
+      description: 'Move, rotate and remove the pages of a PDF in one grid.',
+      synonyms: ['organize pdf', 'organize', 'rearrange', 'rotate', 'delete', 'move pages', 'manage pages', 'pdf'],
+    },
     'reorder-pdf-pages': {
       name: 'Organizar páginas do PDF',
       description: 'Mude a ordem das páginas de um PDF.',
@@ -207,6 +225,18 @@ export default {
       name: "Marca d'água no PDF",
       description: "Carimbe um texto de marca d'água em todas as páginas de um PDF.",
       synonyms: ["marca d'água", 'marca dagua', 'carimbo', 'confidencial', 'rascunho', 'pdf'],
+    },
+    // F18 placeholder: front T writes the pt text (the name is the contract's, decision 4).
+    'split-pdf-extract-pages': {
+      name: 'Extrair páginas do PDF',
+      description: 'Save the pages you pick from a PDF in one new PDF.',
+      synonyms: ['extract', 'extract pages', 'extract pages from pdf', 'pull out pages', 'save pages', 'pdf'],
+    },
+    // F18 placeholder: front T writes the pt text (the name is the contract's, decision 4).
+    'pdf-to-jpg-to-png': {
+      name: 'PDF para PNG',
+      description: 'Turn the pages of a PDF into sharp PNG images.',
+      synonyms: ['pdf to png', 'png', 'convert pdf to png', 'pdf page to png', 'pdf'],
     },
   },
   calcs: {

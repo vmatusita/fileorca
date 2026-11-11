@@ -21,6 +21,8 @@ const texts: PdfToolsTexts = {
     { before: 'Fotos ou digitalizações que deviam virar um PDF:', tool: 'image-to-pdf', after: 'põe uma imagem em cada página, na ordem da lista.' },
     { before: 'Uma digitalização que saiu de lado ou de cabeça para baixo:', tool: 'rotate-pdf', after: 'gira todas as páginas, ou só as que precisam, sem redesenhar nada.' },
     { before: 'Páginas em branco ou que sobram no meio:', tool: 'delete-pdf-pages', after: 'tira essas páginas e deixa todo o resto como estava.' },
+    // F18 placeholder: front T writes the pt text.
+    { before: 'Pages to move, turn and take out of the same PDF:', tool: 'organize-pdf', after: 'does all three in one grid and saves one new PDF.' },
     { before: 'Páginas fora de ordem:', tool: 'reorder-pdf-pages', after: 'deixa você arrastar as páginas ou mover cada uma pelos botões ou pelo teclado.' },
     { before: 'Um relatório ou um TCC que precisa de páginas numeradas:', tool: 'add-page-numbers-to-pdf', after: 'escreve os números onde você quiser, num dos quatro formatos.' },
     { before: 'Um documento para marcar como rascunho ou como confidencial:', tool: 'watermark-pdf', after: 'carimba o seu texto no meio de todas as páginas.' },
@@ -34,6 +36,10 @@ const texts: PdfToolsTexts = {
     'Toda ferramenta de PDF daqui lê e grava o arquivo dentro do seu navegador. O PDF é aberto com o PDF.js, o leitor que o Firefox usa, e alterado com o pdf-lib e o qpdf, compilados para rodar na página. Nada é enviado a um servidor, então não há envio para esperar nem cópia do seu arquivo em outro lugar.',
     'A senha que você digita para proteger ou abrir um PDF fica na página enquanto você usa a ferramenta e some quando você fecha a página. A assinatura que você desenha, escolhe em imagem ou digita também não fica guardada. Abra a aba Rede do navegador enquanto uma ferramenta trabalha: nenhuma requisição leva o seu arquivo, a sua senha ou o seu texto.',
   ],
+  // F18 placeholder: front T writes the pt text.
+  presetsHeading: 'Ready-made settings',
+  presetsCaption: 'Ready-made settings of the PDF tools and what each one gives',
+  presetsHead: ['Preset', 'What you get'],
 };
 
 export default texts;

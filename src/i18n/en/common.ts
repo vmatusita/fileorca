@@ -141,15 +141,32 @@ export default {
       description: 'Remove the password or the restrictions of a PDF you can open.',
       synonyms: ['remove password', 'decrypt pdf', 'pdf password remover', 'remove restrictions', 'pdf'],
     },
+    'organize-pdf': {
+      name: 'Organize PDF',
+      description: 'Move, rotate and remove the pages of a PDF in one grid.',
+      synonyms: ['organize pdf', 'organize', 'rearrange', 'rotate', 'delete', 'move pages', 'manage pages', 'pdf'],
+    },
+    // F18 (decision 4; DECISOES § 724): "organize pdf" went to Organize PDF, which has the term in its name.
     'reorder-pdf-pages': {
       name: 'Reorder PDF pages',
       description: 'Change the order of the pages of a PDF.',
-      synonyms: ['reorder pages', 'rearrange pages', 'sort pages', 'move pages', 'organize pdf', 'pdf'],
+      synonyms: ['reorder pages', 'rearrange pages', 'sort pages', 'move pages', 'pdf'],
     },
     'watermark-pdf': {
       name: 'Watermark PDF',
       description: 'Stamp a text watermark across every page of a PDF.',
       synonyms: ['watermark', 'stamp', 'confidential', 'draft', 'add watermark', 'pdf'],
+    },
+    // F18 (decision 5): the PDF presets. "jpg" stays out of PDF to PNG, so the search "pdf to jpg" does not find it.
+    'split-pdf-extract-pages': {
+      name: 'Extract pages from PDF',
+      description: 'Save the pages you pick from a PDF in one new PDF.',
+      synonyms: ['extract', 'extract pages', 'extract pages from pdf', 'pull out pages', 'save pages', 'pdf'],
+    },
+    'pdf-to-jpg-to-png': {
+      name: 'PDF to PNG',
+      description: 'Turn the pages of a PDF into sharp PNG images.',
+      synonyms: ['pdf to png', 'png', 'convert pdf to png', 'pdf page to png', 'pdf'],
     },
   },
   calcSeal: 'Your numbers stay on your device',
@@ -431,6 +448,11 @@ export default {
       description: 'Put your images in one PDF, one image per page.',
       synonyms: ['pdf', 'jpg to pdf', 'png to pdf', 'photo to pdf', 'combine images', 'merge images', 'jpg', 'jpeg', 'png', 'webp', 'image'],
     },
+    'remove-exif-data': {
+      name: 'Remove EXIF data',
+      description: 'Take the location, date and camera out of a photo.',
+      synonyms: ['exif', 'metadata', 'gps', 'location', 'remove exif', 'remove metadata', 'exif remover', 'photo', 'image', 'jpg', 'jpeg', 'png', 'webp'],
+    },
     'compress-image-to-100kb': {
       name: 'Compress image to 100 KB',
       description: 'A JPG of 100 KB or less, for forms with a size limit.',
@@ -445,6 +467,11 @@ export default {
       name: 'YouTube thumbnail resizer',
       description: 'A 1280 × 720 JPG under 2 MB, ready for a YouTube video.',
       synonyms: ['youtube', 'thumbnail', 'youtube thumbnail', '1280x720', '1280 x 720', '16:9', 'video', 'jpg', 'jpeg'],
+    },
+    'rotate-image-flip': {
+      name: 'Flip image',
+      description: 'Mirror a photo left to right or top to bottom.',
+      synonyms: ['flip', 'mirror', 'flip image', 'mirror image', 'flip horizontally', 'flip vertically', 'photo', 'image', 'jpg', 'jpeg', 'png', 'webp'],
     },
   },
 } satisfies EnCommonTexts;
