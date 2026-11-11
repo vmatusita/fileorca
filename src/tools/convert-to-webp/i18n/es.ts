@@ -20,7 +20,7 @@ export default {
       ['Resultado', 'WebP, que es la opción predeterminada, o AVIF. Sale un archivo por cada imagen.'],
       ['Compresión', 'La Recomendada equilibra tamaño y aspecto, y la Fuerte da el archivo más pequeño.'],
       ['Transparencia', 'Se conserva, tanto en WebP como en AVIF.'],
-      ['Velocidad', 'El AVIF tarda más en guardarse que el WebP, y la diferencia crece con el tamaño de la foto.'],
+      ['Velocidad', 'Una foto más grande tarda más en guardarse, en los dos formatos. Cuál de los dos se guarda más rápido depende del navegador.'],
       ['Compatibilidad', 'El WebP se abre en todos los navegadores actuales. El AVIF se abre en las versiones actuales de Chrome, Edge, Firefox y Safari, pero algunas apps y algunos editores antiguos no pueden leerlo.'],
       ['Lote', 'Sin límite de imágenes. Una imagen se descarga directamente, y varias llegan en un solo ZIP.'],
       ['Metadatos', 'Se eliminan Exif, XMP, IPTC y GPS, y se aplica la orientación de la foto.'],
@@ -34,7 +34,7 @@ export default {
     },
     {
       q: '¿Elijo WebP o AVIF?',
-      a: 'El WebP es la opción segura: todos los navegadores actuales lo abren, y se guarda rápido. El AVIF da archivos más pequeños, pero tarda más en guardarse, y algunas apps antiguas no pueden abrirlo.',
+      a: 'El WebP es la opción segura: todos los navegadores actuales lo abren. El AVIF da archivos más pequeños, pero algunas apps antiguas no pueden abrirlo.',
     },
     {
       q: '¿El WebP conserva la transparencia de un PNG?',

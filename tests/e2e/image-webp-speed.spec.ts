@@ -3,8 +3,9 @@ import { expect, test } from '@playwright/test';
 import { imageSize, sniff } from './lib/images.ts';
 import { expectNoMetadata, filesOf, openTool, oracle, takeDownload } from './lib/matrix.ts';
 
-// F18 (decision 16; DECISOES § 739, the F17 m-1 of group 27): the sibling of image-avif-speed.spec.ts, so the page's "AVIF
-// takes longer to save than WebP" can be read against a number of the same runner. Convert to WebP gets the same 12 MP
+// F18 (decision 16; DECISOES § 739, the F17 m-1 of group 27): the sibling of image-avif-speed.spec.ts, so the speed of the
+// two formats can be read against numbers of the same runner (the page said "AVIF takes longer to save than WebP" until
+// the F18 measured WebKit saving the WebP slower, § 739; it now says which one is faster depends on the browser). Convert to WebP gets the same 12 MP
 // photo with WebP (its default), once per browser, and the line "[webp 12 MP] <browser> <seconds>" is printed, from the
 // gesture (the file goes in) to the Download on screen. The time is a measure, not a criterion, and the test stays in the
 // CI so every full run logs the number of its runner. What it asserts is only the output: a WebP of the display size of the

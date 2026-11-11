@@ -20,7 +20,7 @@ export default {
       ['Output', 'WebP, which is the default, or AVIF. One file comes out for each image.'],
       ['Compression', 'Recommended balances size and looks, and Strong makes the smallest file.'],
       ['Transparency', 'Kept, in both WebP and AVIF.'],
-      ['Speed', 'AVIF takes longer to save than WebP, and the difference grows with the size of the photo.'],
+      ['Speed', 'A bigger photo takes longer to save, in both formats. Which of the two saves faster depends on the browser.'],
       ['Support', 'WebP opens in every current browser. AVIF opens in current versions of Chrome, Edge, Firefox and Safari, but some older apps and editors cannot read it.'],
       ['Batch', 'No limit on the number of images. One image downloads directly, and several come in one ZIP.'],
       ['Metadata', 'Exif, XMP, IPTC and GPS are removed, and the photo orientation is applied.'],
@@ -34,7 +34,7 @@ export default {
     },
     {
       q: 'Should I choose WebP or AVIF?',
-      a: 'WebP is the safe choice: every current browser opens it, and it saves quickly. AVIF gives smaller files but takes longer to save, and some older apps cannot open it.',
+      a: 'WebP is the safe choice: every current browser opens it. AVIF gives smaller files, but some older apps cannot open it.',
     },
     {
       q: 'Does WebP keep the transparency of a PNG?',
