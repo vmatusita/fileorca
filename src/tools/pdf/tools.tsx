@@ -1,4 +1,4 @@
-// The behaviour of the 12 PDF tools (F5a, decision 1): each one's options, the request it sends the engine for a
+// The behaviour of the 13 PDF tools and the 2 PDF presets (F5a, F18, decision 1): each one's options, the request it sends the engine for a
 // file, and its option fields. The panel (PdfPanel.tsx) does the rest: the drop, the queue, the run, the result.
 // Ranges typed by the person are parsed here (ranges.ts), so the engine only gets page numbers.
 import { useEffect, useState } from 'preact/hooks';

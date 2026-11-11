@@ -4,7 +4,7 @@
 // The money calculators and presets of the F4 (ids of src/tools/calc/registry.ts) carry how (3 steps or more),
 // faq (4 questions or more), privacy ("Your numbers stay on your device") and related, and a calculator preset
 // has three blocks of its own too (DECISOES § 121).
-// The 12 PDF tools and the PDF hub of the F5a come from the PDF registry (src/tools/pdf/registry.ts): each tool page has
+// The PDF tools (13 since the F18) and the PDF hub of the F5a come from the PDF registry (src/tools/pdf/registry.ts): each tool page has
 // the five blocks, an H1 and a title that start with the tool name, the PrivacySeal, specs that say what it takes, a limit,
 // what stays and what each mode does, four real questions, a privacy note, at most six related cards and no unmeasured
 // claim; the hub has a card and a guide link for each tool (DECISOES § 162).
@@ -114,7 +114,7 @@ const calcWanted = [...CALC_PAGE_IDS, ...brInMap, ...LIFE_CALC_IDS].reduce((sum,
 if (calcPages !== calcWanted) problems.add(`${calcPages} página(s) de calculadora conferida(s), os registros têm ${calcWanted} (cada calculadora em cada idioma dela)`);
 
 // The PDF tools, read from the PDF registry (never a hand list), in every language of their route (F6): the route map must
-// have each one, and the page must pass the PDF rules in its language; the hub lists the 12 and the Image to PDF card of its
+// have each one, and the page must pass the PDF rules in its language; the hub lists the 13 and the Image to PDF card of its
 // language, and the guide links to each of them.
 // F18 (decision 5; DECISOES § 725): the PDF presets too, with the rules of a PDF page and, as an image preset, at least
 // MIN_OWN_BLOCKS blocks that neither the parent nor a sibling preset has, in each language.

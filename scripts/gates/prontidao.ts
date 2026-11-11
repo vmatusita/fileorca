@@ -7,7 +7,7 @@
 // test build of the Playwright specs too), under .cache/builds/, reused when the commit and the variables are the same and
 // the tree is clean; "all" has the fake ids of the 37 units of the ad map and the wall off.
 // The checks are in scripts/lib/prontidao.ts, proven in tests/unit/prontidao.test.ts. From the F5a the cards of the
-// home and of the PDF hub and the search come from the PDF registry as well, and the 12 PDF tools and the hub each have
+// home and of the PDF hub and the search come from the PDF registry as well, and the 13 PDF tools and the hub each have
 // rows of their own (page, H1/title/description, 60 words and 150 per AdSlot). From the F7 (decision 11), the home in
 // English lists the home and health calculators and the QR code generator, the two new hubs list their calculators in
 // the order of the registry, and the search offers the 11 calculators and the QR code generator, all read from the registry.

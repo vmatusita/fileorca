@@ -1,4 +1,4 @@
-// The PDF tool island, shared by the 12 PDF tools (F5a, decision 6; DECISOES § 148). One entry for all of them
+// The PDF tool island, shared by the 13 PDF tools and the 2 PDF presets (F5a, F18, decision 6; DECISOES § 148). One entry for all of them
 // (PdfIsland.astro), hydrated from data-props (DECISOES § 23). The image island's model (§ 69), grown for PDF:
 //  - files come from a drop anywhere on the panel, the picker or Ctrl+V; each one is read first (pages, lock, form) by
 //    the engine, which never trusts the name;

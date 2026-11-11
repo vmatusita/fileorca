@@ -121,13 +121,13 @@ export interface Site {
   /**
    * More cards a page must list, by route id and language (F4): the home's money section (the five credit
    * calculators) and the money hub (the 14 calculators), both from the calculator registry. From the F5a, the
-   * home's PDF section and the PDF hub (the 12 tools and the Image to PDF card), from the PDF registry. From the F7, the
+   * home's PDF section and the PDF hub (the 13 tools and the Image to PDF card), from the PDF registry. From the F7, the
    * home's home, health and QR sections and the two hubs of home and health calculators (LIFE_HUB_IDS).
    */
   cards?: Record<string, Partial<Record<Lang, string[]>>>;
   /** Ids the search index must offer: every page of the three registries and the guides. */
   searchIds: string[];
-  /** Route ids of the PDF pages (F5a): the 12 tools of the PDF registry and the PDF hub. Each has a page of its own to check. */
+  /** Route ids of the PDF pages (F5a): the 13 tools of the PDF registry and the PDF hub. Each has a page of its own to check. */
   pdf?: string[];
 }
 
@@ -147,7 +147,7 @@ function row(item: string, how: string, problems: string[]): Row {
  * the registries and the map, so the home, the money hub and the PDF hub of Portuguese and Spanish are held to what exists
  * there: the home lists the money calculators of its money section (HOME_BAND_MONEY_IDS[lang] since the F13b, DECISOES § 570;
  * HOME_MONEY_IDS before; when the language has a money hub, moneyHubId) and
- * the PDF tools of the language; each money hub lists HUB_MONEY_IDS[lang]; the PDF hub of each language its 12 tools and
+ * the PDF tools of the language; each money hub lists HUB_MONEY_IDS[lang]; the PDF hub of each language its 13 tools and
  * Image to PDF.
  */
 export function realSite(dir: string): Site {
@@ -165,13 +165,13 @@ export function realSite(dir: string): Site {
   for (const lang of LANGS) {
     const hub = moneyHubId(lang);
     const hasMoneyHub = pagePath(hub, lang) !== undefined;
-    // The home lists the five credit calculators of the language and, from the F5a, the 12 PDF tools (DECISOES § 162).
+    // The home lists the five credit calculators of the language and, from the F5a, the 12 PDF tools (13 since the F18) (DECISOES § 162).
     // F7 (decision 9): then the home and the health calculators and the QR code generator, where they exist (English only).
     const qr = pagePath(QR_ID, lang);
     const life = [...lifePaths('house', lang), ...lifePaths('health', lang), ...(qr ? [qr] : [])];
     if (pagePath('home', lang)) cards.home = { ...cards.home, [lang]: [...(hasMoneyHub ? moneyPaths(HOME_BAND_MONEY_IDS[lang], lang) : []), ...pdfPaths(lang), ...life] };
     if (hasMoneyHub) cards[hub] = { ...cards[hub], [lang]: moneyPaths(HUB_MONEY_IDS[lang], lang) };
-    // The PDF hub lists the 12 tools and the card of Image to PDF, whose page stays in the image hub.
+    // The PDF hub lists the 13 tools and the card of Image to PDF, whose page stays in the image hub.
     const image = pagePath('image-to-pdf', lang);
     if (pagePath(PDF_HUB_ID, lang)) cards[PDF_HUB_ID] = { ...cards[PDF_HUB_ID], [lang]: [...pdfPaths(lang), ...(image ? [image] : [])] };
     // F7 (decision 9): each home or health hub lists its calculators, in the order of the registry, and nothing else.
@@ -525,13 +525,13 @@ export function checkContent(site: Site): Row[] {
 // ---- (d2) The PDF pages (F5a) ---------------------------------------------------------------------------------
 
 /**
- * The 12 tools of the PDF registry and the PDF hub, each looked at on its own (prompt F5a, decision 9). The generic
+ * The 13 tools of the PDF registry and the PDF hub, each looked at on its own (prompt F5a, decision 9). The generic
  * content items above already read every indexable page of the route map; these rows make the PDF pages
  * explicit, so a page that drops out of the route map, loses its ad area or is not in the build fails here by
  * name instead of silently leaving the generic items: the page exists and has an ad area, its H1, title and
  * description are its own among all the pages, it has 60 words in <main> and 150 for each AdSlot.
  * F6 (decision 4): every language of the PDF pages, not only English. Each PDF page must exist in English and in every
- * language any PDF page of the site has (the 12 tools and the hub are translated together), so a page that drops out of
+ * language any PDF page of the site has (the 13 tools and the hub are translated together), so a page that drops out of
  * one language fails by name too.
  */
 export function checkPdfPages(site: Site): Row[] {
