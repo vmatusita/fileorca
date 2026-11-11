@@ -4,9 +4,9 @@
 // bits of the shared PDF island. The specs rows state the real behaviour of the PDF engine (src/engine/pdf/): when it
 // changes there, change them here. F18: front P refines the option texts (no mode segment).
 import type { PdfToolTexts } from '../../../../../i18n/types.ts';
-import type { SplitTexts } from '../../../../pdf/option-texts.ts';
+import type { ExtractTexts } from '../../../../pdf/option-texts.ts';
 
-const texts: PdfToolTexts<SplitTexts> = {
+const texts: PdfToolTexts<ExtractTexts> = {
   title: 'Extract pages from PDF: save the pages you pick in a new PDF',
   description:
     'Extract pages from a PDF in your browser: pick them in a grid of thumbnails or type numbers like 2-4, 7, and get them in one new PDF. Nothing is uploaded.',
@@ -67,13 +67,6 @@ const texts: PdfToolTexts<SplitTexts> = {
     doneMany: 'Done! Oli made {count} PDFs from your file.',
     action: 'Extract pages',
     options: {
-      legend: 'Split by',
-      each: 'Every page',
-      ranges: 'Page ranges',
-      pick: 'Pick pages',
-      rangesLabel: 'Pages for each file',
-      rangesHelp: 'One file for each range, for example 1-3, 5, 8-10',
-      rangesError: 'Type page numbers like 1-3, 5, 8-10, using only pages the PDF has.',
       pickHelp: 'Pick the pages you want. They go together into one new PDF, in the order of your file.',
       pickNone: 'Pick at least one page first.',
     },

@@ -5,9 +5,9 @@
 // Every sentence on the size of the files is checked against the matrix (front P). F18: front P refines the option texts
 // (no format choice).
 import type { PdfToolTexts } from '../../../../../i18n/types.ts';
-import type { ImagesTexts } from '../../../../pdf/option-texts.ts';
+import type { PngTexts } from '../../../../pdf/option-texts.ts';
 
-const texts: PdfToolTexts<ImagesTexts> = {
+const texts: PdfToolTexts<PngTexts> = {
   title: 'PDF to PNG: turn PDF pages into sharp images in your browser',
   description:
     'Convert the pages of a PDF to PNG images at 72, 150 or 300 ppi, in your browser. PNG keeps text and thin lines sharp. No upload, and no Exif or GPS.',
@@ -69,8 +69,6 @@ const texts: PdfToolTexts<ImagesTexts> = {
     done: 'Done! Oli turned your PDF into a PNG image.',
     doneMany: 'Done! Oli turned the pages into {count} PNG images.',
     options: {
-      formatLegend: 'Image format',
-      jpg: 'JPG',
       png: 'PNG',
       formatHelp: 'Every page comes out as a PNG, saved without loss.',
       resolutionLegend: 'Resolution',

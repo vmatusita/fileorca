@@ -1,12 +1,12 @@
 // PDF to PNG (F18, decisions 5 and 8): a preset of PDF to JPG with PNG fixed. Page blocks (how, specs, faq, privacy,
 // related) with at least three of their own (gate:conteudo, MIN_OWN_BLOCKS) and the panel bits of the shared PDF island.
 // The specs rows state the real behaviour of the PDF engine (src/engine/pdf/): when it changes there, change them here.
-// Every sentence on the size of the files is checked against the matrix (front P). F18: front P refines the option texts
-// (no format choice).
+// Every sentence on the size of the files is checked against the matrix (tests/e2e/pdf-matrix.spec.ts, DECISOES § 729).
+// The options are PngTexts: no format choice, so no legend and no "JPG"; `png` is the format in the "Adjust" line.
 import type { PdfToolTexts } from '../../../../../i18n/types.ts';
-import type { ImagesTexts } from '../../../../pdf/option-texts.ts';
+import type { PngTexts } from '../../../../pdf/option-texts.ts';
 
-const texts: PdfToolTexts<ImagesTexts> = {
+const texts: PdfToolTexts<PngTexts> = {
   title: 'PDF to PNG: turn PDF pages into sharp images in your browser',
   description:
     'Convert the pages of a PDF to PNG images at 72, 150 or 300 ppi, in your browser. PNG keeps text and thin lines sharp. No upload, and no Exif or GPS.',
@@ -28,7 +28,7 @@ const texts: PdfToolTexts<ImagesTexts> = {
       ['Pages', 'Every page, or a range such as 2-4, 7, which applies to each PDF you add.'],
       ['What comes out', 'One PNG for each page, named after the PDF with -page-1, -page-2 and so on, like report-page-1.png. Several images download together in one ZIP.'],
       ['Background', 'Each page is drawn on white, as a PDF reader shows it, so the PNG has no transparent areas.'],
-      ['File size', 'A PNG of a page is usually larger than a JPG of the same page, and the more photos the page has, the larger the gap.'],
+      ['File size', 'On a page with photos, the PNG is several times the size of the JPG of the same page. On a page of text and lines, the two are much closer in size.'],
       ['Very large pages', 'A page over 16.7 megapixels at the chosen resolution is too big for the browser to draw, so it comes out smaller, and the result tells you.'],
       ['Metadata', 'The PNG files carry no metadata: no Exif data and no GPS location.'],
       ['Restricted PDFs', 'A PDF with only editing restrictions is drawn all the same. A PDF with a password to open is turned away, with a link to Unlock PDF.'],
@@ -41,8 +41,8 @@ const texts: PdfToolTexts<ImagesTexts> = {
       a: 'For pages of text, tables, charts and line drawings. PNG is saved without loss, so letters, thin lines and sharp edges stay crisp, with none of the blur JPG can leave around them. For pages that are mostly photos, PDF to JPG gives a smaller file that looks the same.',
     },
     {
-      q: 'Why are the PNG files bigger than JPG files?',
-      a: 'PNG keeps every detail of the page, while JPG drops detail the eye hardly sees in order to save space. So the PNG of a page is usually the larger file, and more so when the page has photos. If a small file matters more than sharp text, use PDF to JPG.',
+      q: 'Are the PNG files bigger than JPG files?',
+      a: 'On pages with photos, yes, several times bigger: PNG keeps every detail of the picture, while JPG drops detail the eye hardly sees in order to save space. On pages of text and lines the two come out much closer in size. If a small file matters more than sharp text, use PDF to JPG.',
     },
     {
       q: 'Which resolution should I choose for PNG images?',
@@ -68,8 +68,6 @@ const texts: PdfToolTexts<ImagesTexts> = {
     done: 'Done! Oli turned your PDF into a PNG image.',
     doneMany: 'Done! Oli turned the pages into {count} PNG images.',
     options: {
-      formatLegend: 'Image format',
-      jpg: 'JPG',
       png: 'PNG',
       formatHelp: 'Every page comes out as a PNG, saved without loss.',
       resolutionLegend: 'Resolution',
