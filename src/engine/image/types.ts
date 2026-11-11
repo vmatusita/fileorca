@@ -43,7 +43,13 @@ export type Operation =
    */
   | { kind: 'convert'; to: OutputFormat | 'swap'; level?: Level }
   /** One page of a PDF: JPEG for photos, PNG when the image has transparency (what the Image to PDF tool embeds). */
-  | { kind: 'pdf-page' };
+  | { kind: 'pdf-page' }
+  /**
+   * The same file without its metadata (JPG, PNG and WebP): the image data is copied byte for byte by strip.ts, never
+   * decoded nor encoded again, so the pixels are the ones that came in. A rotated JPG keeps a minimal Exif block with only
+   * the Orientation, so it still shows upright (DECISOES § 33 and § 732); an animated WebP keeps every frame.
+   */
+  | { kind: 'strip' };
 
 /** Facts the result card states in one line each. */
 export type Note =
@@ -67,7 +73,8 @@ export interface EngineOutput {
   width: number;
   height: number;
   /**
-   * new: a new file was written from the pixels; no-gain: the copy would not be smaller and the
+   * new: the operation did what it was asked, and this is its own result: a new file written from the pixels or, for
+   * strip, the file's own image data without its metadata (DECISOES § 731); no-gain: the copy would not be smaller and the
    * original goes back without metadata; cannot-encode: this browser cannot save the format, the
    * original goes back without metadata; fits: the file already fit the target size.
    */

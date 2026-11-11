@@ -162,6 +162,20 @@ describe('the measurements of the file guides', () => {
     expect(measured.guides['guides-remove-location-from-photos'].facts['winner']).toBe(FILE_GUIDES['guides-remove-location-from-photos'].tool);
   });
 
+  // F18 (DECISOES § 733): the guide says that Resize image at the full size gave back the very same files as Remove EXIF
+  // data, and that the tie went to the tool with nothing to set. Both halves come from the measurement: equal bytes in
+  // each browser and every photo with identical pixels, for both tools; a new measurement that parts them fails here.
+  it('say, in guide 6, that Resize image tied with Remove EXIF data only while the measurement shows the same files', () => {
+    const numbers = measured.guides['guides-remove-location-from-photos'].numbers;
+    const value = (name: string): number | undefined => numbers[name]?.value;
+    for (const browser of ['Chromium', 'Webkit']) {
+      expect(value(`removeExifDataBytes${browser}`), browser).toBe(value(`resizeImageBytes${browser}`));
+      expect(value(`removeExifDataIdentical${browser}`), browser).toBe(value('photos'));
+      expect(value(`resizeImageIdentical${browser}`), browser).toBe(value('photos'));
+    }
+    expect(JSON.stringify(removeLocation)).toContain('Resize image, set to keep the full size, gave back the very same files');
+  });
+
   it('take an official size only from the words of its page, and fail a size the page does not give (DECISOES § 198)', () => {
     const youtube: OfficialSize = {
       id: 'youtube-thumbnail', network: 'YouTube', use: 'Video thumbnail', width: 3840, height: 2160, limit: 2_000_000, ad: false,

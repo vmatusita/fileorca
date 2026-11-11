@@ -4,7 +4,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { stripJpeg } from '../../src/engine/image/strip.ts';
-import { BROKEN, batchOf, expectNoMetadata, fixtureBytes, fixturesOf, orientationOnly, oracle, storedBox } from '../e2e/lib/matrix.ts';
+import { BROKEN, batchOf, expectNoMetadata, fixtureBytes, fixturesOf, imageBytes, orientationOnly, oracle, sameImageBytes, storedBox } from '../e2e/lib/matrix.ts';
 import { crc32 } from '../e2e/lib/zip.ts';
 
 const bytes = (name: string): Uint8Array => new Uint8Array(fixtureBytes(name));
@@ -85,5 +85,68 @@ describe('the batches', () => {
     expect(oracle('gen-png-extensao-jpg.jpg').format).toBe('png');
     expect(fixturesOf('jpeg', 'png', 'webp', 'avif', 'heic').filter((name) => (BROKEN as readonly string[]).includes(name))).toEqual([]);
     expect(readFileSync('fixtures/images/expected.json', 'utf8')).toContain('gen-vazio.jpg');
+  });
+});
+
+// F18 (decision 15): the proof of "the same picture" of Remove EXIF data. It must see through every change of metadata and
+// catch the change of one byte of the picture.
+describe('imageBytes and sameImageBytes', () => {
+  const flip = (source: Uint8Array, at: number): Uint8Array => {
+    const copy = source.slice();
+    copy[at] = (copy[at] ?? 0) ^ 0x01;
+    return copy;
+  };
+  const insertAt = (source: Uint8Array, at: number, part: number[]): Uint8Array => Uint8Array.from([...source.subarray(0, at), ...part, ...source.subarray(at)]);
+  const ascii = (value: string): number[] => [...value].map((char) => char.charCodeAt(0));
+  /** Where a top-level segment starts (the Exif thumbnail of a phone photo has a DQT and a SOF of its own, inside the APP1). */
+  const markerAt = (source: Uint8Array, marker: number): number => {
+    let at = 2;
+    while (source[at + 1] !== marker) at += 2 + (((source[at + 2] ?? 0) << 8) | (source[at + 3] ?? 0));
+    return at;
+  };
+
+  it('JPEG: the same picture with other metadata, a comment or bytes after its end; another one when a byte of a table, the frame or the scan changes', () => {
+    const jpeg = bytes(JPG_02);
+    // A COM segment and an APP13 after the SOI, and a second picture after the EOI: the picture is the same.
+    const comment = [0xff, 0xfe, 0, 8, ...ascii('Lisbon')];
+    const iptc = [0xff, 0xed, 0, 6, 1, 2, 3, 4];
+    expect(sameImageBytes(jpeg, insertAt(jpeg, 2, [...comment, ...iptc]))).toBe(true);
+    expect(sameImageBytes(jpeg, Uint8Array.from([...jpeg, 0xff, 0xd8, 0xff, 0xd9]))).toBe(true);
+    expect(sameImageBytes(jpeg, stripJpeg(jpeg))).toBe(true);
+    // A byte of the quantization table, of the frame header, and of the scan near its end.
+    expect(sameImageBytes(jpeg, flip(jpeg, markerAt(jpeg, 0xdb) + 10))).toBe(false);
+    expect(sameImageBytes(jpeg, flip(jpeg, markerAt(jpeg, 0xc0) + 6))).toBe(false);
+    expect(sameImageBytes(jpeg, flip(jpeg, jpeg.length - 100))).toBe(false);
+    // And it is most of the file.
+    expect(imageBytes(jpeg).length).toBeGreaterThan(jpeg.length / 2);
+  });
+
+  it('PNG: the same picture with a text chunk; another one when a byte of the IDAT or of the header changes', () => {
+    const png = bytes('gen-png-transparente.png');
+    const ihdrEnd = 8 + 12 + 13;
+    const body = ascii('tEXtComment\0taken in Lisbon');
+    const crc = crc32(Uint8Array.from(body));
+    const length = body.length - 4;
+    const chunk = [0, 0, length >> 8, length & 0xff, ...body, crc >>> 24, (crc >>> 16) & 0xff, (crc >>> 8) & 0xff, crc & 0xff];
+    expect(sameImageBytes(png, insertAt(png, ihdrEnd, chunk))).toBe(true);
+    expect(sameImageBytes(png, flip(png, png.length - 40))).toBe(false); // in the last IDAT
+    expect(sameImageBytes(png, flip(png, 8 + 8 + 9))).toBe(false); // the colour type in the IHDR
+  });
+
+  it('WebP: the same picture without its EXIF chunk; another one when a byte of the image, a frame or the VP8X flags changes', () => {
+    const webp = bytes('gen-webp-exif-gps.webp');
+    // The file is VP8X, VP8 and EXIF: dropping the EXIF chunk (and fixing the RIFF size) keeps the picture.
+    const exifAt = Buffer.from(webp).indexOf('EXIF');
+    const withoutExif = webp.slice(0, exifAt);
+    new DataView(withoutExif.buffer).setUint32(4, withoutExif.length - 8, true);
+    expect(sameImageBytes(webp, withoutExif)).toBe(true);
+    expect(sameImageBytes(webp, flip(webp, 200))).toBe(false); // inside the VP8 chunk
+    expect(sameImageBytes(webp, flip(webp, 20))).toBe(false); // the VP8X flags (bit 0 is reserved, and still counts)
+    const animated = bytes('gen-webp-animada.webp');
+    expect(sameImageBytes(animated, flip(animated, animated.length - 10))).toBe(false); // in the last ANMF
+  });
+
+  it('knows only JPG, PNG and WebP', () => {
+    expect(() => imageBytes(bytes('gen-avif.avif'))).toThrow(/no picture bytes for a avif file/);
   });
 });

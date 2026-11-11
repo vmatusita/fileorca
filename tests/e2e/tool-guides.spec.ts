@@ -5,7 +5,7 @@ import { IMAGE_PANEL_TEXTS } from '../../src/tools/image/texts.ts';
 import { PDF_PAGES } from '../../src/tools/pdf/registry.ts';
 import { PDF_PANEL_TEXTS } from '../../src/tools/pdf/texts.ts';
 import { imageSize, metadataReport, sniff } from './lib/images.ts';
-import { expectNoMetadata, filesOf, fixtureFile, takeDownload, type Delivered } from './lib/matrix.ts';
+import { expectNoMetadata, filesOf, fixtureFile, sameImageBytes, takeDownload, type Delivered } from './lib/matrix.ts';
 import { dismissCookies, hydrated, type TestFile } from './lib/page.ts';
 import { pdfFile } from './lib/pdf-tools.ts';
 import { parsePdf, strictPdf } from './lib/pdf.ts';
@@ -92,9 +92,14 @@ const CASES: Record<FileGuideId, Case> = {
     files: () => [photo('jpg-03-iphone5-paisagem-orientacao3-gps.jpg')],
     check: (delivered) => {
       expectImages(delivered, 'jpeg');
-      // At By percentage, 100 the photo keeps its size as shown: only the metadata goes (DECISOES § 186).
+      // Remove EXIF data since the F18 (DECISOES § 733): the photo keeps its name, its size as shown and its picture, byte
+      // for byte; only the metadata goes, and the Orientation 3 stays, alone in its block.
+      const original = new Uint8Array(fixtureFile('jpg-03-iphone5-paisagem-orientacao3-gps.jpg').buffer);
+      expect(delivered.name).toBe('jpg-03-iphone5-paisagem-orientacao3-gps.jpg');
       expect(displaySize(delivered.bytes)).toEqual({ width: 3264, height: 2448 });
-      expect(delivered.bytes.length).toBeLessThan(fixtureFile('jpg-03-iphone5-paisagem-orientacao3-gps.jpg').buffer.length);
+      expect(delivered.bytes.length).toBeLessThan(original.length);
+      expect(sameImageBytes(delivered.bytes, original), 'the picture is the one that went in').toBe(true);
+      expect(metadataReport(delivered.bytes).orientation).toBe(3);
     },
   },
   'guides-pdf-to-jpg-resolution': {

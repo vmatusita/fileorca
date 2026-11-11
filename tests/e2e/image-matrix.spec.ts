@@ -30,7 +30,8 @@ import type { Format } from './lib/images.ts';
 // the ZIP (or the PDF) in Node: its real format, its size, that it opens in the browser, its
 // orientation by pixels, its transparency, and that it carries no Exif, XMP, IPTC or GPS. The records
 // the table docs/relatorios/fase-02-matriz.md is built from (fase-17-matriz.md since the F17, with AVIF to JPG and
-// Convert to WebP) are written to test-results/matriz/.
+// Convert to WebP, and fase-18-matriz.md since the F18, with Flip image and Remove EXIF data) are written to
+// test-results/matriz/.
 
 const JPG_03 = 'jpg-03-iphone5-paisagem-orientacao3-gps.jpg';
 const ORIENTED = [JPG_03, 'gen-jpg-01-orientacao6.jpg', 'gen-jpg-02-orientacao8.jpg'];
@@ -197,6 +198,108 @@ CASES.push(
   rotateCase('rotate-image-photos', BIG_PHOTOS, [SMALL.heic, BROKEN[0], BROKEN[1]], []),
   rotateCase('rotate-image-rest', SMALL_PHOTOS, [SMALL.avif, BROKEN[2], BROKEN[3]], FIRST_FRAME),
 );
+
+// ---- the two image pages of the F18: what they refuse in the middle of each batch ------------------------------------------------
+// The HEIC and the AVIF (with the link to the converter), the four broken files and a GIF. There is no GIF fixture (decision
+// 15: no new fixture), so the test writes a 1 × 1 GIF89a next to its own results; the engine reads it as a GIF and refuses
+// it as 'unsupported' ("isn't an image Oli can read. Try JPG, PNG or WebP.").
+const GIF = 'made-in-the-test.gif';
+const GIF_BYTES = Uint8Array.from([
+  0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 1, 0, 1, 0, 0x80, 0, 0, 0, 0, 0, 0xff, 0xff, 0xff, 0x21, 0xf9, 4, 1, 0, 0, 0, 0, 0x2c, 0, 0, 0, 0, 1, 0, 1, 0, 0, 2, 2, 0x44, 1, 0, 0x3b,
+]);
+/** The batch of a test holds the GIF: it is written to the test's own output folder, and the case reads it from there. */
+function withGif(kase: MatrixCase): MatrixCase {
+  if (!kase.batch.includes(GIF)) return kase;
+  const path = test.info().outputPath(GIF);
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, GIF_BYTES);
+  return { ...kase, paths: { ...kase.paths, [GIF]: path } };
+}
+const gifOrElse = (outcome: (fixture: string) => Outcome): ((fixture: string) => Outcome) => (fixture) => (fixture === GIF ? { refuse: 'unsupported' } : outcome(fixture));
+/** Each page sees all of these, shared out between its two batches, some in the middle of each. */
+const F18_REFUSED_PHOTOS = [SMALL.heic, BROKEN[0], BROKEN[1]];
+const F18_REFUSED_REST = [SMALL.avif, GIF, BROKEN[2], BROKEN[3]];
+
+// ---- Flip image (F18, decision 9; DECISOES § 730): the mirror of the picture as it is seen, the sides kept ---------------------
+// Horizontal is the picture of the fixture turned by its own Orientation and then by the Exif Orientation 2 (left and right
+// swap), Vertical by the 4 (top and bottom swap), built in Node from the stored pixels (withOrientation(bytes, 1)); the
+// closestWrong margin keeps out the other mirror, the 180° turn and the picture as it was. Every picture is checked, the
+// PNG and the WebP too. Two options, each in the two batches of the parent (§ 88).
+const chooseVertical = async (page: Page): Promise<void> => {
+  await page.locator('.fo-seg__opt', { hasText: 'Vertical' }).click();
+};
+const flipCase = (id: string, mirror: 'horizontal' | 'vertical', fixtures: readonly string[], refused: readonly string[], says: readonly string[]): MatrixCase => ({
+  id,
+  tool: 'rotate-image-flip',
+  path: '/rotate-image/flip/',
+  options: mirror === 'horizontal' ? 'Horizontal (default)' : 'Vertical',
+  batch: batchOf([...fixtures], [...refused]),
+  ...(mirror === 'vertical' ? { setup: chooseVertical } : {}),
+  deliverable: 'files',
+  says,
+  outcome: gifOrElse(
+    outcomeFor(['jpeg', 'png', 'webp'], (fixture) => {
+      const [width, height] = display(fixture);
+      const format = realFormat(fixture);
+      return {
+        name: sameName(fixture, format),
+        format,
+        width,
+        height,
+        ...(fixture === TRANSPARENT ? { alpha: 'kept' as const } : {}),
+        ...(fixture === ANIMATED ? { still: true } : {}),
+        pixels: { from: fixture, limit: CLOSE, after: mirror === 'horizontal' ? 2 : 4 },
+      };
+    }),
+  ),
+});
+CASES.push(
+  flipCase('rotate-image-flip-photos', 'horizontal', BIG_PHOTOS, F18_REFUSED_PHOTOS, []),
+  flipCase('rotate-image-flip-rest', 'horizontal', SMALL_PHOTOS, F18_REFUSED_REST, FIRST_FRAME),
+  flipCase('rotate-image-flip-vertical-photos', 'vertical', BIG_PHOTOS, F18_REFUSED_PHOTOS, []),
+  flipCase('rotate-image-flip-vertical-rest', 'vertical', SMALL_PHOTOS, F18_REFUSED_REST, FIRST_FRAME),
+);
+
+// ---- Remove EXIF data (F18, decision 10; DECISOES § 731 and § 732): the same picture, without its metadata ------------------
+// Every output has the bytes of the picture of its fixture and, decoded in this browser, every pixel of it; no GPS, XMP,
+// IPTC nor Exif, except the Orientation of a rotated JPG, alone in its block. The animated WebP stays animated, the
+// transparent PNG transparent, and nothing grows. The card says that the location and the rest are out and the picture did
+// not change, and never that a frame was dropped.
+const exifCase = (id: string, fixtures: readonly string[], refused: readonly string[]): MatrixCase => ({
+  id,
+  tool: 'remove-exif-data',
+  path: '/remove-exif-data/',
+  options: 'No choice',
+  batch: batchOf([...fixtures], [...refused]),
+  deliverable: 'files',
+  outcome: gifOrElse(
+    outcomeFor(['jpeg', 'png', 'webp'], (fixture) => {
+      const [width, height] = display(fixture);
+      const format = realFormat(fixture);
+      return {
+        name: sameName(fixture, format),
+        format,
+        width,
+        height,
+        sameImage: true,
+        ...(oracle(fixture).hasGps ? { smaller: true } : { notBigger: true }),
+        ...(ORIENTED.includes(fixture) ? { tagMayStay: true } : {}),
+        ...(fixture === TRANSPARENT ? { alpha: 'kept' as const } : {}),
+        ...(fixture === ANIMATED ? { animated: true } : {}),
+      };
+    }),
+  ),
+  then: async (page, _browser, outputs) => {
+    const count = outputs.length;
+    await expect(page.locator('.fo-result__says')).toHaveText(
+      count === 1
+        ? 'Done! The location and the other metadata are out of your photo, and the picture did not change.'
+        : `Done! The location and the other metadata are out of your ${count} photos, and the pictures did not change.`,
+    );
+    await expect(page.locator('.fo-result__notes'), 'no frame was dropped').not.toContainText('first frame');
+  },
+});
+CASES.push(exifCase('remove-exif-data-photos', BIG_PHOTOS, F18_REFUSED_PHOTOS), exifCase('remove-exif-data-rest', SMALL_PHOTOS, F18_REFUSED_REST));
 
 // ---- HEIC to JPG/PNG: the main image of each file, in its display size --------------------------------------------------------
 const HEIC = fixturesOf('heic');
@@ -406,7 +509,7 @@ CASES.push({
 
 for (const kase of CASES) {
   test(`${kase.id}: ${kase.batch.length} files in one batch`, async ({ page, browserName }) => {
-    const record = await runCase(page, browserName, kase);
+    const record = await runCase(page, browserName, withGif(kase));
     test.info().annotations.push({ type: 'matrix', description: `${record.files.length} files in ${record.ms} ms, ${record.requests} requests` });
   });
 }
@@ -421,6 +524,9 @@ const REFUSED_ELSEWHERE: readonly { path: string; lang: Lang }[] = [
   { path: '/compress-image/to-100kb/', lang: 'en' },
   { path: '/compress-image/to-1mb/', lang: 'en' },
   { path: '/resize-image/youtube-thumbnail/', lang: 'en' },
+  // F18: the two image pages of the run, in the language the batches above do not see them in.
+  { path: '/pt/girar-imagem/espelhar/', lang: 'pt' },
+  { path: '/es/quitar-metadatos-foto/', lang: 'es' },
 ];
 for (const { path, lang } of REFUSED_ELSEWHERE) {
   test(`${path}: a refused AVIF and HEIC link to their converters in the language of the page`, async ({ page }) => {

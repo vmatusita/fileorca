@@ -1,8 +1,8 @@
 ---
-// /es/guias/quitar-la-ubicacion-de-las-fotos/ (languages adjustment): the es guide guides-remove-location-from-photos, with the es page of its tool (DECISOES § 184).
+// /es/guias/quitar-la-ubicacion-de-las-fotos/ (languages adjustment): the es guide guides-remove-location-from-photos, with the es page of its tool (DECISOES § 184). Since the F18, Remove EXIF data (§ 733).
 import FileGuideView from '../../../../views/FileGuideView.astro';
-import ResizeImagePage from '../../../../tools/resize-image/ResizeImagePage.astro';
+import RemoveExifDataPage from '../../../../tools/remove-exif-data/RemoveExifDataPage.astro';
 ---
 <FileGuideView id="guides-remove-location-from-photos" lang="es">
-  <ResizeImagePage slot="tool" lang="es" embed initial={{ mode: 'percent', percent: 100 }} />
+  <RemoveExifDataPage slot="tool" lang="es" embed />
 </FileGuideView>
