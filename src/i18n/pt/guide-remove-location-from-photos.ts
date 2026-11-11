@@ -11,7 +11,7 @@ const texts: FileGuideTexts = {
     'Alguns apps tiram esses dados quando você publica, e outros não. E-mail, transferência de arquivos, pastas na nuvem e muitos apps de conversa mandam o arquivo do jeito que ele está. Se uma foto mostra a sua casa, a escola do seu filho ou qualquer lugar que você prefira não marcar, tire a localização antes de o arquivo sair das suas mãos.',
   ],
   toolHeading: 'Tire os metadados',
-  toolIntro: 'Esta é a Redimensionar imagem, na opção {winnerOption}: cada foto mantém todos os pixels e volta sem a localização, a câmera e a data. Ela roda nesta aba do navegador, então as fotos nunca são enviadas.',
+  toolIntro: 'Esta é a Remover metadados da foto, sem nada para ajustar: cada foto mantém todos os pixels e volta sem a localização, a câmera e a data. Ela roda nesta aba do navegador, então as fotos nunca são enviadas.',
   sections: [
     {
       heading: 'O que as nossas fotos levavam',
@@ -37,8 +37,8 @@ const texts: FileGuideTexts = {
     {
       heading: 'Tire do arquivo sem mudar a foto',
       paragraphs: [
-        'Toda ferramenta deste site que grava uma imagem grava a partir dos pixels, e isso deixa os metadados para trás. Quase todas também mudam a imagem: comprimem, cortam, giram ou trocam o formato. Então medimos qual delas muda menos a foto, por uma regra fixada antes da medida: o mesmo quadro, o mesmo formato e os pixels mais próximos do original.',
-        'A Redimensionar imagem, na opção {winnerOption}, venceu. Uma foto que já tem o tamanho pedido não é decodificada nem codificada de novo: a ferramenta copia os dados da imagem como estão e deixa os metadados de fora. Os pixels voltaram idênticos em {resizeImageIdenticalChromium_wordf} das nossas fotos, e os arquivos ficaram só {resizeImageRatioChromium_off} mais leves, que é o peso dos metadados.',
+        'Toda ferramenta de imagem deste site deixa os metadados de fora dos arquivos que devolve. Quase todas também mudam a imagem: comprimem, cortam, giram ou trocam o formato. Então medimos qual delas muda menos a foto, por uma regra fixada antes da medida: o mesmo quadro, o mesmo formato e os pixels mais próximos do original.',
+        'A Remover metadados da foto venceu. Ela não decodifica nem codifica a foto de novo: copia os dados da imagem como estão e deixa os metadados de fora. Os pixels voltaram idênticos em {removeExifDataIdenticalChromium_wordf} das nossas fotos, e os arquivos ficaram só {removeExifDataRatioChromium_off} mais leves, que é o peso dos metadados. A Redimensionar imagem, na opção que mantém o tamanho inteiro, devolveu exatamente os mesmos arquivos, então a regra ficou com a ferramenta que não tem nada para ajustar.',
       ],
     },
     {
@@ -51,14 +51,14 @@ const texts: FileGuideTexts = {
     {
       heading: 'O que fica, e o que a foto ainda mostra',
       paragraphs: [
-        'Duas coisas ficam de propósito. Uma foto guardada de cabeça para baixo mantém uma pequena marcação que diz qual lado é o de cima, para não aparecer virada: essa marcação ficou em {resizeImageOrientationChromium_wordf} das nossas fotos. O perfil de cor também fica, para as cores não mudarem.',
+        'Duas coisas ficam de propósito. Uma foto guardada de cabeça para baixo mantém uma pequena marcação que diz qual lado é o de cima, para não aparecer virada: essa marcação ficou em {removeExifDataOrientationChromium_wordf} das nossas fotos. O perfil de cor também fica, para as cores não mudarem.',
         'Tirar os dados não esconde o que aparece na imagem. A ajuda do Google avisa que as pessoas ainda podem descobrir onde uma foto foi tirada pelo que ela mostra, como um ponto turístico. Olhe a própria foto antes de compartilhar.',
       ],
     },
     {
       heading: 'Para fotos HEIC',
       paragraphs: [
-        'A Redimensionar imagem aceita JPG, PNG e WebP. Para fotos HEIC do iPhone, use a HEIC para JPG: ela também grava cada JPG a partir dos pixels, e nenhuma das nossas fotos HEIC de teste manteve dado de GPS depois da conversão. O nosso guia de HEIC para JPG traz essas medidas.',
+        'A Remover metadados da foto aceita JPG, PNG e WebP. Para fotos HEIC do iPhone, use a HEIC para JPG: ela grava cada JPG a partir dos pixels, e nenhuma das nossas fotos HEIC de teste manteve dado de GPS depois da conversão. O nosso guia de HEIC para JPG traz essas medidas.',
       ],
     },
   ],
@@ -66,14 +66,14 @@ const texts: FileGuideTexts = {
   measuredHeading: 'O que medimos',
   sheet: {
     stats: [
-      { label: 'Fotos ainda com GPS', value: '{resizeImageGpsChromium} de {photos}' },
-      { label: 'Fotos com os mesmos pixels', value: '{resizeImageIdenticalChromium} de {photos}', sub: '{resizeImageRatioChromium_off} mais leves' },
+      { label: 'Fotos ainda com GPS', value: '{removeExifDataGpsChromium} de {photos}' },
+      { label: 'Fotos com os mesmos pixels', value: '{removeExifDataIdenticalChromium} de {photos}', sub: '{removeExifDataRatioChromium_off} mais leves' },
     ],
-    sample: '{photos} fotos de celular, na Redimensionar imagem acima.',
+    sample: '{photos} fotos de celular, na Remover metadados da foto acima.',
     link: 'Veja a tabela',
   },
   tableHeading: 'Ferramenta por ferramenta',
-  measuredIntro: 'Nossas {photos_wordf} fotos de celular de verdade passaram por cada ferramenta de imagem que aceita JPG, cada uma na opção que muda menos a foto. A porcentagem compara o tamanho depois com o dos originais, e a coluna dos pixels compara cada cópia com o original na pior das fotos.',
+  measuredIntro: 'Nossas {photos_wordf} fotos de celular de verdade passaram por cada ferramenta de imagem que aceita JPG, cada uma ajustada para mudar a foto o mínimo que pode. A porcentagem compara o tamanho depois com o dos originais, e a coluna dos pixels compara cada cópia com o original na pior das fotos.',
   measuredNote: 'Medido em {date} pelas páginas das ferramentas deste site no Chromium {chromiumVersion} e no WebKit {webkitVersion}, no {system}. Os dois navegadores gravaram arquivos do mesmo tamanho em {browsersSameSize_wordf} das {candidates_wordf} ferramentas; na ferramenta {browsersDiffer}, os tamanhos foram diferentes. Os metadados e os pixels foram lidos no Node, com o mesmo decodificador para o original e para a cópia. A tabela mostra o Chromium.',
   tables: [
     {

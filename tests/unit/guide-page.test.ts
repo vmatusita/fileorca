@@ -69,7 +69,7 @@ describe('the tables of a guide as the page draws them (pageTable)', () => {
     // What the two columns held is what the measurement says: no JPG and no photo kept any GPS data.
     expect(MEASURED.guides['guides-heic-to-jpg-on-windows'].numbers['gpsAfterChromium']?.value).toBe(0);
     const location = MEASURED.guides['guides-remove-location-from-photos'].numbers;
-    for (const tool of ['compressImage', 'resizeImage', 'cropImage', 'rotateImage', 'pngToJpg', 'imageToPdf']) expect(location[`${tool}GpsChromium`]?.value, tool).toBe(0);
+    for (const tool of ['compressImage', 'removeExifData', 'resizeImage', 'cropImage', 'rotateImage', 'pngToJpg', 'imageToPdf']) expect(location[`${tool}GpsChromium`]?.value, tool).toBe(0);
   });
 
   it('groups the HEIC photos by camera, the PDF pages by file and the social sizes by network', () => {
