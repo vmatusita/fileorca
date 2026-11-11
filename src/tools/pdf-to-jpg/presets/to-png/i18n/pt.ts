@@ -2,7 +2,7 @@
 // related) with at least three of their own (gate:conteudo, MIN_OWN_BLOCKS) and the panel bits of the shared PDF island,
 // in Portuguese (docs/i18n/pt.md). The specs rows state the real behaviour of the PDF engine (src/engine/pdf/): when it
 // changes there, change them here and in en.ts. Every sentence on the size of the files is checked against the matrix
-// (front P). F18: front P refines the option texts (no format choice).
+// (tests/e2e/pdf-matrix.spec.ts, DECISOES § 729). The options are PngTexts: no format choice, so no legend and no "JPG".
 import type { PdfToolTexts } from '../../../../../i18n/types.ts';
 import type { PngTexts } from '../../../../pdf/option-texts.ts';
 
@@ -28,7 +28,7 @@ const texts: PdfToolTexts<PngTexts> = {
       ['Páginas', 'Todas as páginas, ou um intervalo como 2-4, 7, que vale para cada PDF que você puser.'],
       ['O que sai', 'Um PNG para cada página, com o nome do PDF e -pagina-1, -pagina-2 e assim por diante, como relatorio-pagina-1.png. Várias imagens são baixadas juntas num ZIP só.'],
       ['Fundo', 'Cada página é desenhada sobre branco, como um leitor de PDF mostra, então o PNG não tem áreas transparentes.'],
-      ['Tamanho do arquivo', 'O PNG de uma página costuma ser maior que o JPG da mesma página, e quanto mais fotos a página tem, maior a diferença.'],
+      ['Tamanho do arquivo', 'Numa página com fotos, o PNG tem várias vezes o tamanho do JPG da mesma página. Numa página de texto e linhas, os dois têm tamanhos bem mais próximos.'],
       ['Páginas muito grandes', 'Uma página acima de 16,7 megapixels na resolução escolhida é grande demais para o navegador desenhar, então sai menor, e o resultado avisa.'],
       ['Metadados', 'Os arquivos PNG saem sem metadados: sem dados Exif e sem localização GPS.'],
       ['PDFs com restrições', 'Um PDF que só tem restrições de edição é desenhado do mesmo jeito. Um PDF com senha para abrir é recusado, com um link para Desbloquear PDF.'],
@@ -41,8 +41,8 @@ const texts: PdfToolTexts<PngTexts> = {
       a: 'Para páginas de texto, tabelas, gráficos e desenhos de linhas. O PNG é salvo sem perda, então as letras, as linhas finas e as bordas continuam bem definidas, sem o borrão que o JPG pode deixar em volta delas. Para páginas que são quase só fotos, a PDF para JPG dá um arquivo menor com a mesma aparência.',
     },
     {
-      q: 'Por que os arquivos PNG são maiores que os JPG?',
-      a: 'O PNG guarda cada detalhe da página, e o JPG descarta detalhes que o olho quase não vê para ocupar menos espaço. Por isso o PNG de uma página costuma ser o arquivo maior, e mais ainda quando a página tem fotos. Se um arquivo pequeno importa mais do que um texto nítido, use a PDF para JPG.',
+      q: 'Os arquivos PNG são maiores que os JPG?',
+      a: 'Nas páginas com fotos, sim, várias vezes maiores: o PNG guarda cada detalhe da imagem, e o JPG descarta detalhes que o olho quase não vê para ocupar menos espaço. Nas páginas de texto e linhas, os dois saem com tamanhos bem mais próximos. Se um arquivo pequeno importa mais do que um texto nítido, use a PDF para JPG.',
     },
     {
       q: 'Qual resolução escolher para as imagens PNG?',

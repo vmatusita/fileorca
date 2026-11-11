@@ -22,7 +22,7 @@ const texts: PdfToolTexts<ImagesTexts> = {
     rows: [
       ['O que aceita', 'Arquivos PDF, quantos quiser. A Oli confere o que há dentro de cada arquivo, não o nome nem a extensão.'],
       ['O que sai', 'Uma imagem para cada página, com o nome do PDF e -pagina-1, -pagina-2 e assim por diante, como relatorio-pagina-1.jpg.'],
-      ['Formatos', 'JPG com qualidade 92, ou PNG. O JPG dá arquivos menores, e o PNG deixa o texto e as linhas finas bem nítidos.'],
+      ['Formatos', 'JPG com qualidade 92, ou PNG. Nas páginas com fotos, os arquivos JPG são bem menores; o PNG deixa o texto e as linhas finas bem nítidos.'],
       ['Resolução', '72 ppi para a tela, 150 ppi para uso geral (o padrão) ou 300 ppi para imprimir.'],
       ['Páginas', 'Todas as páginas, ou um intervalo como 1-3, 5, 8-10. O mesmo intervalo vale para todos os PDFs.'],
       ['Muitas imagens', 'Várias imagens são baixadas juntas num ZIP só.'],
@@ -44,7 +44,7 @@ const texts: PdfToolTexts<ImagesTexts> = {
     },
     {
       q: 'Escolho JPG ou PNG?',
-      a: 'O JPG, salvo com qualidade 92, dá arquivos menores e combina com páginas que têm fotos. O PNG não perde nada, então o texto e as linhas finas da página ficam nítidos, mas os arquivos ficam maiores. Nos dois casos, o texto da página vira parte da imagem e não dá mais para selecionar nem buscar.',
+      a: 'O JPG, salvo com qualidade 92, combina com páginas que têm fotos: nelas, o PNG tem várias vezes o tamanho do JPG. O PNG não perde nada, então o texto e as linhas finas da página ficam nítidos, e nas páginas de texto e linhas os dois saem com tamanhos bem mais próximos. Nos dois casos, o texto da página vira parte da imagem e não dá mais para selecionar nem buscar.',
     },
     {
       q: 'Dá para converter um PDF com restrições de edição ou com senha?',
@@ -76,7 +76,7 @@ const texts: PdfToolTexts<ImagesTexts> = {
       formatLegend: 'Formato da imagem',
       jpg: 'JPG',
       png: 'PNG',
-      formatHelp: 'O JPG dá arquivos menores (qualidade 92). O PNG não perde nada, então o texto e as linhas finas ficam nítidos, mas os arquivos ficam maiores.',
+      formatHelp: 'Nas páginas com fotos, o JPG dá arquivos bem menores (qualidade 92). O PNG não perde nada, então o texto e as linhas finas ficam nítidos.',
       resolutionLegend: 'Resolução',
       low: '72 ppi',
       lowHelp: 'para a tela',

@@ -2,7 +2,8 @@
 // related) with at least three of their own (gate:conteudo, MIN_OWN_BLOCKS) and the panel bits of the shared PDF island,
 // in Spanish (docs/i18n/es.md; "ppp" is the Spanish for ppi, píxeles por pulgada). The specs rows state the real behaviour
 // of the PDF engine (src/engine/pdf/): when it changes there, change them here and in en.ts. Every sentence on the size of
-// the files is checked against the matrix (front P). F18: front P refines the option texts (no format choice).
+// the files is checked against the matrix (tests/e2e/pdf-matrix.spec.ts, DECISOES § 729). The options are PngTexts: no
+// format choice, so no legend and no "JPG".
 import type { PdfToolTexts } from '../../../../../i18n/types.ts';
 import type { PngTexts } from '../../../../pdf/option-texts.ts';
 
@@ -28,7 +29,7 @@ const texts: PdfToolTexts<PngTexts> = {
       ['Páginas', 'Todas las páginas, o un rango como 2-4, 7, que se aplica a cada PDF que agregues.'],
       ['Qué sale', 'Un PNG por página, con el nombre del PDF y -pagina-1, -pagina-2 y así sucesivamente, como informe-pagina-1.png. Varias imágenes se descargan juntas en un ZIP.'],
       ['Fondo', 'Cada página se dibuja sobre blanco, como la muestra un lector de PDF, así que el PNG no tiene zonas transparentes.'],
-      ['Tamaño del archivo', 'El PNG de una página suele pesar más que el JPG de la misma página, y cuantas más fotos tiene la página, mayor es la diferencia.'],
+      ['Tamaño del archivo', 'En una página con fotos, el PNG tiene varias veces el peso del JPG de la misma página. En una página de texto y líneas, los dos tienen tamaños mucho más parecidos.'],
       ['Páginas muy grandes', 'Una página de más de 16.7 megapíxeles con la resolución elegida es demasiado grande para que el navegador la dibuje, así que sale más pequeña, y el resultado te lo dice.'],
       ['Metadatos', 'Los archivos PNG salen sin metadatos: sin datos Exif y sin ubicación GPS.'],
       ['PDF con restricciones', 'Un PDF que solo tiene restricciones de edición se dibuja igual. Un PDF con contraseña para abrirlo se rechaza, con un enlace a Desbloquear PDF.'],
@@ -41,8 +42,8 @@ const texts: PdfToolTexts<PngTexts> = {
       a: 'Para páginas de texto, tablas, gráficos y dibujos de líneas. El PNG se guarda sin pérdida, así que las letras, las líneas finas y los bordes se ven bien definidos, sin el desenfoque que el JPG puede dejar alrededor. Para páginas que son casi solo fotos, PDF a JPG da un archivo más pequeño que se ve igual.',
     },
     {
-      q: '¿Por qué los archivos PNG pesan más que los JPG?',
-      a: 'El PNG guarda cada detalle de la página, mientras que el JPG descarta detalles que el ojo casi no ve para ocupar menos espacio. Por eso el PNG de una página suele ser el archivo más grande, y más aún cuando la página tiene fotos. Si un archivo pequeño importa más que un texto nítido, usa PDF a JPG.',
+      q: '¿Los archivos PNG pesan más que los JPG?',
+      a: 'En las páginas con fotos, sí: tienen varias veces el peso del JPG, porque el PNG guarda cada detalle de la imagen, mientras que el JPG descarta detalles que el ojo casi no ve para ocupar menos espacio. En las páginas de texto y líneas, los dos tienen tamaños mucho más parecidos. Si un archivo pequeño importa más que un texto nítido, usa PDF a JPG.',
     },
     {
       q: '¿Qué resolución elijo para las imágenes PNG?',
