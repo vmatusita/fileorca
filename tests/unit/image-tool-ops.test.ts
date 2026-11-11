@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Operation } from '../../src/engine/image/types.ts';
 import { LANGS } from '../../src/i18n/routes.ts';
-import type { ConvertToOptionsTexts } from '../../src/i18n/types.ts';
+import type { ConvertToOptionsTexts, FlipOptionsTexts } from '../../src/i18n/types.ts';
 import type { FileInfo } from '../../src/tools/image/types.ts';
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { imageToolTexts } from '../../src/tools/image/texts.ts';
@@ -11,9 +11,11 @@ import { TOOL as crop } from '../../src/tools/crop-image/Panel.tsx';
 import { TOOL as heic } from '../../src/tools/heic-to-jpg/Panel.tsx';
 import { TOOL as pdf } from '../../src/tools/image-to-pdf/Panel.tsx';
 import { TOOL as png } from '../../src/tools/png-to-jpg/Panel.tsx';
+import { TOOL as exif } from '../../src/tools/remove-exif-data/Panel.tsx';
 import { TOOL as resize, shownBox } from '../../src/tools/resize-image/Panel.tsx';
 import { TOOL as youtube } from '../../src/tools/resize-image/presets/youtube-thumbnail/Panel.tsx';
 import { TOOL as rotate } from '../../src/tools/rotate-image/Panel.tsx';
+import { TOOL as flip } from '../../src/tools/rotate-image/presets/flip/Panel.tsx';
 import { TOOL as webp } from '../../src/tools/webp-to-jpg/Panel.tsx';
 
 // What each tool of the Tools phase asks the engine for, for its options. The engine itself is proven by
@@ -76,6 +78,37 @@ describe('Rotate image', () => {
   it('turns right by default and combines the turn with the mirror', () => {
     expect(opOf(rotate)).toEqual({ kind: 'rotate', turn: 'right', flip: 'none' });
     expect(opOf(rotate, { turn: 'half', flip: 'vertical' })).toEqual({ kind: 'rotate', turn: 'half', flip: 'vertical' });
+  });
+});
+
+// F18 (decision 9; DECISOES § 730): the engine has no "no turn", and half a turn followed by a mirror is the other mirror,
+// so Horizontal asks for 180° plus the vertical mirror and Vertical for 180° plus the horizontal one. The matrix proves by
+// the pixels that each gives the mirror its name says (image-matrix.spec.ts).
+describe('Flip image', () => {
+  it('starts on Horizontal, and each mirror is half a turn and the other mirror', () => {
+    expect(flip.initial).toEqual({ mirror: 'horizontal' });
+    expect(opOf(flip)).toEqual({ kind: 'rotate', turn: 'half', flip: 'vertical' });
+    expect(opOf(flip, { mirror: 'vertical' })).toEqual({ kind: 'rotate', turn: 'half', flip: 'horizontal' });
+    expect(flip.success).toBe(rotate.success);
+    expect(flip.warm).toEqual([]);
+  });
+
+  it('says the mirror under Adjust, in every language', () => {
+    for (const lang of LANGS) {
+      const texts = imageToolTexts('rotate-image-flip', lang).panel.options as FlipOptionsTexts;
+      expect(flip.now?.(flip.initial, texts, lang), lang).toBe(texts.horizontal);
+      expect(flip.now?.({ mirror: 'vertical' }, texts, lang), lang).toBe(texts.vertical);
+    }
+  });
+});
+
+// F18 (decision 10; DECISOES § 731): no choice, and the one operation that never decodes.
+describe('Remove EXIF data', () => {
+  it('asks the engine to strip every file, warms nothing, has nothing to say under Adjust and calls its success "cleaned"', () => {
+    expect(opOf(exif)).toEqual({ kind: 'strip' });
+    expect(exif.warm).toEqual([]);
+    expect(exif.now).toBeUndefined();
+    expect(exif.success).toBe('cleaned');
   });
 });
 
