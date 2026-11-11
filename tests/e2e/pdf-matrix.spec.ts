@@ -886,9 +886,11 @@ test('PDF to PNG: the small fixtures at 150 ppi, the owner-restricted one drawn,
     // § 729). The sentence and this check are per PDF: the bytes of all the pages of a fixture added up (bytesOf). One page
     // alone goes further (0.39 to 2.9 on the other fixtures, down to 2.5 on a photo page; front P), so the page says it of
     // the PDF.
-    // Several times: more than 3 (4.1 to 7.3 measured on Windows). Between about half and about twice: over 0.4 and under
-    // 2, both ways (0.44 to 1.28 on these fixtures at 150 ppi; 0.40 to 1.91 at the three resolutions, the PNG the smaller
-    // file in WebKit), in both browsers.
+    // This test runs at 150 ppi, in both browsers. Several times: more than 3 (4.68 to 6.34 here in the recorded runs; 4.1
+    // to 7.3 at the three resolutions, front P). Between about half and about twice: over 0.4 and under 2, both ways. Here
+    // the recorded runs give 0.44 (WebKit, gen-ja-otimizado) to 1.28 (Chromium), the PNG files the smaller ones in WebKit.
+    // At 300 ppi WebKit reaches 0.40 on gen-ja-otimizado (front P; the top, 1.91, is at 72 ppi in Chromium): that is why
+    // the sentence says "about half", and why the bound is 0.4 and not the 0.44 measured here.
     const png = bytesOf(outs, fixture, 'png');
     const jpg = bytesOf(jpgs, fixture, 'jpg');
     const ratio = png / jpg;
