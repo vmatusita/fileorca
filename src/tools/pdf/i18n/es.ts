@@ -167,6 +167,9 @@ const texts: PdfPanelTexts = {
       'merge-pdf': { one: 'Unir este PDF con otros', many: 'Unir estos {count} PDF' },
       'split-pdf': { one: 'Dividir este PDF', many: 'Dividir estos {count} PDF' },
       'reorder-pdf-pages': { one: 'Ordenar las páginas de este PDF', many: 'Ordenar las páginas de estos {count} PDF' },
+      // F18 (DECISOES § 734): Organizar PDF después de Unir, Extraer páginas después de Desbloquear; cada una espera su acción.
+      'organize-pdf': { one: 'Organizar las páginas de este PDF', many: 'Organizar las páginas de estos {count} PDF' },
+      'split-pdf-extract-pages': { one: 'Extraer páginas de este PDF', many: 'Extraer páginas de estos {count} PDF' },
       'protect-pdf': { one: 'Proteger este PDF con contraseña', many: 'Proteger estos {count} PDF con contraseña' },
     },
   },
