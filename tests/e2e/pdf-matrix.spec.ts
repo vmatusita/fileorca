@@ -854,7 +854,7 @@ for (const fixture of BIG) {
   });
 }
 
-/** The fixtures whose pages are photos or a colour scan: there the PNG is several times the JPG (decision 8). */
+/** The fixtures whose pages are photos or a colour scan: there the PNG files of all the pages add up to several times the JPG files (decision 8). */
 const PHOTO_PAGES = new Set(['gen-fotos.pdf', 'pdf-escaneado-01-pagina-livro-cor.pdf']);
 const bytesOf = (outs: { name: string; bytes: Uint8Array }[], fixture: string, extension: string): number =>
   Array.from({ length: pages(fixture) }, (_, i) => outs.find((out) => out.name === `${base(fixture)}-page-${i + 1}.${extension}`)?.bytes.length ?? Number.NaN).reduce((sum, bytes) => sum + bytes, 0);
@@ -880,11 +880,15 @@ test('PDF to PNG: the small fixtures at 150 ppi, the owner-restricted one drawn,
   expect(outs).toHaveLength(files.reduce((sum, name) => sum + pages(name), 0));
   await recordEach('png-small', { tool: 'pdf-to-jpg-to-png', browser: browserName }, rows, files, async (fixture) => {
     await checkImages(outs, fixture, 150, Array.from({ length: pages(fixture) }, (_, i) => i + 1), 'png');
-    // "On a page with photos, the PNG is several times the size of the JPG of the same page. On a page of text and lines,
-    // the two are of a similar size: the PNG is between about half and about twice the size of the JPG, so it can even be
-    // the smaller file." (the specs and the FAQ of the page; DECISOES § 729). Several times: more than 3 (4.1 to 7.3
-    // measured on Windows). Between about half and about twice: over 0.4 and under 2, both ways (0.44 to 1.28 on these
-    // fixtures at 150 ppi; 0.40 to 1.91 at the three resolutions, the PNG the smaller file in WebKit), in both browsers.
+    // "For a PDF of photos, the PNG files of all its pages add up to several times the size of the JPG files. For a PDF of
+    // text and lines, the two are of a similar size: the PNG files of all its pages add up to between about half and about
+    // twice the size of the JPG files, so they can even be the smaller ones." (the specs and the FAQ of the page; DECISOES
+    // § 729). The sentence and this check are per PDF: the bytes of all the pages of a fixture added up (bytesOf). One page
+    // alone goes further (0.39 to 2.9 on the other fixtures, down to 2.5 on a photo page; front P), so the page says it of
+    // the PDF.
+    // Several times: more than 3 (4.1 to 7.3 measured on Windows). Between about half and about twice: over 0.4 and under
+    // 2, both ways (0.44 to 1.28 on these fixtures at 150 ppi; 0.40 to 1.91 at the three resolutions, the PNG the smaller
+    // file in WebKit), in both browsers.
     const png = bytesOf(outs, fixture, 'png');
     const jpg = bytesOf(jpgs, fixture, 'jpg');
     const ratio = png / jpg;

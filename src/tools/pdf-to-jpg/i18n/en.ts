@@ -44,7 +44,7 @@ const texts: PdfToolTexts<ImagesTexts> = {
     },
     {
       q: 'Should I pick JPG or PNG?',
-      a: 'JPG, saved at quality 92, suits pages with photos: there the PNG is several times the size of the JPG. PNG loses nothing, so the text and thin lines of a page stay crisp; on pages of text and lines, the PNG is between about half and about twice the size of the JPG, and can even be the smaller file. In both cases the text of the page becomes part of the picture, so it can no longer be selected or searched.',
+      a: 'JPG, saved at quality 92, suits pages with photos: for a PDF of photos, the PNG files of all its pages add up to several times the size of the JPG files. PNG loses nothing, so the text and thin lines of a page stay crisp; for a PDF of text and lines, the PNG files of all its pages add up to between about half and about twice the size of the JPG files, and can even be the smaller ones. In both cases the text of the page becomes part of the picture, so it can no longer be selected or searched.',
     },
     {
       q: 'Can I convert a PDF that has editing restrictions or a password?',

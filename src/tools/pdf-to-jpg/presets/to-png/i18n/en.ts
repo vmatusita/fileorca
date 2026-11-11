@@ -28,7 +28,7 @@ const texts: PdfToolTexts<PngTexts> = {
       ['Pages', 'Every page, or a range such as 2-4, 7, which applies to each PDF you add.'],
       ['What comes out', 'One PNG for each page, named after the PDF with -page-1, -page-2 and so on, like report-page-1.png. Several images download together in one ZIP.'],
       ['Background', 'Each page is drawn on white, as a PDF reader shows it, so the PNG has no transparent areas.'],
-      ['File size', 'On a page with photos, the PNG is several times the size of the JPG of the same page. On a page of text and lines, the two are of a similar size: the PNG is between about half and about twice the size of the JPG, so it can even be the smaller file.'],
+      ['File size', 'For a PDF of photos, the PNG files of all its pages add up to several times the size of the JPG files. For a PDF of text and lines, the two are of a similar size: the PNG files of all its pages add up to between about half and about twice the size of the JPG files, so they can even be the smaller ones.'],
       ['Very large pages', 'A page over 16.7 megapixels at the chosen resolution is too big for the browser to draw, so it comes out smaller, and the result tells you.'],
       ['Metadata', 'The PNG files carry no metadata: no Exif data and no GPS location.'],
       ['Restricted PDFs', 'A PDF with only editing restrictions is drawn all the same. A PDF with a password to open is turned away, with a link to Unlock PDF.'],
@@ -42,7 +42,7 @@ const texts: PdfToolTexts<PngTexts> = {
     },
     {
       q: 'Are the PNG files bigger than JPG files?',
-      a: 'On pages with photos, yes, several times bigger: PNG keeps every detail of the picture, while JPG drops detail the eye hardly sees in order to save space. On pages of text and lines, not always: the PNG is between about half and about twice the size of the JPG, so it can even be the smaller file. When a page has photos and a small file matters more than sharp text, use PDF to JPG.',
+      a: 'For a PDF of photos, yes: the PNG files of all its pages add up to several times the size of the JPG files, because PNG keeps every detail of the picture, while JPG drops detail the eye hardly sees in order to save space. For a PDF of text and lines, not always: the PNG files of all its pages add up to between about half and about twice the size of the JPG files, so they can even be the smaller ones. If the pages are photos and a small file matters more than sharp text, use PDF to JPG.',
     },
     {
       q: 'Which resolution should I choose for PNG images?',
