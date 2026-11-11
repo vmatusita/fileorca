@@ -274,6 +274,23 @@ describe('JFIF com miniatura: o cabeçalho fica, a miniatura sai', () => {
     expect(Array.from(stripJpeg(file))).toEqual(Array.from(file));
   });
 
+  it('gives a JFIF too short for the 14-byte header back byte for byte', () => {
+    // The identifier and the version only (7 bytes), and the header one byte short (13 bytes).
+    for (const payload of [[...ascii('JFIF'), 0, 1, 2], header(0, 0).slice(0, 13)]) {
+      const file = new Uint8Array([...SOI, ...marker(0xe0, payload), ...picture]);
+      expect(Array.from(stripJpeg(file)), `${payload.length} bytes`).toEqual(Array.from(file));
+    }
+  });
+
+  it('drops a JFXX APP0 (the thumbnail of the JFIF extension) whole, and keeps the JFIF header before it', () => {
+    // Extension code 0x10, a thumbnail coded in JPEG: here a text that no picture carries.
+    const jfxx = marker(0xe0, [...ascii('JFXX'), 0, 0x10, ...ascii('JFXX-THUMBNAIL-BYTES')]);
+    const file = new Uint8Array([...SOI, ...marker(0xe0, header(0, 0)), ...jfxx, ...picture]);
+    const clean = stripJpeg(file);
+    expect(latin1(clean)).not.toContain('JFXX');
+    expect(Array.from(clean)).toEqual([...SOI, ...marker(0xe0, header(0, 0)), ...picture]);
+  });
+
   it('on a real photo: no thumbnail byte is left, the header stays with 0 x 0, and the picture from the SOF to the EOI is the same', () => {
     const original = read('jpg-01-pixel2-retrato-gps.jpg');
     // The photo's own JFIF APP0 (16 bytes, no thumbnail) is swapped for the same header with a 7 x 1 thumbnail.
