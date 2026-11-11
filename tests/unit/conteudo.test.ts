@@ -1356,7 +1356,15 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
         continue;
       }
       if (isPdfPage(id)) {
-        write(dir, entry.path, pdfPage({ id, lang: entry.lang }));
+        // F18 (decision 5): a PDF preset has blocks of its own (MIN_OWN_BLOCKS), as the image presets of this site have.
+        const own = PDF_PAGES[id].parent
+          ? {
+              how: `<section data-content="how"><ol><li>Drop for ${id}</li><li>Pick for ${id}</li><li>Download for ${id}</li></ol></section>`,
+              rows: [...FAKE_PDF_WORDS[entry.lang].rows, [id, `What ${id} does to the file.`] as [string, string]],
+              faq: pdfFaqIn(entry.lang, 5),
+            }
+          : {};
+        write(dir, entry.path, pdfPage({ id, lang: entry.lang, ...own }));
         continue;
       }
       if (id === PDF_HUB_ID) {
