@@ -6,7 +6,7 @@ Cada página recebeu toda fixture que a ferramenta dela aceita, como na F5a (DEC
 
 Legenda: `ok: o que foi conferido`, `refused: a fala da linha do arquivo` e `failed: a primeira linha do erro` (uma saída que não passou); `—` é uma linha que aquele navegador não gravou.
 
-Ao todo, 64 linhas: 42 conferidas e 22 recusas (Chromium 32, WebKit 32).
+Ao todo, 92 linhas: 62 conferidas e 30 recusas (Chromium 46, WebKit 46).
 
 ## Cobertura
 
@@ -14,7 +14,7 @@ Cada página contra as fixtures que a ferramenta dela aceita (as legíveis do or
 
 | Ferramenta | Fixtures que aceita | Com linha ok nos dois navegadores | Faltam |
 | --- | ---: | ---: | --- |
-| `organize-pdf` | 10 | 0 | gen-acoes.pdf (Chromium: no ok line, WebKit: no ok line); gen-fotos.pdf (Chromium: no ok line, WebKit: no ok line); gen-ja-otimizado.pdf (Chromium: no ok line, WebKit: no ok line); gen-paginas-300.pdf (Chromium: no ok line, WebKit: no ok line); gen-paginas-mistas.pdf (Chromium: no ok line, WebKit: no ok line); gen-xref-estragada.pdf (Chromium: no ok line, WebKit: no ok line); pdf-escaneado-01-pagina-livro-cor.pdf (Chromium: no ok line, WebKit: no ok line); pdf-escaneado-02-relatorio-nasa-150p.pdf (Chromium: no ok line, WebKit: no ok line); pdf-formulario-irs-1040-2019.pdf (Chromium: no ok line, WebKit: no ok line); pdf-grande-fontes-embutidas-117p.pdf (Chromium: no ok line, WebKit: no ok line) |
+| `organize-pdf` | 10 | 10 | — |
 | `split-pdf-extract-pages` | 10 | 10 | — |
 | `pdf-to-jpg-to-png` | 11 | 11 | — |
 
@@ -26,8 +26,31 @@ Cada página contra as fixtures que a ferramenta dela aceita (as legíveis do or
 | `extract-300` | `split-pdf-extract-pages` | 1 ok · 0 recusadas | 1 ok · 0 recusadas |
 | `extract-nasa` | `split-pdf-extract-pages` | 1 ok · 0 recusadas | 1 ok · 0 recusadas |
 | `extract-small` | `split-pdf-extract-pages` | 7 ok · 6 recusadas | 7 ok · 6 recusadas |
+| `organize-117` | `organize-pdf` | 1 ok · 0 recusadas | 1 ok · 0 recusadas |
+| `organize-300` | `organize-pdf` | 1 ok · 0 recusadas | 1 ok · 0 recusadas |
+| `organize-nasa` | `organize-pdf` | 1 ok · 0 recusadas | 1 ok · 0 recusadas |
+| `organize-small` | `organize-pdf` | 7 ok · 4 recusadas | 7 ok · 4 recusadas |
 | `png-big` | `pdf-to-jpg-to-png` | 3 ok · 0 recusadas | 3 ok · 0 recusadas |
 | `png-small` | `pdf-to-jpg-to-png` | 8 ok · 5 recusadas | 8 ok · 5 recusadas |
+
+## `organize-pdf`
+
+| Fixture | Caso | Chromium | WebKit |
+| --- | --- | --- | --- |
+| `pdf-grande-fontes-embutidas-117p.pdf` | `organize-117` | ok: page 2 moved first, pages 1 and 117 turned, page 3 out, 116 pages | ok: page 2 moved first, pages 1 and 117 turned, page 3 out, 116 pages |
+| `gen-paginas-300.pdf` | `organize-300` | ok: page 2 moved first, pages 1 and 300 turned, page 3 out, 299 pages | ok: page 2 moved first, pages 1 and 300 turned, page 3 out, 299 pages |
+| `pdf-escaneado-02-relatorio-nasa-150p.pdf` | `organize-nasa` | ok: page 2 moved first, pages 1 and 150 turned, page 3 out, 149 pages | ok: page 2 moved first, pages 1 and 150 turned, page 3 out, 149 pages |
+| `gen-paginas-mistas.pdf` | `organize-small` | ok: page 2 moved first, pages 1 and 8 turned, page 3 out, 7 pages | ok: page 2 moved first, pages 1 and 8 turned, page 3 out, 7 pages |
+| `gen-acoes.pdf` | `organize-small` | ok: page 2 moved first, pages 1 and 2 turned | ok: page 2 moved first, pages 1 and 2 turned |
+| `gen-fotos.pdf` | `organize-small` | ok: page 2 moved first, pages 1 and 4 turned, page 3 out, 3 pages | ok: page 2 moved first, pages 1 and 4 turned, page 3 out, 3 pages |
+| `gen-ja-otimizado.pdf` | `organize-small` | ok: page 2 moved first, pages 1 and 12 turned, page 3 out, 11 pages | ok: page 2 moved first, pages 1 and 12 turned, page 3 out, 11 pages |
+| `gen-cortado.pdf` | `organize-small` | refused: gen-cortado.pdf stops before its end. Download it again and try once more. | refused: gen-cortado.pdf stops before its end. Download it again and try once more. |
+| `gen-vazio.pdf` | `organize-small` | refused: gen-vazio.pdf is empty. Choose the file again. | refused: gen-vazio.pdf is empty. Choose the file again. |
+| `gen-jpg-extensao-pdf.pdf` | `organize-small` | refused: gen-jpg-extensao-pdf.pdf is an image, not a PDF. Turn it into one with Image to PDF. | refused: gen-jpg-extensao-pdf.pdf is an image, not a PDF. Turn it into one with Image to PDF. |
+| `gen-texto-extensao-pdf.pdf` | `organize-small` | refused: gen-texto-extensao-pdf.pdf isn't a PDF. Choose a file that ends in .pdf and opens as a document. | refused: gen-texto-extensao-pdf.pdf isn't a PDF. Choose a file that ends in .pdf and opens as a document. |
+| `pdf-escaneado-01-pagina-livro-cor.pdf` | `organize-small` | ok: its only page turned right | ok: its only page turned right |
+| `pdf-formulario-irs-1040-2019.pdf` | `organize-small` | ok: page 2 moved first, pages 1 and 2 turned | ok: page 2 moved first, pages 1 and 2 turned |
+| `gen-xref-estragada.pdf` | `organize-small` | ok: page 2 moved first, pages 1 and 3 turned, page 3 out, 2 pages | ok: page 2 moved first, pages 1 and 3 turned, page 3 out, 2 pages |
 
 ## `split-pdf-extract-pages`
 
