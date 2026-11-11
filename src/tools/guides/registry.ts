@@ -145,7 +145,7 @@ export const FILE_GUIDES: Record<FileGuideId, FileGuideDef> = {
     'guides-open-webp-save-as-jpg',
     'guides-social-media-image-sizes',
   ]),
-  'guides-remove-location-from-photos': def('guides-remove-location-from-photos', 'resize-image', 'image-tools', [
+  'guides-remove-location-from-photos': def('guides-remove-location-from-photos', 'remove-exif-data', 'image-tools', [
     'heic-to-jpg',
     'compress-image',
     'crop-image',
