@@ -1,6 +1,6 @@
 # data/keywords.csv
 
-A saída do passo 21 da F0. Uma linha por página de ferramenta ou preset em inglês (62 linhas). As runs usam este arquivo para decidir o que entra em cada fase e em que ordem construir.
+A saída do passo 21 da F0. Uma linha por página de ferramenta ou preset em inglês (67 linhas). As runs usam este arquivo para decidir o que entra em cada fase e em que ordem construir.
 
 ## Colunas
 
@@ -8,8 +8,8 @@ A saída do passo 21 da F0. Uma linha por página de ferramenta ou preset em ing
 | --- | --- | --- |
 | `slug` | já vem | caminho da página em inglês, sem barras nas pontas (`compress-image/to-100kb` vira `/compress-image/to-100kb/`) |
 | `area` | já vem | `imagem`, `pdf`, `dinheiro`, `casa`, `saude`, `utilidades` |
-| `fase` | já vem | `F2`, `F4`, `F5`, `F7` |
-| `tipo` | já vem | `ferramenta-imagem`, `ferramenta-pdf`, `preset-imagem`, `calculadora`, `preset-dinheiro`, `qr-code` |
+| `fase` | já vem | `F2`, `F4`, `F5`, `F7`, `F18` |
+| `tipo` | já vem | `ferramenta-imagem`, `ferramenta-pdf`, `preset-imagem`, `preset-pdf`, `calculadora`, `preset-dinheiro`, `qr-code` |
 | `termo` | já vem | a busca em inglês colada no Keyword Planner |
 | `volume_eua_faixa` | Victor | exatamente um de: `0-10`, `10-100`, `100-1K`, `1K-10K`, `10K-100K`, `100K-1M`, `1M-10M` |
 | `lance_topo_min_usd` | Victor | número com ponto decimal (`2.35`) ou vazio |
@@ -23,8 +23,10 @@ Planner: país Estados Unidos, idioma inglês, conta do Google Ads em USD. Trend
 
 | Tipo | `entra` quando |
 | --- | --- |
-| `ferramenta-imagem` e `ferramenta-pdf` | sempre |
+| `ferramenta-imagem` e `ferramenta-pdf` | sempre, até a F17 |
+| `ferramenta-imagem` e `ferramenta-pdf` da F18 | volume `10K-100K` ou maior **e** Trends diferente de `caindo` (a seção E do `PLANO-UX-QV.md` e a linha 15 do `PLANO-MELHORIAS.md`) |
 | `preset-imagem` | volume `1K-10K` ou maior **e** Trends diferente de `caindo` |
+| `preset-pdf` | como a `preset-imagem`: volume `1K-10K` ou maior **e** Trends diferente de `caindo` |
 | `calculadora`, `preset-dinheiro` e `qr-code` | (volume `1K-10K` ou maior, **ou** `100-1K` com `lance_topo_max_usd` de 3 ou mais) **e** Trends diferente de `caindo` |
 | qualquer outro caso | `fora` |
 

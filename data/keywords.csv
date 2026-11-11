@@ -61,3 +61,8 @@ due-date-calculator,saude,F7,calculadora,due date calculator,100K-1M,,0.36,estav
 ovulation-calculator,saude,F7,calculadora,ovulation calculator,100K-1M,,,estavel,entra
 body-fat-calculator,saude,F7,calculadora,body fat calculator,100K-1M,,,estavel,entra
 qr-code-generator,utilidades,F7,qr-code,qr code generator,100K-1M,,,estavel,entra
+organize-pdf,pdf,F18,ferramenta-pdf,organize pdf,10K-100K,,,estavel,entra
+split-pdf/extract-pages,pdf,F18,preset-pdf,extract pages from pdf,10K-100K,,,subindo,entra
+pdf-to-jpg/to-png,pdf,F18,preset-pdf,pdf to png,10K-100K,,,estavel,entra
+rotate-image/flip,imagem,F18,preset-imagem,flip image,10K-100K,,,subindo,entra
+remove-exif-data,imagem,F18,ferramenta-imagem,remove exif data,10K-100K,,,subindo,entra
