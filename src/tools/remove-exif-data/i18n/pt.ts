@@ -7,7 +7,7 @@ import type { ImageToolTexts, NoteOptionsTexts } from '../../../i18n/types.ts';
 export default {
   title: 'Remover metadados da foto online, sem upload',
   description:
-    'Remova o Exif e os outros metadados de fotos JPG, PNG e WebP no navegador: localização GPS, data, câmera e mais. Os pixels não mudam. Sem upload e sem limite.',
+    'Remova os dados Exif de fotos JPG, PNG e WebP no navegador: a localização GPS, a data, a câmera e mais. Os pixels não mudam. Sem upload e sem limite.',
   h1: 'Remover metadados da foto',
   howHeading: 'Como remover os metadados de uma foto',
   howSteps: [
