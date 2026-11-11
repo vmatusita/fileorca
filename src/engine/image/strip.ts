@@ -1,5 +1,6 @@
 // Lossless metadata removal for the "no gain" case: when the new copy would not be smaller, the
-// original pixels go back, but without EXIF, GPS, XMP, IPTC or text chunks (DECISOES § 33).
+// original pixels go back, but without EXIF, GPS, XMP, IPTC or text chunks (DECISOES § 33). The strip
+// operation (Remove EXIF data) is this and nothing else (§ 731).
 // The JPEG keeps its colour profile (APP2 ICC) and, when the photo is rotated, a minimal Exif
 // block with the Orientation tag only, so it still shows the right way up.
 // Self-contained: nothing here imports from outside src/engine/image/.
