@@ -12,7 +12,7 @@ import { homePath, type Crumb } from '../../seo/meta.ts';
 import type { IconName } from '../../icons/svg.ts';
 import { IMAGE_PAGES, type ImagePageId } from '../image/registry.ts';
 import { imageToolTexts } from '../image/texts.ts';
-import { PDF_PAGES, type PdfToolId } from '../pdf/registry.ts';
+import { PDF_PAGES, type PdfPageId } from '../pdf/registry.ts';
 import { PDF_TOOL_TEXTS } from '../pdf/texts.ts';
 import { FILE_GUIDES, GUIDES_HUB_ID, isFileGuide, type FileGuideId, type FileGuideRelated, type FileGuideTool } from './registry.ts';
 import { guideCardData, type GuideCardData } from './card.ts';
@@ -39,7 +39,7 @@ export function guidePath(id: FileGuideId, lang: Lang = 'en'): string {
   return FILE_GUIDES[id].paths[lang];
 }
 
-const isPdfTool = (id: string): id is PdfToolId => Object.hasOwn(PDF_PAGES, id);
+const isPdfTool = (id: string): id is PdfPageId => Object.hasOwn(PDF_PAGES, id);
 const isImagePage = (id: string): id is ImagePageId => Object.hasOwn(IMAGE_PAGES, id);
 
 export interface ToolInfo {

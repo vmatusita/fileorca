@@ -21,7 +21,7 @@ import { IMAGE_PAGES, type ImagePageId } from '../tools/image/registry.ts';
 import { normalize, type SearchEntry } from '../search/search.ts';
 import { ICONS } from '../icons/icons.ts';
 import { BR_CALC_IDS, BR_CALC_PAGES, CALC_PAGES, CALC_PAGE_IDS, GUIDE_IDS, LIFE_CALC_IDS, LIFE_CALC_PAGES, isGuide } from '../tools/calc/registry.ts';
-import { PDF_PAGES, PDF_TOOL_IDS } from '../tools/pdf/registry.ts';
+import { PDF_PAGES, type PdfPageId } from '../tools/pdf/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS, isFileGuide } from '../tools/guides/registry.ts';
 
 export function searchIndex(): SearchEntry[] {
@@ -72,9 +72,12 @@ function imageEntries(): SearchEntry[] {
   );
 }
 
-/** The 12 PDF tools, in hub order, with the paths of the route map (the same ones the pages are built on). */
+/**
+ * The PDF tools, in hub order, with the paths of the route map (the same ones the pages are built on). F18 (decision 5):
+ * then the PDF presets, as the image presets follow the image tools (the key order of PDF_PAGES).
+ */
 function pdfEntries(): SearchEntry[] {
-  return PDF_TOOL_IDS.flatMap((id) => entry(id, 'pdf', ICONS[PDF_PAGES[id].icon], (lang) => TEXTS[lang].common.pdf[id]));
+  return (Object.keys(PDF_PAGES) as PdfPageId[]).flatMap((id) => entry(id, 'pdf', ICONS[PDF_PAGES[id].icon], (lang) => TEXTS[lang].common.pdf[id]));
 }
 
 function moneyEntries(): SearchEntry[] {

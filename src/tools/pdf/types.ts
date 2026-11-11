@@ -5,13 +5,13 @@ import type { PdfInspect, PdfOperation } from '../../engine/pdf/types.ts';
 import type { CarryLabel, PdfPanelTexts, PdfToolPanelTexts } from '../../i18n/types.ts';
 import type { Outcome } from '../../analytics/events.ts';
 import type { ChipCarry } from '../image/types.ts';
-import type { ImageNeighbour, PdfPageDef, PdfToolId } from './registry.ts';
+import type { ImageNeighbour, PdfPageDef, PdfPageId, PdfToolId } from './registry.ts';
 import type { Lang } from '../../i18n/routes.ts';
 
 export interface PdfChip {
   href: string;
   name: string;
-  target: PdfToolId | ImageNeighbour | 'home';
+  target: PdfPageId | ImageNeighbour | 'home';
   /** Inner markup of the icon, read at build. */
   icon: string;
   category: 'image' | 'pdf' | 'none';
@@ -43,7 +43,13 @@ export interface PdfIcons {
 
 export interface PdfPanelData<O = object> {
   lang: Lang;
-  page: PdfToolId;
+  /** The page: a tool or, since the F18, a preset (its events, its inbox, its definition in PDF_TOOLS). */
+  page: PdfPageId;
+  /**
+   * F18 (decision 5; DECISOES § 725): the tool the page is (toolOf of the registry: the parent of a preset, else the page),
+   * for the comparisons that mean "this tool" (PDF to JPG takes a restricted PDF and names its ZIP of images).
+   */
+  base: PdfToolId;
   t: PdfPanelTexts;
   texts: PdfToolPanelTexts<O>;
   files: PdfPageDef['files'];

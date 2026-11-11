@@ -53,7 +53,7 @@ import type { QrPageTexts } from '../../src/tools/qr-code-generator/types.ts';
 import { longDate } from '../../src/i18n/dates.ts';
 import { IMAGE_PAGES, IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 import { CALC_PAGES, CALC_PRESET_IDS, isBrCalc, isLifeCalc } from '../../src/tools/calc/registry.ts';
-import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS, type PdfToolId } from '../../src/tools/pdf/registry.ts';
+import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS, type PdfPageId, type PdfToolId } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID, isFileGuide } from '../../src/tools/guides/registry.ts';
 import { HUB_GROUPS, hubGroup, hubGuides } from '../../src/tools/guides/hub.ts';
 import { fmt, groupDigits } from '../../src/i18n/format.ts';
@@ -514,7 +514,7 @@ const pdfFaq = (count: number): string =>
   `<div class="fo-faq">${Array.from({ length: count }, (_, i) => `<details><summary>Question ${i + 1} about the tool?</summary><div><p>${ANSWER} (${i + 1})</p></div></details>`).join('')}</div>`;
 
 /** The mode rows a fake page of this tool carries: one row per mode, headed by the mode (F6: in the language of the page). */
-const modeRows = (id: PdfToolId, lang: Lang = 'en'): [string, string][] => (PDF_RULES[lang].modes[id] ?? []).map(({ mode }) => [mode, `What the ${mode} does to the file.`]);
+const modeRows = (id: PdfPageId, lang: Lang = 'en'): [string, string][] => (PDF_RULES[lang].modes[id] ?? []).map(({ mode }) => [mode, `What the ${mode} does to the file.`]);
 
 const BASE_ROWS: [string, string][] = [
   ['Files it takes', 'PDF files. Oli checks what is inside the file, not its name.'],
@@ -569,7 +569,8 @@ const tableOf = (rows: [string, string][]): string =>
   `<section data-content="specs"><table><thead><tr><th scope="col">Detail</th><th scope="col">What happens</th></tr></thead><tbody>${rows.map(([head, text]) => `<tr><th scope="row">${head}</th><td>${text}</td></tr>`).join('')}</tbody></table></section>`;
 
 interface FakePdf {
-  id?: PdfToolId;
+  // F18: a PDF tool or a PDF preset (the fake site of the gate builds both).
+  id?: PdfPageId;
   lang?: Lang;
   top?: string;
   head?: string;

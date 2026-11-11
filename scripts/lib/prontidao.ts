@@ -22,7 +22,7 @@ import {
   type LifeHub,
   type MoneyPageId,
 } from '../../src/tools/calc/registry.ts';
-import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { PDF_HUB_ID, PDF_PRESET_IDS, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 import { HOME_BAND_MONEY_IDS } from '../../src/components/home-bands.ts';
 import { PLACEHOLDERS, normalizeText, pathOfFile, visibleText } from './conteudo.ts';
@@ -189,8 +189,9 @@ export function realSite(dir: string): Site {
     cards,
     // F5b: the ten file guides are search entries too (DECISOES § 190). F7 (decision 9): and, last, the 11 home and health
     // calculators and the QR code generator (the hubs are not search entries, as the money hub is not).
-    searchIds: [...Object.keys(IMAGE_PAGES), ...CALC_PAGE_IDS, ...brazilian, ...GUIDE_IDS, ...FILE_GUIDE_IDS, ...PDF_TOOL_IDS, ...LIFE_CALC_IDS, QR_ID],
-    pdf: [...PDF_TOOL_IDS, PDF_HUB_ID],
+    // F18 (decision 5): the PDF presets are search entries and PDF pages, as the image presets are.
+    searchIds: [...Object.keys(IMAGE_PAGES), ...CALC_PAGE_IDS, ...brazilian, ...GUIDE_IDS, ...FILE_GUIDE_IDS, ...PDF_TOOL_IDS, ...PDF_PRESET_IDS, ...LIFE_CALC_IDS, QR_ID],
+    pdf: [...PDF_TOOL_IDS, ...PDF_PRESET_IDS, PDF_HUB_ID],
   };
 }
 

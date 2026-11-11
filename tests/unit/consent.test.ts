@@ -260,6 +260,7 @@ describe('the events of the PDF tools (F5a)', () => {
     'sign-pdf': 'signed',
     'protect-pdf': 'protected',
     'unlock-pdf': 'unlocked',
+    'organize-pdf': 'organized',
     'reorder-pdf-pages': 'reordered',
     'watermark-pdf': 'watermarked',
   } as const;

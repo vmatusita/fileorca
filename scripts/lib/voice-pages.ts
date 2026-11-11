@@ -7,7 +7,7 @@ import { checkVoice } from './design-checks.ts';
 import { visibleText } from './conteudo.ts';
 import { LANGS, QR_ID, languagesOf, routeById, type Lang, type RouteId } from '../../src/i18n/routes.ts';
 import { CALC_PAGE_IDS, GUIDE_IDS, MONEY_HUB_ID, type CalcPageId } from '../../src/tools/calc/registry.ts';
-import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { PDF_HUB_ID, PDF_PRESET_IDS, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 
 export interface VoicePage {
@@ -26,9 +26,9 @@ function pagesOf(ids: readonly RouteId[], only?: readonly Lang[]): VoicePage[] {
   });
 }
 
-/** The 12 PDF tools and the PDF hub, in every language of their route (F5a; the three since the F6). */
+/** The PDF tools, the PDF presets (F18) and the PDF hub, in every language of their route (F5a; the three since the F6). */
 export function pdfVoicePages(): VoicePage[] {
-  return pagesOf([...PDF_TOOL_IDS, PDF_HUB_ID]);
+  return pagesOf([...PDF_TOOL_IDS, ...PDF_PRESET_IDS, PDF_HUB_ID]);
 }
 
 /** The ten file guides (F5b), in each language of the registry: the three since the languages adjustment. */

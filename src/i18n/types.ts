@@ -4,7 +4,7 @@
 import type { Lang } from './routes.ts';
 import type { ImagePageId, ImageToolId } from '../tools/image/registry.ts';
 import type { AnyCalcId, BrCalcId, CalcPageId, EsCalcId, GuideId, LifeCalcId } from '../tools/calc/registry.ts';
-import type { PdfToolId } from '../tools/pdf/registry.ts';
+import type { PdfPageId, PdfToolId } from '../tools/pdf/registry.ts';
 import type { FileGuideId } from '../tools/guides/registry.ts';
 
 export type LangNames = Record<Lang, string>;
@@ -143,9 +143,9 @@ export interface CommonTexts {
   qr?: ToolBlurb;
   /** The cards of the money guides (English and Spanish). */
   guides?: Record<GuideId, ToolBlurb>;
-  /** Name of the PDF hub and the cards of the PDF tools. */
+  /** Name of the PDF hub and the cards of the PDF tools and, since the F18, of the PDF presets (decision 5). */
   pdfTools: string;
-  pdf: Record<PdfToolId, ToolBlurb>;
+  pdf: Record<PdfPageId, ToolBlurb>;
   /** The cards of the file guides (the three languages since the languages adjustment). */
   fileGuides?: Record<FileGuideId, ToolBlurb>;
   /** Name of the guides hub (F11): the second step of its breadcrumb and of the guides' breadcrumbs ("Guides"). */
@@ -1009,6 +1009,13 @@ export interface RotateOptionsTexts {
   vertical: string;
 }
 
+/** F18 (decision 9): Flip image, the mirror alone: Horizontal (the default) or Vertical, with no turn. */
+export interface FlipOptionsTexts {
+  legend: string;
+  horizontal: string;
+  vertical: string;
+}
+
 export interface SaveAsOptionsTexts {
   legend: string;
   jpg: string;
@@ -1053,10 +1060,10 @@ export interface ToolBlurb {
 }
 
 /**
- * The page blocks of a PDF tool (F5a, decision 9): like ToolPageContent, with "how to use" in three steps or more and
- * no presets table.
+ * The page blocks of a PDF tool (F5a, decision 9): like ToolPageContent, with "how to use" in three steps or more.
+ * F18 (decision 5; DECISOES § 725): a parent tool has the table of its presets again, as the image parents do.
  */
-export type PdfPageContent = Omit<ToolPageContent, 'howSteps' | 'presets'> & {
+export type PdfPageContent = Omit<ToolPageContent, 'howSteps'> & {
   /** Three steps or more, each one sentence. */
   howSteps: string[];
 };
@@ -1290,6 +1297,15 @@ export interface PdfToolsTexts extends PageMeta {
   guideOutro: string;
   privacyHeading: string;
   privacy: string[];
+  /**
+   * F18 (decision 5; DECISOES § 725): the table of the PDF presets, with their links, as the image hub has (never cards:
+   * the grid of the hub is the tools of the registry, checkPdfHub).
+   */
+  presetsHeading: string;
+  /** Visually hidden caption of the presets table. */
+  presetsCaption: string;
+  /** Column heads of the presets table: the preset, what comes out. */
+  presetsHead: [string, string];
 }
 
 /** A group of the guides hub (F11): the text of its shortcut chip and the heading of its section. */

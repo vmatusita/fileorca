@@ -8,7 +8,7 @@ import { fmt, groupDigits } from '../i18n/format.ts';
 import type { IconName } from '../icons/svg.ts';
 import { homePath } from '../seo/meta.ts';
 import { IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../tools/image/registry.ts';
-import { PDF_HUB_ID, PDF_TOOL_IDS } from '../tools/pdf/registry.ts';
+import { PDF_HUB_ID, PDF_PRESET_IDS, PDF_TOOL_IDS } from '../tools/pdf/registry.ts';
 import {
   BR_CALC_IDS,
   BR_HUB_ID,
@@ -61,7 +61,8 @@ export function sectionPage(section: MenuSection, lang: Lang): RouteId {
  */
 const MEMBERS: Record<MenuSection, readonly RouteId[]> = {
   image: [...IMAGE_TOOL_IDS, ...IMAGE_PRESET_IDS],
-  pdf: PDF_TOOL_IDS,
+  // F18 (decision 5): the PDF presets mark the PDF section, as the image presets mark theirs.
+  pdf: [...PDF_TOOL_IDS, ...PDF_PRESET_IDS],
   money: [...CALC_PAGE_IDS, ...BR_CALC_IDS],
   house: HOUSE_CALC_IDS,
   health: HEALTH_CALC_IDS,

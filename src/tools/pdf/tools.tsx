@@ -28,7 +28,7 @@ import type {
   UnlockTexts,
   WatermarkTexts,
 } from './option-texts.ts';
-import type { PdfToolId } from './registry.ts';
+import type { PdfPageId } from './registry.ts';
 import type { PdfOptionsProps, PdfToolDef } from './types.ts';
 
 const pageCount = (props: { file: { info: { pages: number } | null } | null }): number => props.file?.info?.pages ?? 0;
@@ -736,6 +736,20 @@ const watermark: PdfToolDef<WatermarkState, WatermarkTexts> = {
   Options: WatermarkOptions,
 };
 
+// ---- F18: Organize PDF and the two PDF presets ---------------------------------------------------------------
+
+// F18 placeholder: front O replaces with the organize operation and grid mode. Until then, Reorder's definition (the
+// order grid, the action button), with its own outcome.
+const organize: PdfToolDef<ReorderState, ReorderTexts> = { ...reorder, success: 'organized' };
+
+// F18: front P refines (no mode segment). Split PDF in its Pick mode from the start (decision 7): one PDF with the marked
+// pages, named with the preset's suffix ("-extracted").
+const extract: PdfToolDef<SplitState, SplitTexts> = { ...split, initial: { mode: 'pick', ranges: '', picked: [] }, success: 'split' };
+
+// F18: front P refines (no format choice). PDF to JPG with PNG from the start (decision 8): the resolution and the pages
+// stay as in the parent, and the summary of "Adjust" already says "PNG · <resolution>".
+const png: PdfToolDef<ImagesState, ImagesTexts> = { ...images, initial: { ...images.initial, format: 'png' }, success: 'converted' };
+
 export const PDF_TOOLS = {
   'merge-pdf': merge,
   'split-pdf': split,
@@ -747,7 +761,10 @@ export const PDF_TOOLS = {
   'sign-pdf': sign,
   'protect-pdf': protect,
   'unlock-pdf': unlock,
+  'organize-pdf': organize,
   'reorder-pdf-pages': reorder,
   'watermark-pdf': watermark,
-} as unknown as Record<PdfToolId, PdfToolDef<object, object>>;
+  'split-pdf-extract-pages': extract,
+  'pdf-to-jpg-to-png': png,
+} as unknown as Record<PdfPageId, PdfToolDef<object, object>>;
 

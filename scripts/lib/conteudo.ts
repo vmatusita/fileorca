@@ -11,7 +11,7 @@ import { parse, NodeType, type HTMLElement, type Node } from 'node-html-parser';
 import { DEFAULT_LANG, routeById, type Lang } from '../../src/i18n/routes.ts';
 import { IMAGE_PAGES, presetsOf, type ImagePageId } from '../../src/tools/image/registry.ts';
 import { CALC_PAGES, calcPresetsOf, type CalcPageId } from '../../src/tools/calc/registry.ts';
-import { PDF_PAGES, type PdfToolId } from '../../src/tools/pdf/registry.ts';
+import { PDF_PAGES, presetsOf as pdfPresetsOf, type PdfPageId } from '../../src/tools/pdf/registry.ts';
 
 export const CONTENT_BLOCKS = ['how', 'specs', 'faq', 'privacy', 'related'] as const;
 export type ContentBlock = (typeof CONTENT_BLOCKS)[number];
@@ -253,13 +253,14 @@ export interface PdfPageWant {
   name: string;
   /** The fixed text of the PrivacySeal. */
   seal: string;
-  id: PdfToolId;
+  /** A PDF tool or, since the F18, a PDF preset. */
+  id: PdfPageId;
   /** The language of the page, whose words the rules look for (F6); English when left out. */
   lang?: Lang;
 }
 
 /** The tools whose result is images, not a PDF: what stays in a PDF (form, bookmarks, links) does not apply to them. */
-const IMAGE_RESULT: readonly PdfToolId[] = ['pdf-to-jpg'];
+const IMAGE_RESULT: readonly PdfPageId[] = ['pdf-to-jpg', 'pdf-to-jpg-to-png'];
 
 /** The specs table says what the tool takes: a row headed "Takes", "What it takes", "Files it takes" or just "Files". */
 const SPEC_TAKES = /\btakes?\b|\baccepts?\b|^files$/i;
@@ -276,7 +277,7 @@ const SPEC_KEPT: { label: string; pattern: RegExp }[] = [
  * The modes (or options) a tool offers and the row of the specs table that says what each one does, by header
  * (th). A tool that is not here has no modes. Keyed by registry id, so a renamed tool fails to compile.
  */
-export const PDF_MODES: Partial<Record<PdfToolId, readonly { mode: string; header: RegExp }[]>> = {
+export const PDF_MODES: Partial<Record<PdfPageId, readonly { mode: string; header: RegExp }[]>> = {
   'split-pdf': [
     { mode: 'every page', header: /every page|each page/i },
     { mode: 'page ranges', header: /range/i },
@@ -317,7 +318,7 @@ export const PDF_MODES: Partial<Record<PdfToolId, readonly { mode: string; heade
 };
 
 /** The word a privacy note must say for the tools that take a secret: it is not kept and does not leave the device. */
-export const PDF_SECRETS: Partial<Record<PdfToolId, RegExp>> = {
+export const PDF_SECRETS: Partial<Record<PdfPageId, RegExp>> = {
   'protect-pdf': /\bpassword\b/i,
   'unlock-pdf': /\bpassword\b/i,
   'sign-pdf': /\bsignature\b/i,
@@ -341,9 +342,9 @@ export interface PdfLangRules {
   /** What stays in the file: its form fields, its bookmarks and its links. */
   kept: readonly { label: string; pattern: RegExp }[];
   /** The modes of each tool, with a sample header in the language (the same tools and as many modes as in English). */
-  modes: Partial<Record<PdfToolId, readonly { mode: string; header: RegExp }[]>>;
+  modes: Partial<Record<PdfPageId, readonly { mode: string; header: RegExp }[]>>;
   /** The secret a privacy note names, for the tools that take one. */
-  secrets: Partial<Record<PdfToolId, RegExp>>;
+  secrets: Partial<Record<PdfPageId, RegExp>>;
   /** Where the work happens, and that nothing is sent. */
   device: RegExp;
   notSent: RegExp;
@@ -462,7 +463,7 @@ function specRows(root: HTMLElement): { header: string; text: string }[] {
     .map((row) => ({ header: plainText(row.querySelector('th') ?? row), text: plainText(row) }));
 }
 
-function pdfSpecsProblems(root: HTMLElement, id: PdfToolId, lang: Lang): string[] {
+function pdfSpecsProblems(root: HTMLElement, id: PdfPageId, lang: Lang): string[] {
   const rows = specRows(root);
   if (rows.length === 0) return []; // checkToolPage already said the table is missing
   const rules = PDF_RULES[lang];
@@ -499,7 +500,7 @@ function pdfFaqProblems(root: HTMLElement): string[] {
   return problems;
 }
 
-function pdfPrivacyProblems(root: HTMLElement, id: PdfToolId, lang: Lang): string[] {
+function pdfPrivacyProblems(root: HTMLElement, id: PdfPageId, lang: Lang): string[] {
   const text = blocksOf(root, 'privacy').map(plainText).join(' ');
   if (!text) return [];
   const rules = PDF_RULES[lang];
@@ -727,9 +728,18 @@ export function checkQrPage(html: string, lang: Lang = DEFAULT_LANG): string[] {
   return problems;
 }
 
-/** The PDF tool a route id names (the hub and every other page are not). */
-export function isPdfPage(id: string): id is PdfToolId {
+/** The PDF tool or, since the F18, the PDF preset a route id names (the hub and every other page are not). */
+export function isPdfPage(id: string): id is PdfPageId {
   return Object.hasOwn(PDF_PAGES, id);
+}
+
+/** F18 (decision 5): the paths a PDF preset is compared against in one language: its parent tool, then the sibling presets. */
+export function pdfComparisonPaths(id: PdfPageId, lang: Lang = DEFAULT_LANG): string[] {
+  const parent = PDF_PAGES[id].parent;
+  if (!parent) return [];
+  return [parent, ...pdfPresetsOf(parent).filter((preset) => preset !== id)]
+    .map((other) => routeById(other).paths[lang])
+    .filter((path): path is string => path !== undefined);
 }
 
 /** Elements with data-content that are not inside another one: each is counted once. */

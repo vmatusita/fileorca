@@ -1,5 +1,6 @@
 ---
-// The tool page mold for the 12 PDF tools (docs/design/components/ToolPage; F5a, decision 9): breadcrumb, H1 +
+// The tool page mold for the PDF tools and, since the F18, the PDF presets (docs/design/components/ToolPage; F5a, decision 9;
+// F18, decision 5: the same island and entry, so a preset loads the same 2 JS files as its sisters): breadcrumb, H1 +
 // PrivacySeal, the island, then the blocks the content gate checks (data-content: how, specs, faq, privacy, related), with
 // the ads of the map. The same blocks as ImageToolPage.astro, with "how it works" in three steps or more. The same mold
 // serves the three languages (F6). The card of each guide that embeds the tool closes the "How to" block (F11, decision 7;
@@ -19,14 +20,14 @@ import { TEXTS } from '../../i18n/texts.ts';
 import { breadcrumbLd, webApplicationLd } from '../../seo/meta.ts';
 import { FILE_PANEL_POSES } from '../image/Oli.tsx';
 import PdfIsland from './PdfIsland.astro';
-import { crumbsFor, panelData, relatedFor } from './page.ts';
+import { crumbsFor, panelData, presetRows, relatedFor } from './page.ts';
 import { PDF_TOOL_TEXTS } from './texts.ts';
 import { guidesOfTool } from '../guides/registry.ts';
 import { guideCardData } from '../guides/card.ts';
-import type { PdfToolId } from './registry.ts';
+import { PDF_TOOL_IDS, type PdfPageId, type PdfToolId } from './registry.ts';
 
 interface Props {
-  id: PdfToolId;
+  id: PdfPageId;
   lang?: Lang;
 }
 const { id, lang = 'en' } = Astro.props;
@@ -38,11 +39,15 @@ const area = route.adArea ?? 'arquivos';
 const crumbs = crumbsFor(id, lang);
 const related = relatedFor(id, lang);
 const data = panelData(id, lang);
+// F18 (decision 5): the table of the presets on a parent page, as the image parents have it (none on a preset).
+const presets = presetRows(id, lang);
 const title = t.title.startsWith(t.h1) ? t.title : `${t.h1}: ${t.title}`;
 // The guides that embed this tool (F5b, decision 6), in the language of the page (DECISOES § 6). F11 (decision 7): each one
 // is a GuideCard (--here) at the end of the "How to" block, the first block after the panel; the line "Read the guide"
 // between the specs and the questions is gone.
-const guides = guidesOfTool(id).map((guide) => guideCardData(guide, lang));
+// A preset has no guide of its own (the image presets have none either).
+const tool = (PDF_TOOL_IDS as readonly string[]).includes(id) ? (id as PdfToolId) : null;
+const guides = tool ? guidesOfTool(tool).map((guide) => guideCardData(guide, lang)) : [];
 ---
 <BaseLayout
   lang={lang}
@@ -54,7 +59,8 @@ const guides = guidesOfTool(id).map((guide) => guideCardData(guide, lang));
   oli={FILE_PANEL_POSES}
   schema={[breadcrumbLd(crumbs), webApplicationLd(t.h1, t.description, path, lang)]}
 >
-  <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
+  {/* F18 (decision 5): a preset has four steps, and below 360 px the hub step goes, as on an image preset (§ 582). */}
+  <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} skipHub />
   {/* F13a (UX-04 A; F4-F7 f-2; DECISOES § 463): the H1 takes the whole measure; only the seal row leaves room for the Oli. */}
   <div class="fo-top fo-top--tool">
     <h1 class="fo-h1">{t.h1}</h1>
@@ -80,6 +86,19 @@ const guides = guidesOfTool(id).map((guide) => guideCardData(guide, lang));
         {t.specs.rows.map(([detail, what]) => <tr><th scope="row">{detail}</th><td><RichText text={what} /></td></tr>)}
       </tbody>
     </table>
+    {t.presets && presets.length > 0 && (
+      <>
+        <h3 class="fo-h3" id="presets">{t.presets.heading}</h3>
+        {t.presets.lead && <p>{t.presets.lead}</p>}
+        <table class="fo-table">
+          <caption class="fo-sr">{t.presets.caption}</caption>
+          <thead><tr><th scope="col">{t.presets.head[0]}</th><th scope="col">{t.presets.head[1]}</th></tr></thead>
+          <tbody>
+            {presets.map((preset) => <tr><th scope="row"><a href={preset.href}>{preset.name}</a></th><td>{preset.description}</td></tr>)}
+          </tbody>
+        </table>
+      </>
+    )}
   </section>
   <section class="fo-section" data-content="faq" aria-labelledby="faq">
     <h2 id="faq">{t.faqHeading}</h2>

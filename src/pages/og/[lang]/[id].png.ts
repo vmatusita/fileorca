@@ -31,7 +31,7 @@ import {
 } from '../../../tools/calc/registry.ts';
 import { LIFE_HUB_TEXTS } from '../../../i18n/life-hubs.ts';
 import { SHARED_BY_LANG, calcTexts } from '../../../tools/calc/page.ts';
-import { PDF_HUB_ID, PDF_PAGES, type PdfToolId } from '../../../tools/pdf/registry.ts';
+import { PDF_HUB_ID, PDF_PAGES, type PdfPageId } from '../../../tools/pdf/registry.ts';
 import { PDF_TOOL_TEXTS } from '../../../tools/pdf/texts.ts';
 import { FILE_GUIDES, GUIDES_HUB_ID, isFileGuide, type FileGuideId } from '../../../tools/guides/registry.ts';
 import { QR_TEXTS } from '../../../tools/qr-code-generator/page.ts';
@@ -49,7 +49,7 @@ export const getStaticPaths: GetStaticPaths = () =>
 
 const isImagePage = (id: string): id is ImagePageId => Object.hasOwn(IMAGE_PAGES, id);
 
-const isPdfPage = (id: string): id is PdfToolId => Object.hasOwn(PDF_PAGES, id);
+const isPdfPage = (id: string): id is PdfPageId => Object.hasOwn(PDF_PAGES, id);
 
 type PlainId = Exclude<
   RouteId,
@@ -60,7 +60,7 @@ type PlainId = Exclude<
   | keyof typeof CALC_PAGES
   | keyof typeof BR_CALC_PAGES
   | keyof typeof GUIDES
-  | PdfToolId
+  | PdfPageId
   | typeof PDF_HUB_ID
   | FileGuideId
   | typeof GUIDES_HUB_ID
