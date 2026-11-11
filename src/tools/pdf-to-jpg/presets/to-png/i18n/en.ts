@@ -69,7 +69,9 @@ const texts: PdfToolTexts<PngTexts> = {
     doneMany: 'Done! Oli turned the pages into {count} PNG images.',
     options: {
       png: 'PNG',
-      formatHelp: 'Every page comes out as a PNG, saved without loss.',
+      // One line in Figtree and in its fallback at 320 px (288 px of text), in the three languages: a line that wraps in one
+      // font and not in the other moves the options below it when Figtree arrives (layout-shift.spec.ts; DECISOES § 742).
+      formatHelp: 'Each page is saved as a lossless PNG.',
       resolutionLegend: 'Resolution',
       low: '72 ppi',
       lowHelp: 'for the screen',

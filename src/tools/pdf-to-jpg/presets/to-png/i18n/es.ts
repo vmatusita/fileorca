@@ -70,7 +70,7 @@ const texts: PdfToolTexts<PngTexts> = {
     doneMany: '¡Listo! Oli convirtió las páginas en {count} imágenes PNG.',
     options: {
       png: 'PNG',
-      formatHelp: 'Cada página sale como PNG, guardado sin pérdida.',
+      formatHelp: 'Cada página sale en PNG, sin pérdida.',
       resolutionLegend: 'Resolución',
       low: '72 ppp',
       lowHelp: 'para pantalla',
