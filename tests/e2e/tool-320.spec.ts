@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
+import { LANGS, routeById } from '../../src/i18n/routes.ts';
 import { hydrated } from './lib/page.ts';
 
 // F13b · the tool page at 320 px (decision 9 of the run; the group 22 rows the F13a left; DECISOES § 580 and § 581).
@@ -21,6 +22,9 @@ const PAGES = [
 ];
 /** The pages with a placard (the compressors and their presets). */
 const PLACARD = PAGES.filter((path) => !/youtube/.test(path));
+// F18 (decision 19; DECISOES § 743): the image tool and the image preset of the run with the same photo of a phone (Remove EXIF
+// data is for it), in the three languages: the rectangle and the one row of buttons. They have no placard.
+const F18_PAGES = (['remove-exif-data', 'rotate-image-flip'] as const).flatMap((id) => LANGS.map((lang) => routeById(id).paths[lang] ?? `(${id} sem página em ${lang})`));
 
 async function result(page: Page, path: string, width: number): Promise<void> {
   await page.setViewportSize({ width, height: 740 });
@@ -34,7 +38,7 @@ async function result(page: Page, path: string, width: number): Promise<void> {
 }
 
 test.describe('F13a R-c-1: at 320 px a photo of a phone keeps the rectangle', () => {
-  for (const path of PAGES) {
+  for (const path of [...PAGES, ...F18_PAGES]) {
     test(`${path}: the result is 356px tall, with the buttons in one row`, async ({ page }) => {
       await result(page, path, 320);
       const got = await page.evaluate(() => {
