@@ -75,32 +75,36 @@ const preset = (id: PdfPresetId, parent: PdfToolId, name: string, suffix: string
   return { id, parent, path: `/${parent}/${name}/`, icon: base.icon, files: base.files, run: base.run, next, related, suffix };
 };
 
+// F18 (decision 11; DECISOES § 734): each sister of a new page gives it the place, in its related grid, of the last card
+// the chips above already show (the chip still leads there); Merge PDF leads to Organize PDF and Unlock PDF to Extract
+// pages with a fourth chip, which takes the PDF along and waits for the action (§ 654).
 const PDF_TOOL_DEFS: Record<PdfToolId, PdfPageDef> = {
-  'merge-pdf': def('merge-pdf', 'merge', 'merge', 'action', 'merged', ['add-page-numbers-to-pdf', 'compress-pdf', 'image-to-pdf'], ['split-pdf', 'compress-pdf', 'reorder-pdf-pages', 'delete-pdf-pages', 'add-page-numbers-to-pdf', 'image-to-pdf']),
-  'split-pdf': def('split-pdf', 'split', 'single', 'action', 'split', ['compress-pdf', 'merge-pdf'], ['merge-pdf', 'delete-pdf-pages', 'reorder-pdf-pages', 'pdf-to-jpg', 'compress-pdf', 'rotate-pdf']),
-  'pdf-to-jpg': def('pdf-to-jpg', 'image', 'batch', 'auto', 'page', ['compress-image', 'image-to-pdf'], ['image-to-pdf', 'compress-pdf', 'split-pdf', 'merge-pdf', 'compress-image', 'rotate-pdf']),
+  'merge-pdf': def('merge-pdf', 'merge', 'merge', 'action', 'merged', ['add-page-numbers-to-pdf', 'compress-pdf', 'image-to-pdf', 'organize-pdf'], ['split-pdf', 'compress-pdf', 'reorder-pdf-pages', 'delete-pdf-pages', 'add-page-numbers-to-pdf', 'organize-pdf']),
+  'split-pdf': def('split-pdf', 'split', 'single', 'action', 'split', ['compress-pdf', 'merge-pdf'], ['merge-pdf', 'delete-pdf-pages', 'reorder-pdf-pages', 'pdf-to-jpg', 'split-pdf-extract-pages', 'rotate-pdf']),
+  'pdf-to-jpg': def('pdf-to-jpg', 'image', 'batch', 'auto', 'page', ['compress-image', 'image-to-pdf'], ['image-to-pdf', 'compress-pdf', 'split-pdf', 'merge-pdf', 'pdf-to-jpg-to-png', 'rotate-pdf']),
   'compress-pdf': def('compress-pdf', 'compress', 'batch', 'auto', 'compressed', ['protect-pdf', 'merge-pdf'], ['merge-pdf', 'split-pdf', 'pdf-to-jpg', 'protect-pdf', 'compress-image', 'image-to-pdf']),
-  'rotate-pdf': def('rotate-pdf', 'rotate', 'batch', 'auto', 'rotated', ['compress-pdf', 'merge-pdf'], ['reorder-pdf-pages', 'delete-pdf-pages', 'merge-pdf', 'split-pdf', 'add-page-numbers-to-pdf', 'compress-pdf']),
-  'delete-pdf-pages': def('delete-pdf-pages', 'trash', 'single', 'action', 'edited', ['reorder-pdf-pages', 'compress-pdf'], ['split-pdf', 'reorder-pdf-pages', 'merge-pdf', 'rotate-pdf', 'add-page-numbers-to-pdf', 'compress-pdf']),
+  'rotate-pdf': def('rotate-pdf', 'rotate', 'batch', 'auto', 'rotated', ['compress-pdf', 'merge-pdf'], ['reorder-pdf-pages', 'delete-pdf-pages', 'merge-pdf', 'split-pdf', 'add-page-numbers-to-pdf', 'organize-pdf']),
+  'delete-pdf-pages': def('delete-pdf-pages', 'trash', 'single', 'action', 'edited', ['reorder-pdf-pages', 'compress-pdf'], ['split-pdf', 'organize-pdf', 'merge-pdf', 'rotate-pdf', 'add-page-numbers-to-pdf', 'split-pdf-extract-pages']),
   'add-page-numbers-to-pdf': def('add-page-numbers-to-pdf', 'page-number', 'batch', 'auto', 'numbered', ['compress-pdf', 'protect-pdf'], ['merge-pdf', 'watermark-pdf', 'reorder-pdf-pages', 'delete-pdf-pages', 'sign-pdf', 'compress-pdf']),
   'sign-pdf': def('sign-pdf', 'sign', 'single', 'action', 'signed', ['protect-pdf', 'compress-pdf'], ['watermark-pdf', 'protect-pdf', 'add-page-numbers-to-pdf', 'merge-pdf', 'compress-pdf', 'image-to-pdf']),
   'protect-pdf': def('protect-pdf', 'lock', 'batch', 'action', 'protected', ['compress-pdf', 'merge-pdf'], ['unlock-pdf', 'sign-pdf', 'watermark-pdf', 'compress-pdf', 'merge-pdf', 'split-pdf']),
-  'unlock-pdf': def('unlock-pdf', 'unlock', 'single', 'auto', 'unlocked', ['compress-pdf', 'merge-pdf', 'split-pdf'], ['protect-pdf', 'compress-pdf', 'merge-pdf', 'split-pdf', 'pdf-to-jpg', 'rotate-pdf']),
-  // F18 (decision 6): one file, the action button, "-organized". The icon is a temporary one that no card uses, and the
-  // chips and the related grid are a first list: front S draws the icon (decision 12) and finalizes the lists (decision 11).
-  'organize-pdf': def('organize-pdf', 'menu', 'single', 'action', 'organized', ['compress-pdf', 'add-page-numbers-to-pdf'], ['reorder-pdf-pages', 'delete-pdf-pages', 'rotate-pdf', 'merge-pdf', 'split-pdf', 'compress-pdf']),
-  'reorder-pdf-pages': def('reorder-pdf-pages', 'reorder', 'single', 'action', 'reordered', ['add-page-numbers-to-pdf', 'compress-pdf'], ['delete-pdf-pages', 'rotate-pdf', 'merge-pdf', 'split-pdf', 'add-page-numbers-to-pdf', 'compress-pdf']),
+  'unlock-pdf': def('unlock-pdf', 'unlock', 'single', 'auto', 'unlocked', ['compress-pdf', 'merge-pdf', 'split-pdf', 'split-pdf-extract-pages'], ['protect-pdf', 'compress-pdf', 'merge-pdf', 'split-pdf', 'pdf-to-jpg', 'rotate-pdf']),
+  // F18 (decision 6): one file, the action button, "-organized". Its icon was drawn for it (decision 12; DECISOES § 735);
+  // the chips are the ones of Reorder pages, and the grid the three tools that each do one of its jobs (Reorder, Delete
+  // and Rotate) and Merge, Split and Extract pages (decision 11; § 734).
+  'organize-pdf': def('organize-pdf', 'page-grid', 'single', 'action', 'organized', ['add-page-numbers-to-pdf', 'compress-pdf'], ['reorder-pdf-pages', 'delete-pdf-pages', 'rotate-pdf', 'merge-pdf', 'split-pdf', 'split-pdf-extract-pages']),
+  'reorder-pdf-pages': def('reorder-pdf-pages', 'reorder', 'single', 'action', 'reordered', ['add-page-numbers-to-pdf', 'compress-pdf'], ['delete-pdf-pages', 'rotate-pdf', 'merge-pdf', 'split-pdf', 'add-page-numbers-to-pdf', 'organize-pdf']),
   'watermark-pdf': def('watermark-pdf', 'watermark', 'batch', 'action', 'watermarked', ['protect-pdf', 'compress-pdf'], ['sign-pdf', 'add-page-numbers-to-pdf', 'protect-pdf', 'compress-pdf', 'merge-pdf', 'rotate-pdf']),
 };
 
 /** Every PDF page, the tools in hub order and then the presets (the order of PDF_EVENT_TOOLS and of the search). */
 export const PDF_PAGES: Record<PdfPageId, PdfPageDef> = {
   ...PDF_TOOL_DEFS,
-  // F18 (decisions 5 and 7): Split PDF in the Pick mode only, one PDF named "-extracted". F18 placeholder: front S
-  // finalizes the chips and the related grid (decision 11).
+  // F18 (decisions 5 and 7): Split PDF in the Pick mode only, one PDF named "-extracted". The chips of the parent, and
+  // the grid with the parent first, as the image presets (decision 11; DECISOES § 734).
   'split-pdf-extract-pages': preset('split-pdf-extract-pages', 'split-pdf', 'extract-pages', 'extracted', ['compress-pdf', 'merge-pdf'], ['split-pdf', 'delete-pdf-pages', 'organize-pdf', 'merge-pdf', 'pdf-to-jpg', 'compress-pdf']),
-  // F18 (decisions 5 and 8): PDF to JPG with PNG fixed; the output is the parent's, one PNG per page. F18 placeholder:
-  // front S finalizes the chips and the related grid (decision 11).
+  // F18 (decisions 5 and 8): PDF to JPG with PNG fixed; the output is the parent's, one PNG per page. The chips of the
+  // parent (the two image pages that take a PNG), and the grid with the parent first (decision 11; DECISOES § 734).
   'pdf-to-jpg-to-png': preset('pdf-to-jpg-to-png', 'pdf-to-jpg', 'to-png', 'page', ['compress-image', 'image-to-pdf'], ['pdf-to-jpg', 'image-to-pdf', 'compress-image', 'split-pdf', 'compress-pdf', 'merge-pdf']),
 };
 

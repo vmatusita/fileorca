@@ -16,7 +16,7 @@ import { chipsFor as imageChips, originsOf, panelData as imagePanelData } from '
 import { IMAGE_PAGES, type ImagePageId, type ImageToolId } from '../../src/tools/image/registry.ts';
 import { IMAGE_PANEL_TEXTS } from '../../src/tools/image/texts.ts';
 import { chipsFor as pdfChips, panelData as pdfPanelData } from '../../src/tools/pdf/page.ts';
-import { PDF_PAGES, PDF_TOOL_IDS, type PdfToolId } from '../../src/tools/pdf/registry.ts';
+import { PDF_PAGES, PDF_TOOL_IDS, type PdfPageId, type PdfToolId } from '../../src/tools/pdf/registry.ts';
 import { PDF_PANEL_TEXTS } from '../../src/tools/pdf/texts.ts';
 import { LANGS, languagesOf, pathFor, routeById } from '../../src/i18n/routes.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
@@ -83,7 +83,9 @@ describe('the click that takes the files along', () => {
  * target, and what it does: takes the PDF along ('pdf'), to a tool that takes one file at a time ('pdf one'), takes the
  * images along ('images'), or only links. The tools that wait for an action take the PDF too now (the § 497 said "only
  * link"); Protect PDF never takes its PDF anywhere (it needs a password); a PDF is no image. Every chip of these pages is
- * here, so a pair more or a pair less fails the test.
+ * here, so a pair more or a pair less fails the test. F18 (decision 11; DECISOES § 734): the chips of the PDF presets too (each
+ * PDF page is a source), Merge PDF to Organize PDF and Unlock PDF to Extract pages, which wait for their action, and the
+ * chips of the three pages of the run (Organize PDF, Extract pages and PDF to PNG).
  */
 const PAIRS: Record<string, 'pdf' | 'pdf one' | 'images' | 'link'> = {
   'merge-pdf>add-page-numbers-to-pdf': 'pdf',
@@ -108,6 +110,14 @@ const PAIRS: Record<string, 'pdf' | 'pdf one' | 'images' | 'link'> = {
   'unlock-pdf>compress-pdf': 'pdf',
   'unlock-pdf>merge-pdf': 'pdf',
   'unlock-pdf>split-pdf': 'pdf one',
+  'merge-pdf>organize-pdf': 'pdf one',
+  'unlock-pdf>split-pdf-extract-pages': 'pdf one',
+  'organize-pdf>add-page-numbers-to-pdf': 'pdf',
+  'organize-pdf>compress-pdf': 'pdf',
+  'split-pdf-extract-pages>compress-pdf': 'pdf',
+  'split-pdf-extract-pages>merge-pdf': 'pdf',
+  'pdf-to-jpg-to-png>compress-image': 'images',
+  'pdf-to-jpg-to-png>image-to-pdf': 'images',
   'reorder-pdf-pages>add-page-numbers-to-pdf': 'pdf',
   'reorder-pdf-pages>compress-pdf': 'pdf',
   'watermark-pdf>protect-pdf': 'pdf',
@@ -117,11 +127,16 @@ const PAIRS: Record<string, 'pdf' | 'pdf one' | 'images' | 'link'> = {
   'image-to-pdf>add-page-numbers-to-pdf': 'pdf',
 };
 
-/** The pairs that take a file to a tool that waits for its action (D11 and decision 6 of the F15): none more, none fewer. */
+/**
+ * The pairs that take a file to a tool that waits for its action (D11 and decision 6 of the F15): none more, none fewer.
+ * F18 (decision 11; DECISOES § 734): Organize PDF (from Merge PDF) and Extract pages (from Unlock PDF) wait for theirs, and
+ * Extract pages takes its PDF to Merge PDF, as Split PDF does.
+ */
 const TO_AN_ACTION = [
   'split-pdf>merge-pdf', 'compress-pdf>merge-pdf', 'rotate-pdf>merge-pdf', 'unlock-pdf>merge-pdf', 'image-to-pdf>merge-pdf',
   'unlock-pdf>split-pdf', 'delete-pdf-pages>reorder-pdf-pages',
   'compress-pdf>protect-pdf', 'add-page-numbers-to-pdf>protect-pdf', 'sign-pdf>protect-pdf', 'watermark-pdf>protect-pdf',
+  'merge-pdf>organize-pdf', 'unlock-pdf>split-pdf-extract-pages', 'split-pdf-extract-pages>merge-pdf',
 ];
 
 describe('the chips the pages build', () => {
@@ -150,7 +165,7 @@ describe('the chips the pages build', () => {
     for (const lang of LANGS) {
       const seen: Record<string, string> = {};
       const chips = [
-        ...PDF_TOOL_IDS.flatMap((id) => pdfChips(id, lang).map((chip) => ({ id: id as string, chip }))),
+        ...(Object.keys(PDF_PAGES) as PdfPageId[]).flatMap((id) => pdfChips(id, lang).map((chip) => ({ id: id as string, chip }))),
         ...imageChips('image-to-pdf', lang).map((chip) => ({ id: 'image-to-pdf', chip })),
       ];
       for (const { id, chip } of chips) {
@@ -167,7 +182,7 @@ describe('the chips the pages build', () => {
       }
       expect(seen, lang).toEqual(PAIRS);
     }
-    const toAnAction = Object.keys(PAIRS).filter((pair) => PAIRS[pair] !== 'link' && PDF_PAGES[pair.split('>')[1] as PdfToolId]?.run === 'action');
+    const toAnAction = Object.keys(PAIRS).filter((pair) => PAIRS[pair] !== 'link' && PDF_PAGES[pair.split('>')[1] as PdfPageId]?.run === 'action');
     expect(toAnAction.sort(), 'the tools with an action that take the file now').toEqual([...TO_AN_ACTION].sort());
     expect(pdfChips('protect-pdf', 'en').every((chip) => !chip.carry), 'Protect PDF makes a PDF that needs a password').toBe(true);
     expect(pdfChips('merge-pdf', 'en').find((chip) => chip.target === 'image-to-pdf')?.carry, 'a PDF is no image').toBeUndefined();
@@ -241,6 +256,11 @@ describe('where a file may come from', () => {
     expect(originsOf('compress-image', 'pt')).toMatchObject({ 'resize-image': 'Redimensionar imagem', 'pdf-to-jpg': 'PDF para JPG' });
     expect(originsOf('compress-image', 'en')).not.toHaveProperty('image-to-pdf');
     expect(originsOf('png-to-jpg', 'es')).toEqual({ 'heic-to-jpg': 'HEIC a JPG' });
+    // F18 (decision 11; DECISOES § 734): Remove EXIF data and PDF to PNG make images, so they take them to Compress image;
+    // no chip leads to Remove EXIF data (every image tool leaves the metadata out of its result), so it believes no page.
+    expect(originsOf('compress-image', 'en')).toMatchObject({ 'remove-exif-data': 'Remove EXIF data', 'pdf-to-jpg-to-png': 'PDF to PNG' });
+    expect(originsOf('remove-exif-data', 'en')).toEqual({});
+    for (const id of Object.keys(IMAGE_PAGES) as ImagePageId[]) expect(IMAGE_PAGES[id].next as readonly string[], id).not.toContain('remove-exif-data');
     expect(pdfPanelData('pdf-to-jpg', 'pt').carryLine.one).toBe(IMAGE_PANEL_TEXTS.pt.carry.line);
     expect(pdfPanelData('merge-pdf', 'es').carryLine.many).toBe(PDF_PANEL_TEXTS.es.carry.lineMany);
   });
@@ -248,23 +268,27 @@ describe('where a file may come from', () => {
   // F15 (DECISOES § 653 and § 655): the PDF tools believe the PDF tools whose chip takes the PDF to them, the tools with an
   // action too now, and Image to PDF (to Compress PDF, Merge PDF and Add page numbers), with the name of the page in the
   // language; no tool believes Protect PDF, and the image tools still do not believe Image to PDF.
+  // F18 (decision 11; DECISOES § 734): and the PDF presets, as pages a file may come to and come from: Organize PDF believes
+  // Merge PDF, Extract pages believes Unlock PDF, and Compress PDF, Merge PDF and Add page numbers believe the new pages.
   it('the PDF tools, with an action or not, believe the pages of the table, Image to PDF among them, in the three languages', () => {
-    const expected: Partial<Record<PdfToolId, string[]>> = {
-      'compress-pdf': ['add-page-numbers-to-pdf', 'delete-pdf-pages', 'image-to-pdf', 'merge-pdf', 'reorder-pdf-pages', 'rotate-pdf', 'sign-pdf', 'split-pdf', 'unlock-pdf', 'watermark-pdf'],
-      'merge-pdf': ['compress-pdf', 'image-to-pdf', 'rotate-pdf', 'split-pdf', 'unlock-pdf'],
+    const expected: Partial<Record<PdfPageId, string[]>> = {
+      'compress-pdf': ['add-page-numbers-to-pdf', 'delete-pdf-pages', 'image-to-pdf', 'merge-pdf', 'organize-pdf', 'reorder-pdf-pages', 'rotate-pdf', 'sign-pdf', 'split-pdf', 'split-pdf-extract-pages', 'unlock-pdf', 'watermark-pdf'],
+      'merge-pdf': ['compress-pdf', 'image-to-pdf', 'rotate-pdf', 'split-pdf', 'split-pdf-extract-pages', 'unlock-pdf'],
       'split-pdf': ['unlock-pdf'],
       'reorder-pdf-pages': ['delete-pdf-pages'],
       'protect-pdf': ['add-page-numbers-to-pdf', 'compress-pdf', 'sign-pdf', 'watermark-pdf'],
-      'add-page-numbers-to-pdf': ['image-to-pdf', 'merge-pdf', 'reorder-pdf-pages'],
+      'add-page-numbers-to-pdf': ['image-to-pdf', 'merge-pdf', 'organize-pdf', 'reorder-pdf-pages'],
+      'organize-pdf': ['merge-pdf'],
+      'split-pdf-extract-pages': ['unlock-pdf'],
     };
     for (const lang of LANGS) {
-      for (const id of PDF_TOOL_IDS) {
+      for (const id of Object.keys(PDF_PAGES) as PdfPageId[]) {
         const origins = pdfPanelData(id, lang).origins;
         expect(Object.keys(origins).sort(), `${id} (${lang})`).toEqual([...(expected[id] ?? [])].sort());
         expect(origins, `${id} (${lang})`).not.toHaveProperty('protect-pdf');
         for (const [source, name] of Object.entries(origins)) {
           const common = TEXTS[lang].common;
-          expect(name, `${source} in ${id} (${lang})`).toBe(source in PDF_PAGES ? common.pdf[source as PdfToolId].name : common.tools[source as ImagePageId].name);
+          expect(name, `${source} in ${id} (${lang})`).toBe(source in PDF_PAGES ? common.pdf[source as PdfPageId].name : common.tools[source as ImagePageId].name);
         }
       }
     }

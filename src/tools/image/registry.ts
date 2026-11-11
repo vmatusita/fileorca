@@ -41,8 +41,11 @@ export interface ImagePageDef {
   icon: IconName;
   /** Next-step chips: 2 to 4 tools that exist, chosen by what the person just did (a PDF tool after a PDF, F15). */
   next: readonly (ImageToolId | PdfNeighbour)[];
-  /** Related grid at the end of the page: up to 6 tools that exist. */
-  related: readonly ImageToolId[];
+  /**
+   * Related grid at the end of the page: up to 6 pages that exist in the three languages. F18 (decision 11; DECISOES
+   * § 734): a preset too (Flip image on Rotate image and Crop image), as the PDF grid takes a PDF preset.
+   */
+  related: readonly ImagePageId[];
   /** BeforeAfter only where the output loses quality (compression and lossy conversions). */
   beforeAfter: 'always' | 'lossy' | 'never';
   /** One PDF with the whole batch instead of one file per image. */
@@ -63,7 +66,8 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
     icon: 'compress',
     // F17 (decision 5; DECISOES § 707): the lists of the F2 again, with Convert to WebP (3812f49 took it out).
     next: ['resize-image', 'image-to-pdf', 'convert-to-webp'],
-    related: ['resize-image', 'crop-image', 'convert-to-webp', 'heic-to-jpg', 'png-to-jpg', 'image-to-pdf'],
+    // F18 (decision 11; DECISOES § 734): Remove EXIF data takes the place of Image to PDF, which the chips above show.
+    related: ['resize-image', 'crop-image', 'convert-to-webp', 'heic-to-jpg', 'png-to-jpg', 'remove-exif-data'],
     beforeAfter: 'always',
   },
   'resize-image': {
@@ -71,7 +75,8 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
     accepts: PHOTO,
     icon: 'resize',
     next: ['compress-image', 'crop-image', 'image-to-pdf'],
-    related: ['compress-image', 'crop-image', 'rotate-image', 'convert-to-webp', 'heic-to-jpg', 'image-to-pdf'],
+    // F18 (decision 11; DECISOES § 734): Remove EXIF data takes the place of Image to PDF, which the chips above show.
+    related: ['compress-image', 'crop-image', 'rotate-image', 'convert-to-webp', 'heic-to-jpg', 'remove-exif-data'],
     beforeAfter: 'never',
   },
   'crop-image': {
@@ -79,7 +84,8 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
     accepts: PHOTO,
     icon: 'crop',
     next: ['resize-image', 'compress-image', 'rotate-image'],
-    related: ['resize-image', 'rotate-image', 'compress-image', 'image-to-pdf', 'heic-to-jpg', 'png-to-jpg'],
+    // F18 (decision 11; DECISOES § 734): Flip image takes the place of Compress image, which the chips above show.
+    related: ['resize-image', 'rotate-image', 'rotate-image-flip', 'image-to-pdf', 'heic-to-jpg', 'png-to-jpg'],
     beforeAfter: 'never',
   },
   'rotate-image': {
@@ -87,7 +93,8 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
     accepts: PHOTO,
     icon: 'rotate',
     next: ['crop-image', 'compress-image', 'image-to-pdf'],
-    related: ['crop-image', 'resize-image', 'compress-image', 'image-to-pdf', 'heic-to-jpg', 'png-to-jpg'],
+    // F18 (decision 11; DECISOES § 734): Flip image takes the place of Image to PDF, which the chips above show.
+    related: ['crop-image', 'resize-image', 'compress-image', 'rotate-image-flip', 'heic-to-jpg', 'png-to-jpg'],
     beforeAfter: 'never',
   },
   'heic-to-jpg': {
@@ -95,7 +102,8 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
     accepts: ['heic'],
     icon: 'phone-photo',
     next: ['compress-image', 'resize-image', 'image-to-pdf'],
-    related: ['compress-image', 'resize-image', 'image-to-pdf', 'webp-to-jpg', 'avif-to-jpg', 'png-to-jpg'],
+    // F18 (decision 11; DECISOES § 734): Remove EXIF data takes the place of Image to PDF, which the chips above show.
+    related: ['compress-image', 'resize-image', 'remove-exif-data', 'webp-to-jpg', 'avif-to-jpg', 'png-to-jpg'],
     beforeAfter: 'lossy',
     elsewhere: { format: 'png', tool: 'png-to-jpg' },
   },
@@ -148,9 +156,10 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
     // F18 (decision 10): the formats strip.ts cleans without decoding; HEIC and AVIF are refused with the link to their
     // converter (CONVERTER_FOR), which leaves the metadata out too.
     accepts: PHOTO,
-    // F18 placeholder: a temporary icon that no card uses; front S draws or picks the final one (decision 12).
-    icon: 'shield',
-    // F18 placeholder: front S finalizes the chips and the related grid (decision 11).
+    // F18 (decision 12; DECISOES § 735): drawn for it, the location pin with a cross; no hub nor home repeats a drawing.
+    icon: 'pin-x',
+    // F18 (decision 11; DECISOES § 734): the tools that open the photo it gives back (JPG, PNG or WebP, as it came), and
+    // the grid of its sisters. No chip leads here: every image tool already leaves the metadata out of its result.
     next: ['compress-image', 'resize-image', 'image-to-pdf'],
     related: ['compress-image', 'resize-image', 'heic-to-jpg', 'crop-image', 'rotate-image', 'image-to-pdf'],
     beforeAfter: 'never',
@@ -187,7 +196,7 @@ export const IMAGE_PAGES: Record<ImagePageId, ImagePageDef> = {
     parent: 'rotate-image',
     accepts: PHOTO,
     icon: 'rotate',
-    // F18 placeholder: front S finalizes the chips and the related grid (decision 11).
+    // F18 (decision 11; DECISOES § 734): the chips of the parent; the grid with the parent first, as the other presets.
     next: ['crop-image', 'compress-image', 'image-to-pdf'],
     related: ['rotate-image', 'crop-image', 'resize-image', 'compress-image', 'image-to-pdf', 'heic-to-jpg'],
     // F18 (decision 9): as the parent.

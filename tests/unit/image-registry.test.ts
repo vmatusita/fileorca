@@ -2,7 +2,8 @@
 // result (next), the related grid (related) and the converter a refused format is sent to (CONVERTER_FOR). F17
 // (decision 14; DECISOES § 707 and § 716): with AVIF to JPG and Convert to WebP back, each list leads only to a tool that
 // exists in the three languages, the two tools are back in the lists the F2 had them in (3812f49 took them out), and
-// CONVERTER_FOR sends each refused format to a tool that takes it.
+// CONVERTER_FOR sends each refused format to a tool that takes it. F18 (decision 11; DECISOES § 734 and § 743): the related
+// grid takes an image preset too (Flip image on Rotate image and Crop image), still only a page of the three languages.
 import { describe, expect, it } from 'vitest';
 import type { ImageFormat } from '../../src/engine/image/types.ts';
 import { LANGS, languagesOf, routeById } from '../../src/i18n/routes.ts';
@@ -20,6 +21,7 @@ const inEveryLanguage = (id: Parameters<typeof routeById>[0]): boolean => {
   return LANGS.every((lang) => langs.includes(lang));
 };
 const isImageTool = (id: string): id is ImageToolId => (IMAGE_TOOL_IDS as readonly string[]).includes(id);
+const isImagePage = (id: string): id is ImagePageId => Object.hasOwn(IMAGE_PAGES, id);
 
 /** What is wrong with the next and related lists of one page (empty when nothing is). */
 function listProblems(def: ImagePageDef): string[] {
@@ -35,7 +37,7 @@ function listProblems(def: ImagePageDef): string[] {
   if (new Set(def.related).size !== def.related.length) problems.push(`${def.id}: a related card twice`);
   for (const target of def.related) {
     if (target === def.id) problems.push(`${def.id}: related to itself`);
-    if (!isImageTool(target)) problems.push(`${def.id}: related ${target}, which is no image tool`);
+    if (!isImagePage(target)) problems.push(`${def.id}: related ${target}, which is no image page`);
     else if (!inEveryLanguage(target)) problems.push(`${def.id}: related ${target}, missing in a language`);
   }
   return problems;
@@ -54,7 +56,11 @@ describe('the lists of the image registry (F17)', () => {
     const base = IMAGE_PAGES['avif-to-jpg'];
     expect(listProblems({ ...base, next: ['compress-image'] })).toEqual(['avif-to-jpg: 1 chips (2 to 4)']);
     expect(listProblems({ ...base, related: [...base.related.slice(0, 5), 'avif-to-jpg'] })).toEqual(['avif-to-jpg: related to itself']);
-    expect(listProblems({ ...base, related: ['compress-image-to-1mb' as ImageToolId] })).toEqual(['avif-to-jpg: related compress-image-to-1mb, which is no image tool']);
+    expect(listProblems({ ...base, related: ['no-such-page' as ImageToolId] })).toEqual(['avif-to-jpg: related no-such-page, which is no image page']);
+    expect(listProblems({ ...base, related: ['merge-pdf' as ImageToolId] })).toEqual(['avif-to-jpg: related merge-pdf, which is no image page']);
+    // F18: a preset is a page of the grid now, as a tool is (Flip image on Rotate image).
+    expect(listProblems({ ...base, related: [...base.related.slice(0, 5), 'compress-image-to-1mb'] })).toEqual([]);
+    expect(listProblems({ ...base, related: [...base.related, 'compress-image-to-1mb'] })).toEqual(['avif-to-jpg: 7 related (1 to 6)']);
     expect(listProblems({ ...base, next: ['compress-image', 'no-such-tool' as ImageToolId] })).toEqual(['avif-to-jpg: chip to no-such-tool, which is no tool']);
   });
 

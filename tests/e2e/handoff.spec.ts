@@ -302,6 +302,52 @@ test('Convert to WebP: with AVIF out no chip takes the file, they only open thei
   expect(await inboxState(page), 'the inbox and the note are gone').toEqual({ inbox: false, choice: null });
 });
 
+// F18 (decision 11; DECISOES § 734): the pages of the run as sources. Remove EXIF data gives back the photo it took (a JPG
+// here), so each of its chips takes it along, and Compress image shows the result at once with the note; PDF to PNG makes
+// images, as its parent does (its MAKES), so its chip takes the PNGs of the pages to Compress image, never the PDF.
+test('Remove EXIF data, then "Compress this image": the photo arrives in Compress image with the note', async ({ page }) => {
+  if (await workerOff(page, server)) return;
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await visit(page, server, '/', { island: false });
+  await controlled(page);
+  await visit(page, server, '/remove-exif-data/');
+  await page.setInputFiles('#fo-tool-root input[type="file"]', { name: 'photo.jpg', mimeType: 'image/jpeg', buffer: SMALL_PHOTO });
+  await expect(page.locator('.fo-result .fo-btn--download')).toBeFocused({ timeout: 60_000 });
+  const chips = page.locator('nav.fo-next a.fo-chip');
+  await expect(chips).toHaveText([en.carry.chips['compress-image'].one, en.carry.chips['resize-image'].one, en.carry.chips['image-to-pdf'].one]);
+  for (const chip of await chips.all()) await expect(chip).toHaveAttribute('data-carry', '');
+  await expect(page.locator('.fo-band__now .fo-carry')).toHaveText(en.carry.line);
+  await page.locator('nav.fo-next a.fo-chip[href="/compress-image/"]').click();
+  await page.waitForURL('**/compress-image/');
+  await hydrated(page);
+  await expect(page.locator('.fo-result .fo-btn--download')).toBeFocused({ timeout: 60_000 });
+  await expect(page.locator('.fo-result__from')).toHaveText(fmt(en.carry.from, { tool: 'Remove EXIF data' }));
+  await expect(page.locator('.fo-btn--download')).toHaveAttribute('download', 'photo.jpg');
+  expect(await inboxState(page), 'the inbox and the note are gone').toEqual({ inbox: false, choice: null });
+});
+
+test('PDF to PNG, then "Compress these 2 images": the PNGs of the pages arrive in Compress image with the note', async ({ page }) => {
+  if (await workerOff(page, server)) return;
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await visit(page, server, '/', { island: false });
+  await controlled(page);
+  await visit(page, server, '/pdf-to-jpg/to-png/');
+  await page.setInputFiles('#fo-tool-root input[type="file"]', pdfFile('gen-acoes.pdf', 'report.pdf'));
+  await expect(page.locator('.fo-result .fo-btn--download')).toBeFocused({ timeout: 60_000 });
+  const compress = page.locator('nav.fo-next a.fo-chip[href="/compress-image/"]');
+  await expect(compress, 'two PNGs are for Compress image: the chip takes them').toHaveAttribute('data-carry', '');
+  await expect(compress).toHaveText(fmt(en.carry.chips['compress-image'].many, { count: 2 }));
+  await expect(page.locator('nav.fo-next a.fo-chip[href="/image-to-pdf/"]')).toHaveAttribute('data-carry', '');
+  // The line under the chips is the one of the images, as on PDF to JPG (its carryLine), not the one of a PDF.
+  await expect(page.locator('.fo-band .fo-carry:not(.fo-next--kept)')).toHaveText(en.carry.lineMany);
+  await compress.click();
+  await page.waitForURL('**/compress-image/');
+  await hydrated(page);
+  await expect(page.locator('.fo-result .fo-btn--download')).toBeFocused({ timeout: 60_000 });
+  await expect(page.locator('.fo-result__from')).toHaveText(fmt(en.carry.fromMany, { tool: 'PDF to PNG', count: 2 }));
+  expect(await inboxState(page), 'the inbox and the note are gone').toEqual({ inbox: false, choice: null });
+});
+
 test('Merge PDF, then "Compress this PDF": the merged PDF arrives in Compress PDF with the note', async ({ page }) => {
   if (await workerOff(page, server)) return;
   await page.setViewportSize({ width: 1280, height: 800 });

@@ -8,7 +8,7 @@ import enPdfTools from '../../src/i18n/en/pdf-tools.ts';
 import ptPdfTools from '../../src/i18n/pt/pdf-tools.ts';
 import esPdfTools from '../../src/i18n/es/pdf-tools.ts';
 import { LANGS, type Lang } from '../../src/i18n/routes.ts';
-import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { PDF_PAGES, PDF_PRESET_IDS, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 
 function files(dir: string, pattern: RegExp): string[] {
   return readdirSync(dir).flatMap((entry) => {
@@ -155,7 +155,7 @@ describe('a ilha de PDF e as cores (F5a)', () => {
     expect(offending(`${block}\n.fo-btn--download { background: var(--sun); color: var(--on-sun); }`)).toEqual([]);
   });
 
-  it('uses no hex colour and no yellow in the PDF code: the island, the 12 tool folders, the engine, the hub', () => {
+  it('uses no hex colour and no yellow in the PDF code: the island, the 13 tool folders, the engine, the hub', () => {
     const tokens = new Set([...readFileSync('docs/design/tokens.css', 'utf8').matchAll(/#[0-9A-Fa-f]{3,8}\b/g)].map((match) => match[0].toUpperCase()));
     const folders = ['src/tools/pdf', 'src/engine/pdf', ...PDF_TOOL_IDS.map((id) => `src/tools/${id}`)];
     // F6: the hub texts of the three languages (the tool folders already hold their pt.ts and es.ts).
@@ -172,22 +172,33 @@ describe('a ilha de PDF e as cores (F5a)', () => {
 });
 
 describe('a voz dos textos de PDF (F5a)', () => {
-  // Read from the files, by the PDF registry: the panel texts, the 12 tool pages and the hub. F6: in the three languages
+  // Read from the files, by the PDF registry: the panel texts, the 13 tool pages and the hub. F6: in the three languages
   // (English only before), each with the marketing words of its language too (checkVoice with the language).
   const modules: Record<Lang, Record<string, unknown>> = {
     en: import.meta.glob<unknown>('/src/tools/*/i18n/en.ts', { import: 'default', eager: true }),
     pt: import.meta.glob<unknown>('/src/tools/*/i18n/pt.ts', { import: 'default', eager: true }),
     es: import.meta.glob<unknown>('/src/tools/*/i18n/es.ts', { import: 'default', eager: true }),
   };
+  // F18 (decision 5; DECISOES § 725): the texts of the PDF presets, in src/tools/<parent>/presets/<name>/i18n/.
+  const presetModules: Record<Lang, Record<string, unknown>> = {
+    en: import.meta.glob<unknown>('/src/tools/*/presets/*/i18n/en.ts', { import: 'default', eager: true }),
+    pt: import.meta.glob<unknown>('/src/tools/*/presets/*/i18n/pt.ts', { import: 'default', eager: true }),
+    es: import.meta.glob<unknown>('/src/tools/*/presets/*/i18n/es.ts', { import: 'default', eager: true }),
+  };
+  const presetSlug = (id: (typeof PDF_PRESET_IDS)[number]): string => `${PDF_PAGES[id].parent ?? ''}/presets/${PDF_PAGES[id].path.split('/')[2] ?? ''}`;
+  const presetTextsOf = (id: (typeof PDF_PRESET_IDS)[number], lang: Lang = 'en'): unknown => presetModules[lang][`/src/tools/${presetSlug(id)}/i18n/${lang}.ts`];
   const hubs: Record<Lang, unknown> = { en: enPdfTools, pt: ptPdfTools, es: esPdfTools };
   const textsOf = (slug: string, lang: Lang = 'en'): unknown => modules[lang][`/src/tools/${slug}/i18n/${lang}.ts`];
   const count = (value: unknown): number => (typeof value === 'string' ? 1 : value && typeof value === 'object' ? Object.values(value).reduce<number>((sum, item) => sum + count(item), 0) : 0);
 
-  it('reads the panel texts, the text of each of the 12 tools and the hub, in each language', () => {
-    expect(PDF_TOOL_IDS).toHaveLength(12);
+  it('reads the panel texts, the text of each of the 13 tools, of the 2 presets and the hub, in each language', () => {
+    // F18 (DECISOES § 743): Organize PDF, the 13th tool, and the two presets (12 tools before).
+    expect(PDF_TOOL_IDS).toHaveLength(13);
+    expect(PDF_PRESET_IDS).toHaveLength(2);
     for (const lang of LANGS) {
       expect(textsOf('pdf', lang), lang).toBeDefined();
       for (const id of PDF_TOOL_IDS) expect(textsOf(id, lang), `${lang} ${id}`).toBeDefined();
+      for (const id of PDF_PRESET_IDS) expect(presetTextsOf(id, lang), `${lang} ${id}`).toBeDefined();
       expect((hubs[lang] as { title?: string }).title, lang).toBeDefined();
       expect(count(textsOf('pdf', lang)) + PDF_TOOL_IDS.reduce((sum, id) => sum + count(textsOf(id, lang)), 0) + count(hubs[lang]), lang).toBeGreaterThan(500);
     }
@@ -197,6 +208,7 @@ describe('a voz dos textos de PDF (F5a)', () => {
     const problems = LANGS.flatMap((lang) => [
       ...checkVoice(textsOf('pdf', lang), `src/tools/pdf/i18n/${lang}.ts`, lang),
       ...PDF_TOOL_IDS.flatMap((id) => checkVoice(textsOf(id, lang), `src/tools/${id}/i18n/${lang}.ts`, lang)),
+      ...PDF_PRESET_IDS.flatMap((id) => checkVoice(presetTextsOf(id, lang), `src/tools/${presetSlug(id)}/i18n/${lang}.ts`, lang)),
       ...checkVoice(hubs[lang], `src/i18n/${lang}/pdf-tools.ts`, lang),
     ]);
     expect(problems).toEqual([]);

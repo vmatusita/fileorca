@@ -104,7 +104,8 @@ export default {
     'pdf-to-jpg': {
       name: 'PDF to JPG',
       description: 'Turn every page of a PDF into a JPG or PNG image.',
-      synonyms: ['pdf to jpg', 'pdf to jpeg', 'pdf to png', 'pdf to image', 'convert pdf', 'page to image', 'pdf'],
+      // F18 (decision 4; DECISOES § 724): "pdf to png" went to PDF to PNG, which has it as its name (DECISOES § 180).
+      synonyms: ['pdf to jpg', 'pdf to jpeg', 'pdf to image', 'convert pdf', 'page to image', 'pdf', 'png'],
     },
     'compress-pdf': {
       name: 'Compress PDF',
@@ -114,12 +115,16 @@ export default {
     'rotate-pdf': {
       name: 'Rotate PDF',
       description: 'Turn the pages of a PDF, all of them or one by one.',
-      synonyms: ['rotate pdf', 'turn pdf', 'flip pdf', 'rotate pages', 'landscape', 'portrait', 'pdf'],
+      // F18 (decision 4; DECISOES § 737): "rotate", a word of its name, which Organize PDF also has (the prompt asks it there):
+      // with both exact, the order of the index puts Rotate PDF first (DECISOES § 180).
+      synonyms: ['rotate pdf', 'turn pdf', 'flip pdf', 'rotate pages', 'landscape', 'portrait', 'pdf', 'rotate'],
     },
     'delete-pdf-pages': {
       name: 'Delete PDF pages',
       description: 'Take pages out of a PDF and keep the rest.',
-      synonyms: ['delete pages', 'remove pages', 'delete pdf pages', 'remove page from pdf', 'pdf'],
+      // F18 (decision 4; DECISOES § 737): "delete", a word of its name, which Organize PDF also has (the prompt asks it there):
+      // with both exact, the order of the index puts Delete PDF pages first (DECISOES § 180).
+      synonyms: ['delete pages', 'remove pages', 'delete pdf pages', 'remove page from pdf', 'pdf', 'delete'],
     },
     'add-page-numbers-to-pdf': {
       name: 'Add page numbers',
