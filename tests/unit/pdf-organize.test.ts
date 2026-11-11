@@ -52,6 +52,10 @@ function planOf(count: number): Plan {
 /** What tells one page from another: its "Page N" marker, or its images and the start of its text. */
 const keyOf = (page: ReadPage): string => page.marker ?? `${page.images} images "${page.texts.map((text) => text.str).join(' ').slice(0, 60)}"`;
 
+/** The info fields a person or an app writes (PDF.js adds its own flags beside them). */
+const details = (info: Record<string, unknown>) =>
+  Object.fromEntries(['Title', 'Author', 'Subject', 'Keywords', 'Creator', 'Producer', 'CreationDate', 'ModDate'].filter((key) => key in info).map((key) => [key, info[key]]));
+
 const NOTES: Partial<Record<string, PdfNote[]>> = {
   'gen-xref-estragada.pdf': ['repaired'],
   'pdf-formulario-irs-1040-2019.pdf': ['xfa-removed'],
@@ -92,6 +96,9 @@ describe('organize: every fixture Delete takes, with a plan that moves, turns an
         expect(page.shown.height, `${name} position ${position + 1}: height as shown`).toBeCloseTo(sideways ? width : height, 1);
       });
       expect([...result.notes].sort()).toEqual(NOTES[name] ?? []);
+      // The rule of a new document (DECISOES § 145), with the file as its only source: its Info and XMP, nothing added.
+      expect(details(read.info), 'the info fields of the file').toEqual(details(before.info));
+      expect(read.hasXmp, 'the XMP of the file').toBe(before.hasXmp);
     }, 90_000);
   }
 });
