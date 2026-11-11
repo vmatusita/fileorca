@@ -103,7 +103,7 @@ As datas de "Revisado el" e "Última actualización" são o dia em Brasília.
 
 Os formatos ficam como estão: JPG, PNG, HEIC, WebP, AVIF, GIF, PDF, ZIP. O plural de PDF não leva "s" no texto corrido ("tus PDF"); no nome do ZIP fica `pdfs`.
 
-F18 (DECISOES § 724): em espanhol o Reorder pages é "Ordenar páginas de PDF", então "Organizar PDF" fica livre para o Organize PDF. O Quitar metadatos de la foto fica depois da Imagen a PDF, na ordem do registro e do hub: nenhuma irmã faz o mesmo trabalho (as outras quitam os metadados porque gravam a imagem de novo).
+F18 (DECISOES § 724): em espanhol o Reorder pages é "Ordenar páginas de PDF", então "Organizar PDF" fica livre para o Organize PDF. O Quitar metadatos de la foto fica depois da Imagen a PDF, na ordem do registro e do hub: nenhuma irmã faz o mesmo trabalho (as outras tiram os metadados porque gravam a imagem de novo).
 
 | Opção (inglês) | Español |
 | --- | --- |
