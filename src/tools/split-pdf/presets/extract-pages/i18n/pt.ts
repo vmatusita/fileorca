@@ -2,7 +2,8 @@
 // blocks (how, specs, faq, privacy, related) with at least three of their own (gate:conteudo, MIN_OWN_BLOCKS) and the panel
 // bits of the shared PDF island, in Portuguese (docs/i18n/pt.md; the suffix "-extraido" is in the glossary, DECISOES § 724).
 // The specs rows state the real behaviour of the PDF engine (src/engine/pdf/): when it changes there, change them here and
-// in en.ts. F18: front P refines the option texts (no mode segment).
+// in en.ts. The options are ExtractTexts: no segment of Split's modes, only the help above the grid and the error of the
+// action pressed with no page picked (DECISOES § 728).
 import type { PdfToolTexts } from '../../../../../i18n/types.ts';
 import type { ExtractTexts } from '../../../../pdf/option-texts.ts';
 

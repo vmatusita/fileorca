@@ -38,7 +38,7 @@ export default {
     },
     {
       q: 'Remover os dados EXIF muda a minha foto?',
-      a: 'Não. A Oli tira só os metadados e copia os dados da imagem como estão, sem decodificar nem salvar de novo, então cada pixel continua igual e não há perda de qualidade.',
+      a: 'Não. A Oli tira só os metadados e copia os dados da imagem como estão, sem decodificar nem salvar de novo, então cada pixel continua igual e não há perda de qualidade. O perfil de cor também fica, e as cores continuam as mesmas.',
     },
     {
       q: 'Por que um JPG girado fica com um pouco de Exif?',
@@ -60,8 +60,8 @@ export default {
   panel: {
     formats: 'JPG, PNG ou WebP',
     progressLabel: 'Removendo os metadados',
-    done: 'Prontinho! Os metadados saíram da sua foto.',
-    doneMany: 'Prontinho! Os metadados saíram das suas {count} fotos.',
+    done: 'Prontinho! A localização e os outros metadados saíram da sua foto, e a imagem não mudou.',
+    doneMany: 'Prontinho! A localização e os outros metadados saíram das suas {count} fotos, e as imagens não mudaram.',
     options: {
       note: 'Cada foto mantém os pixels e perde os metadados: a localização, a data, a câmera e o resto.',
     },

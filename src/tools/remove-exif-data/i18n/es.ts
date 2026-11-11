@@ -38,7 +38,7 @@ export default {
     },
     {
       q: '¿Quitar los datos EXIF cambia mi foto?',
-      a: 'No. Oli quita solo los metadatos y copia los datos de la imagen tal como están, sin decodificarlos ni guardarlos de nuevo, así que cada píxel sigue igual y no hay pérdida de calidad.',
+      a: 'No. Oli quita solo los metadatos y copia los datos de la imagen tal como están, sin decodificarlos ni guardarlos de nuevo, así que cada píxel sigue igual y no hay pérdida de calidad. El perfil de color también se queda, así que los colores se ven iguales.',
     },
     {
       q: '¿Por qué un JPG rotado conserva un poco de Exif?',
@@ -60,8 +60,8 @@ export default {
   panel: {
     formats: 'JPG, PNG o WebP',
     progressLabel: 'Quitando los metadatos',
-    done: '¡Listo! Tu foto ya no tiene metadatos.',
-    doneMany: '¡Listo! Tus {count} fotos ya no tienen metadatos.',
+    done: '¡Listo! La ubicación y los demás metadatos salieron de tu foto, y la imagen no cambió.',
+    doneMany: '¡Listo! La ubicación y los demás metadatos salieron de tus {count} fotos, y las imágenes no cambiaron.',
     options: {
       note: 'Cada foto conserva sus píxeles y pierde sus metadatos: la ubicación, la fecha, la cámara y lo demás.',
     },
