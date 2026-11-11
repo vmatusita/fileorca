@@ -21,7 +21,7 @@ export default {
     rows: [
       ['Aceita', 'JPG, PNG e WebP, reconhecidos pelo conteúdo do arquivo e não pelo nome. Fotos HEIC passam antes pela ferramenta HEIC para JPG, e arquivos AVIF, pela ferramenta AVIF para JPG.'],
       ['Horizontal', 'O padrão. A esquerda e a direita trocam de lugar, como num espelho posto ao lado da imagem.'],
-      ['Vertical', 'O alto e o baixo trocam de lugar, como no reflexo da imagem numa água parada.'],
+      ['Vertical', 'O alto e o baixo trocam de lugar, como no reflexo da imagem na água parada.'],
       ['Sem giro', 'A imagem só é espelhada, nunca girada. Para girar também, a Girar imagem combina um giro com um espelhamento.'],
       ['Ponto de partida', 'A orientação da foto é aplicada primeiro, então o espelho inverte a imagem como você a vê, e não os pixels crus.'],
       ['Lote', 'O espelho escolhido vale para todas as imagens do lote, sem limite de imagens.'],

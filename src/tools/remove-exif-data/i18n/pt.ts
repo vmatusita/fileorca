@@ -34,7 +34,7 @@ export default {
   faq: [
     {
       q: 'O que são dados EXIF?',
-      a: 'EXIF são informações que o celular ou a câmera grava dentro do arquivo da foto: quando e, muitas vezes, onde ela foi tirada, o aparelho e os ajustes dele, e uma miniatura. Elas não aparecem na imagem, mas qualquer pessoa que recebe o arquivo consegue ler.',
+      a: 'EXIF são informações que o celular ou a câmera grava dentro do arquivo da foto: quando e, muitas vezes, onde ela foi tirada, o aparelho e os ajustes dele, e uma miniatura. Elas não aparecem na imagem, mas qualquer pessoa que recebe o arquivo consegue ler essas informações.',
     },
     {
       q: 'Remover os dados EXIF muda a minha foto?',
