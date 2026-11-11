@@ -34,6 +34,10 @@ import deleteTexts from '../../src/tools/delete-pdf-pages/i18n/en.ts';
 import mergeTexts from '../../src/tools/merge-pdf/i18n/en.ts';
 import panelTexts from '../../src/tools/pdf/i18n/en.ts';
 import { leavingCount } from '../../src/tools/pdf/grid-math.ts';
+// F18 (front P): the two PDF presets, in their block at the end of the file.
+import extractTexts from '../../src/tools/split-pdf/presets/extract-pages/i18n/en.ts';
+import pngTexts from '../../src/tools/pdf-to-jpg/presets/to-png/i18n/en.ts';
+import { countOf } from '../../src/tools/pdf/grid-math.ts';
 
 // The fixture matrix of the PDF tools (F5a, decision 12): every tool, every fixture it takes, both browsers, with the
 // refused files in the middle of the batch. Every output is downloaded and read in Node by readers that are not the
@@ -703,3 +707,134 @@ for (const fixture of BIG) {
     });
   });
 }
+
+// ---- F18: the PDF presets (front P; DECISOES § 728 and § 729) ----------------------------------------------------
+// Each preset against every fixture its parent takes (§ 175): Extract pages with pages picked by number, typed out of order,
+// checked by the order and the text of each page; PDF to PNG with its pages, the size of each image by the resolution, the
+// PNG format by the bytes, and the size it states against the JPG of PDF to JPG. Their tables are in
+// docs/relatorios/fase-18-matriz-pdf.md (scripts/fixtures/pdf-matrix-table.ts --table fase-18).
+
+/** The PDFs with a lock, which a tool that makes a PDF turns away with the link to Unlock PDF. */
+const LOCKED_REFUSAL: Record<string, RegExp> = { 'gen-cifrado-aes256.pdf': /needs a password/, 'gen-cifrado-dono.pdf': /editing restrictions/ };
+
+/**
+ * The pages Extract pages picks in a file of n pages, typed out of order and with a repeat (the second and third, the middle
+ * and the last): they come out once each, in the order of the file. One page or two: the last one.
+ */
+function extractPlan(n: number): { typed: string; picked: number[] } {
+  if (n <= 2) return { typed: String(n), picked: [n] };
+  const middle = Math.ceil(n / 2);
+  return { typed: `${n}, ${middle}, 2-3`, picked: [...new Set([2, 3, middle, n])].sort((a, b) => a - b) };
+}
+
+/** The first words PDF.js reads on a page, for the order "by the text" of decision 15. */
+const wordsOf = (p: ReadPage): string => p.texts.map((t) => t.str).join(' ').replace(/\s+/g, ' ').trim().slice(0, 60);
+
+/** Picks the pages of the plan by number and extracts them: one PDF, the picked pages in the order of the file, as they were. */
+async function extractPages(page: Page, fixture: string, timeout?: number): Promise<string> {
+  await ready(page, extractTexts, timeout);
+  // Decision 7: no segment of Split's three modes (the grid's own Small and Large stay), the grid from the start, and
+  // Split's count ("picked").
+  await expect(page.locator('#fo-tool-root input[name="fo-split-mode"]')).toHaveCount(0);
+  const n = pages(fixture);
+  const { typed, picked } = extractPlan(n);
+  await page.getByLabel('Pick pages by number').fill(typed);
+  await page.getByRole('button', { name: 'Pick these' }).click();
+  await expect(page.locator('#fo-tool-root .fo-pages__count')).toHaveText(countOf(panelTexts.grid, picked.length, n, false));
+  await actionButton(page, extractTexts).click();
+  const read = await soundPdf(await onlyOutput(page, fixture, 'extracted', timeout));
+  const before = (await original(fixture)).pages;
+  const at = <T>(of: (p: ReadPage) => T): T[] => picked.map((number) => of(before[number - 1] as ReadPage));
+  expect(read.pages.map(pageKey), `${fixture}: the order`).toEqual(at(pageKey));
+  expect(read.pages.map(wordsOf), `${fixture}: the text`).toEqual(at(wordsOf));
+  expect(read.pages.map((p) => p.rotate), `${fixture}: the turns`).toEqual(at((p) => p.rotate));
+  expect(read.pages.map((p) => p.widgets), `${fixture}: the form fields of the extracted pages`).toEqual(at((p) => p.widgets));
+  return `ok: "${typed}" typed, pages ${picked.join(', ')} out in the order of the file, text, turns and fields kept`;
+}
+
+test('Extract pages: pages typed out of order in each small fixture, one file after the other, the refused ones in the middle', async ({ page, browserName }) => {
+  await openTool(page, '/split-pdf/extract-pages/');
+  const refused: Record<string, RegExp> = { ...REFUSAL_TEXT, ...LOCKED_REFUSAL };
+  const sequence = [...SMALL.slice(0, 4), ...BROKEN_PDFS, ...Object.keys(LOCKED_REFUSAL), ...SMALL.slice(4)];
+  let after: 'nothing' | 'result' | 'refusal' = 'nothing';
+  await recordEach('extract-small', { tool: 'split-pdf-extract-pages', browser: browserName }, [], sequence, async (fixture) => {
+    // A tool of one file at a time: Start over after a result; after a refusal the next file is chosen at once.
+    if (after === 'result') await startOver(page);
+    await choosePdfs(page, [pdfFile(fixture)]);
+    const reason = refused[fixture];
+    if (reason) {
+      after = 'refusal';
+      // F13a (UX-04 A; DECISOES § 487): the reason of the error is the line under the sentence, with the link to Unlock PDF
+      // for a locked file.
+      const why = page.locator('#fo-tool-root .fo-drop__why');
+      await expect(why).toHaveText(reason, { timeout: 30_000 });
+      if (fixture in LOCKED_REFUSAL) await expect(why.getByRole('link', { name: 'Unlock PDF' })).toHaveAttribute('href', '/unlock-pdf/');
+      return `refused: ${(await why.innerText()).trim()}`;
+    }
+    after = 'result';
+    return extractPages(page, fixture);
+  });
+  const errors = (await dataLayer(page)).filter((entry) => entry[0] === 'event' && entry[1] === 'tool_error').map((entry) => (entry[2] as { reason?: string }).reason);
+  expect(errors.sort()).toEqual(['empty', 'needs-password', 'not-pdf', 'not-pdf', 'restricted', 'truncated']);
+});
+
+for (const fixture of BIG) {
+  test(`Extract pages: the second, third, middle and last page of ${fixture}`, async ({ page, browserName }) => {
+    await openTool(page, '/split-pdf/extract-pages/');
+    await oneByOne(page, `extract-${bigCase(fixture)}`, { tool: 'split-pdf-extract-pages', browser: browserName }, [fixture], () => extractPages(page, fixture, BIG_WAIT));
+  });
+}
+
+/** The fixtures whose pages are photos or a colour scan: there the PNG is several times the JPG (decision 8). */
+const PHOTO_PAGES = new Set(['gen-fotos.pdf', 'pdf-escaneado-01-pagina-livro-cor.pdf']);
+const bytesOf = (outs: { name: string; bytes: Uint8Array }[], fixture: string, extension: string): number =>
+  Array.from({ length: pages(fixture) }, (_, i) => outs.find((out) => out.name === `${base(fixture)}-page-${i + 1}.${extension}`)?.bytes.length ?? Number.NaN).reduce((sum, bytes) => sum + bytes, 0);
+
+test('PDF to PNG: the small fixtures at 150 ppi, the owner-restricted one drawn, the locked one refused, each against the JPG of PDF to JPG', async ({ page, browserName }) => {
+  // The JPG of the parent at its default, 150 ppi, of the same files: the page states the size of the PNG against it.
+  const files = [...SMALL.slice(0, 4), 'gen-cifrado-dono.pdf', ...SMALL.slice(4)];
+  await openTool(page, '/pdf-to-jpg/');
+  await choosePdfs(page, files.map((name) => pdfFile(name)));
+  const jpgs = filesOf(await takePdfDownload(page, 90_000));
+  await openTool(page, '/pdf-to-jpg/to-png/');
+  // Decision 8: no format choice; PNG at the parent's default resolution, with no option touched.
+  await expect(page.locator('#fo-tool-root input[name="fo-images-format"]')).toHaveCount(0);
+  await choosePdfs(page, [...withBroken(files), 'gen-cifrado-aes256.pdf'].map((name) => pdfFile(name)));
+  const rows = await refusals(page, 'pdf-to-jpg-to-png', browserName);
+  const locked = await rowReason(page, 'gen-cifrado-aes256.pdf');
+  expect(locked).toMatch(/needs a password/);
+  rows.push({ tool: 'pdf-to-jpg-to-png', fixture: 'gen-cifrado-aes256.pdf', browser: browserName, result: `refused: ${locked}` });
+  const download = await takePdfDownload(page, 90_000);
+  // The ZIP of images of the parent (the panel names it by the base tool, DECISOES § 725).
+  expect(download.name).toBe(`${panelTexts.files.imagesZip}.zip`);
+  const outs = filesOf(download);
+  expect(outs).toHaveLength(files.reduce((sum, name) => sum + pages(name), 0));
+  await recordEach('png-small', { tool: 'pdf-to-jpg-to-png', browser: browserName }, rows, files, async (fixture) => {
+    await checkImages(outs, fixture, 150, Array.from({ length: pages(fixture) }, (_, i) => i + 1), 'png');
+    // "On a page with photos, the PNG is several times the size of the JPG of the same page. On a page of text and lines,
+    // the two are much closer in size." (the specs and the FAQ of the page; DECISOES § 729). Several times: more than 3
+    // (4.1 to 7.3 measured on Windows); much closer: under 2 (0.4 to 1.7 on these fixtures), in both browsers and at the
+    // three resolutions.
+    const png = bytesOf(outs, fixture, 'png');
+    const jpg = bytesOf(jpgs, fixture, 'jpg');
+    const ratio = png / jpg;
+    if (PHOTO_PAGES.has(fixture)) expect(ratio, `${fixture}: PNG ${png} B, JPG ${jpg} B`).toBeGreaterThan(3);
+    else expect(ratio, `${fixture}: PNG ${png} B, JPG ${jpg} B`).toBeLessThan(2);
+    return `ok: ${pages(fixture)} PNG at 150 ppi, sizes within 1 px, no Exif; ${png} B against ${jpg} B of JPG (${ratio.toFixed(2)}×)`;
+  });
+});
+
+test('PDF to PNG: 300 ppi of a range of each big file', async ({ page, browserName }) => {
+  await openTool(page, '/pdf-to-jpg/to-png/');
+  await option(page, pngTexts.panel.options.high);
+  await option(page, pngTexts.panel.options.range);
+  await page.getByLabel(pngTexts.panel.options.rangeLabel).fill('1-2, 117');
+  await page.getByLabel(pngTexts.panel.options.rangeLabel).blur();
+  await choosePdfs(page, BIG.map((name) => pdfFile(name)));
+  const outs = filesOf(await takePdfDownload(page, BIG_WAIT));
+  expect(outs).toHaveLength(BIG.length * 3);
+  await recordEach('png-big', { tool: 'pdf-to-jpg-to-png', browser: browserName }, [], BIG, async (fixture) => {
+    await checkImages(outs, fixture, 300, [1, 2, 117], 'png');
+    return 'ok: PNG at 300 ppi of pages 1, 2 and 117, sizes within 1 px, no Exif';
+  });
+});
