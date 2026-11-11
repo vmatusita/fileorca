@@ -6,7 +6,7 @@ Uma página do PDF em tamanho grande, dentro da própria ferramenta, para a pess
 
 ## Onde abre
 
-- **Pela lupa de uma página da grade** (as cinco ferramentas da grade: Excluir, Dividir no modo Escolher, Girar página por página, Assinar no modo Escolher e Reorganizar): no lugar da grade, que some até a pessoa voltar. No Girar depois do resultado, dentro do "Ajustar" aberto.
+- **Pela lupa de uma página da grade** (as cinco ferramentas da grade: Excluir, Dividir no modo Escolher, Girar página por página, Assinar no modo Escolher e Reorganizar; e, desde a F18, o Organizar PDF): no lugar da grade, que some até a pessoa voltar. No Girar depois do resultado, dentro do "Ajustar" aberto. A grade tem o README dela em [`PageGrid`](../PageGrid/README.md).
 - **Pelo "Ver o PDF novo"** do resultado (um PDF só e sem senha) e **pelo "Ver páginas de {name}"** de uma linha do Juntar: como o primeiro item da faixa de baixo do painel.
 - **Nunca** é diálogo, popover, camada por cima da página, tela cheia nem `position: fixed` ou `sticky`: a vista empurra o resto da página para baixo, por um gesto da pessoa, e nada do site cobre a âncora do AdSense. Nada muda na URL nem no histórico.
 
@@ -25,9 +25,12 @@ Uma página do PDF em tamanho grande, dentro da própria ferramenta, para a pess
 | Assinar (Escolher) | "Assinar esta página" | `aria-pressed` |
 | Girar (página por página) | "Girar 90°" | um giro por toque, sem `aria-pressed` |
 | Reorganizar | nenhuma (mover continua na grade) | o título diz a posição |
+| Organizar PDF (F18) | duas: "Girar 90°" e "Tirar esta página" | "Girar 90°" sem `aria-pressed`, um giro por toque; "Tirar esta página" com `aria-pressed` (apertado: a página sai); o título diz a posição |
 | Resultado, Juntar | nenhuma: só ver | — |
 
-A ação usa o mesmo caminho da célula da grade: a grade, a contagem e a operação mudam juntas, e a página marcada na vista vira a âncora do Shift+clique. Apertada, a ação tem o fundo `brand-soft` e o traço `brand`.
+A ação usa o mesmo caminho da célula da grade: a grade, a contagem e a operação mudam juntas, e a página marcada na vista vira a âncora do Shift+clique. Apertada, a ação tem o fundo `brand-soft` e o traço `brand`. No Organizar, as duas ações vão pelo caminho da barra de ações da grade, para a página da vista: o giro diz "A página {n} agora está girada {graus}°." e o tirar diz o que sai, "{count} de {total} saem · o PDF novo fica com {left} páginas", uma fala por toque; Anterior e Próxima seguem a ordem atual da grade.
+
+**A barra de baixo com duas ações (Organizar):** de 768 px para cima, Anterior, "Girar 90°", "Tirar esta página" e Próxima numa linha só (as duas ações no meio); de 480 a 767 px as quatro não cabem numa linha (583 px em inglês, 620 px em espanhol, com a coluna de 448 px a 480 px), e as duas ações vão lado a lado na primeira linha, com Anterior e Próxima embaixo, lado a lado; abaixo de 480 px, cada ação ocupa uma linha inteira e Anterior e Próxima vão embaixo, lado a lado. Todo botão com 48 px ou mais e nada passa da coluna, de 320 a 1280 px (`tests/e2e/island-pdf-organize.spec.ts`).
 
 ## Estados
 
@@ -45,7 +48,7 @@ A ação usa o mesmo caminho da célula da grade: a grade, a contagem e a opera�
 
 Pela região de status do painel (`p.fo-sr[role="status"]`), uma por gesto; a vista não tem região própria:
 
-- trocar de página: "Página {n} de {total}", com o estado quando houver (", sai", ", marcada", ", girada {graus}°");
+- trocar de página: "Página {n} de {total}", com o estado quando houver (", sai", ", marcada", ", girada {graus}°"); no Organizar, "Página {n} · posição {p} de {total}" e os três estados na ordem do nome da célula (", girada {graus}°", ", marcada", ", sai");
 - marcar na vista: a contagem, a mesma frase de Marcar todas (no Excluir, "{count} de {total} saem · o PDF novo fica com {left} páginas");
 - girar na vista: "A página {n} agora está girada {graus}°.", sem o "Prontinho!" da execução que o giro dispara.
 

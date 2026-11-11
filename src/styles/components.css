@@ -1889,7 +1889,8 @@ html:has(.fo-wall[open]) [data-oli]:not(.fo-wall__oli) { visibility: hidden; }
    wrapping its words. The view has two actions on the line of Previous and Next from 768 px; under 768 px the four do
    not fit on one line (583 px in en, 620 in es), so the two actions go side by side above Previous and Next; under 480 px
    each action takes a whole row and Previous and Next go under them, side by side. */
-.fo-page__badge--out { background: var(--brand); border-color: var(--brand-edge); color: var(--on-brand); }
+/* The ring is ink, not brand-edge: in the dark theme brand-edge is the brand itself, 1.76:1 on a white page at 40 %. */
+.fo-page__badge--out { background: var(--brand); border-color: var(--ink); color: var(--on-brand); }
 .fo-pages__acts .fo-field__help { flex-basis: 100%; margin: 0; }
 .fo-pages__act--left .fo-icon { scale: -1 1; }
 .fo-pview__bar--acts { grid-template-columns: 1fr auto auto 1fr; }
