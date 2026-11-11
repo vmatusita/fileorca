@@ -37,11 +37,11 @@ const texts: PdfToolTexts<ExtractTexts> = {
   faq: [
     {
       q: 'What is the difference between extracting pages and splitting a PDF?',
-      a: 'Extract pages gives one PDF with the pages you pick. Split PDF can also put every page in a file of its own, or cut the PDF into several files by ranges like 1-3, 4-6. To pull a few pages out into one file, Extract pages has fewer steps.',
+      a: 'Extract pages from PDF gives one PDF with the pages you pick. Split PDF can also put every page in a file of its own, or cut the PDF into several files by ranges like 1-3, 4-6. To pull a few pages out into one file, Extract pages from PDF has fewer steps.',
     },
     {
       q: 'Should I use Delete PDF pages instead?',
-      a: 'Use Delete PDF pages when it is quicker to pick the pages that go than the pages that stay: it gives your PDF without the pages you pick. Extract pages works the other way round and gives only the pages you pick.',
+      a: 'Use Delete PDF pages when it is quicker to pick the pages that go than the pages that stay: it gives your PDF without the pages you pick. Extract pages from PDF works the other way round and gives only the pages you pick.',
     },
     {
       q: 'Can I put the extracted pages in another order?',
