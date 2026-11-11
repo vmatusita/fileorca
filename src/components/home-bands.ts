@@ -3,8 +3,8 @@
 // description and its icon), read from the registries at build time. A page with no path in the language gets no card.
 // The lists are the F13b bands' (the module keeps the word "band" for a category section). Node only (the home has no
 // island): HomeView.astro renders the sections, gate:prontidao (scripts/lib/prontidao.ts) and the tests read the same lists.
-//   - image: the 10 image tools (Image to PDF in the colour of PDF, as on the image hub);
-//   - PDF: the 12 PDF tools;
+//   - image: the 11 image tools (Image to PDF in the colour of PDF, as on the image hub);
+//   - PDF: the 13 PDF tools (the PDF presets never);
 //   - money: in English and Spanish the 6 most used credit calculators (the 5 of HOME_MONEY_IDS and Credit card payoff,
 //     as the specification asks; § 570), in Portuguese the 8 made for Brazil;
 //   - home and health (English only): the 6 home and the 5 health calculators;

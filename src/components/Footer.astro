@@ -95,9 +95,9 @@ const life = (hubId: LifeHub, name: string | undefined, title: string | undefine
 const lifeColumns = [life('house', t.homeCalculators, t.footer.homeColumn), life('health', t.healthCalculators, t.footer.healthColumn)].filter((column) => column !== null);
 /**
  * F13b (UX-17 A; DECISOES § 587): the category columns. Each keeps its hub (the first link) in sight and puts its tools in
- * a disclosure below 768 px. Its summary says "All 10" when the list holds every tool of the category in the language (the
+ * a disclosure below 768 px. Its summary says "All 11" when the list holds every tool of the category in the language (the
  * count of the Menu, src/components/tool-count.ts) and "6 popular" when it holds some, and the screen reader hears the
- * rest ("All 10 image tools"). From 768 px the summary goes away and the list shows as before (::details-content).
+ * rest ("All 11 image tools"). From 768 px the summary goes away and the list shows as before (::details-content).
  */
 const counts = toolCounts(lang);
 const category = (title: string | undefined, links: readonly { label: string; href: string }[], total: number, noun: string | undefined) => {

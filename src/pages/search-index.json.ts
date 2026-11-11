@@ -3,7 +3,7 @@
 // page exists; its terms (names and synonyms) come from every language that has the text, so a search
 // in one language still finds a synonym typed in another. The search shows an entry only in a language
 // that has its link (src/search/search.ts), so a page that exists only in English is not offered in
-// Portuguese or Spanish. The 12 PDF tools come after the image pages, in the PDF category, then the money calculators
+// Portuguese or Spanish. The PDF tools and presets come after the image pages, in the PDF category, then the money calculators
 // in the money category: the English ones (all of them also in Spanish since the languages adjustment), the eight
 // Brazilian ones (only in Portuguese, F6) and the money guides (English and Spanish). The hubs are not listed, as the image
 // hub is not (DECISOES § 160). The ten file guides (in the three languages since the languages adjustment) come next, each
