@@ -13,7 +13,7 @@ import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts'
 import { violationsEverywhere } from './lib/axe.ts';
 import { animationsDone, chooseImages, coffeeLineInOneUse, dismissCookies, hydrated, jpegBatch, openAdjust, openCompare, searchWithoutResult, slowEngine, useImage, type TestFile } from './lib/page.ts';
 import { walkPdfTool } from './lib/pdf-states.ts';
-import { choosePdfs, openTool, pdfFile } from './lib/pdf-tools.ts';
+import { choosePdfs, openTool } from './lib/pdf-tools.ts';
 
 // axe-core (WCAG 2.2 AA and best practices, tests/e2e/lib/axe.ts) on every page, at 360 and 1280px, in both
 // themes. It runs with reduced motion (DECISOES § 57): the site animates only transform and opacity, so the
@@ -439,9 +439,11 @@ test.describe('axe nas páginas da F17 com o resultado, o antes e depois e a rec
 // F18 (decision 19; DECISOES § 742): the fifteen pages of the run in the states the page-by-page pass does not read on them.
 // Remove EXIF data and Flip image: the result (with "Adjust" open where the page has it: the mirror of Flip image), then a
 // HEIC and an AVIF, each refused with the link to its converter in the page's language (CONVERTER_FOR). The PDF pages: a
-// photo refused with the link to Image to PDF of the language, then the result of the two presets (Extract pages with two
-// pages picked on the grid, PDF to PNG with its one page drawn). The result of Organize PDF, its bar and its open view are
-// walked in axe-pdf-states.spec.ts and in the specs of its grid, as every PDF tool's (tests/e2e/lib/pdf-states.ts).
+// photo refused with the link to Image to PDF of the language. Their result, and the grid of Organize PDF and of Extract
+// pages, are walked in axe-pdf-states.spec.ts and in the specs of the grid, as every PDF page's (tests/e2e/lib/pdf-states.ts,
+// PDF_WALKS: the tools and the presets, in the three languages, at the same widths and themes, in both browsers). F18
+// junction (DECISOES § 743): the result of the two presets was read here too, the same state at the same reach; it is read
+// once, there.
 const F18_IMAGE_IDS = ['remove-exif-data', 'rotate-image-flip'] as const;
 const F18_PDF_IDS: readonly PdfPageId[] = ['organize-pdf', ...PDF_PRESET_IDS];
 const F18_REFUSED: [format: 'heic' | 'avif', file: { fixture: string; mimeType: string }, converter: 'heic-to-jpg' | 'avif-to-jpg'][] = [
@@ -480,8 +482,7 @@ test.describe('axe nas páginas da F18 com o resultado e a recusa, a 360 e 1280p
   for (const id of F18_PDF_IDS) {
     for (const lang of ['en', ...TRANSLATED] as const) {
       const path = routeById(id).paths[lang] ?? '';
-      const result = id === 'organize-pdf' ? '' : ', then the result';
-      test(`${path}: a photo refused with the link to Image to PDF${result}`, async ({ page }) => {
+      test(`${path}: a photo refused with the link to Image to PDF`, async ({ page }) => {
         await openTool(page, path);
         const root = page.locator('#fo-tool-root');
         await choosePdfs(page, await jpegBatch(page, 1));
@@ -489,24 +490,6 @@ test.describe('axe nas páginas da F18 com o resultado e a recusa, a 360 e 1280p
         await expect(root.locator('.fo-drop__why a'), `the link to Image to PDF in ${lang}`).toHaveAttribute('href', routeById('image-to-pdf').paths[lang] ?? '');
         await animationsDone(page);
         expect(await violationsEverywhere(page), 'a photo refused').toEqual([]);
-        if (id === 'organize-pdf') return;
-
-        if (id === 'split-pdf-extract-pages') {
-          // The page opens on the grid (decision 7): two pages picked, then the one action.
-          await choosePdfs(page, [pdfFile('gen-paginas-mistas.pdf')]);
-          const cells = root.locator('.fo-pages__grid .fo-page');
-          await expect(cells).toHaveCount(8, { timeout: 30_000 });
-          await cells.nth(0).locator('.fo-page__main').click();
-          await cells.nth(2).locator('.fo-page__main').click();
-          await expect(root.locator('.fo-page[data-selected="true"]')).toHaveCount(2);
-          await root.locator('.fo-ready:not(.fo-ready--reading) .fo-btn--brand').click();
-        } else {
-          // PDF to PNG runs when the file arrives, as its parent: the one page of a scan, drawn.
-          await choosePdfs(page, [pdfFile('pdf-escaneado-01-pagina-livro-cor.pdf')]);
-        }
-        await expect(root.locator('.fo-btn--download')).toBeVisible({ timeout: 60_000 });
-        await animationsDone(page);
-        expect(await violationsEverywhere(page), 'the result').toEqual([]);
       });
     }
   }
