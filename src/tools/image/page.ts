@@ -31,7 +31,7 @@ export function existsIn(id: ImagePageId | PdfNeighbour, lang: Lang): boolean {
   return languagesOf(routeById(id)).includes(lang);
 }
 
-const categoryOf = (id: ImageToolId): 'image' | 'pdf' => (IMAGE_PAGES[id].pdf ? 'pdf' : 'image');
+const categoryOf = (id: ImagePageId): 'image' | 'pdf' => (IMAGE_PAGES[id].pdf ? 'pdf' : 'image');
 
 /**
  * F13a · UX-14 (DECISOES § 497): the chip to `target` takes the result along when this page makes images (Image to
@@ -172,7 +172,10 @@ export interface RelatedCard {
   category: 'image' | 'pdf';
 }
 
-/** The related grid: tools that exist in this language, at most six. */
+/**
+ * The related grid: tools and, since the F18 (decision 11), presets that exist in this language, at most six. The
+ * registry never holds more (tests/unit/registry-lists.test.ts), so the slice cuts nothing.
+ */
 export function relatedFor(id: ImagePageId, lang: Lang): RelatedCard[] {
   return IMAGE_PAGES[id].related
     .filter((tool) => existsIn(tool, lang))
