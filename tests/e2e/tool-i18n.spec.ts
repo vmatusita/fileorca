@@ -39,7 +39,7 @@ const IMAGE_INPUT: Record<ImagePageId, string[]> = {
   'avif-to-jpg': ['gen-avif.avif'],
   'convert-to-webp': [JPG],
   'image-to-pdf': [JPG, JPG_2],
-  // F18 placeholder: the fronts confirm the inputs of the new pages.
+  // F18: Remove EXIF data and Flip image take a JPG, as their sisters do.
   'remove-exif-data': [JPG],
   'rotate-image-flip': [JPG],
 };

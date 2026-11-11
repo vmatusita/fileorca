@@ -29,7 +29,7 @@ const texts: PdfToolTexts<OrganizeTexts> = {
       ['Taking pages out', 'Remove takes the picked pages out of the new PDF. They stay in the grid, faded, and Put back brings them in again. At least one page has to stay.'],
       ['Moving pages', 'The arrows on each page move it one place earlier or later, and the mouse can drag it to its new place.'],
       ['The new file', 'Oli copies the pages you keep into a new PDF, in your order and with your turns, the way Delete PDF pages does. What only the removed pages used is left out.'],
-      ['Forms', 'Form fields on the pages you keep stay. An XFA form layer, which only Adobe apps read, is removed; the regular form fields still work.'],
+      ['Forms', 'Form fields stay on the pages you keep. An XFA form layer, which only Adobe apps read, is removed; the regular form fields still work.'],
       ['Bookmarks and links', 'Bookmarks and links between pages stay when they point to a page you keep, and they still lead to that page in its new place. Links to the web stay. Links to a page you took out are removed.'],
       ['Details kept', 'The new PDF keeps the info fields and XMP metadata of your file. Oli adds no date, no Producer and nothing from your device.'],
       ['Files it refuses', 'A PDF that needs a password to open, or that has editing restrictions, is refused with a link to Unlock PDF. An empty or cut-short file, or one that is not a PDF, is refused too. A file with a damaged index (xref) is repaired while Oli reads it.'],

@@ -379,7 +379,10 @@ Da seção B do PLANO-UX-QV.md (F14, DECISOES § 623): o espanhol segue o regist
 | View the new PDF · View pages of {name} | Ver el PDF nuevo · Ver páginas de {name} |
 | Page {n} of {total} · Page {n} · position {p} of {total} | Página {n} de {total} · Página {n} · posición {p} de {total} |
 | Take this page out · Pick this page · Sign this page · Turn 90° | Quitar esta página · Elegir esta página · Firmar esta página · Girar 90° |
-| (Organizar PDF, la barra) Rotate right · Rotate left · Remove · Put back | Girar a la derecha · Girar a la izquierda · Quitar · Restaurar |
+| (Organizar PDF, la barra) Rotate right · Rotate left · Remove · Put back | Girar a la derecha · Girar a la izquierda · Quitar · Devolver |
+| (Organizar PDF, el recuento) {count} picked · 1 picked | {count} elegidas · 1 elegida |
+| (Organizar PDF, la ayuda de la barra) Pick pages first: these buttons turn the picked pages or take them out. | Elige páginas primero: estos botones giran las páginas elegidas o las quitan. |
+| (Organizar PDF, el aviso del giro) {count} pages turned right / left. | {count} páginas giradas a la derecha / a la izquierda. |
 | (Eliminar) {count} of {total} come out · the new PDF keeps {left} pages | {count} de {total} salen · el PDF nuevo queda con {left} páginas ("1 de 12 sale", "queda con 1 página") |
 | (Eliminar, el nombre de la página) …, comes out | …, sale |
 | Pages {from} to {to} picked · unpicked | Páginas {from} a {to} elegidas · desmarcadas |

@@ -27,7 +27,7 @@ const texts: PdfToolTexts<OrganizeTexts> = {
       ['La cuadrícula', 'Oli dibuja una miniatura de cada página con PDF.js. La lupa de una página la abre en tamaño grande, y allí Anterior y Siguiente siguen el orden que elegiste.'],
       ['Elegir páginas', 'Toca las páginas para elegirlas, usa "Elegir todas", "Desmarcar todas" o "Invertir selección", o escribe números y rangos de página como 1-3, 5.'],
       ['Girar páginas', '"Girar a la derecha" y "Girar a la izquierda" giran las páginas elegidas un cuarto de vuelta cada vez, sumado al giro que ya tienen.'],
-      ['Quitar páginas', '"Quitar" saca las páginas elegidas del PDF nuevo. Se quedan en la cuadrícula, atenuadas, y "Restaurar" las vuelve a poner. Al menos una página tiene que quedar.'],
+      ['Quitar páginas', '"Quitar" saca las páginas elegidas del PDF nuevo. Se quedan en la cuadrícula, atenuadas, y "Devolver" las vuelve a poner. Al menos una página tiene que quedar.'],
       ['Mover páginas', 'Las flechas de cada página la mueven un lugar antes o después, y el mouse puede arrastrarla a su nuevo lugar.'],
       ['El archivo nuevo', 'Oli copia las páginas que conservas a un PDF nuevo, en tu orden y con tus giros, como lo hace Eliminar páginas de PDF. Lo que solo usaban las páginas quitadas queda fuera.'],
       ['Formularios', 'Los campos de formulario de las páginas que quedan se conservan. Se quita la capa de formulario XFA, que solo leen las aplicaciones de Adobe; los campos de formulario normales siguen funcionando.'],
@@ -48,7 +48,7 @@ const texts: PdfToolTexts<OrganizeTexts> = {
     },
     {
       q: '¿Puedo deshacer un cambio antes de guardar?',
-      a: 'Sí. Una página que quitaste se queda en la cuadrícula, atenuada: elígela y presiona "Restaurar". Un giro se deshace con un giro en el otro sentido, y una página que moviste vuelve con las flechas. Después del resultado, la cuadrícula sigue en pantalla, y cualquier cambio trae de vuelta el botón para guardar otro PDF. Tu archivo original nunca cambia.',
+      a: 'Sí. Una página que quitaste se queda en la cuadrícula, atenuada: elígela y presiona "Devolver". Un giro se deshace con un giro en el otro sentido, y una página que moviste vuelve con las flechas. Después del resultado, la cuadrícula sigue en pantalla, y cualquier cambio trae de vuelta el botón para guardar otro PDF. Tu archivo original nunca cambia.',
     },
     {
       q: '¿Los formularios, los enlaces y los marcadores siguen funcionando?',

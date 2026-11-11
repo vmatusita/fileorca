@@ -22,6 +22,7 @@ import deleteTexts from '../../src/tools/delete-pdf-pages/i18n/en.ts';
 import numbersTexts from '../../src/tools/add-page-numbers-to-pdf/i18n/en.ts';
 import signTexts from '../../src/tools/sign-pdf/i18n/en.ts';
 import reorderTexts from '../../src/tools/reorder-pdf-pages/i18n/en.ts';
+import organizeTexts from '../../src/tools/organize-pdf/i18n/en.ts';
 import watermarkTexts from '../../src/tools/watermark-pdf/i18n/en.ts';
 import { PDF_PANEL_TEXTS } from '../../src/tools/pdf/texts.ts';
 import enCommon from '../../src/i18n/en/common.ts';
@@ -324,6 +325,27 @@ const TOOLS: Tool[] = [
     },
   },
   {
+    slug: 'organize-pdf',
+    files: one,
+    after: async (page) => {
+      // F18 (decision 6): page 1 one place later, page 3 turned right with the bar, page 12 taken out.
+      await page.getByRole('button', { name: 'Move page 1 later', exact: true }).click();
+      await page.locator('#fo-tool-root .fo-pages__grid > li[data-page="2"] .fo-page__main').click();
+      await page.locator('#fo-tool-root .fo-pages__act--right').click();
+      await page.getByRole('button', { name: 'Pick none', exact: true }).click();
+      await page.locator(`#fo-tool-root .fo-pages__grid > li[data-page="${PAGES - 1}"] .fo-page__main`).click();
+      await page.locator('#fo-tool-root .fo-pages__act--out').click();
+      await page.getByRole('button', { name: actionOf(organizeTexts) }).click();
+    },
+    proves: async (outs) => {
+      expect(outs.map((out) => out.name)).toEqual([`${STEM}-organized.pdf`]);
+      const read = await readWithPdfjs(outs[0]?.bytes as Uint8Array);
+      expect(read.pages.map((p) => p.marker)).toEqual(['Page 2', 'Page 1', ...markers(PAGES - 1).slice(2)]);
+      expect(read.pages.map((p) => p.rotate)).toEqual(read.pages.map((_, i) => (i === 2 ? 90 : 0)));
+      return `page 1 moved, page 3 turned, page ${PAGES} out: ${PAGES - 1} pages`;
+    },
+  },
+  {
     slug: 'reorder-pdf-pages',
     files: one,
     after: async (page) => {
@@ -568,6 +590,17 @@ const DRAWS: Draws[] = [
       await gridDrawn(page);
       await page.getByRole('button', { name: reorderTexts.panel.options.reverse }).click();
       await page.getByRole('button', { name: actionOf(reorderTexts) }).click();
+    },
+  },
+  {
+    title: 'the grid of Organize PDF',
+    slug: 'organize-pdf',
+    drawn: 'grid',
+    gives: 'pdf',
+    after: async (page) => {
+      await gridDrawn(page);
+      await page.getByRole('button', { name: 'Move page 2 earlier', exact: true }).click();
+      await page.getByRole('button', { name: actionOf(organizeTexts) }).click();
     },
   },
   {

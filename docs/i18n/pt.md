@@ -332,6 +332,9 @@ Da seção B do PLANO-UX-QV.md (F14, DECISOES § 623): os textos de pt são os d
 | Page {n} of {total} · Page {n} · position {p} of {total} | Página {n} de {total} · Página {n} · posição {p} de {total} |
 | Take this page out · Pick this page · Sign this page · Turn 90° | Tirar esta página · Marcar esta página · Assinar esta página · Girar 90° |
 | (Gerenciar páginas do PDF, a barra) Rotate right · Rotate left · Remove · Put back | Girar à direita · Girar à esquerda · Tirar · Devolver (F18, os rótulos do prompt) |
+| (Gerenciar páginas do PDF, a contagem) {count} picked · 1 picked | {count} marcadas · 1 marcada |
+| (Gerenciar páginas do PDF, a ajuda da barra) Pick pages first: these buttons turn the picked pages or take them out. | Marque páginas primeiro: estes botões giram as páginas marcadas ou as tiram. |
+| (Gerenciar páginas do PDF, a fala do giro) {count} pages turned right / left. | {count} páginas giradas para a direita / para a esquerda. |
 | (Excluir) {count} of {total} come out · the new PDF keeps {left} pages | {count} de {total} saem · o PDF novo fica com {left} páginas ("1 de 12 sai", "fica com 1 página") |
 | (Excluir, o nome da página) …, comes out | …, sai |
 | Pages {from} to {to} picked · unpicked | Páginas {from} a {to} marcadas · desmarcadas |
