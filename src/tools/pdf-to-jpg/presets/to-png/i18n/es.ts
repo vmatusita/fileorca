@@ -29,7 +29,7 @@ const texts: PdfToolTexts<PngTexts> = {
       ['Páginas', 'Todas las páginas, o un rango como 2-4, 7, que se aplica a cada PDF que agregues.'],
       ['Qué sale', 'Un PNG por página, con el nombre del PDF y -pagina-1, -pagina-2 y así sucesivamente, como informe-pagina-1.png. Varias imágenes se descargan juntas en un ZIP.'],
       ['Fondo', 'Cada página se dibuja sobre blanco, como la muestra un lector de PDF, así que el PNG no tiene zonas transparentes.'],
-      ['Tamaño del archivo', 'En una página con fotos, el PNG tiene varias veces el peso del JPG de la misma página. En una página de texto y líneas, los dos tienen tamaños mucho más parecidos.'],
+      ['Tamaño del archivo', 'En una página con fotos, el PNG tiene varias veces el peso del JPG de la misma página. En una página de texto y líneas, los dos tienen un peso parecido: el PNG pesa aproximadamente entre la mitad y el doble que el JPG, y hasta puede ser el archivo más pequeño.'],
       ['Páginas muy grandes', 'Una página de más de 16.7 megapíxeles con la resolución elegida es demasiado grande para que el navegador la dibuje, así que sale más pequeña, y el resultado te lo dice.'],
       ['Metadatos', 'Los archivos PNG salen sin metadatos: sin datos Exif y sin ubicación GPS.'],
       ['PDF con restricciones', 'Un PDF que solo tiene restricciones de edición se dibuja igual. Un PDF con contraseña para abrirlo se rechaza, con un enlace a Desbloquear PDF.'],
@@ -43,7 +43,7 @@ const texts: PdfToolTexts<PngTexts> = {
     },
     {
       q: '¿Los archivos PNG pesan más que los JPG?',
-      a: 'En las páginas con fotos, sí: tienen varias veces el peso del JPG, porque el PNG guarda cada detalle de la imagen, mientras que el JPG descarta detalles que el ojo casi no ve para ocupar menos espacio. En las páginas de texto y líneas, los dos tienen tamaños mucho más parecidos. Si un archivo pequeño importa más que un texto nítido, usa PDF a JPG.',
+      a: 'En las páginas con fotos, sí: tienen varias veces el peso del JPG, porque el PNG guarda cada detalle de la imagen, mientras que el JPG descarta detalles que el ojo casi no ve para ocupar menos espacio. En las páginas de texto y líneas, no siempre: el PNG pesa aproximadamente entre la mitad y el doble que el JPG, y hasta puede ser el archivo más pequeño. Si la página tiene fotos y un archivo pequeño importa más que un texto nítido, usa PDF a JPG.',
     },
     {
       q: '¿Qué resolución elijo para las imágenes PNG?',

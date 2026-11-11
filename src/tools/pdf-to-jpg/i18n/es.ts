@@ -45,7 +45,7 @@ const texts: PdfToolTexts<ImagesTexts> = {
     },
     {
       q: '¿Elijo JPG o PNG?',
-      a: 'El JPG, guardado con calidad 92, va bien con páginas que tienen fotos: en ellas, el PNG tiene varias veces el peso del JPG. El PNG no pierde nada, así que el texto y las líneas finas de la página quedan nítidos, y en las páginas de texto y líneas los dos tienen tamaños mucho más parecidos. En los dos casos el texto de la página pasa a ser parte de la imagen, así que ya no se puede seleccionar ni buscar.',
+      a: 'El JPG, guardado con calidad 92, va bien con páginas que tienen fotos: en ellas, el PNG tiene varias veces el peso del JPG. El PNG no pierde nada, así que el texto y las líneas finas de la página quedan nítidos; en las páginas de texto y líneas, el PNG pesa aproximadamente entre la mitad y el doble que el JPG, y hasta puede ser el archivo más pequeño. En los dos casos el texto de la página pasa a ser parte de la imagen, así que ya no se puede seleccionar ni buscar.',
     },
     {
       q: '¿Puedo convertir un PDF con restricciones de edición o con contraseña?',
