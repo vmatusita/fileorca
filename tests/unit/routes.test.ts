@@ -361,12 +361,30 @@ describe('tool search', () => {
       ['pdf to png', ['pdf-to-jpg-to-png', 'image-to-pdf', 'pdf-to-jpg']],
       ['extract pages from pdf', ['split-pdf-extract-pages']],
       ['extract pages', ['split-pdf', 'split-pdf-extract-pages']],
+      // F18 (decision 4; DECISOES § 737): Organize PDF says "delete" and "rotate" (the prompt asks it), words of the names of
+      // Delete PDF pages and Rotate PDF; each of those says its word too, so the tie goes to the order of the index and the
+      // page whose name has the word comes before Organize PDF (Rotate image, an image page, before both, as before the F18).
+      ['delete', ['delete-pdf-pages', 'organize-pdf']],
+      ['rotate', ['rotate-image', 'rotate-pdf', 'organize-pdf']],
       // F17 (decision 9; DECISOES § 716): the AVIF pages of the F2 are back. "avif" finds AVIF to JPG (its name) and then
       // Convert to WebP (a synonym: it makes AVIF too), as before the 3812f49; it found nothing from the F2 to the F16.
       ['avif', ['avif-to-jpg', 'convert-to-webp']],
       ['convert to avif', ['convert-to-webp', 'avif-to-jpg']],
     ];
     for (const [query, found] of expected) expect(ids(filterEntries(index, query)), query).toEqual(found);
+    // F18 (DECISOES § 737): the verb of the name of Delete PDF pages and of Rotate PDF finds that page before Organize PDF,
+    // whatever the language of the page and of the word (the search joins the terms of the three languages).
+    const before: [string, string][] = [
+      ['delete', 'delete-pdf-pages'], ['excluir', 'delete-pdf-pages'], ['eliminar', 'delete-pdf-pages'],
+      ['rotate', 'rotate-pdf'], ['girar', 'rotate-pdf'], ['rotar', 'rotate-pdf'],
+    ];
+    for (const lang of LANGS) {
+      for (const [query, page] of before) {
+        const found = ids(filterEntries(index, query, lang));
+        expect(found, `${query} ${lang}`).toContain(page);
+        if (found.includes('organize-pdf')) expect(found.indexOf(page), `${query} ${lang}: ${found.join(', ')}`).toBeLessThan(found.indexOf('organize-pdf'));
+      }
+    }
     // In each language, "avif" finds the two, each at the page of that language.
     for (const lang of LANGS) {
       const avif = filterEntries(index, 'avif', lang);
