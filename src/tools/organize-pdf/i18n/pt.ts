@@ -1,13 +1,12 @@
 // F18 placeholder: front T writes the pt text
 import type { PdfToolTexts } from '../../../i18n/types.ts';
-import type { ReorderTexts } from '../../pdf/option-texts.ts';
+import type { OrganizeTexts } from '../../pdf/option-texts.ts';
 
 // Organize PDF page blocks (data-content: how, specs, faq, privacy, related) and the panel bits the shared PDF island shows
 // (F18, decision 6). The new PDF is built the way Delete PDF pages builds it (the engine's assemble.ts, DECISOES § 145), so
 // the rows on forms, bookmarks and links follow that tool's. The specs rows state the real behaviour of the engine: when it
-// changes there, change them here. F18 placeholder: the option texts are Reorder's shape until front O gives the grid mode
-// its own (OrganizeTexts).
-const texts: PdfToolTexts<ReorderTexts> = {
+// changes there, change them here. Front O wrote the option texts (OrganizeTexts) in pt.
+const texts: PdfToolTexts<OrganizeTexts> = {
   title: 'Organize PDF: move, rotate and remove pages in your browser',
   description:
     'Move, rotate and remove the pages of a PDF in one grid of thumbnails, then save one new PDF. It all happens in your browser, and nothing is uploaded.',
@@ -71,10 +70,9 @@ const texts: PdfToolTexts<ReorderTexts> = {
     doneMany: 'Done! Oli organized the pages of {count} PDFs.',
     action: 'Save changes',
     options: {
-      help: 'Pick pages to turn them or take them out, and move a page with the arrows on it.',
-      reverse: 'Reverse order',
-      reversed: 'Pages reversed.',
-      unchanged: 'Move, turn or take out a page to save a new PDF.',
+      help: 'Marque páginas para girar ou tirar, e mova uma página com as setas dela.',
+      unchanged: 'Mova, gire ou tire uma página para salvar um PDF novo.',
+      allOut: 'Um PDF precisa de pelo menos uma página: devolva uma.',
     },
   },
 };

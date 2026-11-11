@@ -1173,6 +1173,22 @@ export interface PdfPanelTexts {
     /** F14 (DECISOES § 628): what Shift+click says, "Pages {from} to {to} picked" (or "unpicked"). */
     spanOn: string;
     spanOff: string;
+    /**
+     * F18, Organize PDF (decision 6 of the prompt): the count of its grid, "{count} picked · the new PDF keeps {left}
+     * pages", in two halves with the forms of one ("1 picked"); the second half is `keptCount` and `keptOne`.
+     */
+    markedCount: string;
+    markedOne: string;
+    /** F18, Organize PDF: the bar of actions over the picked pages, "Rotate right", "Rotate left", "Remove", "Put back". */
+    turnRight: string;
+    turnLeft: string;
+    takeOut: string;
+    putBack: string;
+    /** F18: the help of that bar, which says to pick pages first (its buttons are aria-disabled until then). */
+    actsHelp: string;
+    /** F18: what the bar says after turning more than one page, "{count} pages turned right." (one page: `turned`). */
+    turnedRight: string;
+    turnedLeft: string;
   };
   /**
    * F14 (section A of PLANO-UX-QV.md; DECISOES § 624 to § 626): the page view, the large page inside the tool, with its

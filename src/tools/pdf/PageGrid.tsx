@@ -12,14 +12,19 @@
 // sheet has the shape of the page as it will come out; "Small" and "Large" above the grid set the columns, and the
 // pictures are asked at the width the sheet shows; the magnifier of each cell opens the page large; the anchor of
 // Shift+click lives here, in one place, for the grid and the view.
+// F18 (decision 6 of the prompt): a fourth use, organize (Organize PDF). It picks like select (a press, Shift+click,
+// Shift+Space, Pick all, Pick none, Invert, a typed range), moves like order (the arrows of the cell and the mouse; Space
+// and Enter pick, so no key does two things), and a bar over the grid turns the picked pages or takes them out. A page
+// that comes out stays in the grid with Delete's look until it is put back.
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { PageBox } from '../../engine/pdf/types.ts';
 import type { PdfPanelTexts } from '../../i18n/types.ts';
 import { fmt } from '../../i18n/format.ts';
+import Icon from '../../icons/Icon.tsx';
 import OptionGroup from '../image/OptionGroup.tsx';
 import PageCell, { type CellActions } from './PageCell.tsx';
-import PageView, { type Held, type ViewAction } from './PageView.tsx';
-import { THUMB_CAP, askWidth, countOf, inverted, quarters, samePages, sheetRatio, span, spanned } from './grid-math.ts';
+import PageView, { type Held, type ViewAction, type ViewActions } from './PageView.tsx';
+import { THUMB_CAP, askWidth, countOf, inverted, leavingCount, markedCount, outAfter, quarters, samePages, sheetRatio, span, spanned, turnedBy } from './grid-math.ts';
 import type { PdfIcons, Thumbnails } from './types.ts';
 
 export interface PageGridProps {
@@ -27,7 +32,7 @@ export interface PageGridProps {
   id: string;
   name: string;
   boxes: PageBox[];
-  mode: 'select' | 'order' | 'rotate';
+  mode: 'select' | 'order' | 'rotate' | 'organize';
   texts: PdfPanelTexts['grid'];
   icons: PdfIcons;
   thumbnails: Thumbnails | null;
@@ -44,11 +49,15 @@ export interface PageGridProps {
   /** Page indices in their current order (order mode). */
   order?: readonly number[];
   onMove?: (from: number, to: number) => void;
-  /** Quarter turns added to each page (rotate mode). */
+  /** Quarter turns added to each page (rotate and organize modes). */
   turns?: Readonly<Record<number, number>>;
   onTurn?: (index: number) => void;
+  /** F18, organize mode: the pages that come out (`setOf(state.out)`). */
+  out?: ReadonlySet<number>;
+  /** F18, organize mode: the grid works out the turns and the pages out after a gesture of the bar or of the view. */
+  onOrganize?: (change: { turns?: Record<number, number>; out?: number[] }) => void;
   /** F14 (DECISOES § 624): the page view the magnifier opens, with its words and the action of the tool (none in Reorder). */
-  view: { texts: PdfPanelTexts['view']; action?: ViewAction };
+  view: { texts: PdfPanelTexts['view']; action?: ViewActions };
 }
 
 /**
@@ -74,9 +83,12 @@ let kept: { thumbnails: WeakRef<Thumbnails>; index: number } | null = null;
 const pixelRatio = (): number => (typeof window !== 'undefined' && window.devicePixelRatio > 0 ? window.devicePixelRatio : 1);
 
 export default function PageGrid(props: PageGridProps) {
-  const { id, name, boxes, mode, texts, icons, thumbnails, announce, selected, order, turns } = props;
+  const { id, name, boxes, mode, texts, icons, thumbnails, announce, selected, order, turns, out } = props;
   const total = boxes.length;
-  const sequence = mode === 'order' && order ? order : boxes.map((_, i) => i);
+  const organize = mode === 'organize';
+  const sequence = (mode === 'order' || organize) && order ? order : boxes.map((_, i) => i);
+  /** Quarter turns the person gave a page (rotate and organize). */
+  const turnOf = (index: number): number => (mode === 'rotate' || organize ? (turns?.[index] ?? 0) : 0);
   const [active, setActive] = useState(0);
   const [grabbed, setGrabbed] = useState<number | null>(null);
   const [size, setSize] = useState<GridSize>(remembered);
@@ -170,8 +182,13 @@ export default function PageGrid(props: PageGridProps) {
     if (turn) label += fmt(texts.rotated, { degrees: turn });
     // F14 (item 4, § 627): in Delete a picked page is one that comes out, and its name says so.
     if (selected?.has(index)) label += removes ? texts.leaving : texts.selected;
+    // F18: in Organize a page that comes out says so last (", comes out"), picked or not.
+    if (out?.has(index)) label += texts.leaving;
     return mode === 'rotate' ? `${fmt(texts.turn, { n: index + 1 })} (${label})` : label;
   };
+
+  /** The count of the grid: Organize's "{count} picked · the new PDF keeps {left} pages", or the select mode's. */
+  const countNow = (count: number, gone = out?.size ?? 0): string => (organize ? markedCount(texts, count, total - gone) : countOf(texts, count, total, removes));
 
   function columns(): number {
     const items = list.current?.children;
@@ -209,9 +226,11 @@ export default function PageGrid(props: PageGridProps) {
       return;
     }
     const on = !selected?.has(index);
-    const pages = span(from, index);
+    // F18: in Organize the span is by place in the grid's order, and the sentence names its first and last pages there.
+    const order = organize ? sequence : undefined;
+    const pages = span(from, index, order);
     anchor.current = index;
-    hand(spanned(picked, from, index, on));
+    hand(spanned(picked, from, index, on, order));
     announce(fmt(on ? texts.spanOn : texts.spanOff, { from: (pages[0] ?? 0) + 1, to: (pages[pages.length - 1] ?? 0) + 1 }));
   }
 
@@ -219,8 +238,27 @@ export default function PageGrid(props: PageGridProps) {
   function handAll(pages: number[]): void {
     anchor.current = null;
     hand(pages);
-    announce(countOf(texts, pages.length, total, removes));
+    announce(countNow(pages.length));
   }
+
+  // F18: the bar of Organize and the two actions of its view. Each gesture hands the new turns or pages out to the tool and
+  // says one sentence; the picks and the anchor stay, so the same pages can be turned again or put back.
+  /** Turns pages a quarter right (1) or left (3), on top of their turns. */
+  function turnPages(pages: readonly number[], by: number): void {
+    if (pages.length === 0) return;
+    props.onOrganize?.({ turns: turnedBy(turns ?? {}, pages, by) });
+    const one = pages.length === 1 ? (pages[0] as number) : null;
+    announce(one !== null ? fmt(texts.turned, { n: one + 1, degrees: quarters(boxes[one], (turns?.[one] ?? 0) + by) * 90 }) : fmt(by === 1 ? texts.turnedRight : texts.turnedLeft, { count: pages.length }));
+  }
+  /** Takes the pages out, or puts them back when they all come out already: the count of what comes out is said. */
+  function outPages(pages: readonly number[]): void {
+    if (pages.length === 0) return;
+    const next = outAfter([...(out ?? [])], pages);
+    props.onOrganize?.({ out: next });
+    announce(leavingCount(texts, next.length, total));
+  }
+  /** The picked pages in the grid's order, for the bar. */
+  const pickedInOrder = (): number[] => sequence.filter((index) => selected?.has(index));
 
   const selectAll = () => handAll(Array.from({ length: total }, (_, i) => i));
   const selectNone = () => handAll([]);
@@ -259,7 +297,7 @@ export default function PageGrid(props: PageGridProps) {
       press(index, position, event) {
         const now = latest.current;
         setActive(position);
-        if (now.mode === 'select') {
+        if (now.mode === 'select' || now.mode === 'organize') {
           if (event.shiftKey) now.extend(index);
           else now.pick(index);
         }
@@ -268,8 +306,8 @@ export default function PageGrid(props: PageGridProps) {
       key(event, index, position) {
         const now = latest.current;
         // F14 (§ 628): Shift+Space is Shift+click by the keyboard. Its default is kept from the button, which would
-        // press the page once more on the key's release; a held key does it once.
-        if (event.key === ' ' && event.shiftKey && now.mode === 'select') {
+        // press the page once more on the key's release; a held key does it once. F18: Organize picks the same way.
+        if (event.key === ' ' && event.shiftKey && (now.mode === 'select' || now.mode === 'organize')) {
           event.preventDefault();
           if (!event.repeat) now.extend(index);
           return;
@@ -289,6 +327,8 @@ export default function PageGrid(props: PageGridProps) {
           else now.go(position, target);
           return;
         }
+        // Only the order mode picks a page up with Space and Enter; in Organize they press the button (a pick), and moving
+        // by the keyboard is the arrows of the cell (F18: no key does two things).
         if ((event.key === ' ' || event.key === 'Enter') && now.mode === 'order') {
           event.preventDefault();
           if (now.grabbed === null) {
@@ -357,16 +397,24 @@ export default function PageGrid(props: PageGridProps) {
     const action = props.view.action;
     /** What the page on view is now, said after its heading when the page changes (section A). */
     const stateOf = (index: number): string => {
-      if (mode === 'rotate') {
+      if (mode === 'rotate' || organize) {
         const degrees = quarters(boxes[index], turns?.[index] ?? 0) * 90;
-        return degrees ? fmt(texts.rotated, { degrees }) : '';
+        const turned = degrees ? fmt(texts.rotated, { degrees }) : '';
+        // F18: Organize says the turn, the pick and that the page comes out, in the order of the cell's name.
+        return organize ? turned + (selected?.has(index) ? texts.selected : '') + (out?.has(index) ? texts.leaving : '') : turned;
       }
       return mode === 'select' && selected?.has(index) ? (props.removes ? texts.leaving : texts.selected) : '';
     };
     // The action of the view goes the way of the cell's (the anchor of Shift+click included), so the grid, the count and
     // the operation change together; a pick says the count, as the batch buttons do, and a turn says its own sentence.
-    const act = (): void => {
-      if (action === 'turn') {
+    // F18: in Organize, "Turn 90°" and "Take this page out" go the way of the bar, for this one page.
+    const act = (which: ViewAction): void => {
+      if (organize) {
+        if (which === 'turn') turnPages([open.index], 1);
+        else outPages([open.index]);
+        return;
+      }
+      if (which === 'turn') {
         turn(open.index);
         return;
       }
@@ -386,10 +434,10 @@ export default function PageGrid(props: PageGridProps) {
           small={open.held?.width ?? (width || THUMB_WIDTH)}
           texts={props.view.texts}
           icons={icons}
-          order={mode === 'order'}
-          turns={mode === 'rotate' ? turns : undefined}
+          order={mode === 'order' || organize}
+          turns={mode === 'rotate' || organize ? turns : undefined}
           action={action}
-          pressed={selected?.has(open.index)}
+          pressed={organize ? out?.has(open.index) : selected?.has(open.index)}
           onAct={act}
           state={stateOf}
           announce={announce}
@@ -421,9 +469,9 @@ export default function PageGrid(props: PageGridProps) {
         ]}
         onChange={chooseSize}
       />
-      {mode === 'select' && (
+      {(mode === 'select' || organize) && (
         <div key="bar" class="fo-pages__bar">
-          <p class="fo-pages__count">{countOf(texts, selected?.size ?? 0, total, removes)}</p>
+          <p class="fo-pages__count">{countNow(selected?.size ?? 0)}</p>
           <button type="button" class="fo-btn fo-btn--ghost" onClick={selectAll}>
             {texts.selectAll}
           </button>
@@ -433,6 +481,26 @@ export default function PageGrid(props: PageGridProps) {
           <button type="button" class="fo-btn fo-btn--ghost" onClick={invert}>
             {texts.invert}
           </button>
+        </div>
+      )}
+      {organize && (
+        // F18: the bar of actions over the picked pages, right above the grid. With no page picked its buttons stay in the
+        // Tab order with aria-disabled and do nothing; the help under them, always there, says to pick pages first.
+        <div key="acts" class="fo-pages__bar fo-pages__acts">
+          {(['right', 'left', 'out'] as const).map((which) => {
+            const none = (selected?.size ?? 0) === 0;
+            const back = !none && picked.every((page) => out?.has(page));
+            const run = () => (which === 'out' ? outPages(pickedInOrder()) : turnPages(pickedInOrder(), which === 'right' ? 1 : 3));
+            return (
+              <button key={which} type="button" class={`fo-btn fo-pages__act fo-pages__act--${which}`} aria-disabled={none ? 'true' : undefined} aria-describedby={`${id}-acts-help`} onClick={run}>
+                <Icon inner={which === 'out' ? icons.trash : icons.rotate} class="fo-icon--sm" />
+                {which === 'right' ? texts.turnRight : which === 'left' ? texts.turnLeft : back ? texts.putBack : texts.takeOut}
+              </button>
+            );
+          })}
+          <p class="fo-field__help" id={`${id}-acts-help`}>
+            {texts.actsHelp}
+          </p>
         </div>
       )}
       <ul key="list" class="fo-pages__grid" ref={list} data-size={size} aria-label={fmt(texts.label, { name })} aria-describedby={helpId}>
@@ -445,8 +513,9 @@ export default function PageGrid(props: PageGridProps) {
             label={labelOf(index)}
             selected={selected?.has(index) ?? false}
             removes={removes}
-            turn={mode === 'rotate' ? (turns?.[index] ?? 0) : 0}
-            ratio={sheetRatio(boxes[index], mode === 'rotate' ? (turns?.[index] ?? 0) : 0)}
+            out={organize && (out?.has(index) ?? false)}
+            turn={turnOf(index)}
+            ratio={sheetRatio(boxes[index], turnOf(index))}
             active={position === activePosition}
             grabbed={grabbed === index}
             first={position === 0}

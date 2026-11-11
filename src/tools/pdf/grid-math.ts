@@ -45,8 +45,14 @@ export function askWidth(cssWidth: number, dpr: number, cap: number): number {
   return Math.max(WIDTH_STEP, Math.ceil(wanted / WIDTH_STEP) * WIDTH_STEP);
 }
 
-/** The pages from the anchor to the page touched, both included, in order (page indices of the file). */
-export function span(anchor: number, target: number): number[] {
+/**
+ * The pages from the anchor to the page touched, both included, in order (page indices of the file). F18: in a grid in
+ * another order (Organize PDF), the pages between the two places of `sequence`, in that order.
+ */
+export function span(anchor: number, target: number, sequence?: readonly number[]): number[] {
+  const a = sequence ? sequence.indexOf(anchor) : -1;
+  const b = sequence ? sequence.indexOf(target) : -1;
+  if (sequence && a >= 0 && b >= 0) return sequence.slice(Math.min(a, b), Math.max(a, b) + 1);
   const from = Math.min(anchor, target);
   const to = Math.max(anchor, target);
   return Array.from({ length: to - from + 1 }, (_, i) => from + i);
@@ -82,6 +88,57 @@ export function countOf(texts: CountTexts, count: number, total: number, removes
   return removes ? leavingCount(texts, count, total) : fmt(texts.selectedCount, { count, total });
 }
 
+// F18 (decision 6 of the prompt): Organize PDF, where a picked page is one the bar acts on and a page that comes out is
+// another state of its own.
+
+/** The words of Organize's count. */
+export type MarkedTexts = Pick<PdfPanelTexts['grid'], 'markedCount' | 'markedOne' | 'keptCount' | 'keptOne'>;
+
+/**
+ * Organize's count: "3 picked · the new PDF keeps 9 pages", with the forms of one ("1 picked", "keeps 1 page"), the two
+ * halves joined by " · " like Delete's. `left` is the pages that do not come out.
+ */
+export function markedCount(texts: MarkedTexts, count: number, left: number): string {
+  const kept = Math.max(0, left);
+  return `${count === 1 ? texts.markedOne : fmt(texts.markedCount, { count })} · ${kept === 1 ? texts.keptOne : fmt(texts.keptCount, { left: kept })}`;
+}
+
+/** Quarter turns from 0 to 3. */
+export const quarter = (turns: number): number => ((Math.trunc(turns) % 4) + 4) % 4;
+
+/** Rotate right (1) and Rotate left (3) of the bar: the picked pages take the turn on top of the ones they had. */
+export function turnedBy(turns: Readonly<Record<number, number>>, pages: readonly number[], by: number): Record<number, number> {
+  const next: Record<number, number> = { ...turns };
+  for (const page of pages) next[page] = quarter((turns[page] ?? 0) + by);
+  return next;
+}
+
+/**
+ * Remove and Put back of the bar: when every picked page already comes out, they come back (Put back); else they all come
+ * out. The pages that came out before keep their order; the new ones come after.
+ */
+export function outAfter(out: readonly number[], picked: readonly number[]): number[] {
+  const had = new Set(out);
+  if (picked.length > 0 && picked.every((page) => had.has(page))) {
+    const back = new Set(picked);
+    return out.filter((page) => !back.has(page));
+  }
+  return [...out, ...picked.filter((page) => !had.has(page))];
+}
+
+/**
+ * The request of Organize PDF (decision 6): the pages in the grid's order without the ones that come out, each with its
+ * turns; null when nothing would change (the same order, no turn, nothing out) or when every page comes out.
+ */
+export function organizePages(total: number, order: readonly number[] | null, out: readonly number[], turns: Readonly<Record<number, number>>): { index: number; turn: number }[] | null {
+  const sequence = order ?? Array.from({ length: total }, (_, i) => i);
+  const gone = new Set(out);
+  const pages = sequence.filter((index) => !gone.has(index)).map((index) => ({ index, turn: quarter(turns[index] ?? 0) }));
+  if (pages.length === 0) return null;
+  const changed = pages.length < sequence.length || pages.some((page, i) => page.turn !== 0 || page.index !== i);
+  return changed ? pages : null;
+}
+
 /** "Invert selection": every page that was not picked, in page order. */
 export function inverted(picked: readonly number[], total: number): number[] {
   const had = new Set(picked);
@@ -92,8 +149,8 @@ export function inverted(picked: readonly number[], total: number): number[] {
  * Shift+click and Shift+Space: every page from the anchor to the page touched takes the new state of the page touched
  * (`on`: picked). The pages picked before keep their order; the new ones come after, in page order.
  */
-export function spanned(picked: readonly number[], anchor: number, target: number, on: boolean): number[] {
-  const pages = span(anchor, target);
+export function spanned(picked: readonly number[], anchor: number, target: number, on: boolean, sequence?: readonly number[]): number[] {
+  const pages = span(anchor, target, sequence);
   if (!on) return picked.filter((page) => !pages.includes(page));
   const had = new Set(picked);
   return [...picked, ...pages.filter((page) => !had.has(page))];
