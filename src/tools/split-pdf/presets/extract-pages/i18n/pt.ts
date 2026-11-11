@@ -1,81 +1,81 @@
-// F18 placeholder: front T writes the pt text
 // Extract pages from PDF (F18, decisions 5 and 7): a preset of Split PDF in its Pick mode only, with one PDF out. Page
 // blocks (how, specs, faq, privacy, related) with at least three of their own (gate:conteudo, MIN_OWN_BLOCKS) and the panel
-// bits of the shared PDF island. The specs rows state the real behaviour of the PDF engine (src/engine/pdf/): when it
-// changes there, change them here. F18: front P refines the option texts (no mode segment).
+// bits of the shared PDF island, in Portuguese (docs/i18n/pt.md; the suffix "-extraido" is in the glossary, DECISOES § 724).
+// The specs rows state the real behaviour of the PDF engine (src/engine/pdf/): when it changes there, change them here and
+// in en.ts. F18: front P refines the option texts (no mode segment).
 import type { PdfToolTexts } from '../../../../../i18n/types.ts';
 import type { SplitTexts } from '../../../../pdf/option-texts.ts';
 
 const texts: PdfToolTexts<SplitTexts> = {
-  title: 'Extract pages from PDF: save the pages you pick in a new PDF',
+  title: 'Extrair páginas do PDF: salve as páginas que escolher num PDF novo',
   description:
-    'Extract pages from a PDF in your browser: pick them in a grid of thumbnails or type numbers like 2-4, 7, and get them in one new PDF. Nothing is uploaded.',
-  h1: 'Extract pages from PDF',
-  howHeading: 'How to extract pages from a PDF',
+    'Extraia páginas de um PDF no navegador: marque na grade de miniaturas ou digite números como 2-4, 7, e receba as páginas num PDF novo. Nada é enviado.',
+  h1: 'Extrair páginas do PDF',
+  howHeading: 'Como extrair páginas de um PDF',
   howSteps: [
-    'Drop one PDF on the box, choose it, or paste it. Oli shows a thumbnail of every page, and the magnifier opens a page large.',
-    'Pick the pages you want in the grid, or type their numbers, like 2-4, 7.',
-    'Press Extract pages. Oli copies the picked pages into one new PDF, in the order they have in your file.',
-    'Download the new PDF, named after your file with -extracted. Your original keeps every page.',
+    'Solte um PDF na caixa, escolha o arquivo ou cole. A Oli mostra uma miniatura de cada página, e a lupa abre a página em tamanho grande.',
+    'Marque na grade as páginas que você quer, ou digite os números delas, como 2-4, 7.',
+    'Aperte Extrair páginas. A Oli copia as páginas marcadas para um PDF novo, na ordem que elas têm no seu arquivo.',
+    'Baixe o PDF novo, com o nome do seu arquivo e -extraido. O seu original fica com todas as páginas.',
   ],
-  specsHeading: 'What the extracted PDF keeps',
+  specsHeading: 'O que o PDF extraído mantém',
   specs: {
-    caption: 'What Extract pages from PDF takes in and gives back',
-    head: ['Detail', 'What happens'],
+    caption: 'O que a Extrair páginas do PDF recebe e entrega',
+    head: ['Detalhe', 'O que acontece'],
     rows: [
-      ['What it takes', 'One PDF at a time. Oli reads what is inside the file, not its name or its ending.'],
-      ['Choosing pages', 'Tap pages in the grid of thumbnails, or type numbers and ranges like 2-4, 7 and Oli picks them for you. Pick all, Pick none and Invert selection work on the whole grid.'],
-      ['What you get', 'One PDF with the picked pages, in the order they have in your file, named with -extracted. The pages are copied, so your original keeps all of them.'],
-      ['Form fields', 'The new PDF keeps the form fields that sit on the extracted pages. The XFA layer, which only Adobe apps read, is removed.'],
-      ['Bookmarks and links', 'Bookmarks and links between pages stay when they point to an extracted page. Links to a web address stay too, and links to the pages left behind go away.'],
-      ['Document info', 'The new PDF takes the title, author and other metadata of your file. Oli adds no date, no producer name and nothing from your device.'],
-      ['Locked PDFs', 'A PDF with a password to open, or with editing restrictions, is turned away with a link to Unlock PDF.'],
-      ['Damaged files', 'An empty file, a file cut short or a file that is not a PDF is turned away. A damaged index is repaired while Oli reads the file.'],
+      ['O que aceita', 'Um PDF por vez. A Oli lê o que há dentro do arquivo, não o nome nem a extensão.'],
+      ['Escolher as páginas', 'Toque nas páginas da grade de miniaturas, ou digite números e intervalos como 2-4, 7, e a Oli marca as páginas para você. "Marcar todas", "Desmarcar todas" e "Inverter seleção" valem para a grade inteira.'],
+      ['O que você recebe', 'Um PDF com as páginas marcadas, na ordem que elas têm no seu arquivo, com -extraido no nome. As páginas são copiadas, então o seu original fica com todas elas.'],
+      ['Campos de formulário', 'O PDF novo fica com os campos de formulário que estão nas páginas extraídas. A camada XFA, que só os programas da Adobe leem, sai.'],
+      ['Marcadores e links', 'Os marcadores e os links entre páginas ficam quando apontam para uma página extraída. Os links para endereços da web também ficam, e os links para as páginas que ficaram de fora somem.'],
+      ['Dados do documento', 'O PDF novo fica com o título, o autor e os outros metadados do seu arquivo. A Oli não acrescenta data, nome de programa nem nada do seu aparelho.'],
+      ['PDFs trancados', 'Um PDF com senha para abrir, ou com restrições de edição, é recusado com um link para Desbloquear PDF.'],
+      ['Arquivos danificados', 'Um arquivo vazio, cortado ou que não é PDF é recusado. Um índice danificado é consertado enquanto a Oli lê o arquivo.'],
     ],
   },
-  faqHeading: 'Questions about extracting pages',
+  faqHeading: 'Perguntas sobre extrair páginas',
   faq: [
     {
-      q: 'What is the difference between extracting pages and splitting a PDF?',
-      a: 'Extract pages gives one PDF with the pages you pick. Split PDF can also put every page in a file of its own, or cut the PDF into several files by ranges like 1-3, 4-6. To pull a few pages out into one file, Extract pages has fewer steps.',
+      q: 'Qual é a diferença entre extrair páginas e dividir um PDF?',
+      a: 'A Extrair páginas do PDF entrega um PDF com as páginas que você marcar. A Dividir PDF também pode pôr cada página num arquivo próprio, ou cortar o PDF em vários arquivos por intervalos como 1-3, 4-6. Para tirar algumas páginas num arquivo só, a Extrair páginas do PDF tem menos passos.',
     },
     {
-      q: 'Should I use Delete PDF pages instead?',
-      a: 'Use Delete PDF pages when it is quicker to pick the pages that go than the pages that stay: it gives your PDF without the pages you pick. Extract pages works the other way round and gives only the pages you pick.',
+      q: 'É melhor usar a Excluir páginas do PDF?',
+      a: 'Use a Excluir páginas do PDF quando for mais rápido marcar as páginas que saem do que as que ficam: ela entrega o seu PDF sem as páginas marcadas. A Extrair páginas do PDF faz o contrário e entrega só as páginas marcadas.',
     },
     {
-      q: 'Can I put the extracted pages in another order?',
-      a: 'They come out in the order they have in your file. To change the order, turn a page or take one out as well, open the new PDF in Organize PDF.',
+      q: 'Dá para pôr as páginas extraídas em outra ordem?',
+      a: 'Elas saem na ordem que têm no seu arquivo. Para mudar a ordem, girar uma página ou tirar outra também, abra o PDF novo na Gerenciar páginas do PDF.',
     },
     {
-      q: 'Does my original PDF lose the pages I extract?',
-      a: 'No. Oli copies the picked pages into a new file and never changes yours, which keeps every page it had.',
+      q: 'O meu PDF original perde as páginas que eu extraio?',
+      a: 'Não. A Oli copia as páginas marcadas para um arquivo novo e nunca muda o seu, que fica com todas as páginas que tinha.',
     },
     {
-      q: 'Is my PDF uploaded to extract the pages?',
-      a: 'No. The PDF is read and the new file is written on your device, in your browser, and nothing is sent to a server. Open the Network tab of your browser while you extract pages: no request carries your file.',
+      q: 'Meu PDF é enviado para extrair as páginas?',
+      a: 'Não. O PDF é lido e o arquivo novo é gravado no seu aparelho, no navegador, e nada vai para um servidor. Abra a aba Rede do navegador enquanto extrai as páginas: nenhuma requisição leva o seu arquivo.',
     },
   ],
-  privacyHeading: 'Privacy',
-  privacyNote: 'The pages you extract are copied on your device, in your browser, and your PDF is never sent to a server.',
-  relatedHeading: 'Related tools',
+  privacyHeading: 'Privacidade',
+  privacyNote: 'As páginas que você extrai são copiadas no seu aparelho, no navegador, e o seu PDF nunca é enviado a um servidor.',
+  relatedHeading: 'Ferramentas relacionadas',
   panel: {
-    suffix: 'extracted',
-    note: 'one PDF at a time',
-    progressLabel: 'Extracting pages',
-    done: 'Done! Oli put your pages in a new PDF.',
-    doneMany: 'Done! Oli made {count} PDFs from your file.',
-    action: 'Extract pages',
+    suffix: 'extraido',
+    note: 'um PDF por vez',
+    progressLabel: 'Extraindo as páginas',
+    done: 'Prontinho! A Oli pôs suas páginas num PDF novo.',
+    doneMany: 'Prontinho! A Oli fez {count} PDFs com o seu arquivo.',
+    action: 'Extrair páginas',
     options: {
-      legend: 'Split by',
-      each: 'Every page',
-      ranges: 'Page ranges',
-      pick: 'Pick pages',
-      rangesLabel: 'Pages for each file',
-      rangesHelp: 'One file for each range, for example 1-3, 5, 8-10',
-      rangesError: 'Type page numbers like 1-3, 5, 8-10, using only pages the PDF has.',
-      pickHelp: 'Pick the pages you want. They go together into one new PDF, in the order of your file.',
-      pickNone: 'Pick at least one page first.',
+      legend: 'Dividir por',
+      each: 'Cada página',
+      ranges: 'Intervalos de páginas',
+      pick: 'Escolher páginas',
+      rangesLabel: 'Páginas de cada arquivo',
+      rangesHelp: 'Um arquivo para cada intervalo, por exemplo 1-3, 5, 8-10',
+      rangesError: 'Digite números de página como 1-3, 5, 8-10, só com páginas que o PDF tem.',
+      pickHelp: 'Marque as páginas que você quer. Elas vão juntas para um PDF novo, na ordem do seu arquivo.',
+      pickNone: 'Marque pelo menos uma página antes.',
     },
   },
 };

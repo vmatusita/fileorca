@@ -1,80 +1,81 @@
-// F18 placeholder: front T writes the pt text
 import type { PdfToolTexts } from '../../../i18n/types.ts';
 import type { ReorderTexts } from '../../pdf/option-texts.ts';
 
 // Organize PDF page blocks (data-content: how, specs, faq, privacy, related) and the panel bits the shared PDF island shows
-// (F18, decision 6). The new PDF is built the way Delete PDF pages builds it (the engine's assemble.ts, DECISOES § 145), so
-// the rows on forms, bookmarks and links follow that tool's. The specs rows state the real behaviour of the engine: when it
-// changes there, change them here. F18 placeholder: the option texts are Reorder's shape until front O gives the grid mode
-// its own (OrganizeTexts).
+// (F18, decision 6), in Portuguese (docs/i18n/pt.md; the name is "Gerenciar páginas do PDF", since "Organizar páginas do
+// PDF" is Reorder's, decision 4). The new PDF is built the way Delete PDF pages builds it (the engine's assemble.ts,
+// DECISOES § 145), so the rows on forms, bookmarks and links follow that tool's. The specs rows state the real behaviour of
+// the engine, as the English file does: when it changes there, change them here and in en.ts. The suffix is "gerenciado":
+// "organizado" is Reorder's (DECISOES § 724). F18 placeholder: the option texts are Reorder's shape until front O gives
+// the grid mode its own (OrganizeTexts).
 const texts: PdfToolTexts<ReorderTexts> = {
-  title: 'Organize PDF: move, rotate and remove pages in your browser',
+  title: 'Gerenciar páginas do PDF: mova, gire e tire páginas no navegador',
   description:
-    'Move, rotate and remove the pages of a PDF in one grid of thumbnails, then save one new PDF. It all happens in your browser, and nothing is uploaded.',
-  h1: 'Organize PDF',
-  howHeading: 'How it works',
+    'Mova, gire e tire as páginas de um PDF numa grade de miniaturas e salve um PDF novo. Tudo acontece no seu navegador, e nada é enviado.',
+  h1: 'Gerenciar páginas do PDF',
+  howHeading: 'Como funciona',
   howSteps: [
-    'Drop a PDF on the box, choose one, or paste it. Oli works on one PDF at a time and shows a thumbnail of every page; the magnifier on a page opens it large.',
-    'Pick pages by tapping them or by typing numbers like 1-3, 5, then use the bar above the grid to turn them right or left, or to take them out of the new PDF.',
-    'Move a page with the arrows on it, or drag it with the mouse. A page you took out stays in the grid, faded, until you put it back.',
-    'Press Save changes, then download the new PDF. Your original file stays untouched.',
+    'Solte um PDF na caixa, escolha o arquivo ou cole. A Oli trabalha com um PDF por vez e mostra uma miniatura de cada página; a lupa de uma página abre a página em tamanho grande.',
+    'Marque as páginas tocando nelas ou digitando números como 1-3, 5, e use a barra acima da grade para girar as páginas para a direita ou para a esquerda, ou para tirar as páginas do PDF novo.',
+    'Mova uma página com as setas dela, ou arraste com o mouse. Uma página que você tirou fica na grade, mais clara, até você devolver.',
+    'Aperte Salvar as mudanças e baixe o PDF novo. O seu arquivo original continua intacto.',
   ],
-  specsHeading: 'What goes in and what comes out',
+  specsHeading: 'O que entra e o que sai',
   specs: {
-    caption: 'What Organize PDF takes in and gives back',
-    head: ['Detail', 'What happens'],
+    caption: 'O que a Gerenciar páginas do PDF recebe e entrega',
+    head: ['Detalhe', 'O que acontece'],
     rows: [
-      ['Files', 'One PDF at a time. Oli checks that it is a PDF from what is inside the file, not from its name.'],
-      ['The grid', 'Oli draws a thumbnail of every page with PDF.js. The magnifier on a page opens it large, where Previous and Next follow the order you set.'],
-      ['Picking pages', 'Tap pages to pick them, use Pick all, Pick none or Invert selection, or type page numbers and ranges like 1-3, 5.'],
-      ['Turning pages', 'Rotate right and Rotate left turn the picked pages a quarter turn each time, on top of the turn they already have.'],
-      ['Taking pages out', 'Remove takes the picked pages out of the new PDF. They stay in the grid, faded, and Put back brings them in again. At least one page has to stay.'],
-      ['Moving pages', 'The arrows on each page move it one place earlier or later, and the mouse can drag it to its new place.'],
-      ['The new file', 'Oli copies the pages you keep into a new PDF, in your order and with your turns, the way Delete PDF pages does. What only the removed pages used is left out.'],
-      ['Forms', 'Form fields on the pages you keep stay. An XFA form layer, which only Adobe apps read, is removed; the regular form fields still work.'],
-      ['Bookmarks and links', 'Bookmarks and links between pages stay when they point to a page you keep, and they still lead to that page in its new place. Links to the web stay. Links to a page you took out are removed.'],
-      ['Details kept', 'The new PDF keeps the info fields and XMP metadata of your file. Oli adds no date, no Producer and nothing from your device.'],
-      ['Files it refuses', 'A PDF that needs a password to open, or that has editing restrictions, is refused with a link to Unlock PDF. An empty or cut-short file, or one that is not a PDF, is refused too. A file with a damaged index (xref) is repaired while Oli reads it.'],
+      ['Arquivos', 'Um PDF por vez. A Oli confere que é um PDF pelo que há dentro do arquivo, não pelo nome.'],
+      ['A grade', 'A Oli desenha uma miniatura de cada página com o PDF.js. A lupa de uma página abre a página em tamanho grande, e ali Anterior e Próxima seguem a ordem que você definiu.'],
+      ['Marcar páginas', 'Toque nas páginas para marcar, use "Marcar todas", "Desmarcar todas" ou "Inverter seleção", ou digite números e intervalos de páginas como 1-3, 5.'],
+      ['Girar páginas', '"Girar à direita" e "Girar à esquerda" giram as páginas marcadas um quarto de volta a cada toque, somando ao giro que elas já têm.'],
+      ['Tirar páginas', '"Tirar" tira as páginas marcadas do PDF novo. Elas ficam na grade, mais claras, e "Devolver" põe as páginas de volta. Pelo menos uma página tem de ficar.'],
+      ['Mover páginas', 'As setas de cada página movem a página uma posição para antes ou para depois, e o mouse pode arrastar a página para o novo lugar.'],
+      ['O arquivo novo', 'A Oli copia as páginas que ficam para um PDF novo, na sua ordem e com os seus giros, do jeito que a Excluir páginas do PDF faz. O que só as páginas tiradas usavam fica de fora.'],
+      ['Formulários', 'Os campos de formulário das páginas que ficam continuam. A camada de formulário XFA, que só os programas da Adobe leem, sai; os campos de formulário comuns continuam funcionando.'],
+      ['Marcadores e links', 'Os marcadores e os links entre páginas continuam quando apontam para uma página que fica, e ainda levam a essa página no novo lugar dela. Os links para a web ficam. Os links para uma página que você tirou saem.'],
+      ['O que fica', 'O PDF novo mantém os campos de informação e os metadados XMP do seu arquivo. A Oli não acrescenta data, nome de programa (Producer) nem nada do seu aparelho.'],
+      ['Arquivos recusados', 'Um PDF que pede senha para abrir, ou que tem restrições de edição, é recusado com um link para Desbloquear PDF. Um arquivo vazio ou cortado, ou que não é PDF, também é recusado. Um arquivo com o índice (xref) danificado é consertado enquanto a Oli lê.'],
     ],
   },
-  faqHeading: 'Questions',
+  faqHeading: 'Perguntas',
   faq: [
     {
-      q: 'What is the difference between Organize PDF and Reorder PDF pages?',
-      a: 'Reorder PDF pages changes only the order of the pages. Organize PDF changes the order, turns pages and takes pages out in the same grid, and saves all of it in one new PDF, so a file that needs the three fixes goes through one tool instead of three.',
+      q: 'Qual é a diferença entre a Gerenciar páginas do PDF e a Organizar páginas do PDF?',
+      a: 'A Organizar páginas do PDF só muda a ordem das páginas. A Gerenciar páginas do PDF muda a ordem, gira páginas e tira páginas na mesma grade, e salva tudo num PDF novo, então um arquivo que precisa das três correções passa por uma ferramenta em vez de três.',
     },
     {
-      q: 'When should I use Delete PDF pages or Rotate PDF instead?',
-      a: 'Use Delete PDF pages when you only need to take pages out, and Rotate PDF when you only need to turn pages, or to turn the pages of several PDFs at once. Organize PDF works on one PDF at a time and suits a file that needs more than one of these fixes.',
+      q: 'Quando é melhor usar a Excluir páginas do PDF ou a Girar PDF?',
+      a: 'Use a Excluir páginas do PDF quando você só precisa tirar páginas, e a Girar PDF quando só precisa girar páginas, ou girar as páginas de vários PDFs de uma vez. A Gerenciar páginas do PDF trabalha com um PDF por vez e serve para um arquivo que precisa de mais de uma dessas correções.',
     },
     {
-      q: 'Can I undo a change before I save?',
-      a: 'Yes. A page you took out stays in the grid, faded: pick it and press Put back. A turn goes back with a turn the other way, and a page you moved goes back with the arrows. After the result the grid stays on screen, and any change brings the button back to save another PDF. Your original file is never changed.',
+      q: 'Dá para desfazer uma mudança antes de salvar?',
+      a: 'Dá. Uma página que você tirou fica na grade, mais clara: marque a página e aperte "Devolver". Um giro volta com um giro para o outro lado, e uma página que você moveu volta com as setas. Depois do resultado a grade continua na tela, e qualquer mudança traz o botão de volta para salvar outro PDF. O seu arquivo original nunca muda.',
     },
     {
-      q: 'Will forms, links and bookmarks still work?',
-      a: 'On the pages you keep, yes. Form fields stay, bookmarks and links between pages still lead to the same pages in their new place, and links to the web stay. A link to a page you took out is removed, because that page is no longer in the file.',
+      q: 'Os formulários, os links e os marcadores continuam funcionando?',
+      a: 'Nas páginas que ficam, sim. Os campos de formulário ficam, os marcadores e os links entre páginas ainda levam às mesmas páginas no novo lugar delas, e os links para a web ficam. Um link para uma página que você tirou sai, porque essa página não está mais no arquivo.',
     },
     {
-      q: 'Is my PDF uploaded?',
-      a: "No. FileOrca reads and writes your PDF on your device, in your browser, and PDF.js draws the thumbnails there too. Open your browser's Network tab while you organize the pages: no request carries your files.",
+      q: 'Meu PDF é enviado para algum lugar?',
+      a: 'Não. O FileOrca lê e grava o seu PDF no seu aparelho, no navegador, e o PDF.js desenha as miniaturas ali também. Abra a aba Rede do navegador enquanto mexe nas páginas: nenhuma requisição leva os seus arquivos.',
     },
   ],
-  privacyHeading: 'Privacy',
-  privacyNote: 'Your PDF is read and rebuilt on your device, in your browser, and is never sent to a server. The thumbnails and the large view of a page are drawn there too.',
-  relatedHeading: 'Related tools',
+  privacyHeading: 'Privacidade',
+  privacyNote: 'Seu PDF é lido e montado de novo no seu aparelho, no navegador, e nunca é enviado a um servidor. As miniaturas e a vista grande de uma página também são desenhadas ali.',
+  relatedHeading: 'Ferramentas relacionadas',
   panel: {
-    suffix: 'organized',
-    note: 'one PDF at a time',
-    progressLabel: 'Organizing pages',
-    done: 'Done! Oli saved your pages in a new PDF.',
-    doneMany: 'Done! Oli organized the pages of {count} PDFs.',
-    action: 'Save changes',
+    suffix: 'gerenciado',
+    note: 'um PDF por vez',
+    progressLabel: 'Arrumando as páginas',
+    done: 'Prontinho! A Oli salvou suas páginas num PDF novo.',
+    doneMany: 'Prontinho! A Oli arrumou as páginas de {count} PDFs.',
+    action: 'Salvar as mudanças',
     options: {
-      help: 'Pick pages to turn them or take them out, and move a page with the arrows on it.',
-      reverse: 'Reverse order',
-      reversed: 'Pages reversed.',
-      unchanged: 'Move, turn or take out a page to save a new PDF.',
+      help: 'Marque páginas para girar ou tirar, e mova uma página com as setas dela.',
+      reverse: 'Inverter a ordem',
+      reversed: 'Páginas invertidas.',
+      unchanged: 'Mova, gire ou tire uma página para salvar um PDF novo.',
     },
   },
 };
