@@ -131,11 +131,10 @@ export default {
       description: 'Junte suas imagens num PDF só, uma imagem por página.',
       synonyms: ['pdf', 'jpg para pdf', 'png para pdf', 'foto para pdf', 'juntar imagens', 'juntar fotos', 'jpg', 'png', 'imagem'],
     },
-    // F18 placeholder: front T writes the pt text (the name is the contract's, decision 4).
     'remove-exif-data': {
       name: 'Remover metadados da foto',
-      description: 'Take the location, date and camera out of a photo.',
-      synonyms: ['exif', 'metadata', 'gps', 'location', 'remove exif', 'remove metadata', 'exif remover', 'photo', 'image', 'jpg', 'jpeg', 'png', 'webp'],
+      description: 'Tire de uma foto a localização, a data e os dados da câmera.',
+      synonyms: ['exif', 'metadados', 'gps', 'localização', 'remover exif', 'remover metadados', 'tirar metadados', 'tirar localização', 'foto', 'imagem', 'jpg', 'jpeg', 'png', 'webp'],
     },
     'compress-image-to-100kb': {
       name: 'Comprimir imagem para 100 KB',
@@ -152,11 +151,10 @@ export default {
       description: 'Um JPG de 1280 × 720 com menos de 2 MB, pronto para o vídeo do YouTube.',
       synonyms: ['youtube', 'miniatura', 'thumbnail', 'capa do vídeo', '1280x720', '1280 x 720', '16:9', 'vídeo', 'jpg'],
     },
-    // F18 placeholder: front T writes the pt text (the name is the contract's, decision 4).
     'rotate-image-flip': {
       name: 'Espelhar imagem',
-      description: 'Mirror a photo left to right or top to bottom.',
-      synonyms: ['flip', 'mirror', 'flip image', 'mirror image', 'flip horizontally', 'flip vertically', 'photo', 'image', 'jpg', 'jpeg', 'png', 'webp'],
+      description: 'Espelhe uma foto na horizontal ou na vertical, sem girar.',
+      synonyms: ['espelhar', 'espelho', 'espelhar imagem', 'espelhar foto', 'espelhar na horizontal', 'espelhar na vertical', 'foto', 'imagem', 'jpg', 'jpeg', 'png', 'webp'],
     },
   },
   pdf: {
@@ -173,7 +171,8 @@ export default {
     'pdf-to-jpg': {
       name: 'PDF para JPG',
       description: 'Transforme cada página de um PDF numa imagem JPG ou PNG.',
-      synonyms: ['pdf para jpg', 'pdf para jpeg', 'pdf para png', 'pdf para imagem', 'converter pdf', 'página para imagem', 'pdf'],
+      // F18 (decision 4; DECISOES § 724): "pdf para png" went to PDF para PNG, whose name it is (§ 180).
+      synonyms: ['pdf para jpg', 'pdf para jpeg', 'pdf para imagem', 'converter pdf', 'página para imagem', 'pdf'],
     },
     'compress-pdf': {
       name: 'Comprimir PDF',
@@ -210,11 +209,10 @@ export default {
       description: 'Tire a senha ou as restrições de um PDF que você consegue abrir.',
       synonyms: ['tirar senha', 'remover senha', 'desbloquear pdf', 'descriptografar pdf', 'tirar restrições', 'pdf'],
     },
-    // F18 placeholder: front T writes the pt text (the name is the contract's, decision 4).
     'organize-pdf': {
       name: 'Gerenciar páginas do PDF',
-      description: 'Move, rotate and remove the pages of a PDF in one grid.',
-      synonyms: ['organize pdf', 'organize', 'rearrange', 'rotate', 'delete', 'move pages', 'manage pages', 'pdf'],
+      description: 'Mova, gire e tire páginas de um PDF numa grade só.',
+      synonyms: ['gerenciar páginas', 'gerenciar pdf', 'organizar pdf', 'reorganizar', 'girar páginas', 'excluir páginas', 'pdf'],
     },
     'reorder-pdf-pages': {
       name: 'Organizar páginas do PDF',
@@ -226,17 +224,15 @@ export default {
       description: "Carimbe um texto de marca d'água em todas as páginas de um PDF.",
       synonyms: ["marca d'água", 'marca dagua', 'carimbo', 'confidencial', 'rascunho', 'pdf'],
     },
-    // F18 placeholder: front T writes the pt text (the name is the contract's, decision 4).
     'split-pdf-extract-pages': {
       name: 'Extrair páginas do PDF',
-      description: 'Save the pages you pick from a PDF in one new PDF.',
-      synonyms: ['extract', 'extract pages', 'extract pages from pdf', 'pull out pages', 'save pages', 'pdf'],
+      description: 'Guarde num PDF novo só as páginas que você escolher.',
+      synonyms: ['extrair', 'extrair páginas', 'extrair páginas do pdf', 'salvar páginas', 'copiar páginas', 'pdf'],
     },
-    // F18 placeholder: front T writes the pt text (the name is the contract's, decision 4).
     'pdf-to-jpg-to-png': {
       name: 'PDF para PNG',
-      description: 'Turn the pages of a PDF into sharp PNG images.',
-      synonyms: ['pdf to png', 'png', 'convert pdf to png', 'pdf page to png', 'pdf'],
+      description: 'Transforme as páginas de um PDF em imagens PNG nítidas.',
+      synonyms: ['pdf para png', 'png', 'converter pdf em png', 'página para png', 'pdf'],
     },
   },
   calcs: {
