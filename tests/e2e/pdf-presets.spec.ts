@@ -57,10 +57,20 @@ test('Extract pages: no segment of the modes of Split, the grid at once, and one
   await action.click();
   await expect(root(page).getByText(extractTexts.panel.options.pickNone)).toBeVisible();
   await expect(root(page).locator('.fo-btn--download')).toHaveCount(0);
+  // "Pick all, Pick none and Invert selection work on the whole grid" (the specs of the page).
+  const count = root(page).locator('.fo-pages__count');
+  await root(page).getByRole('button', { name: panel.grid.selectAll, exact: true }).click();
+  await expect(count).toHaveText(countOf(panel.grid, 8, 8, false));
+  await root(page).getByRole('button', { name: panel.grid.selectNone, exact: true }).click();
+  await expect(count).toHaveText(countOf(panel.grid, 0, 8, false));
   // Picked on the grid, in another order than the file's: Split's count ("picked"), never Delete's ("come out").
   await cells.nth(4).locator('.fo-page__main').click();
   await cells.nth(1).locator('.fo-page__main').click();
-  await expect(root(page).locator('.fo-pages__count')).toHaveText(countOf(panel.grid, 2, 8, false));
+  await expect(count).toHaveText(countOf(panel.grid, 2, 8, false));
+  await root(page).getByRole('button', { name: panel.grid.invert, exact: true }).click();
+  await expect(count).toHaveText(countOf(panel.grid, 6, 8, false));
+  await root(page).getByRole('button', { name: panel.grid.invert, exact: true }).click();
+  await expect(count).toHaveText(countOf(panel.grid, 2, 8, false));
   await action.click();
   const download = await takePdfDownload(page);
   expect(download.name).toBe('gen-paginas-mistas-extracted.pdf');
