@@ -228,15 +228,21 @@ test.describe('two lines in Figtree and in its fallback', () => {
 // above the notice. What is left, fixed here: 1px at most under it in those three PDF tools in Spanish, and in the
 // presets of pt with the fallback font (the notice in three lines). The button stays clickable, and the page scrolls.
 test.describe('first visit at 320 × 640: the Choose button of the presets', () => {
+  // F18 (junction; DECISOES § 742 and § 743): Extract pages in Spanish is a PDF page with the layout of the three PDF tools
+  // in Spanish below, measured at 320 × 640 in both browsers: the trail in two rows (54 px), the H1 in two lines, the PDF
+  // island, and the Choose button ending at 484.59 px, where the Spanish notice (148 px, a line more than in en and pt)
+  // starts at 484 px: 0.59 px under it, as /es/eliminar-paginas-pdf/. The name is the one of decision 4, and the drop zone
+  // and the notice are the site's; so it has the 1px those three have since the F13b (§ 582), not a tolerance of its own.
+  const EXTRACT_ES = routeById('split-pdf-extract-pages').paths.es ?? '(split-pdf-extract-pages sem página em es)';
   const PRESETS = [
     '/compress-image/to-100kb/', '/pt/comprimir-imagem/para-100kb/', '/es/comprimir-imagen/a-100kb/',
     '/compress-image/to-1mb/', '/pt/comprimir-imagem/para-1mb/', '/es/comprimir-imagen/a-1mb/',
     '/resize-image/youtube-thumbnail/', '/pt/redimensionar-imagem/miniatura-youtube/', '/es/redimensionar-imagen/miniatura-youtube/',
     // F18 (decision 19; DECISOES § 743): the presets of the run, with the trail of four steps that leaves out its hub under
     // 360 px (§ 582): the image one and the two PDF ones (the first of the site, with the same trail since the F18).
-    ...(['rotate-image-flip', 'split-pdf-extract-pages', 'pdf-to-jpg-to-png'] as const).flatMap((id) => LANGS.map((lang) => routeById(id).paths[lang] ?? `(${id} sem página em ${lang})`)),
+    ...(['rotate-image-flip', 'split-pdf-extract-pages', 'pdf-to-jpg-to-png'] as const).flatMap((id) => LANGS.map((lang) => routeById(id).paths[lang] ?? `(${id} sem página em ${lang})`)).filter((path) => path !== EXTRACT_ES),
   ];
-  const LEFT = ['/es/eliminar-paginas-pdf/', '/es/numerar-paginas-pdf/', '/es/ordenar-paginas-pdf/'];
+  const LEFT = ['/es/eliminar-paginas-pdf/', '/es/numerar-paginas-pdf/', '/es/ordenar-paginas-pdf/', EXTRACT_ES];
   for (const font of ['Figtree', 'fallback'] as const) {
     for (const path of [...PRESETS, ...LEFT]) {
       test(`${font}: ${path}`, async ({ browser }) => {
