@@ -113,6 +113,12 @@ export interface Expect {
   mostlyRed?: boolean;
   /** The Orientation tag may stay when the original goes back unchanged (a rotated JPEG that did not shrink). */
   tagMayStay?: boolean;
+  /**
+   * F18 (Remove EXIF data, decision 10): the picture is the one that went in. The bytes of the image equal the fixture's
+   * (`imageBytes`, in Node), every decoded pixel equals the fixture's (`pixelHash`, in this browser), and the Orientation
+   * is the fixture's own, alone in its block (a JPG with none has no Exif at all).
+   */
+  sameImage?: boolean;
 }
 
 export type Refusal = 'wrong-tool' | 'unsupported' | 'truncated' | 'decode' | 'empty';
@@ -419,7 +425,10 @@ export async function reference(page: Page, check: PixelCheck): Promise<Referenc
   const tag = oracle(check.from).orientation;
   const stored = tag === 1 ? bytes : withOrientation(bytes, 1);
   const region = check.box ? storedBox(check.box, tag) : undefined;
-  const grid = await thumbnail(page, stored, 'image/jpeg', { size: GRID, ...(region ? { region } : {}) });
+  // F18: the type of what the fixture really is (the mirror of Flip image is checked on the PNG and WebP fixtures too).
+  const real = sniff(stored);
+  const mime = real === 'png' || real === 'webp' ? MIME_OF[real] : 'image/jpeg';
+  const grid = await thumbnail(page, stored, mime, { size: GRID, ...(region ? { region } : {}) });
   if (!grid.ok) throw new Error(`could not decode the stored pixels of ${check.from}: ${grid.error}`);
   const upright = orientGrid(grid.gray, GRID, tag);
   const expected = (check.after ?? 1) > 1 ? orientGrid(upright, GRID, check.after ?? 1) : upright;
@@ -804,6 +813,18 @@ async function checkOutput(context: CheckContext, fixture: string, want: Expect,
       expect(red / cells, `${out.name} shows the first (red) frame: red ${Math.round(red / cells)}, blue ${Math.round(blue / cells)}`).toBeGreaterThan(blue / cells + 60);
       notes.push('first frame is red');
     }
+  }
+  if (want.sameImage) {
+    const input = new Uint8Array(fixtureBytes(fixture));
+    expect(sameImageBytes(out.bytes, input), `${out.name}: the bytes of the picture are the ones of ${fixture}`).toBe(true);
+    notes.push('same picture bytes');
+    const [before, after] = [await pixelHash(page, input, MIME_OF[want.format]), await pixelHash(page, out.bytes, MIME_OF[want.format])];
+    expect(before.ok && after.ok, `${out.name} and ${fixture} decode for the pixel hash: ${before.error} ${after.error}`).toBe(true);
+    expect(after, `${out.name}: every decoded pixel is the one of ${fixture}`).toEqual(before);
+    notes.push('same decoded pixels');
+    const tag = oracle(fixture).orientation;
+    expect(metadataReport(out.bytes).orientation ?? 1, `${out.name}: the Orientation of ${fixture}`).toBe(tag);
+    if (tag > 1) notes.push('Orientation tag only');
   }
   if (want.pixels && opens === 'yes') {
     const verdict = await comparePixels(page, out, want.format, want.pixels, context.references);

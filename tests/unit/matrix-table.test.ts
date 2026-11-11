@@ -44,6 +44,11 @@ describe('size and note', () => {
     expect(note('already fits: own format and no metadata, orientation ok')).toBe('já cabia: mesmo formato e sem metadados; orientação ok');
     expect(note('something new')).toBe('something new');
   });
+
+  it('F18: the notes of Remove EXIF data (the same picture, the Orientation alone) in Portuguese too', () => {
+    expect(note('same picture bytes, same decoded pixels, Orientation tag only')).toBe('mesmos bytes da imagem; mesmos pixels decodificados; só a tag Orientation');
+    expect(note('same picture bytes, same decoded pixels, animation kept')).toBe('mesmos bytes da imagem; mesmos pixels decodificados; animação mantida');
+  });
 });
 
 describe('buildTable', () => {

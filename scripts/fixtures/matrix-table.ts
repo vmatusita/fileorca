@@ -1,10 +1,11 @@
 // Builds the Markdown table "ferramenta × fixture × navegador" of the report (docs/relatorios/fase-02-matriz.md,
-// and docs/relatorios/fase-17-matriz.md since the F17, with AVIF to JPG and Convert to WebP) from the JSON records
+// docs/relatorios/fase-17-matriz.md since the F17, with AVIF to JPG and Convert to WebP, and
+// docs/relatorios/fase-18-matriz.md since the F18, with Flip image and Remove EXIF data) from the JSON records
 // the matrix tests write while they run (test-results/matriz/*.json, one per test and browser, from
 // tests/e2e/image-matrix.spec.ts and image-presets.spec.ts). Nothing in the table is written by hand: run the two
 // specs in both browsers in ONE Playwright run (it clears test-results at its start), then
 //
-//   node scripts/fixtures/matrix-table.ts > docs/relatorios/fase-17-matriz.md
+//   node scripts/fixtures/matrix-table.ts > docs/relatorios/fase-18-matriz.md
 //
 // The functions are exported so a Vitest can prove the layout (tests/unit/matrix-table.test.ts).
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
@@ -69,6 +70,10 @@ export function note(text: string): string {
         'already fits: own format and no metadata': 'já cabia: mesmo formato e sem metadados',
         'orientation ok': 'orientação ok',
         '16:9 from the centre': '16:9 pelo centro',
+        // F18: Remove EXIF data hands the picture back as it came (tests/e2e/lib/matrix.ts, `sameImage`).
+        'same picture bytes': 'mesmos bytes da imagem',
+        'same decoded pixels': 'mesmos pixels decodificados',
+        'Orientation tag only': 'só a tag Orientation',
       };
       return known[part] ?? part;
     })
