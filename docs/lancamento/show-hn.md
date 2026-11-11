@@ -66,7 +66,7 @@ Com a 2b no ar (F17), os quatro títulos continuam verdadeiros: "convert" cobre 
 
 Por quê:
 
-- O título fala de "image tools", e o hub `/image-tools/` é exatamente isso: as dez ferramentas e os três presets, cada um com link direto. Quem clica já escolhe e usa.
+- O título fala de "image tools", e o hub `/image-tools/` é exatamente isso: as onze ferramentas e os quatro presets, cada um com link direto. Quem clica já escolhe e usa.
 - A home (`/`) hoje é quase o mesmo hub, mas tem blocos de texto de apresentação ("Your files stay with you") e vai crescer com as calculadoras (F4) e o PDF (F5). O Show HN rejeita landing page, e a home tende a parecer uma.
 - Guardar a home deixa a URL livre para um segundo Show HN quando as calculadoras ou o PDF forem uma reformulação grande de verdade.
 
@@ -90,8 +90,9 @@ What is there today:
 - Compress, resize, crop and rotate (and mirror) for JPG, PNG and WebP.
 - HEIC to JPG or PNG, WebP to JPG or PNG, and PNG to JPG or JPG to PNG.
 - AVIF to JPG, and JPG or PNG to WebP or AVIF, with the transparency kept.
+- Remove EXIF data from JPG, PNG and WebP.
 - Image to PDF, one image per page.
-- Presets for common limits: 100 KB, 1 MB and a YouTube thumbnail size.
+- Presets: 100 KB, 1 MB, a YouTube thumbnail size, and a flip with no rotation.
 
 There is no account and no limit on batch size. You can paste images with Ctrl+V and download the results one by one or as a ZIP.
 

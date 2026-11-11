@@ -36,7 +36,7 @@ Depois da aprovação, quem é dono do app pode pedir acesso de desenvolvedor pa
 | Descrição curta | **Até 150 caracteres** | Adotado por cautela (não publicado) |
 | Descrição longa | **Até cerca de 1.000 caracteres** | Adotado por cautela (não publicado) |
 
-Se o formulário mostrar outro limite, ele vale. Os textos abaixo têm 146 caracteres (curta) e 748 (longa, três parágrafos).
+Se o formulário mostrar outro limite, ele vale. Os textos abaixo têm 146 caracteres (curta) e 785 (longa, três parágrafos).
 
 Regra do Victor: só em inglês, sem emoji, sem exclamação, sem as palavras vetadas.
 
@@ -66,10 +66,10 @@ Regra do Victor: só em inglês, sem emoji, sem exclamação, sem as palavras ve
 Free image tools that run in your browser: compress, resize, crop, rotate, convert HEIC, WebP, PNG and AVIF, and make PDFs. No account, no upload.
 ```
 
-### Descrição longa (748 caracteres)
+### Descrição longa (785 caracteres)
 
 ```
-FileOrca is a set of free image tools that run in your web browser. You can compress, resize, crop and rotate JPG, PNG and WebP files, turn HEIC, WebP, PNG and AVIF into JPG, convert JPG and PNG to WebP or AVIF, and put images into one PDF. There are also presets for common limits: 100 KB, 1 MB and a YouTube thumbnail.
+FileOrca is a set of free image tools that run in your web browser. You can compress, resize, crop, rotate and flip JPG, PNG and WebP files, remove their EXIF data, turn HEIC, WebP, PNG and AVIF into JPG, convert JPG and PNG to WebP or AVIF, and put images into one PDF. There are also presets: 100 KB, 1 MB, a YouTube thumbnail and a flip with no rotation.
 
 Your files are processed on your device and are not uploaded. There is no account and no limit on how many images you add at once. You can paste images with Ctrl+V and download the results one by one or as a ZIP file. Results come out without photo metadata such as GPS, Exif, XMP and IPTC.
 
