@@ -104,7 +104,8 @@ export default {
     'pdf-to-jpg': {
       name: 'PDF to JPG',
       description: 'Turn every page of a PDF into a JPG or PNG image.',
-      synonyms: ['pdf to jpg', 'pdf to jpeg', 'pdf to png', 'pdf to image', 'convert pdf', 'page to image', 'pdf'],
+      // F18 (decision 4; DECISOES § 724): "pdf to png" went to PDF to PNG, which has it as its name (DECISOES § 180).
+      synonyms: ['pdf to jpg', 'pdf to jpeg', 'pdf to image', 'convert pdf', 'page to image', 'pdf', 'png'],
     },
     'compress-pdf': {
       name: 'Compress PDF',

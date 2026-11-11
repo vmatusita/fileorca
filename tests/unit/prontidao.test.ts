@@ -27,7 +27,7 @@ import {
   type SitePage,
 } from '../../scripts/lib/prontidao.ts';
 import { LANGS, QR_ID, ROUTES, languagesOf, moneyHubId, pagePath, routeById, type Lang, type RouteId } from '../../src/i18n/routes.ts';
-import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { PDF_HUB_ID, PDF_PAGES, PDF_PRESET_IDS, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import {
   BR_CALC_IDS,
   BR_HUB_ID,
@@ -98,9 +98,12 @@ function write(dir: string, path: string, content: string): void {
   writeFileSync(file, content);
 }
 
-/** The PDF pages of a fake site with the PDF tools: the 12 of the registry and the hub, English only, with an ad area. */
+/**
+ * The PDF pages of a fake site with the PDF tools: the 13 tools of the registry, its 2 presets (F18, decision 5) and the hub,
+ * English only, with an ad area.
+ */
 const PDF_FAKE: SitePage[] = [
-  ...PDF_TOOL_IDS.map((id) => ({ id, lang: 'en' as const, path: PDF_PAGES[id].path, indexable: true, ads: true })),
+  ...[...PDF_TOOL_IDS, ...PDF_PRESET_IDS].map((id) => ({ id, lang: 'en' as const, path: PDF_PAGES[id].path, indexable: true, ads: true })),
   { id: PDF_HUB_ID, lang: 'en' as const, path: '/pdf-tools/', indexable: true, ads: true },
 ];
 const PDF_PATHS = PDF_TOOL_IDS.map((id) => PDF_PAGES[id].path);
@@ -128,15 +131,15 @@ function makeSite(change: (dir: string) => void = () => {}, pdf = false): Site {
     write(dir, `/sitemap-${lang}.xml`, `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`);
   }
   write(dir, '/_headers', "/*\n  X-Content-Type-Options: nosniff\n\nhttps://:version.:subdomain.workers.dev/*\n  X-Robots-Tag: noindex\n\n/404\n  X-Robots-Tag: noindex\n");
-  write(dir, '/search-index.json', JSON.stringify([{ id: 'compress-image', href: { en: TOOL } }, ...(pdf ? PDF_TOOL_IDS.map((id) => ({ id, href: { en: PDF_PAGES[id].path } })) : [])]));
+  write(dir, '/search-index.json', JSON.stringify([{ id: 'compress-image', href: { en: TOOL } }, ...(pdf ? [...PDF_TOOL_IDS, ...PDF_PRESET_IDS].map((id) => ({ id, href: { en: PDF_PAGES[id].path } })) : [])]));
   change(dir);
   const site: Site = { dir, pages, tools: { en: [TOOL], pt: [], es: [] }, searchIds: ['compress-image'] };
   if (!pdf) return site;
   return {
     ...site,
-    searchIds: ['compress-image', ...PDF_TOOL_IDS],
+    searchIds: ['compress-image', ...PDF_TOOL_IDS, ...PDF_PRESET_IDS],
     cards: { home: { en: PDF_PATHS }, [PDF_HUB_ID]: { en: [...PDF_PATHS, IMAGE_TO_PDF] } },
-    pdf: [...PDF_TOOL_IDS, PDF_HUB_ID],
+    pdf: [...PDF_TOOL_IDS, ...PDF_PRESET_IDS, PDF_HUB_ID],
   };
 }
 
@@ -408,8 +411,9 @@ describe('gate:prontidao, (c) nenhuma página em breve', () => {
     const brazilian = BR_CALC_IDS.filter((id) => pagePath(id, 'pt') !== undefined);
     expect([0, BR_CALC_IDS.length]).toContain(brazilian.length);
     // F7 (decision 9; DECISOES § 259): and the 11 home and health calculators and the QR code generator.
-    // F17 (DECISOES § 716): 13 image pages, with AVIF to JPG and Convert to WebP (11 before).
-    expect(site.searchIds).toHaveLength(13 + 18 + brazilian.length + 5 + PDF_TOOL_IDS.length + FILE_GUIDE_IDS.length + 11 + 1);
+    // F17 (DECISOES § 716): 13 image pages, with AVIF to JPG and Convert to WebP (11 before). F18 (DECISOES § 743): 15,
+    // with Remove EXIF data and Flip image, and the 2 PDF presets after the PDF tools.
+    expect(site.searchIds).toHaveLength(15 + 18 + brazilian.length + 5 + PDF_TOOL_IDS.length + PDF_PRESET_IDS.length + FILE_GUIDE_IDS.length + 11 + 1);
   });
 
   it('builds the F7 part of the real site from the calculator registry: the home cards, the two hubs and the search, home and health in English only (F7, decision 9)', () => {
@@ -450,8 +454,9 @@ describe('gate:prontidao, (c) nenhuma página em breve', () => {
     }
     // F7 (decision 9; DECISOES § 259): the 12 PDF tools come right before the 11 home and health calculators and the QR
     // code generator, which close the search (they closed it before the F7).
-    expect(site.searchIds.slice(-PDF_TOOL_IDS.length - 12, -12)).toEqual([...PDF_TOOL_IDS]);
-    expect(site.pdf).toEqual([...PDF_TOOL_IDS, PDF_HUB_ID]);
+    // F18 (decision 5; DECISOES § 725): and the 2 PDF presets right after the tools, which are PDF pages to look at too.
+    expect(site.searchIds.slice(-PDF_TOOL_IDS.length - PDF_PRESET_IDS.length - 12, -12)).toEqual([...PDF_TOOL_IDS, ...PDF_PRESET_IDS]);
+    expect(site.pdf).toEqual([...PDF_TOOL_IDS, ...PDF_PRESET_IDS, PDF_HUB_ID]);
     // Each of them is a page of the route map, in the three languages since the F6 (English only before), with an ad area.
     for (const id of site.pdf ?? []) {
       const route = ROUTES.find((candidate) => candidate.id === id);
@@ -557,13 +562,16 @@ describe('gate:prontidao, as páginas de PDF (F5a)', () => {
   const home = PAGES.find((page) => page.id === 'home' && page.lang === 'en') as SitePage;
   const allRows = (site: Site): Row[] => [...checkTodayBuild(withoutBoxes(site)), ...checkRequiredPages(site), ...checkNothingUnfinished(site), ...checkContent(site), ...checkPdfPages(site), ...checkCrawlable(site)];
 
-  it('passes a site with the 12 PDF tools, their hub, cards and search on every item', () => {
+  it('passes a site with the 13 PDF tools, the 2 PDF presets, their hub, cards and search on every item', () => {
     const rows = allRows(pdfSite());
     expect(failing(rows)).toEqual([]);
     // The 14 items of before and the 3 rows of the PDF pages.
     expect(rows).toHaveLength(14 + 3);
     expect(checkPdfPages(pdfSite()).map((entry) => entry.ok)).toEqual([true, true, true]);
-    expect(PDF_FAKE).toHaveLength(13);
+    // F18 (decision 5; DECISOES § 725): 13 tools (Organize PDF), the 2 presets and the hub (12 tools and the hub before).
+    expect(PDF_FAKE).toHaveLength(PDF_TOOL_IDS.length + PDF_PRESET_IDS.length + 1);
+    expect(PDF_TOOL_IDS).toHaveLength(13);
+    expect(PDF_PRESET_IDS).toHaveLength(2);
   });
 
   it('has nothing to look at in a site without PDF pages (the rows pass on no page)', () => {
@@ -682,17 +690,22 @@ describe('gate:prontidao, as páginas de PDF (F5a)', () => {
     expect(failing(checkNothingUnfinished(strangeCard)).join('\n')).toMatch(/\/: cartão para \/pdf-ocr\/, que não existe[\s\S]*cartões fora do registro: \/pdf-ocr\//);
   });
 
-  it('checks that the search has the 12 PDF tools of the registry, and only those', () => {
-    const entries = (ids: readonly string[]) => JSON.stringify([{ id: 'compress-image', href: { en: TOOL } }, ...ids.map((id) => ({ id, href: { en: `/${id}/` } }))]);
+  // F18 (decision 5; DECISOES § 725 and § 743): the 2 PDF presets are search entries of the registry too, at their paths.
+  it('checks that the search has the 13 PDF tools and the 2 PDF presets of the registry, and only those', () => {
+    const pathOf = (id: string): string => (Object.hasOwn(PDF_PAGES, id) ? PDF_PAGES[id as keyof typeof PDF_PAGES].path : `/${id}/`);
+    const entries = (ids: readonly string[]) => JSON.stringify([{ id: 'compress-image', href: { en: TOOL } }, ...ids.map((id) => ({ id, href: { en: pathOf(id) } }))]);
+    const PDF_SEARCH = [...PDF_TOOL_IDS, ...PDF_PRESET_IDS];
     // Today's search has no PDF tool (the PDF pages are not in it yet): the item must say which ones are missing.
     const none = pdfSite((dir) => write(dir, '/search-index.json', entries([])));
-    expect(failing(checkNothingUnfinished(none))).toEqual([`Cartões e busca só com o que existe: busca sem ${PDF_TOOL_IDS.join(', ')}`]);
-    const one = pdfSite((dir) => write(dir, '/search-index.json', entries(PDF_TOOL_IDS.filter((id) => id !== 'sign-pdf'))));
+    expect(failing(checkNothingUnfinished(none))).toEqual([`Cartões e busca só com o que existe: busca sem ${PDF_SEARCH.join(', ')}`]);
+    const one = pdfSite((dir) => write(dir, '/search-index.json', entries(PDF_SEARCH.filter((id) => id !== 'sign-pdf'))));
     expect(failing(checkNothingUnfinished(one))).toEqual(['Cartões e busca só com o que existe: busca sem sign-pdf']);
-    const extra = pdfSite((dir) => write(dir, '/search-index.json', entries([...PDF_TOOL_IDS, 'pdf-ocr'])));
+    const preset = pdfSite((dir) => write(dir, '/search-index.json', entries(PDF_SEARCH.filter((id) => id !== 'pdf-to-jpg-to-png'))));
+    expect(failing(checkNothingUnfinished(preset))).toEqual(['Cartões e busca só com o que existe: busca sem pdf-to-jpg-to-png']);
+    const extra = pdfSite((dir) => write(dir, '/search-index.json', entries([...PDF_SEARCH, 'pdf-ocr'])));
     expect(failing(checkNothingUnfinished(extra)).join('\n')).toMatch(/busca: pdf-ocr leva a \/pdf-ocr\/, que não existe[\s\S]*busca com itens fora do registro: pdf-ocr/);
     const dangling = pdfSite((dir) => {
-      write(dir, '/search-index.json', entries(PDF_TOOL_IDS));
+      write(dir, '/search-index.json', entries(PDF_SEARCH));
       rmSync(fileIn(dir, '/watermark-pdf/'));
     });
     expect(failing(checkNothingUnfinished(dangling)).join('\n')).toMatch(/busca: watermark-pdf leva a \/watermark-pdf\/, que não existe/);
