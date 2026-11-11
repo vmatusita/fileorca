@@ -1,7 +1,8 @@
 // The ad map in every page with ads (F12, decisions 3 and 11; UX-07 A; DECISOES § 419 to § 422), on the test build
 // (fake ids in the 37 units, the worst case). The name puts this spec next to the other specs of the test build in the
 // parts of the CI (after events.spec.ts, with header-menu.spec.ts; DECISOES § 422).
-//   - The 190 pages (184 until the F17 added AVIF to JPG and Convert to WebP in the three languages), in blocks: at 360 × 740, the conservative density of § 351 up to 30 %, 1,110 px or more between two
+//   - The 205 pages (184 until the F17 added AVIF to JPG and Convert to WebP in the three languages, 190 until the F18 added
+//     its five pages in the three languages), in blocks: at 360 × 740, the conservative density of § 351 up to 30 %, 1,110 px or more between two
 //     content ads edge to edge, 150 px from every target, nothing above the tool, the first ad after the piece of its mold,
 //     no box in a grid, a table, a list, a question, a form, the panel, the schedule or a band, none against a table or a
 //     heading; the cookie notice open 150 px or more from the first content box at 360 × 740 and 1280 × 800 (and, since the
@@ -45,11 +46,21 @@ const NOTICE_WINDOWS = [PHONE, DESKTOP, { width: 1440, height: 900 }, { width: 1
 const HOME_CONTENT_ADS: Record<string, number> = { '/': 5, '/pt/': 4, '/es/': 4 };
 
 // F17 (decision 13; DECISOES § 716): 184 → 190, the six pages of AVIF to JPG and Convert to WebP, read from the route map.
-test('the map reads the 190 pages with ads of the route map', () => {
-  expect(AD_PAGES).toHaveLength(190);
+// F18 (decision 19; DECISOES § 743): 190 → 205, the fifteen pages of the run: the image tool and the image preset in the mold
+// of an image tool, the PDF tool and the two PDF presets (the first of the site) in the mold of a PDF tool.
+const F18_AD_PAGES: [path: string, mold: 'tool-image' | 'tool-pdf'][] = [
+  ['/remove-exif-data/', 'tool-image'], ['/pt/remover-metadados-foto/', 'tool-image'], ['/es/quitar-metadatos-foto/', 'tool-image'],
+  ['/rotate-image/flip/', 'tool-image'], ['/pt/girar-imagem/espelhar/', 'tool-image'], ['/es/rotar-imagen/reflejar/', 'tool-image'],
+  ['/organize-pdf/', 'tool-pdf'], ['/pt/gerenciar-paginas-pdf/', 'tool-pdf'], ['/es/organizar-pdf/', 'tool-pdf'],
+  ['/split-pdf/extract-pages/', 'tool-pdf'], ['/pt/dividir-pdf/extrair-paginas/', 'tool-pdf'], ['/es/dividir-pdf/extraer-paginas/', 'tool-pdf'],
+  ['/pdf-to-jpg/to-png/', 'tool-pdf'], ['/pt/pdf-para-jpg/para-png/', 'tool-pdf'], ['/es/pdf-a-jpg/a-png/', 'tool-pdf'],
+];
+test('the map reads the 205 pages with ads of the route map', () => {
+  expect(AD_PAGES).toHaveLength(205);
   for (const path of ['/avif-to-jpg/', '/convert-to-webp/', '/pt/avif-para-jpg/', '/pt/converter-para-webp/', '/es/avif-a-jpg/', '/es/convertir-a-webp/']) {
     expect(AD_PAGES.find((page) => page.path === path), path).toMatchObject({ area: 'arquivos', mold: 'tool-image' });
   }
+  for (const [path, mold] of F18_AD_PAGES) expect(AD_PAGES.find((page) => page.path === path), path).toMatchObject({ area: 'arquivos', mold });
   expect(AD_PAGES.filter((page) => page.mold === 'home').map((page) => page.path)).toEqual(['/', '/pt/', '/es/']);
   expect(AD_PAGES.filter((page) => page.mold === 'guides-hub').map((page) => page.path)).toEqual(['/guides/', '/pt/guias/', '/es/guias/']);
 });
