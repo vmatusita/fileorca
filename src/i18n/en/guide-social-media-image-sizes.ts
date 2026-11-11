@@ -5,7 +5,7 @@ const texts: FileGuideTexts = {
   description: 'The image sizes Instagram, Facebook, X, LinkedIn, YouTube and Pinterest publish, and what real photos look like and weigh when resized to them.',
   h1: 'Social media image sizes',
   lead: 'Each network publishes the sizes it wants, and resizes whatever does not fit. Here are the sizes from their own help pages, and what a photo becomes at each one.',
-  changed: 'First version of this guide, published on {published} with these measurements. The help pages were read on the date given with each source.',
+  changed: 'First version of this guide, published on {published}. The numbers were measured again on {measured}. The help pages were read on the date given with each source.',
   intro: [
     'Every social network takes a photo, fits it to its own frame and compresses it again. If the photo is far bigger than the frame, the network throws pixels away with its own settings. If it has the wrong shape, the network crops it where it chooses. Uploading a photo that already has the right size and shape keeps those decisions in your hands.',
     'The sizes below come only from each network’s own help or developer pages, read on the date at the bottom of this page. Where a network publishes a figure only for ads, the table says so. TikTok is not in the table: its help pages we read give no size for photos.',

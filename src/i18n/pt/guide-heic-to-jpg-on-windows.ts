@@ -5,7 +5,7 @@ const texts: FileGuideTexts = {
   description: 'Por que o Windows não abre as fotos do iPhone, os ajustes que evitam o HEIC e o que muda no tamanho e na localização quando as fotos viram JPG.',
   h1: 'Como converter HEIC para JPG no Windows',
   lead: 'Seu iPhone salvou a foto em HEIC, e o Windows não abre o arquivo, ou um site não aceita. Veja por que isso acontece e como chegar a um JPG.',
-  changed: 'Primeira versão deste guia, publicada em {published} com as medidas de {measured}.',
+  changed: 'Primeira versão deste guia, publicada em {published}. Os números foram medidos de novo em {measured}.',
   intro: [
     'HEIC é o arquivo que a Apple grava quando um iPhone ou iPad salva as fotos no formato Alta Eficiência, que se baseia no HEIF. A imagem é a mesma de um JPG, mas fica guardada de um jeito mais compacto, e por isso cabem mais fotos no mesmo espaço do celular. O problema aparece em todo o resto: o Windows precisa de um programa a mais para mostrar o arquivo, e muitos formulários de envio ainda pedem JPG.',
     'Dá para resolver isso em lugares diferentes. Você pode ensinar o Windows a ler HEIC, pode pedir ao iPhone que pare de gravar nesse formato ou pode converter os arquivos que já tem. Cada caminho resolve uma parte do problema, e só o último entrega arquivos JPG que você pode mandar para qualquer lugar.',

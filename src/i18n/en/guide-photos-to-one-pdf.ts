@@ -5,7 +5,7 @@ const texts: FileGuideTexts = {
   description: 'How to put several photos into one PDF on a phone or a computer, what the PDF weighs, and what compressing the photos first does to it.',
   h1: 'How to turn photos into one PDF',
   lead: 'Receipts, a contract, photos for a form: one PDF is easier to send and to print than a pile of images. Here is how, and how heavy it gets.',
-  changed: 'First version of this guide, published on {published} with these measurements.',
+  changed: 'First version of this guide, published on {published}. The numbers were measured again on {measured}.',
   intro: [
     'A PDF of photos keeps them in order, prints each one on its own page and opens on any computer or phone. Many forms and offices also ask for exactly that: one PDF, not a set of images.',
     'The catch is size. Put into one PDF, our {photos_word} phone photos made a file {pdfRatioChromium} as heavy as the photos themselves. We measured what happens to the size, with and without compressing the photos first.',

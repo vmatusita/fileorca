@@ -5,7 +5,7 @@ const texts: FileGuideTexts = {
   description: 'Where a photo keeps the place it was taken, how to stop or hide it on iPhone and Android, and the way to strip it from the file without changing a pixel.',
   h1: 'How to remove location data from photos before you share them',
   lead: 'A phone photo can carry the exact place it was taken. Here is how to keep it out of the photos you share.',
-  changed: 'First version of this guide, published on {published} with these measurements.',
+  changed: 'First version of this guide, published on {published}. The numbers were measured again on {measured}, and the tool in the guide went from Resize image to Remove EXIF data.',
   intro: [
     'Phones write facts about each photo into the file itself: the camera, the date and time, and, when location is on, the GPS coordinates of where you stood. Apple puts it plainly: the coordinates are embedded into each photo and video. Anyone who gets the original file can read them, and a few clicks put them on a map.',
     'Some apps strip this data when you post, and some do not. Email, file transfers, cloud folders and many chat apps send the file as it is. If a photo shows your home, your child’s school or anywhere you would rather not pin, remove the location before the file leaves your hands.',

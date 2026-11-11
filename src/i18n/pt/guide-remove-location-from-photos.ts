@@ -5,7 +5,7 @@ const texts: FileGuideTexts = {
   description: 'Onde a foto guarda o lugar em que foi tirada, como impedir ou esconder isso no iPhone e no Android e como tirar o dado do arquivo sem mudar um pixel.',
   h1: 'Como remover a localização das fotos antes de compartilhar',
   lead: 'Uma foto de celular pode levar o lugar exato em que foi tirada. Veja como tirar esse dado antes de compartilhar.',
-  changed: 'Primeira versão deste guia, publicada em {published} com as medidas de {measured}.',
+  changed: 'Primeira versão deste guia, publicada em {published}. Os números foram medidos de novo em {measured}, e a ferramenta no guia passou da Redimensionar imagem para a Remover metadados da foto.',
   intro: [
     'O celular grava informações sobre cada foto dentro do próprio arquivo: a câmera, a data e a hora e, com a localização ligada, as coordenadas de GPS de onde você estava. A Apple diz isso com todas as letras: essas coordenadas são incorporadas a cada foto e vídeo. Quem recebe o arquivo original consegue ler esses dados, e com poucos cliques eles viram um ponto no mapa.',
     'Alguns apps tiram esses dados quando você publica, e outros não. E-mail, transferência de arquivos, pastas na nuvem e muitos apps de conversa mandam o arquivo do jeito que ele está. Se uma foto mostra a sua casa, a escola do seu filho ou qualquer lugar que você prefira não marcar, tire a localização antes de o arquivo sair das suas mãos.',

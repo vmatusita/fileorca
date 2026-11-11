@@ -5,7 +5,7 @@ const texts: FileGuideTexts = {
   description: 'Las formas de juntar varios PDF en uno solo en un iPhone o en un celular Android, cuánto pesa el archivo unido y qué conserva de cada PDF.',
   h1: 'Cómo unir PDF en el celular',
   lead: 'Tienes algunos PDF en el celular y necesitas enviarlos como uno solo. Estas son las formas de hacerlo ahí mismo, sin computadora, y lo que puedes esperar del resultado.',
-  changed: 'Primera versión de esta guía, publicada el {published} con las mediciones del {measured}.',
+  changed: 'Primera versión de esta guía, publicada el {published}. Los números se midieron de nuevo el {measured}.',
   intro: [
     'Formularios, recibos, una página firmada y el escaneo de una identificación pueden llegar como PDF separados, y el lugar al que tienes que enviarlos acepta un solo archivo. En una computadora hay muchas formas de juntarlos. En un celular hay menos, y dependen del teléfono.',
     'Esta guía cubre la forma que Apple documenta para el iPhone, la forma que funciona en el navegador de cualquier celular y lo que medimos al unir {pairs_word} pares de nuestros PDF de prueba.',

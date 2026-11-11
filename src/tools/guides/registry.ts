@@ -32,19 +32,21 @@ export const GUIDES_HUB_ID = 'guides';
  * pnpm guias:medir stamps, and never before it (DECISOES § 207): the last measurement and the merge fall on this day.
  * Plain data here since the F13b (DECISOES § 558), so src/tools/guides/measured.ts can give the history line of a guide
  * its dates in Node too (the lint:texto); src/tools/guides/page.ts gives them to the pages as before.
- * F18 (DECISOES § 733): the guides were measured again on 2026-11-11, when guide 6 took Remove EXIF data, so the dates
- * move to that day (a measurement is one day for the whole file: every number carries the date of measuredOn).
+ * F18 (DECISOES § 733): the guides were measured again on 2026-11-11, when guide 6 took Remove EXIF data, so the review
+ * moves to that day (a measurement is one day for the whole file: every number carries the date of measuredOn). The first
+ * publication stays the day of the first version: a later measurement never moves it, and the history line of each guide
+ * says when the numbers were measured again.
  */
 export const GUIDE_REVIEWED = '2026-11-11';
-export const GUIDE_PUBLISHED = '2026-11-11';
+export const GUIDE_PUBLISHED = '2026-11-02';
 
 /**
  * Per language: the day the guides were reviewed and first published. The Portuguese and Spanish guides were written in
  * the languages adjustment, on the day in Brasília of the run (DECISOES § 223), never before the measurement (§ 207); since
- * the F18 measurement, the same day as the English ones (§ 733).
+ * the F18 measurement, reviewed on the same day as the English ones, and still first published on 2026-11-03 (§ 733).
  */
 export const GUIDE_REVIEWED_ON: Record<Lang, string> = { en: GUIDE_REVIEWED, pt: '2026-11-11', es: '2026-11-11' };
-export const GUIDE_PUBLISHED_ON: Record<Lang, string> = { en: GUIDE_PUBLISHED, pt: '2026-11-11', es: '2026-11-11' };
+export const GUIDE_PUBLISHED_ON: Record<Lang, string> = { en: GUIDE_PUBLISHED, pt: '2026-11-03', es: '2026-11-03' };
 
 export type FileGuideHub = 'image-tools' | 'pdf-tools';
 export type FileGuideTool = ImageToolId | PdfToolId;

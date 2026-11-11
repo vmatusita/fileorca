@@ -5,7 +5,7 @@ const texts: FileGuideTexts = {
   description: 'When to save as JPG and when as PNG, with the sizes we measured on the same photos in both formats and what happens to a transparent image.',
   h1: 'JPG or PNG: which one to use',
   lead: 'Both formats open everywhere, so the choice is about what the picture is. Here is the rule, and what we measured when the same photos went both ways.',
-  changed: 'First version of this guide, published on {published} with these measurements.',
+  changed: 'First version of this guide, published on {published}. The numbers were measured again on {measured}.',
   intro: [
     'The short answer: photos go in JPG, and graphics go in PNG. Screenshots, logos, charts, text and anything with a transparent background are graphics. A photo from a camera or a phone is a photo, even if it shows a document.',
     'The longer answer is about what each format keeps. One stays small by throwing away detail you will hardly notice; the other keeps every pixel exactly and pays for it in size. Which trade is right depends on the picture, and on what happens to it next.',

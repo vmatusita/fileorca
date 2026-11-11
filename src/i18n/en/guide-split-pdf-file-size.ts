@@ -5,7 +5,7 @@ const texts: FileGuideTexts = {
   description: 'Why the parts of a split PDF can add up to far more than the original, measured on our test PDFs, and how to split so they do not.',
   h1: 'How to split a PDF, and why the parts can weigh more than the whole',
   lead: 'Split a big PDF into pieces, and the pieces can add up to more than the file. Here is why, and when they do not.',
-  changed: 'First version of this guide, published on {published} with these measurements.',
+  changed: 'First version of this guide, published on {published}. The numbers were measured again on {measured}.',
   intro: [
     'Splitting a PDF sounds like cutting paper: the pages go into separate piles and nothing is added. A PDF does not work like that. Each part has to be a complete PDF on its own, able to open anywhere, so it carries everything its pages need to show correctly, and Split PDF also gives every part a copy of the description of the original document.',
     'How much that adds depends on the file. We split {files_word} PDFs of our tests, one part per page, and added the parts up. The parts of {bigger_word} of them weighed more than the whole: those of the lecture notes {bookRatio_times} as much, those of the scanned NASA report {reportRatio_more} more, and those of the PDF of photos {photosGrowth_exact} more.',

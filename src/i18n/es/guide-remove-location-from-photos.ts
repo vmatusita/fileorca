@@ -5,7 +5,7 @@ const texts: FileGuideTexts = {
   description: 'Dónde guarda una foto el lugar en que se tomó, cómo evitarlo u ocultarlo en iPhone y Android, y cómo quitarlo del archivo sin cambiar un solo píxel.',
   h1: 'Cómo quitar la ubicación de las fotos antes de compartirlas',
   lead: 'Una foto del celular puede llevar el lugar exacto donde se tomó. Aquí ves cómo quitar ese dato antes de compartirla.',
-  changed: 'Primera versión de esta guía, publicada el {published} con las mediciones del {measured}.',
+  changed: 'Primera versión de esta guía, publicada el {published}. Los números se midieron de nuevo el {measured}, y la herramienta en la guía pasó de Redimensionar imagen a Quitar metadatos de la foto.',
   intro: [
     'Los teléfonos escriben datos de cada foto dentro del propio archivo: la cámara, la fecha y la hora y, si la ubicación está activada, las coordenadas GPS del lugar donde estabas. Apple lo dice con claridad: las coordenadas se incrustan en cada foto y video. Cualquiera que reciba el archivo original puede leerlas, y con unos pocos clics las pone en un mapa.',
     'Algunas apps quitan estos datos cuando publicas, y otras no. El correo, las transferencias de archivos, las carpetas en la nube y muchas apps de chat envían el archivo tal como está. Si una foto muestra tu casa, la escuela de tus hijos o cualquier lugar que prefieras no marcar en un mapa, quita la ubicación antes de que el archivo salga de tus manos.',

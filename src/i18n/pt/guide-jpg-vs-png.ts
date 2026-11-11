@@ -5,7 +5,7 @@ const texts: FileGuideTexts = {
   description: 'Quando salvar em JPG e quando em PNG, com os tamanhos que medimos nas mesmas fotos nos dois formatos e o que acontece com uma imagem transparente.',
   h1: 'JPG ou PNG: qual usar',
   lead: 'Os dois formatos abrem em qualquer lugar, então a escolha depende do que a imagem é. Veja a regra e o que medimos quando as mesmas fotos foram de um formato para o outro.',
-  changed: 'Primeira versão deste guia, publicada em {published} com as medidas de {measured}.',
+  changed: 'Primeira versão deste guia, publicada em {published}. Os números foram medidos de novo em {measured}.',
   intro: [
     'A resposta curta: foto vai em JPG, e imagem gráfica vai em PNG. Capturas de tela, logos, gráficos, textos e qualquer imagem com fundo transparente são imagens gráficas. Uma foto tirada com câmera ou celular é foto, mesmo que mostre um documento.',
     'A resposta longa fala do que cada formato guarda. Um fica pequeno jogando fora detalhes que você mal percebe; o outro guarda cada pixel exatamente e paga por isso em tamanho. A troca certa depende da imagem e do que vai acontecer com ela depois.',
