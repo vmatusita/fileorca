@@ -28,17 +28,18 @@ describe('home', () => {
   // F13b (UX-03 B; DECISOES § 576) and ajuste-home-cards (§ 612): the image section of the home (still labelled by "tools")
   // shows the ten tools as ToolCards again, as in the F13a, with the link to the hub under the grid; the money section the
   // 6 credit calculators of the specification (§ 570). The rule is the same: the catalogue order, the hub, no preset, no
-  // AdSlot in the default build.
-  it('shows the ten image tools in English, in catalogue order, with a link to the hub under the grid', async () => {
+  // AdSlot in the default build. F18 (decision 14; DECISOES § 737): eleven tools, with Remove EXIF data.
+  it('shows the eleven image tools in English, in catalogue order, with a link to the hub under the grid', async () => {
     const page = await render(HomeView, 'en');
     // The image section is the first one; the money section of the F4 comes after the PDF one (DECISOES § 118).
     const tools = page.querySelector('main section[aria-labelledby="tools"]');
     expect(tools?.querySelectorAll('.fo-grid a.fo-tool').map((card) => card.getAttribute('href'))).toEqual(toolPaths('en'));
-    expect(toolPaths('en')).toHaveLength(10);
-    expect(tools?.querySelectorAll('.fo-tool h3')).toHaveLength(10);
+    expect(toolPaths('en')).toHaveLength(11);
+    expect(tools?.querySelectorAll('.fo-tool h3')).toHaveLength(11);
     const more = tools?.querySelector('.fo-more a');
     expect(more?.getAttribute('href')).toBe('/image-tools/');
-    expect(more?.text).toBe('All image tools and common sizes');
+    // F18 (decision 13; DECISOES § 737): the presets are no longer only sizes (Flip image), as the table of the hub says.
+    expect(more?.text).toBe('All image tools and ready-made settings');
     // The presets are not tools: they are linked from the hub and their parent page, not from the home grid.
     for (const id of IMAGE_PRESET_IDS) expect(page.querySelector('main')?.querySelector(`a[href="${routeById(id).paths.en}"]`)).toBeNull();
     // The money section: the five credit calculators and Credit card payoff, and the money hub, and no AdSlot on the home.
@@ -50,7 +51,7 @@ describe('home', () => {
     expect(page.querySelectorAll('.fo-ad')).toHaveLength(0);
   });
 
-  it('shows the ten image tools in Portuguese and Spanish too, with the link to the hub of the language, and links only to pages of the language', async () => {
+  it('shows the eleven image tools in Portuguese and Spanish too, with the link to the hub of the language, and links only to pages of the language', async () => {
     for (const lang of ['pt', 'es'] as const) {
       const page = await render(HomeView, lang);
       const tools = page.querySelector('main section[aria-labelledby="tools"]');
@@ -74,7 +75,7 @@ describe('footer', () => {
   // tools are in the disclosure of the column. The links of the column are the same, in the same order.
   const imageColumn = (page: ReturnType<typeof parse>) => page.querySelectorAll('footer .fo-footer__cols > div:first-child a');
 
-  it('lists the hub first and then the ten tools in English', async () => {
+  it('lists the hub first and then the eleven tools in English', async () => {
     const page = await render(HomeView, 'en');
     const links = imageColumn(page);
     expect(links.map((link) => link.getAttribute('href'))).toEqual(['/image-tools/', ...toolPaths('en')]);
@@ -85,7 +86,7 @@ describe('footer', () => {
     expect(tools.map((link) => link.getAttribute('href'))).toEqual(toolPaths('en'));
   });
 
-  it('lists the hub first and then the ten tools in Portuguese and Spanish too (F6; only Compress image before)', async () => {
+  it('lists the hub first and then the eleven tools in Portuguese and Spanish too (F6; only Compress image before)', async () => {
     for (const lang of ['pt', 'es'] as const) {
       const links = imageColumn(await render(HomeView, lang));
       expect(links.map((link) => link.getAttribute('href')), lang).toEqual([routeById('image-tools').paths[lang], ...toolPaths(lang)]);
@@ -95,10 +96,10 @@ describe('footer', () => {
 });
 
 describe('hub /image-tools/', () => {
-  it('has the band, the grid of the ten tools, the presets table and the two AdSlots', async () => {
+  it('has the band, the grid of the eleven tools, the presets table and the two AdSlots', async () => {
     const page = await render(ImageToolsView, 'en');
     // The eyebrow names the category and the H1 says something of its own, as in the ToolCard preview (DECISOES § 96).
-    expect(page.querySelectorAll('h1').map((h1) => h1.text)).toEqual(['Ten image tools, zero uploads']);
+    expect(page.querySelectorAll('h1').map((h1) => h1.text)).toEqual(['Eleven image tools, zero uploads']);
     const band = page.querySelector('main .fo-hubband.fo-cat--image');
     expect(band?.querySelector('.fo-eyebrow')?.text).toBe('Image tools');
     expect(band?.querySelector('.fo-eyebrow')?.text).not.toBe(band?.querySelector('h1')?.text);
@@ -122,12 +123,13 @@ describe('hub /image-tools/', () => {
 
   // F17 (decision 8; DECISOES § 709): with AVIF to JPG and Convert to WebP the hub counts ten tools in its title, H1,
   // description and intro, in the three languages (the words of the plan of the run, docs/relatorios/fase-17-plano.md).
-  it('counts the ten tools of the registry in the title, the H1, the description and the intro, in the three languages', async () => {
-    expect(IMAGE_TOOL_IDS).toHaveLength(10);
+  // F18 (decision 13; DECISOES § 737): eleven with Remove EXIF data, the word of before swapped for the new one.
+  it('counts the eleven tools of the registry in the title, the H1, the description and the intro, in the three languages', async () => {
+    expect(IMAGE_TOOL_IDS).toHaveLength(11);
     const said = {
-      en: { word: /\bTen\b/i, old: /\beight\b/i, title: 'Image tools: ten free tools, no upload', h1: 'Ten image tools, zero uploads' },
-      pt: { word: /\bdez\b/i, old: /\boito\b/i, title: 'Ferramentas de imagem: dez ferramentas grátis, sem upload', h1: 'Dez ferramentas de imagem, sem upload' },
-      es: { word: /\bdiez\b/i, old: /\bocho\b/i, title: 'Herramientas de imagen: diez gratis, sin subir archivos', h1: 'Diez herramientas de imagen, sin subir nada' },
+      en: { word: /\bEleven\b/i, old: /\bten\b/i, title: 'Image tools: eleven free tools, no upload', h1: 'Eleven image tools, zero uploads' },
+      pt: { word: /\bonze\b/i, old: /\bdez\b/i, title: 'Ferramentas de imagem: onze ferramentas grátis, sem upload', h1: 'Onze ferramentas de imagem, sem upload' },
+      es: { word: /\bonce\b/i, old: /\bdiez\b/i, title: 'Herramientas de imagen: once gratis, sin subir archivos', h1: 'Once herramientas de imagen, sin subir nada' },
     } as const;
     for (const lang of ['en', 'pt', 'es'] as const) {
       const t = TEXTS[lang]['image-tools'];
@@ -141,11 +143,11 @@ describe('hub /image-tools/', () => {
       const page = await render(ImageToolsView, lang);
       expect(page.querySelectorAll('h1').map((node) => node.text), lang).toEqual([h1]);
       expect(page.querySelector('title')?.text, lang).toBe(`${title} | FileOrca`);
-      expect(page.querySelectorAll('main .fo-grid a.fo-tool'), lang).toHaveLength(10);
+      expect(page.querySelectorAll('main .fo-grid a.fo-tool'), lang).toHaveLength(11);
     }
   });
 
-  it('has the breadcrumb Home > Image tools, the hreflang cluster of the three languages and the CollectionPage with the ten tools', async () => {
+  it('has the breadcrumb Home > Image tools, the hreflang cluster of the three languages and the CollectionPage with the eleven tools', async () => {
     const page = await render(ImageToolsView, 'en');
     const crumbs = page.querySelectorAll('.fo-crumbs li');
     expect(crumbs.map((crumb) => crumb.text.trim())).toEqual(['Home', 'Image tools']);
@@ -161,7 +163,7 @@ describe('hub /image-tools/', () => {
     const graph = JSON.parse(page.querySelector('script[type="application/ld+json"]')?.text ?? '{}') as { '@graph': { '@type': string; mainEntity?: { itemListElement: unknown[] } }[] };
     const types = graph['@graph'].map((node) => node['@type']);
     expect(types).toEqual(['Organization', 'BreadcrumbList', 'CollectionPage']);
-    expect(graph['@graph'][2]?.mainEntity?.itemListElement).toHaveLength(10);
+    expect(graph['@graph'][2]?.mainEntity?.itemListElement).toHaveLength(11);
     // The Portuguese and Spanish hubs carry the same cluster, their own canonical and the crumbs of their language.
     for (const lang of ['pt', 'es'] as const) {
       const translated = await render(ImageToolsView, lang);

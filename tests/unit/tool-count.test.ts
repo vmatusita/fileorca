@@ -1,6 +1,7 @@
 // One count of tools for the whole site, without the presets (F13b, decision 3; Victor's choice, F10 p-17 and F11
 // R-E-1; DECISOES § 540). The module reads the registries at build time; this test recounts them on its own, checks the
-// 48, 31 and 37 (the 46, 29 and 35 of the brief until the F17 added AVIF to JPG and Convert to WebP), and reads the built
+// 50, 33 and 39 (the 46, 29 and 35 of the brief until the F17 added AVIF to JPG and Convert to WebP, and 48, 31 and 37
+// until the F18 added Remove EXIF data and Organize PDF; its three presets never count), and reads the built
 // pages: the home H1, the "FileOrca in numbers" card of the About page, the About text and the Terms say the number of the
 // module in the three languages, and the Menu keeps its 14.
 import { existsSync, readFileSync } from 'node:fs';
@@ -12,13 +13,13 @@ import { sectionCount } from '../../src/components/header-menu.ts';
 import { LANGS, QR_ID, pagePath, type Lang } from '../../src/i18n/routes.ts';
 import { BR_CALC_IDS, CALC_TOOL_IDS, HEALTH_CALC_IDS, HOUSE_CALC_IDS } from '../../src/tools/calc/registry.ts';
 import { IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
-import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { PDF_PRESET_IDS, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 
 const exists = (ids: readonly string[], lang: Lang) => ids.filter((id) => pagePath(id as never, lang) !== undefined).length;
 
 describe('the count of tools of a language', () => {
-  it('is 48 in English, 31 in Portuguese and 37 in Spanish (F17: 46, 29 and 35 plus AVIF to JPG and Convert to WebP)', () => {
-    expect(LANGS.map((lang) => toolCount(lang))).toEqual([48, 31, 37]);
+  it('is 50 in English, 33 in Portuguese and 39 in Spanish (F18: 48, 31 and 37 plus Remove EXIF data and Organize PDF)', () => {
+    expect(LANGS.map((lang) => toolCount(lang))).toEqual([50, 33, 39]);
   });
 
   it('adds the categories of the registries, without the presets', () => {
@@ -28,13 +29,15 @@ describe('the count of tools of a language', () => {
         exists(IMAGE_TOOL_IDS, lang) + exists(PDF_TOOL_IDS, lang) + exists(money, lang) + exists(HOUSE_CALC_IDS, lang) +
         exists(HEALTH_CALC_IDS, lang) + (pagePath(QR_ID, lang) === undefined ? 0 : 1);
       expect(toolCount(lang), lang).toBe(recount);
-      // The presets have pages but never count.
+      // The presets have pages but never count: the image ones and, since the F18, the PDF ones.
       expect(exists(IMAGE_PRESET_IDS, lang), lang).toBeGreaterThan(0);
+      expect(exists(PDF_PRESET_IDS, lang), lang).toBe(PDF_PRESET_IDS.length);
       expect(IMAGE_TOOL_IDS.some((id) => (IMAGE_PRESET_IDS as readonly string[]).includes(id))).toBe(false);
+      expect(PDF_TOOL_IDS.some((id) => (PDF_PRESET_IDS as readonly string[]).includes(id))).toBe(false);
     }
-    expect(toolCounts('en')).toMatchObject({ image: 10, pdf: 12, money: 14, house: 6, health: 5, qr: 1, life: 11 });
-    expect(toolCounts('pt')).toMatchObject({ image: 10, pdf: 12, money: 8, house: 0, health: 0, qr: 1 });
-    expect(toolCounts('es')).toMatchObject({ image: 10, pdf: 12, money: 14, house: 0, health: 0, qr: 1 });
+    expect(toolCounts('en')).toMatchObject({ image: 11, pdf: 13, money: 14, house: 6, health: 5, qr: 1, life: 11 });
+    expect(toolCounts('pt')).toMatchObject({ image: 11, pdf: 13, money: 8, house: 0, health: 0, qr: 1 });
+    expect(toolCounts('es')).toMatchObject({ image: 11, pdf: 13, money: 14, house: 0, health: 0, qr: 1 });
   });
 
   it('gives the lint:texto the counts it fills the About and Terms with', () => {
@@ -45,9 +48,9 @@ describe('the count of tools of a language', () => {
   });
 
   it('gives the card "FileOrca in numbers" its four counts (F13b; DECISOES § 586)', () => {
-    expect(statsItems('en')).toEqual([{ kind: 'image', value: 10 }, { kind: 'pdf', value: 12 }, { kind: 'money', value: 14 }, { kind: 'life', value: 11 }]);
-    expect(statsItems('pt')).toEqual([{ kind: 'image', value: 10 }, { kind: 'pdf', value: 12 }, { kind: 'money', value: 8 }, { kind: 'languages', value: 3 }]);
-    expect(statsItems('es')).toEqual([{ kind: 'image', value: 10 }, { kind: 'pdf', value: 12 }, { kind: 'money', value: 14 }, { kind: 'languages', value: LANGS.length }]);
+    expect(statsItems('en')).toEqual([{ kind: 'image', value: 11 }, { kind: 'pdf', value: 13 }, { kind: 'money', value: 14 }, { kind: 'life', value: 11 }]);
+    expect(statsItems('pt')).toEqual([{ kind: 'image', value: 11 }, { kind: 'pdf', value: 13 }, { kind: 'money', value: 8 }, { kind: 'languages', value: 3 }]);
+    expect(statsItems('es')).toEqual([{ kind: 'image', value: 11 }, { kind: 'pdf', value: 13 }, { kind: 'money', value: 14 }, { kind: 'languages', value: LANGS.length }]);
   });
 
   it('counts the money calculators as the Menu does (14 in English and Spanish)', () => {
@@ -87,8 +90,8 @@ describe.runIf(BUILT)('the built pages say the number of the module', () => {
 
   // F13b (decision 8; DECISOES § 586): the card "FileOrca in numbers" of the About page reads the same module
   // (statsItems), whose fourth count is the home and health calculators in English and the languages elsewhere.
-  it('the card "FileOrca in numbers" of the About page says the counts of the module (10 · 12 · 14 · 11, 10 · 12 · 8 · 3, 10 · 12 · 14 · 3)', () => {
-    const want: Record<Lang, string[]> = { en: ['10', '12', '14', '11', '0'], pt: ['10', '12', '8', '3', '0'], es: ['10', '12', '14', '3', '0'] };
+  it('the card "FileOrca in numbers" of the About page says the counts of the module (11 · 13 · 14 · 11, 11 · 13 · 8 · 3, 11 · 13 · 14 · 3)', () => {
+    const want: Record<Lang, string[]> = { en: ['11', '13', '14', '11', '0'], pt: ['11', '13', '8', '3', '0'], es: ['11', '13', '14', '3', '0'] };
     for (const lang of LANGS) {
       const counts = toolCounts(lang);
       const card = /<section class="fo-stats[\s\S]*?<\/section>/.exec(main(html(pagePath('about', lang) ?? '/')))?.[0] ?? '';

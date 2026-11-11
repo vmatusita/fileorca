@@ -118,6 +118,8 @@ export default {
       // F17 (DECISOES § 707): o Converter para WebP depois do Comprimir; ele leva um resultado JPG ou PNG, nunca um WebP.
       'convert-to-webp': { one: 'Converter esta imagem para WebP', many: 'Converter estas {count} imagens para WebP' },
       'image-to-pdf': { one: 'Pôr esta imagem num PDF', many: 'Pôr estas {count} imagens num PDF' },
+      // F18 (DECISOES § 734): o Remover metadados da foto leva um JPG, um PNG ou um WebP.
+      'remove-exif-data': { one: 'Remover os metadados desta imagem', many: 'Remover os metadados destas {count} imagens' },
       // F15 (DECISOES § 653): as ferramentas de PDF depois da Imagem para PDF, com as palavras da ilha de PDF.
       'compress-pdf': { one: 'Comprimir este PDF', many: 'Comprimir estes {count} PDFs' },
       'merge-pdf': { one: 'Juntar este PDF com outros', many: 'Juntar estes {count} PDFs' },

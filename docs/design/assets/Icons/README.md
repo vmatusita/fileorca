@@ -1,6 +1,6 @@
 # Ícones
 
-74 ícones próprios, grade de 24×24, traço 2px, pontas e cantos redondos. Estes arquivos têm o traço em Orca `#0F1B2D`, para uso em `<img>`. No site, use a versão inline com `stroke="currentColor"`, `class="fo-icon"` (24px) ou `fo-icon fo-icon--sm` (20px) e `aria-hidden="true"`: é o mesmo desenho, só troca o atributo `stroke`.
+76 ícones próprios, grade de 24×24, traço 2px, pontas e cantos redondos. Estes arquivos têm o traço em Orca `#0F1B2D`, para uso em `<img>`. No site, use a versão inline com `stroke="currentColor"`, `class="fo-icon"` (24px) ou `fo-icon fo-icon--sm` (20px) e `aria-hidden="true"`: é o mesmo desenho, só troca o atributo `stroke`.
 
 - Arquivo e mídia: file, image, pdf, upload, download, paste, trash.
 - Ferramentas: compress, resize, crop, rotate, convert, merge, split, lock, unlock, qr, sign, watermark, page-number, reorder (os quatro últimos desenhados na F5a, DECISOES § 149).
@@ -14,5 +14,6 @@
 - DropZone: file-drop (o selo em repouso: um arquivo que entra na água).
 - Os 27 das cinco linhas acima foram desenhados na F10 (UX-16, `docs/propostas/ux-v2/icons/`, DECISOES § 379) e trazidos na F13a byte a byte, com o traço em Orca no arquivo (DECISOES § 490). Com eles, cada ferramenta tem o seu ícone, e nenhum hub repete um ícone entre os cartões dele (`tests/unit/hub-icons.test.ts`, no `dist/`). Na home, que junta as categorias, só o compress e o rotate se repetem: o mesmo verbo num cartão de imagem e num de PDF, em cores de categoria diferentes. A página de atalho usa o ícone da ferramenta, salvo quando aparece na mesma grade dela (os atalhos da hipoteca e o balão), e então ganha o próprio.
 - Ferramentas de imagem da F17: image-stack (AVIF para JPG: a foto e, atrás dela, a cópia em outro formato) e image-fast (Converter para WebP: a foto com as linhas de velocidade, mais leve e mais rápida de abrir). Desenhados na F17 (DECISOES § 706) porque nenhum ícone do conjunto fora dos cartões servia pelo sentido, e o `convert` já é do PNG para JPG.
+- Ferramentas da F18: page-grid (Organizar PDF: quatro páginas na grade, a última virada, para mover, girar e tirar páginas) e pin-x (Remover dados EXIF: o alfinete de localização com um × ao lado, a localização e os outros dados que saem da foto). Desenhados na F18 (DECISOES § 735) porque nenhum ícone do conjunto fora dos cartões servia pelo sentido: o `menu` é o do cabeçalho, o `shield` é o selo de privacidade de toda página, e o `reorder` e o `trash` já são do Reorganizar e do Excluir.
 
 Ícone sozinho só em ação de linha ou de item da grade de páginas (a lupa, F14, DECISOES § 637), com `aria-label` no botão. Ferramenta que pede um ícone que não existe (como foram o assinar, a marca d'água e, na F13a, o carro, o cartão e os outros 25 desta lista) ganha um desenhado na mesma grade e no mesmo traço, que entra aqui com decisão registrada no DECISOES.md.

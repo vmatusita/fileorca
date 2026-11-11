@@ -14,7 +14,8 @@ export default {
   image: {
     heading: 'Image',
     more: 'Each image tool opens the file in this tab, does the work on your device and gives you a new copy to save.',
-    all: 'All image tools and common sizes',
+    // F18 (decision 13; DECISOES § 737): the presets of the hub are no longer only sizes (Flip image), as its table says.
+    all: 'All image tools and ready-made settings',
   },
   pdf: {
     heading: 'PDF',

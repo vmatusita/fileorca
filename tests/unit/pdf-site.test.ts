@@ -16,7 +16,7 @@ import { countValues } from '../../src/components/tool-count.ts';
 import enCommon from '../../src/i18n/en/common.ts';
 import { ogImagePath } from '../../src/seo/meta.ts';
 import { sitemapUrls, sitemapXml } from '../../src/seo/sitemap.ts';
-import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { PDF_HUB_ID, PDF_PAGES, PDF_PRESET_IDS, PDF_TOOL_IDS, type PdfPageId } from '../../src/tools/pdf/registry.ts';
 import { PDF_TOOL_TEXTS } from '../../src/tools/pdf/texts.ts';
 import { PDF_PAGE_IDS, isPdfPage, missingFromSitemap, requiredSchemaTypes, schemaProblems, titleProblem, type LdNode } from '../../scripts/lib/seo-pages.ts';
 
@@ -174,7 +174,8 @@ describe('footer', () => {
 });
 
 describe('the PDF pages in search engines (item 5: schema, Open Graph, sitemap, hreflang, language menu)', () => {
-  const pages = [...PDF_TOOL_IDS.map((id) => ({ id, render: () => container.renderToString(PdfToolPage as Parameters<AstroContainer['renderToString']>[0], { props: { id } }) })),
+  // F18 (decision 14; DECISOES § 737): the PDF presets carry what the tools carry, with the parent in the breadcrumb.
+  const pages = [...[...PDF_TOOL_IDS, ...PDF_PRESET_IDS].map((id) => ({ id, render: () => container.renderToString(PdfToolPage as Parameters<AstroContainer['renderToString']>[0], { props: { id } }) })),
     { id: PDF_HUB_ID, render: () => container.renderToString(PdfToolsView as Parameters<AstroContainer['renderToString']>[0], { props: { lang: 'en' } }) }];
 
   it('carries a WebApplication with no rating and a BreadcrumbList that ends at the page, the canonical and the Open Graph image', async () => {
@@ -194,7 +195,8 @@ describe('the PDF pages in search engines (item 5: schema, Open Graph, sitemap, 
       expect(raw, id).not.toMatch(/aggregateRating|"review"/);
       expect(schemaProblems(id, nodes, canonical), id).toEqual([]);
       const crumbs = (nodes.find((node) => node['@type'] === 'BreadcrumbList')?.itemListElement ?? []).map((crumb) => crumb.item);
-      expect(crumbs, id).toEqual(id === PDF_HUB_ID ? [`${O}/`, canonical] : [`${O}/`, `${O}${hubPath}`, canonical]);
+      const parent = id === PDF_HUB_ID ? undefined : PDF_PAGES[id as PdfPageId].parent;
+      expect(crumbs, id).toEqual(id === PDF_HUB_ID ? [`${O}/`, canonical] : [`${O}/`, `${O}${hubPath}`, ...(parent ? [`${O}${toolPath(parent)}`] : []), canonical]);
       // The title starts with the H1, which is the name of the tool.
       const title = root.querySelector('title')?.text.trim() ?? '';
       expect(title.endsWith(' | FileOrca'), id).toBe(true);
@@ -257,7 +259,8 @@ describe('the PDF pages in search engines (item 5: schema, Open Graph, sitemap, 
   it('is in the sitemap of each of its languages, with the path of that language (F6; English only before)', () => {
     for (const lang of LANGS) {
       const urls = PDF_PAGE_IDS.map((id) => `${O}${routeById(id as Parameters<typeof routeById>[0]).paths[lang]}`);
-      expect(urls, lang).toHaveLength(PDF_TOOL_IDS.length + 1);
+      // F18 (decision 5; DECISOES § 725): the hub, the tools and the presets, which are PDF pages too.
+      expect(urls, lang).toHaveLength(1 + PDF_TOOL_IDS.length + PDF_PRESET_IDS.length);
       expect(missingFromSitemap(sitemapXml(lang), urls), lang).toEqual([]);
       // And never in the sitemap of another language.
       for (const other of LANGS.filter((candidate) => candidate !== lang)) expect(sitemapUrls(other).filter((url) => urls.includes(url)), `${lang} in ${other}`).toEqual([]);
@@ -266,14 +269,15 @@ describe('the PDF pages in search engines (item 5: schema, Open Graph, sitemap, 
 });
 
 describe('the SEO checks that know the PDF pages (scripts/lib/seo-pages.ts)', () => {
-  it('lists the hub and the 12 tools, and tells a tool from the hub', () => {
-    expect(PDF_PAGE_IDS).toEqual([PDF_HUB_ID, ...PDF_TOOL_IDS]);
-    for (const id of PDF_TOOL_IDS) expect(isPdfPage(id), id).toBe(true);
+  // F18 (decision 5; DECISOES § 725): the PDF presets are PDF pages for the gate:seo too (title, schema, description, sitemap).
+  it('lists the hub, the 13 tools and the 2 presets, and tells a page from the hub', () => {
+    expect(PDF_PAGE_IDS).toEqual([PDF_HUB_ID, ...PDF_TOOL_IDS, ...PDF_PRESET_IDS]);
+    for (const id of [...PDF_TOOL_IDS, ...PDF_PRESET_IDS]) expect(isPdfPage(id), id).toBe(true);
     for (const id of [PDF_HUB_ID, 'image-to-pdf', 'privacy', 'toString']) expect(isPdfPage(id), id).toBe(false);
   });
 
   it('asks each tool a WebApplication and a BreadcrumbList, and the hub a CollectionPage and a BreadcrumbList', () => {
-    for (const id of PDF_TOOL_IDS) expect(requiredSchemaTypes(id), id).toEqual(['Organization', 'BreadcrumbList', 'WebApplication']);
+    for (const id of [...PDF_TOOL_IDS, ...PDF_PRESET_IDS]) expect(requiredSchemaTypes(id), id).toEqual(['Organization', 'BreadcrumbList', 'WebApplication']);
     expect(requiredSchemaTypes(PDF_HUB_ID)).toEqual(['Organization', 'BreadcrumbList', 'CollectionPage']);
     // The image pages keep what they had, and Image to PDF is an image page, not a PDF one.
     expect(requiredSchemaTypes('image-to-pdf')).toEqual(['Organization', 'BreadcrumbList', 'WebApplication']);
