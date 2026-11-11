@@ -98,6 +98,22 @@ describe.runIf(BUILT)('one icon per tool card (UX-16)', () => {
     }
   });
 
+  // F18 (decision 12; DECISOES § 735): Organize PDF wears page-grid on the PDF hub and Remove EXIF data pin-x on the image
+  // hub, and both on the home of each language, the drawings made for them (menu and shield, the placeholders of the
+  // slice 1, are the Menu of the header and the seal of every page).
+  it('shows page-grid on Organize PDF and pin-x on Remove EXIF data, on their hub and the home of each language', () => {
+    const iconOf = (html: string, href: string): string | undefined =>
+      new RegExp(`<a class="fo-tool\\b[^>]*href="${href}"[^>]*>[\\s\\S]*?<span class="fo-tool__icon"[^>]*><svg\\b[^>]*>([\\s\\S]*?)</svg>`).exec(html)?.[1]?.trim();
+    const wanted: [RouteId, RouteId, IconName][] = [['organize-pdf', PDF_HUB_ID, 'page-grid'], ['remove-exif-data', 'image-tools', 'pin-x']];
+    for (const lang of LANGS) {
+      for (const [id, hub, icon] of wanted) {
+        for (const page of [pagePath(hub, lang), lang === 'en' ? '/' : `/${lang}/`]) {
+          expect(iconOf(read(page ?? ''), pagePath(id, lang) ?? ''), `${page} ${id}`).toBe(ICONS[icon]);
+        }
+      }
+    }
+  });
+
   it('catches a repeat (control)', () => {
     const card = (name: IconName, href: string): string =>
       `<a class="fo-tool fo-dogear fo-cat--money" href="${href}"><span class="fo-tool__icon" aria-hidden="true"><svg class="fo-icon" viewBox="0 0 24 24">${ICONS[name]}</svg></span><h3 class="fo-tool__name">x</h3></a>`;
