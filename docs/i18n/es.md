@@ -2,7 +2,7 @@
 
 Glossário fixo do FileOrca em espanhol (F6, decisão 3 do prompt; PLANO "Idiomas"). As explicações estão em português, como todo o `docs/`; os termos estão em espanhol. Todo texto do site em espanhol segue este arquivo: as páginas, os painéis, os PDFs e CSVs que o site gera, os nomes de arquivo baixado e os textos escondidos para leitor de tela. O `tests/unit/glossary.test.ts` lê a seção "Nunca" e reprova o termo nos arquivos de texto em espanhol e no HTML das páginas `/es/` do `dist/`.
 
-Escrito em 1º/nov/2026, antes de qualquer tradução da F6. Mudança neste arquivo pede um § no DECISOES.md. Ampliado no ajuste "idiomas" (3/nov/2026, DECISOES § 317): o QR code, os guias de arquivo e o resto do dinheiro dos EUA. Corrigido na revisão do ajuste (DECISOES § 321): "ppp", "Chico", a nota do "pago global" e a tabela das páginas de dinheiro.
+Escrito em 1º/nov/2026, antes de qualquer tradução da F6. Mudança neste arquivo pede um § no DECISOES.md. Ampliado no ajuste "idiomas" (3/nov/2026, DECISOES § 317): o QR code, os guias de arquivo e o resto do dinheiro dos EUA. Corrigido na revisão do ajuste (DECISOES § 321): "ppp", "Chico", a nota do "pago global" e a tabela das páginas de dinheiro. Ampliado na F18 (11/nov/2026, DECISOES § 724 e § 736): as cinco páginas novas, os sufixos delas, a barra do Organizar PDF e o "Horizontal · Vertical" da linha "Mirror".
 
 ## Registro
 
@@ -75,19 +75,24 @@ As datas de "Revisado el" e "Última actualización" são o dia em Brasília.
 | YouTube thumbnail | Miniatura de YouTube | /es/redimensionar-imagen/miniatura-youtube/ |
 | Crop image | Recortar imagen | /es/recortar-imagen/ |
 | Rotate image | Rotar imagen | /es/rotar-imagen/ |
+| Flip image | Reflejar imagen | /es/rotar-imagen/reflejar/ |
 | HEIC to JPG | HEIC a JPG | /es/heic-a-jpg/ |
 | WebP to JPG | WebP a JPG | /es/webp-a-jpg/ |
 | PNG to JPG | PNG a JPG | /es/png-a-jpg/ |
 | AVIF to JPG | AVIF a JPG | /es/avif-a-jpg/ |
 | Convert to WebP | Convertir a WebP | /es/convertir-a-webp/ |
 | Image to PDF | Imagen a PDF | /es/imagen-a-pdf/ |
+| Remove EXIF data | Quitar metadatos de la foto | /es/quitar-metadatos-foto/ |
 | PDF tools (hub) | Herramientas PDF | /es/herramientas-pdf/ |
 | Merge PDF | Unir PDF | /es/unir-pdf/ |
 | Split PDF | Dividir PDF | /es/dividir-pdf/ |
+| Extract pages from PDF | Extraer páginas de PDF | /es/dividir-pdf/extraer-paginas/ |
 | Rotate PDF | Rotar PDF | /es/rotar-pdf/ |
 | Delete pages | Eliminar páginas de PDF | /es/eliminar-paginas-pdf/ |
 | Reorder pages | Ordenar páginas de PDF | /es/ordenar-paginas-pdf/ |
+| Organize PDF | Organizar PDF | /es/organizar-pdf/ |
 | PDF to JPG | PDF a JPG | /es/pdf-a-jpg/ |
+| PDF to PNG | PDF a PNG | /es/pdf-a-jpg/a-png/ |
 | Page numbers | Numerar páginas de PDF | /es/numerar-paginas-pdf/ |
 | Watermark | Marca de agua en PDF | /es/marca-de-agua-pdf/ |
 | Sign PDF | Firmar PDF | /es/firmar-pdf/ |
@@ -98,13 +103,15 @@ As datas de "Revisado el" e "Última actualización" são o dia em Brasília.
 
 Os formatos ficam como estão: JPG, PNG, HEIC, WebP, AVIF, GIF, PDF, ZIP. O plural de PDF não leva "s" no texto corrido ("tus PDF"); no nome do ZIP fica `pdfs`.
 
+F18 (DECISOES § 724): em espanhol o Reorder pages é "Ordenar páginas de PDF", então "Organizar PDF" fica livre para o Organize PDF. O Quitar metadatos de la foto fica depois da Imagen a PDF, na ordem do registro e do hub: nenhuma irmã faz o mesmo trabalho (as outras tiram os metadados porque gravam a imagem de novo).
+
 | Opção (inglês) | Español |
 | --- | --- |
 | Compression · Recommended · Strong · Lossless | Compresión · Recomendada · Fuerte · Sin pérdida |
 | best balance · smallest | mejor equilibrio · archivo más pequeño |
 | Resize · By size · By percentage · Width · Height | Redimensionar · Por tamaño · Por porcentaje · Ancho · Alto |
 | Aspect ratio · Square · Free · Crop area | Proporción · Cuadrado · Libre · Área de recorte |
-| Rotate · Right 90° · Left 90° · 180° · Mirror · None | Rotar · 90° a la derecha · 90° a la izquierda · 180° · Reflejar · Ninguno |
+| Rotate · Right 90° · Left 90° · 180° · Mirror · None · Horizontal · Vertical | Rotar · 90° a la derecha · 90° a la izquierda · 180° · Reflejar · Ninguno · Horizontal · Vertical |
 | Save as | Guardar como |
 | Page size · Image size · Letter · A4 | Tamaño de página · Tamaño de la imagen · Carta · A4 |
 | Split by · Every page · Page ranges · Pick pages | Dividir por · Cada página · Rangos de páginas · Elegir páginas |
@@ -118,6 +125,8 @@ Os formatos ficam como estão: JPG, PNG, HEIC, WebP, AVIF, GIF, PDF, ZIP. O plur
 | Signature · Draw · Upload · Type · Clear | Firma · Dibujar · Imagen · Escribir · Borrar |
 | Password · Confirm password · Remove password | Contraseña · Confirma la contraseña · Quitar la contraseña |
 | Reverse order | Invertir el orden |
+| Extract pages (o botão da Extraer páginas de PDF) | Extraer páginas |
+| Save changes (o botão do Organizar PDF) | Guardar los cambios |
 | Add more PDFs | Agregar más PDF |
 
 ## Nombre del archivo descargado
@@ -132,6 +141,8 @@ Sem acento, em minúsculas, com hífen.
 | `-rotated` | `-rotado` |
 | `-edited` | `-editado` |
 | `-reordered` | `-ordenado` |
+| `-organized` | `-organizado` |
+| `-extracted` | `-extraido` |
 | `-numbered` | `-numerado` |
 | `-watermarked` | `-marca-de-agua` |
 | `-signed` | `-firmado` |
@@ -368,6 +379,7 @@ Da seção B do PLANO-UX-QV.md (F14, DECISOES § 623): o espanhol segue o regist
 | View the new PDF · View pages of {name} | Ver el PDF nuevo · Ver páginas de {name} |
 | Page {n} of {total} · Page {n} · position {p} of {total} | Página {n} de {total} · Página {n} · posición {p} de {total} |
 | Take this page out · Pick this page · Sign this page · Turn 90° | Quitar esta página · Elegir esta página · Firmar esta página · Girar 90° |
+| (Organizar PDF, la barra) Rotate right · Rotate left · Remove · Put back | Girar a la derecha · Girar a la izquierda · Quitar · Restaurar |
 | (Eliminar) {count} of {total} come out · the new PDF keeps {left} pages | {count} de {total} salen · el PDF nuevo queda con {left} páginas ("1 de 12 sale", "queda con 1 página") |
 | (Eliminar, el nombre de la página) …, comes out | …, sale |
 | Pages {from} to {to} picked · unpicked | Páginas {from} a {to} elegidas · desmarcadas |

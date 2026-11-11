@@ -1,69 +1,69 @@
-// F18 placeholder: front T writes the pt text
 // Flip image (F18, decision 9): a preset of Rotate image with the mirror alone, Horizontal (the default) or Vertical, and no
-// turn. Page blocks with at least three of their own (gate:conteudo, MIN_OWN_BLOCKS) and the panel bits.
+// turn. Page blocks with at least three of their own (gate:conteudo, MIN_OWN_BLOCKS) and the panel bits. The Portuguese
+// text says what the English one says, with "Espelhar" of the "Mirror" row of docs/i18n/pt.md (DECISOES § 736).
 import type { FlipOptionsTexts, ImageToolTexts } from '../../../../../i18n/types.ts';
 
 export default {
-  title: 'Flip image online, no upload',
+  title: 'Espelhar imagem online, sem upload',
   description:
-    'Flip a JPG, PNG or WebP image in your browser: mirror it left to right or top to bottom, with no rotation. No upload, no limit, and GPS data is removed.',
-  h1: 'Flip image',
-  howHeading: 'How to flip an image',
+    'Espelhe uma imagem JPG, PNG ou WebP no navegador: troque a esquerda pela direita ou o alto pelo baixo, sem girar. Sem upload, sem limite e sem GPS.',
+  h1: 'Espelhar imagem',
+  howHeading: 'Como espelhar uma imagem',
   howSteps: [
-    'Drop your images on the box, choose them, or paste them with Ctrl V.',
-    'Keep Horizontal to swap left and right, or pick Vertical to swap top and bottom.',
-    'Download the flipped image, or the ZIP when you flipped several.',
+    'Solte as imagens na caixa, escolha os arquivos ou cole com Ctrl V.',
+    'Deixe a opção Horizontal para trocar a esquerda pela direita, ou escolha a Vertical para trocar o alto pelo baixo.',
+    'Baixe a imagem espelhada, ou o ZIP quando tiver espelhado várias.',
   ],
-  specsHeading: 'What the flip does',
+  specsHeading: 'O que o espelhamento faz',
   specs: {
-    caption: 'Flip image: formats taken, the two mirrors and the output',
-    head: ['Detail', 'What happens'],
+    caption: 'Espelhar imagem: formatos aceitos, os dois espelhos e a saída',
+    head: ['Detalhe', 'O que acontece'],
     rows: [
-      ['Takes', 'JPG, PNG and WebP, recognized from the file content and not from the name. HEIC photos go through HEIC to JPG first, and AVIF files through AVIF to JPG.'],
-      ['Horizontal', 'The default. Left and right swap places, as in a mirror held beside the picture.'],
-      ['Vertical', 'Top and bottom swap places, as in the reflection of the picture in still water.'],
-      ['No rotation', 'The picture is only mirrored, never turned. To turn it as well, Rotate image combines a turn with a mirror.'],
-      ['Starting point', 'The photo orientation is applied first, so the mirror flips the picture as you see it and not its raw pixels.'],
-      ['Batch', 'The mirror you pick applies to every image in the batch, with no limit on the number of images.'],
-      ['Output', 'The same format and the same width and height as the picture you see. PNG and WebP keep their transparency.'],
-      ['Quality', 'JPG and WebP are saved again after the flip. PNG is saved without loss.'],
-      ['Metadata', 'Exif, XMP, IPTC and GPS are removed, and no orientation tag is left to be read twice.'],
+      ['Aceita', 'JPG, PNG e WebP, reconhecidos pelo conteúdo do arquivo e não pelo nome. Fotos HEIC passam antes pela ferramenta HEIC para JPG, e arquivos AVIF, pela ferramenta AVIF para JPG.'],
+      ['Horizontal', 'O padrão. A esquerda e a direita trocam de lugar, como num espelho posto ao lado da imagem.'],
+      ['Vertical', 'O alto e o baixo trocam de lugar, como no reflexo da imagem na água parada.'],
+      ['Sem giro', 'A imagem só é espelhada, nunca girada. Para girar também, a Girar imagem combina um giro com um espelhamento.'],
+      ['Ponto de partida', 'A orientação da foto é aplicada primeiro, então o espelho inverte a imagem como você a vê, e não os pixels crus.'],
+      ['Lote', 'O espelho escolhido vale para todas as imagens do lote, sem limite de imagens.'],
+      ['Saída', 'O mesmo formato e a mesma largura e altura da imagem que você vê. PNG e WebP mantêm a transparência.'],
+      ['Qualidade', 'JPG e WebP são salvos de novo depois do espelhamento. O PNG é salvo sem perda.'],
+      ['Metadados', 'Exif, XMP, IPTC e GPS são removidos, e nenhuma marcação de orientação fica para ser lida duas vezes.'],
     ],
   },
-  faqHeading: 'Questions about flipping',
+  faqHeading: 'Perguntas sobre espelhar',
   faq: [
     {
-      q: 'What is the difference between flipping and rotating an image?',
-      a: 'Rotating turns the picture around its center. Flipping mirrors it: Horizontal swaps left and right, and Vertical swaps top and bottom. Text in a flipped image reads backward.',
+      q: 'Qual é a diferença entre espelhar e girar uma imagem?',
+      a: 'Girar roda a imagem em torno do centro. Espelhar inverte a imagem como num espelho: a opção Horizontal troca a esquerda pela direita, e a Vertical troca o alto pelo baixo. Um texto numa imagem espelhada fica ao contrário.',
     },
     {
-      q: 'How do I fix a selfie that came out mirrored?',
-      a: 'Keep Horizontal. Left and right swap places, so text that read backward in the photo reads the right way again.',
+      q: 'Como corrijo uma selfie que saiu espelhada?',
+      a: 'Deixe a opção Horizontal. A esquerda e a direita trocam de lugar, então um texto que aparecia ao contrário na foto volta a ser lido do jeito certo.',
     },
     {
-      q: 'Is a vertical flip the same as turning the image upside down?',
-      a: 'No. A turn of 180° also swaps left and right, while a vertical flip keeps them where they are and only swaps top and bottom. For a photo that is upside down, use 180° in Rotate image.',
+      q: 'Espelhar na vertical é o mesmo que deixar a imagem de cabeça para baixo?',
+      a: 'Não. Um giro de 180° também troca a esquerda pela direita, enquanto o espelho vertical deixa os dois lados onde estão e só troca o alto pelo baixo. Para uma foto de cabeça para baixo, use 180° na Girar imagem.',
     },
     {
-      q: 'Does flipping a JPG lower its quality?',
-      a: 'A JPG or a WebP is saved again after the flip, so it goes through lossy compression once more. PNG is saved without loss. Flip once from your original rather than several times.',
+      q: 'Espelhar um JPG diminui a qualidade?',
+      a: 'Um JPG ou um WebP é salvo de novo depois do espelhamento, então passa mais uma vez por uma compressão com perda. O PNG é salvo sem perda. Espelhe uma vez só, a partir do original, em vez de espelhar várias vezes.',
     },
     {
-      q: 'Can I flip several images at once?',
-      a: 'Yes. Drop them together. The mirror you pick applies to the whole batch, and the download is one ZIP.',
+      q: 'Dá para espelhar várias imagens de uma vez?',
+      a: 'Sim. Solte todas juntas. O espelho escolhido vale para o lote inteiro, e você baixa tudo num ZIP só.',
     },
   ],
-  privacyHeading: 'Privacy',
+  privacyHeading: 'Privacidade',
   privacyNote:
-    'Your images are flipped on your device and never sent to a server. The flipped copies leave out the photo metadata, including the GPS location.',
-  relatedHeading: 'More image tools',
+    'Suas imagens são espelhadas no seu aparelho e nunca são enviadas a um servidor. As cópias espelhadas deixam de fora os metadados da foto, inclusive a localização GPS.',
+  relatedHeading: 'Mais ferramentas de imagem',
   panel: {
-    formats: 'JPG, PNG or WebP',
-    progressLabel: 'Flipping images',
-    done: 'Done! Your image is flipped.',
-    doneMany: 'Done! Your {count} images are flipped.',
+    formats: 'JPG, PNG ou WebP',
+    progressLabel: 'Espelhando as imagens',
+    done: 'Prontinho! Sua imagem foi espelhada.',
+    doneMany: 'Prontinho! Suas {count} imagens foram espelhadas.',
     options: {
-      legend: 'Mirror',
+      legend: 'Espelhar',
       horizontal: 'Horizontal',
       vertical: 'Vertical',
     },

@@ -1,15 +1,17 @@
 import type { ImageToolsTexts } from '../types.ts';
 
 export default {
-  title: 'Herramientas de imagen: diez gratis, sin subir archivos',
+  // F18 (decision 13; DECISOES § 736): eleven with Remove EXIF data; the presets are not counted.
+  title: 'Herramientas de imagen: once gratis, sin subir archivos',
   description:
-    'Comprime, redimensiona, recorta, rota, convierte y pasa imágenes a PDF. Diez herramientas de imagen gratis en tu navegador, sin subir nada ni crear cuenta.',
+    'Comprime, redimensiona, recorta, rota y convierte imágenes, quítales los metadatos o pásalas a PDF. Once herramientas gratis en tu navegador, sin subir nada.',
   eyebrow: 'Herramientas de imagen',
-  h1: 'Diez herramientas de imagen, sin subir nada',
-  intro: 'Diez herramientas para comprimir, redimensionar, recortar, rotar, convertir y combinar imágenes, todo en tu navegador y sin subir nada.',
+  h1: 'Once herramientas de imagen, sin subir nada',
+  intro: 'Once herramientas para comprimir, redimensionar, recortar, rotar, convertir y combinar imágenes y quitarles los metadatos, todo en tu navegador y sin subir nada.',
   toolsHeading: 'Todas las herramientas de imagen',
-  presetsHeading: 'Tamaños y límites comunes',
-  presetsCaption: 'Ajustes predefinidos para tamaños comunes y límites de archivo',
+  // F18: Flip image is neither a size nor a limit, so the heading says what every preset is.
+  presetsHeading: 'Ajustes predefinidos',
+  presetsCaption: 'Ajustes predefinidos para tamaños comunes, límites de archivo y fotos reflejadas',
   presetsHead: ['Ajuste predefinido', 'Qué obtienes'],
   guideHeading: '¿Qué herramienta necesitas?',
   guideIntro:
@@ -25,6 +27,7 @@ export default {
     { before: 'Una imagen guardada de un sitio web llegó en AVIF:', tool: 'avif-to-jpg', after: 'la convierte en JPG.' },
     { before: 'Una página web necesita imágenes más ligeras:', tool: 'convert-to-webp', after: 'convierte JPG y PNG en archivos WebP o AVIF más pequeños.' },
     { before: 'Varias imágenes tienen que ir en un solo documento:', tool: 'image-to-pdf', after: 'las pone en un solo PDF, una imagen por página.' },
+    { before: 'Una foto tiene que salir sin su ubicación ni los datos de la cámara:', tool: 'remove-exif-data', after: 'quita los metadatos y deja cada píxel como estaba.' },
   ],
   guideOutro:
     'Además, cada herramienta deja los metadatos de la foto fuera de la copia que descargas, así que la ubicación GPS de una foto del teléfono se queda contigo.',

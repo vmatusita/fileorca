@@ -3,8 +3,8 @@
 // About and Terms pages read it, and the tests read it in Node, like header-menu.ts (never import it from an island).
 // The categories count what the Menu counts (sectionCount): the image and PDF tools with a page in the language, the
 // money calculators of the language's hub (14 in English and Spanish, the 8 made for Brazil in Portuguese), the home
-// and health calculators where they exist, and the QR code generator. The 3 image presets and the 4 money presets
-// never count: 48 tools in English, 31 in Portuguese and 37 in Spanish.
+// and health calculators where they exist, and the QR code generator. The 4 image presets, the 2 PDF presets and the
+// 4 money presets never count: 50 tools in English, 33 in Portuguese and 39 in Spanish (F18).
 import { groupDigits } from '../i18n/format.ts';
 import { LANGS, QR_ID, pagePath, type Lang } from '../i18n/routes.ts';
 import { sectionCount } from './header-menu.ts';
