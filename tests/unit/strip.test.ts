@@ -251,3 +251,57 @@ describe('JPEG com dados depois do EOI, MPF e bytes de preenchimento', () => {
     }
   });
 });
+
+// ---- the thumbnail of the JFIF APP0 (review of the F18, E-2) --------------------------------------------------------
+
+describe('JFIF com miniatura: o cabeçalho fica, a miniatura sai', () => {
+  /** The 14 bytes of a JFIF header: "JFIF\0", version 1.02, units 1 (dots per inch), 72 x 72, then the thumbnail size. */
+  const header = (width: number, height: number): number[] => [...ascii('JFIF'), 0, 1, 2, 1, 0, 72, 0, 72, width, height];
+  /** 7 x 1 thumbnail pixels, 3 bytes each: a text that no picture carries, so its absence can be searched for. */
+  const THUMBNAIL = ascii('JFIF-THUMBNAIL-PIXELS');
+  const picture = [...DQT, ...SOF0, ...DHT, ...SOS, ...SCAN, ...EOI];
+
+  it('keeps the JFIF header with a 0 x 0 thumbnail and drops the thumbnail pixels, the length fixed', () => {
+    expect(THUMBNAIL).toHaveLength(7 * 1 * 3);
+    const file = new Uint8Array([...SOI, ...marker(0xe0, [...header(7, 1), ...THUMBNAIL]), ...picture]);
+    const clean = stripJpeg(file);
+    expect(latin1(clean)).not.toContain('JFIF-THUMBNAIL-PIXELS');
+    expect(Array.from(clean)).toEqual([...SOI, ...marker(0xe0, header(0, 0)), ...picture]);
+  });
+
+  it('gives a JFIF header that has no thumbnail back byte for byte', () => {
+    const file = new Uint8Array([...SOI, ...marker(0xe0, header(0, 0)), ...picture]);
+    expect(Array.from(stripJpeg(file))).toEqual(Array.from(file));
+  });
+
+  it('on a real photo: no thumbnail byte is left, the header stays with 0 x 0, and the picture from the SOF to the EOI is the same', () => {
+    const original = read('jpg-01-pixel2-retrato-gps.jpg');
+    // The photo's own JFIF APP0 (16 bytes, no thumbnail) is swapped for the same header with a 7 x 1 thumbnail.
+    const lengthAt = (bytes: Uint8Array, at: number): number => ((bytes[at + 2] ?? 0) << 8) | (bytes[at + 3] ?? 0);
+    let at = 2;
+    while (original[at + 1] !== 0xe0) at += 2 + lengthAt(original, at); // segment by segment: the Exif's own thumbnail is skipped
+    const length = lengthAt(original, at);
+    expect(latin1(original.subarray(at + 4, at + 9))).toBe('JFIF\0');
+    expect(length).toBe(16);
+    const own = Array.from(original.subarray(at + 4, at + 4 + 12));
+    const withThumbnail = new Uint8Array([...original.subarray(0, at), ...marker(0xe0, [...own, 7, 1, ...THUMBNAIL]), ...original.subarray(at + 2 + length)]);
+    expect(latin1(withThumbnail)).toContain('JFIF-THUMBNAIL-PIXELS');
+
+    const clean = stripJpeg(withThumbnail);
+    expect(latin1(clean)).not.toContain('JFIF-THUMBNAIL-PIXELS');
+    const app0 = segments(clean).filter((segment) => segment.marker === 0xe0);
+    expect(app0).toHaveLength(1);
+    expect(Array.from(app0[0]?.data ?? [])).toEqual([...own, 0, 0]);
+    // The same output as the photo without the thumbnail, byte for byte.
+    expect(Buffer.from(clean).equals(Buffer.from(stripJpeg(original)))).toBe(true);
+    // From the SOF to the EOI, the bytes are the ones that went in.
+    const fromSof = (bytes: Uint8Array): Uint8Array => {
+      let i = 2;
+      while (!(bytes[i + 1] === 0xc0 || bytes[i + 1] === 0xc2)) i += 2 + lengthAt(bytes, i);
+      return bytes.subarray(i);
+    };
+    const picturePart = fromSof(clean);
+    expect(Array.from(picturePart.subarray(picturePart.length - 2))).toEqual(EOI);
+    expect(Buffer.from(picturePart).equals(Buffer.from(fromSof(withThumbnail).subarray(0, picturePart.length)))).toBe(true);
+  });
+});

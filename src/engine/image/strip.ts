@@ -1,8 +1,8 @@
 // Lossless metadata removal for the "no gain" case: when the new copy would not be smaller, the
 // original pixels go back, but without EXIF, GPS, XMP, IPTC or text chunks (DECISOES § 33). The strip
 // operation (Remove EXIF data) is this and nothing else (§ 731).
-// The JPEG keeps its colour profile (APP2 ICC) and, when the photo is rotated, a minimal Exif
-// block with the Orientation tag only, so it still shows the right way up.
+// The JPEG keeps its colour profile (APP2 ICC), its JFIF header without the thumbnail and, when the photo
+// is rotated, a minimal Exif block with the Orientation tag only, so it still shows the right way up.
 // Self-contained: nothing here imports from outside src/engine/image/.
 
 function u16(bytes: Uint8Array, at: number, little: boolean): number {
@@ -60,6 +60,26 @@ function startsWith(bytes: Uint8Array, at: number, id: string): boolean {
   return String.fromCharCode(...bytes.subarray(at, at + id.length)) === id;
 }
 
+/** Bytes of the JFIF header after the marker and the length: "JFIF\0", version, units, two densities, thumbnail size. */
+const JFIF_HEADER = 14;
+
+/**
+ * The JFIF APP0 (marker and length included) without its thumbnail: the 14-byte header stays (identifier, version,
+ * units and densities), with the thumbnail size set to 0 x 0, and the thumbnail pixels after it go, with the length
+ * fixed to match. A header with no thumbnail comes back as it is, and so does one too short to hold the 14 bytes.
+ */
+function jfifWithoutThumbnail(segment: Uint8Array): Uint8Array {
+  const end = 4 + JFIF_HEADER;
+  if (segment.length < end) return segment;
+  if (segment.length === end && segment[end - 2] === 0 && segment[end - 1] === 0) return segment;
+  const out = segment.slice(0, end);
+  out[2] = 0;
+  out[3] = JFIF_HEADER + 2;
+  out[end - 2] = 0;
+  out[end - 1] = 0;
+  return out;
+}
+
 /** True for the APP2 segment (marker and length included) that carries a piece of the ICC colour profile. */
 function isIccSegment(segment: Uint8Array): boolean {
   return String.fromCharCode(...segment.subarray(4, 4 + ICC_ID.length)) === ICC_ID;
@@ -100,12 +120,11 @@ export function stripJpeg(bytes: Uint8Array): Uint8Array {
     // Keep JFIF (APP0), the ICC profile (APP2), Adobe (APP14) and every non-APP segment; drop the rest
     // (Exif and XMP in APP1, IPTC in APP13, MPF and any other APP2, comments). An APP0 or APP14 is kept only when
     // it is what its marker is for: a JFXX thumbnail or a private block under the same marker goes (DECISOES § 100).
-    const keepApp =
-      (marker === 0xe0 && startsWith(segment, 4, JFIF_ID)) ||
-      (marker === 0xee && startsWith(segment, 4, ADOBE_ID)) ||
-      (marker === 0xe2 && isIccSegment(segment));
+    // The JFIF APP0 keeps its header but not the thumbnail it can carry after it.
+    const isJfif = marker === 0xe0 && startsWith(segment, 4, JFIF_ID);
+    const keepApp = isJfif || (marker === 0xee && startsWith(segment, 4, ADOBE_ID)) || (marker === 0xe2 && isIccSegment(segment));
     const drop = (isApp && !keepApp) || marker === 0xfe;
-    if (!drop) keep.push(segment);
+    if (!drop) keep.push(isJfif ? jfifWithoutThumbnail(segment) : segment);
     i += 2 + length;
     if (marker === 0xda) {
       // The entropy-coded data of the scan runs to the next marker; FF00 (a stuffed byte) and FFD0 to FFD7 (restart
