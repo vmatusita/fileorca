@@ -55,7 +55,7 @@ const texts: PdfToolTexts<RotatePdfTexts> = {
     },
     {
       q: 'Can I rotate a PDF that has a password?',
-      a: 'Not as it is. Take the password off in Unlock PDF first, then bring the unlocked copy back here.',
+      a: 'Not as it is. Take the password off in Unlock PDF first, then bring the copy without it back here.',
     },
   ],
   privacyHeading: 'Privacy',

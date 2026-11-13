@@ -48,7 +48,7 @@ const texts: PdfToolTexts<ImagesTexts> = {
     },
     {
       q: 'Can I convert a PDF that needs a password to open?',
-      a: 'Not as it is. Take the password off in Unlock PDF first, then bring the unlocked copy back here.',
+      a: 'Not as it is. Take the password off in Unlock PDF first, then bring the copy without it back here.',
     },
   ],
   privacyHeading: 'Privacy',

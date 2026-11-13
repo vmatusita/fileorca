@@ -36,7 +36,7 @@ const texts: PdfToolTexts<ImagesTexts> = {
   faq: [
     {
       q: 'Qual resolução devo escolher?',
-      a: 'A que combina com o destino das imagens: a menor para a tela, a maior para imprimir. Cada passo acima dá imagens mais nítidas, mas arquivos maiores, que demoram mais para sair: uma página Carta, o papel americano, sai com 612 × 792 pixels na menor resolução, 1275 × 1650 na padrão e 2550 × 3300 na maior.',
+      a: 'A que combina com o destino das imagens: a menor para a tela, a maior para imprimir. Cada passo acima dá imagens mais nítidas, mas arquivos maiores, que demoram mais para sair: uma página Carta, o papel americano, sai com 612 × 792 pixels na menor resolução, 1275 × 1650 na resolução padrão e 2550 × 3300 na maior.',
     },
     {
       q: 'E se um dos PDFs tiver menos páginas que o intervalo?',

@@ -44,7 +44,7 @@ const texts: PdfToolTexts<MergeTexts> = {
     },
     {
       q: 'Can I merge a PDF that has a password?',
-      a: 'Not as it is. Take the password off in Unlock PDF first, then add the unlocked copy to the list here.',
+      a: 'Not as it is. Take the password off in Unlock PDF first, then add the copy without it to the list here.',
     },
     {
       q: 'Does a long list take longer on a phone?',

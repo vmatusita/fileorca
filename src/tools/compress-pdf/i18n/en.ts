@@ -61,7 +61,7 @@ const texts: PdfToolTexts<CompressPdfTexts> = {
     },
     {
       q: 'Can I compress a PDF that has a password?',
-      a: 'Not as it is. Take the password off in Unlock PDF, compress the unlocked copy here, then put a password back on with Protect PDF.',
+      a: 'Not as it is. Take the password off in Unlock PDF, compress that copy here, then put a password back on with Protect PDF.',
     },
     {
       q: 'Why did my PDF come back the same size?',
