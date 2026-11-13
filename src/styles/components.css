@@ -1953,3 +1953,11 @@ html:has(.fo-wall[open]) [data-oli]:not(.fo-wall__oli) { visibility: hidden; }
 .fo-section.fo-author h2 { margin: 0 0 var(--space-2); font: 700 18px/26px var(--fo-font-text); }
 .fo-author p { margin: 0 0 var(--space-2); }
 .fo-author p:last-child { margin-bottom: 0; }
+/* The link "How to check" (src/components/HowToCheck.astro) ends a sentence, at the home and in the privacy note of every
+   tool and calculator: underlined like a link of running text (global.css), which its class takes it out of, so colour is
+   never the only cue (axe link-in-text-block, dark theme). The same for the links in the row header of the table. */
+main :where(p, li, td, th) a.fo-howtocheck, .fo-engines th a { text-decoration-line: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+main :where(p, li, td, th) a.fo-howtocheck:hover, .fo-engines th a:hover { text-decoration-thickness: 3px; }
+/* The name in a signature ("Reviewed by Victor Yuki Matusita", § 763) keeps the ink of the line it is in, the muted ink
+   that passes on every ground of the page (the band of a hub included), and is told apart by its underline. */
+.fo-reviewed a[rel="author"] { color: inherit; }
