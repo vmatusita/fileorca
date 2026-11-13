@@ -1961,3 +1961,23 @@ main :where(p, li, td, th) a.fo-howtocheck:hover, .fo-engines th a:hover { text-
 /* The name in a signature ("Reviewed by Victor Yuki Matusita", § 763) keeps the ink of the line it is in, the muted ink
    that passes on every ground of the page (the band of a hub included), and is told apart by its underline. */
 .fo-reviewed a[rel="author"] { color: inherit; }
+/* How it works from 1280 px: the grid of the Licenses (the head, then the parts; the index in the right column), § 759. */
+@media (min-width: 1280px) {
+  .fo-view--how { grid-template-rows: auto 1fr; }
+}
+/* The table of the libraries (§ 761): from 600 px the tools take the widest column, a name per line, never cut inside a
+   word; under 600 px each library is a block of its own (its name and lines, what it does, then its tools in rows that
+   wrap), the heads of the columns only for screen readers, and the roles of the markup keep it a table for them (Safari
+   drops the semantics of a table drawn as blocks). */
+.fo-engines__tools a { overflow-wrap: normal; }
+@media (min-width: 600px) {
+  .fo-engines td:last-child { width: 40%; }
+}
+@media (max-width: 599px) {
+  .fo-engines, .fo-engines tbody, .fo-engines tr, .fo-engines th, .fo-engines td { display: block; }
+  .fo-engines thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .fo-engines tbody tr { padding: var(--space-3) 0; border-bottom: var(--stroke-hair) solid var(--hairline); }
+  .fo-table.fo-engines :is(th, td) { padding: 0; border: 0; }
+  .fo-table.fo-engines td { margin-top: var(--space-2); }
+  .fo-prose .fo-engines__tools { display: flex; flex-wrap: wrap; column-gap: var(--space-4); }
+}

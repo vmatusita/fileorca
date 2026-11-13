@@ -83,13 +83,13 @@ const licensesPath = pathFor('licenses', lang);
         {t.wasm.paragraphs.map((paragraph) => (
           <p>{sentences(paragraph, 'wasm').map((sentence, at) => <>{at > 0 && ' '}<span data-claim={sentence.claim}>{sentence.parts.map((part) => ('link' in part ? <a href={part.link.href}>{part.link.name}</a> : part.text))}</span></>)}</p>
         ))}
-        <table class="fo-table fo-engines" data-engines>
+        <table class="fo-table fo-engines" role="table" data-engines>
           <caption class="fo-sr">{t.wasm.table.caption}</caption>
-          <thead><tr><th scope="col">{t.wasm.table.library}</th><th scope="col">{t.wasm.table.does}</th><th scope="col">{t.wasm.table.tools}</th></tr></thead>
-          <tbody>
+          <thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader">{t.wasm.table.library}</th><th scope="col" role="columnheader">{t.wasm.table.does}</th><th scope="col" role="columnheader">{t.wasm.table.tools}</th></tr></thead>
+          <tbody role="rowgroup">
             {ENGINES.map((engine) => (
-              <tr data-engine={engine.id} data-kind={engine.kind}>
-                <th scope="row">
+              <tr role="row" data-engine={engine.id} data-kind={engine.kind}>
+                <th scope="row" role="rowheader">
                   <span class="fo-engines__name">{engine.library}</span>
                   <span class="fo-engines__line">{engine.kind === 'wasm' ? t.wasm.table.wasm : t.wasm.table.js}</span>
                   {engine.wasm.length > 0 && (
@@ -97,8 +97,8 @@ const licensesPath = pathFor('licenses', lang);
                   )}
                   <span class="fo-engines__line">{licenseBefore}<a href={`${licensesPath}#${licenseAnchor(engine.pkg)}`} data-license={engine.pkg}>{engine.pkg}</a>{licenseAfter}</span>
                 </th>
-                <td>{t.wasm.does[engine.id]}</td>
-                <td>
+                <td role="cell">{t.wasm.does[engine.id]}</td>
+                <td role="cell">
                   <ul class="fo-engines__tools">
                     {engine.tools.map((id) => <li><a href={pathFor(id, lang)}>{toolName(id)}</a></li>)}
                   </ul>
