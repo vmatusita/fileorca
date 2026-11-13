@@ -64,10 +64,12 @@ export const CHANGELOG = [
     langs: ['en'],
     pages: ['image-tools', 'resize-image', 'crop-image', 'rotate-image', 'heic-to-jpg', 'webp-to-jpg', 'png-to-jpg', 'image-to-pdf', 'compress-image-to-100kb', 'compress-image-to-1mb', 'resize-image-youtube-thumbnail'],
   },
-  // F3 (#7) and the adjustment of the cookie notice (#8).
+  // F3 (#7) and the adjustment of the cookie notice (#8). The image hub of then (the group: only the English one existed)
+  // got its "which tool to use" guide; the cookie notice of #7 (the light band under the footer) is the one #8 finished.
   { id: 'private-chunks', date: '2026-10-31', pr: 7, kind: 'conteudo', pages: ['all:image-tools', 'all:image-presets', 'all:hubs'] },
   { id: 'cookie-notice-space', date: '2026-10-31', pr: 8, kind: 'site', pages: [] },
-  // F4 (#11): the money calculators, their presets and guides, in English.
+  // F4 (#11): the money calculators, their presets and guides, in English; the Privacy and the Terms of the three languages
+  // got the calculators (DECISOES § 755: a page every language has, changed by a change that happened in English only).
   {
     id: 'money-calculators',
     date: '2026-11-01',
@@ -102,7 +104,8 @@ export const CHANGELOG = [
       'home',
     ],
   },
-  // F5a (#12): the PDF tools in English.
+  { id: 'calculator-terms', date: '2026-11-01', pr: 11, kind: 'conteudo', pages: ['privacy', 'terms'] },
+  // F5a (#12): the PDF tools in English; the Privacy, the Terms and the Licenses of the three languages got them.
   {
     id: 'pdf-tools',
     date: '2026-11-01',
@@ -111,7 +114,8 @@ export const CHANGELOG = [
     langs: ['en'],
     pages: ['pdf-tools', 'merge-pdf', 'split-pdf', 'pdf-to-jpg', 'compress-pdf', 'rotate-pdf', 'delete-pdf-pages', 'add-page-numbers-to-pdf', 'sign-pdf', 'protect-pdf', 'unlock-pdf', 'reorder-pdf-pages', 'watermark-pdf', 'home'],
   },
-  // F5b (#13): the file guides in English.
+  { id: 'pdf-terms', date: '2026-11-01', pr: 12, kind: 'conteudo', pages: ['privacy', 'terms', 'licenses'] },
+  // F5b (#13): the file guides in English, and the image and PDF hubs that lead to them.
   {
     id: 'file-guides',
     date: '2026-11-01',
@@ -129,9 +133,11 @@ export const CHANGELOG = [
       'guides-split-pdf-file-size',
       'guides-combine-pdfs-on-phone',
       'guides-photos-to-one-pdf',
+      'image-tools',
+      'pdf-tools',
     ],
   },
-  // F6 (#14): Portuguese and Spanish.
+  // F6 (#14): Portuguese and Spanish, with the pages of the site of the two languages rewritten for them.
   {
     id: 'portuguese-spanish',
     date: '2026-11-02',
@@ -180,9 +186,14 @@ export const CHANGELOG = [
       'compound-interest-calculator',
       'home',
       'support',
+      'privacy',
+      'terms',
+      'about',
+      'licenses',
     ],
   },
-  // F7 (#15): home and health calculators and the QR code generator, in English.
+  // F7 (#15): home and health calculators and the QR code generator, in English; the Privacy, the Terms and the Licenses of
+  // the three languages got them.
   {
     id: 'home-health-calculators',
     date: '2026-11-02',
@@ -207,9 +218,11 @@ export const CHANGELOG = [
     ],
   },
   { id: 'qr-code', date: '2026-11-02', pr: 15, kind: 'conteudo', langs: ['en'], pages: ['qr-code-generator'] },
-  // F8 (#18): offline and "Open with".
-  { id: 'offline', date: '2026-11-02', pr: 18, kind: 'site', pages: [] },
-  // The languages adjustment (#19).
+  { id: 'health-terms', date: '2026-11-02', pr: 15, kind: 'conteudo', pages: ['privacy', 'terms', 'licenses'] },
+  // F8 (#18): offline and "Open with", for every page; the Privacy says what the offline copy keeps, so the entry is
+  // 'conteudo' for it (DECISOES § 755: 'site' only when no page changed its text).
+  { id: 'offline', date: '2026-11-02', pr: 18, kind: 'conteudo', pages: ['privacy'] },
+  // The languages adjustment (#19), with the hubs and the pages of the site of pt and es that lead to the new pages.
   {
     id: 'more-in-portuguese-spanish',
     date: '2026-11-03',
@@ -247,24 +260,31 @@ export const CHANGELOG = [
       'guides-combine-pdfs-on-phone',
       'guides-photos-to-one-pdf',
       'money-calculators',
+      'br-money-calculators',
+      'image-tools',
+      'pdf-tools',
       'home',
+      'privacy',
+      'terms',
+      'about',
     ],
   },
-  // F11 (#23), the header adjustment (#24) and F12 (#25).
-  { id: 'theme-and-menu', date: '2026-11-04', pr: 23, kind: 'site', pages: [] },
-  { id: 'guides-hub', date: '2026-11-04', pr: 23, kind: 'conteudo', pages: ['guides', 'home'] },
+  // F11 (#23), the header adjustment (#24) and F12 (#25). The theme and the Menu are of every page, and the Privacy says
+  // where the theme is kept: 'conteudo' for it (DECISOES § 755). The guides got their hub, and every guide its breadcrumb.
+  { id: 'theme-and-menu', date: '2026-11-04', pr: 23, kind: 'conteudo', pages: ['privacy'] },
+  { id: 'guides-hub', date: '2026-11-04', pr: 23, kind: 'conteudo', pages: ['guides', 'home', 'all:file-guides', 'all:money-guides'] },
   { id: 'header-width', date: '2026-11-04', pr: 24, kind: 'site', pages: [] },
   { id: 'support-page', date: '2026-11-04', pr: 25, kind: 'conteudo', pages: ['support'] },
-  // F13a (#26).
-  { id: 'tool-page', date: '2026-11-05', pr: 26, kind: 'conteudo', pages: ['all:image-tools', 'all:image-presets', 'all:pdf-tools'] },
+  // F13a (#26): the tool page in one place, and the result that a next step takes along, which the Privacy explains.
+  { id: 'tool-page', date: '2026-11-05', pr: 26, kind: 'conteudo', pages: ['all:image-tools', 'all:image-presets', 'all:pdf-tools', 'privacy'] },
   { id: 'cookie-notice', date: '2026-11-05', pr: 26, kind: 'site', pages: [] },
-  // F13b (#27) and the adjustment of the home cards (#28).
+  // F13b (#27) and the adjustment of the home cards (#28). The money guides hold the card of their calculator.
   {
     id: 'calculator-card',
     date: '2026-11-06',
     pr: 27,
     kind: 'conteudo',
-    pages: ['all:money-calculators', 'all:money-presets', 'all:br-calculators', 'all:home-calculators', 'all:health-calculators', 'qr-code-generator'],
+    pages: ['all:money-calculators', 'all:money-presets', 'all:br-calculators', 'all:home-calculators', 'all:health-calculators', 'qr-code-generator', 'all:money-guides'],
   },
   { id: 'file-guide-page', date: '2026-11-06', pr: 27, kind: 'conteudo', pages: ['all:file-guides'] },
   { id: 'home-and-hubs', date: '2026-11-06', pr: 27, kind: 'conteudo', pages: ['home', 'all:hubs'] },
@@ -279,16 +299,17 @@ export const CHANGELOG = [
     date: '2026-11-10',
     pr: 32,
     kind: 'conteudo',
-    pages: ['all:money-calculators', 'all:money-presets', 'all:br-calculators', 'all:home-calculators', 'all:health-calculators'],
+    pages: ['all:money-calculators', 'all:money-presets', 'all:br-calculators', 'all:home-calculators', 'all:health-calculators', 'all:money-guides'],
   },
-  { id: 'avif-webp', date: '2026-11-10', pr: 33, kind: 'conteudo', pages: ['avif-to-jpg', 'convert-to-webp', 'image-tools', 'compress-image', 'home'] },
-  // F18 (#35).
+  // F17 (#33): the two tools, and every image tool that now sends an AVIF file to AVIF to JPG.
+  { id: 'avif-webp', date: '2026-11-10', pr: 33, kind: 'conteudo', pages: ['avif-to-jpg', 'convert-to-webp', 'image-tools', 'home', 'all:image-tools'] },
+  // F18 (#35): the new pages, the hubs, the home and the sister tools whose related tools and texts changed.
   {
     id: 'organize-exif',
     date: '2026-11-13',
     pr: 35,
     kind: 'conteudo',
-    pages: ['remove-exif-data', 'rotate-image-flip', 'organize-pdf', 'split-pdf-extract-pages', 'pdf-to-jpg-to-png', 'image-tools', 'pdf-tools', 'home'],
+    pages: ['organize-pdf', 'remove-exif-data', 'split-pdf-extract-pages', 'pdf-to-jpg-to-png', 'rotate-image-flip', 'pdf-tools', 'image-tools', 'home', 'split-pdf', 'pdf-to-jpg', 'rotate-image', 'convert-to-webp'],
   },
   { id: 'file-guides-measured', date: '2026-11-13', pr: 35, kind: 'conteudo', pages: ['all:file-guides'] },
   // F19a (this run; decision 9): the two new pages and the texts of the tools without repetition.
