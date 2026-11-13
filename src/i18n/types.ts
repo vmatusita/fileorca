@@ -268,6 +268,23 @@ export interface AboutTexts extends PageMeta {
   websiteLabel: string;
   linkedinLabel: string;
   /**
+   * F19a (decision 5; DECISOES § 758): the paragraph after the counts. `{date}` is LAUNCH_DATE (src/platform/site.ts) in the
+   * long form of the language, never typed here; `{whatsNew}` and `{howItWorks}` are the links to those pages, named by their
+   * names in the footer.
+   */
+  since: string;
+  /**
+   * F19a (decision 6; DECISOES § 763): the author box at the end of every guide, before the related pages. `{name}` is the
+   * author's name, a link to this page; `who` is one sentence of who he is; `fileGuide` and `moneyGuide` say how the
+   * numbers of that kind of guide were obtained (`{date}` is the long date of the measurement of the file guides).
+   */
+  author: {
+    heading: string;
+    who: string;
+    fileGuide: string;
+    moneyGuide: string;
+  };
+  /**
    * The card "FileOrca in numbers" (F13b, UX-17 A; DECISOES § 586), on the About page and, from 1280 px, on the Contact
    * page: four counts and the zero. These are the labels; the numbers come from src/components/tool-count.ts and LANGS,
    * never typed here. The fourth count is the home and health calculators where the language has them (`life`, English),

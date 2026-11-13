@@ -1,0 +1,45 @@
+---
+// The author box at the end of every guide, right before the related pages (F19a, decision 6; DECISOES § 763): the name
+// as a link to the About of the language, one sentence of who he is (the idea of the About) and one of how the numbers of
+// the guide were obtained. A file guide: measured with the engine of the site's own tools on the test files, on the day of
+// the measurement (MEASURED.measuredOn, the long date); a money guide: worked out by the calculator inside it, whose math
+// tests/unit/calc-oracle.test.ts checks against the independent oracle of scripts/oracle/ (fixtures/calc/). Victor's photo
+// comes in only when the files of `pnpm sobre:foto` exist (src/platform/about-photo.ts).
+// `data-content="author"` and no data-guide-text: the box is out of the word count of a file guide (checkFileGuide counts
+// the 800 to 1,500 words of the guide's own text without it), and it is a 'site' change, so no date or <lastmod> moves.
+import { pathFor, type Lang } from '../i18n/routes.ts';
+import { TEXTS } from '../i18n/texts.ts';
+import { longDate } from '../i18n/dates.ts';
+import { AUTHOR } from '../platform/site.ts';
+import { aboutPhoto } from '../platform/about-photo.ts';
+
+interface Props {
+  lang: Lang;
+  /** What kind of guide: the file guides measure, the money guides calculate. */
+  kind: 'file' | 'money';
+  /** The day of the measurement of a file guide (YYYY-MM-DD). */
+  measuredOn?: string;
+}
+const { lang, kind, measuredOn } = Astro.props;
+const t = TEXTS[lang].about.author;
+const photo = aboutPhoto()?.author;
+const about = pathFor('about', lang);
+const [whoBefore = '', whoAfter = ''] = t.who.split('{name}');
+const how = kind === 'file' ? t.fileGuide : t.moneyGuide;
+if (kind === 'file' && measuredOn === undefined) throw new Error('a file guide needs the day of its measurement');
+const [howBefore = '', howAfter = ''] = how.split('{date}');
+---
+<section class="fo-section fo-author" aria-labelledby="author" data-content="author">
+  {photo && (
+    <picture class="fo-author__photo" data-photo="author">
+      <source type="image/webp" srcset={photo.webp} />
+      {/* The name is the link right beside it: the photo adds nothing a screen reader should say twice. */}
+      <img src={photo.jpg} width={photo.width} height={photo.height} alt="" loading="lazy" />
+    </picture>
+  )}
+  <div class="fo-author__text">
+    <h2 id="author">{t.heading}</h2>
+    <p>{whoBefore}<a href={about} rel="author">{AUTHOR.name}</a>{whoAfter}</p>
+    <p>{howBefore}{kind === 'file' && measuredOn !== undefined && <time datetime={measuredOn}>{longDate(measuredOn, lang)}</time>}{howAfter}</p>
+  </div>
+</section>

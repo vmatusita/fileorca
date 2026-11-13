@@ -36,7 +36,8 @@
     "guias:medir": "node scripts/guides/measure.ts",
     "lancamento:imagens": "node scripts/lancamento/imagens.ts",
     "ci:custo": "node scripts/ci/custo.ts",
-    "publico:auditar": "node scripts/publico/auditar.ts"
+    "publico:auditar": "node scripts/publico/auditar.ts",
+    "sobre:foto": "node scripts/sobre/foto.ts"
   },
   "dependencies": {
     "@astrojs/preact": "^6.1.1",
