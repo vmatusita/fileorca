@@ -1012,6 +1012,8 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
    is in the Figtree that never swaps (as the 404 and the sections of the home), so a paragraph that the fallback font wraps
    in another number of lines never moves the entries under it when Figtree arrives (es at 360 px moved them 26 px). */
 .fo-view--whats-new { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-steady); }
+/* F19a (DECISOES § 774): How it works too, for the same reason; pt and es at 360 px moved its paragraphs (CLS 0.007). */
+.fo-view--how { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-steady); }
 .fo-changes { list-style: none; margin: 0; padding: 0; max-width: var(--fo-measure); }
 .fo-change { padding-block: var(--space-6); border-top: var(--stroke-hair) solid var(--hairline); scroll-margin-top: var(--space-4); }
 .fo-change:last-child { padding-bottom: 0; }
