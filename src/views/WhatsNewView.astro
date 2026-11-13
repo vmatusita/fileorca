@@ -1,14 +1,23 @@
 ---
-// What's new (F19a, decision 2; DECISOES § 752): the changes a person sees, newest first, from src/platform/changelog.ts,
-// each with its date in a <time datetime>, its title and text, and the links to the pages it touched in this language.
-// Indexable, with no ad: the page has no ad area. Slice 1 of the run: the list of entries; front N finishes the page.
+// What's new (F19a, decision 2; DECISOES § 752 and § 756): the changes a person sees, newest first, from
+// src/platform/changelog.ts (entriesIn: the entries of this language). Each entry is a list item whose id is the id of the
+// entry (the date in the footer links to the newest one, and gate:links checks the anchor), with its title (an H2 after the
+// H1), its date in a <time datetime> in the long form of the language, its text, and the links to the pages it touched in
+// this language (pagesIn), by the names the cards, the hubs, the footer and the Menu give them (src/components/page-name.ts):
+// the first six, then "and {n} more", {n} with the digits of the language; never this page itself. The links sit in a sentence, with commas, so
+// they are inline links of a text (WCAG 2.5.8). Indexable, with no ad area, no ad, no image and no script of its own.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
-import { routeById, type Lang } from '../i18n/routes.ts';
+import { pagePath, routeById, type Lang } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
 import { longDate } from '../i18n/dates.ts';
-import { entriesIn } from '../platform/changelog.ts';
+import { fmt, groupDigits } from '../i18n/format.ts';
+import { pageName } from '../components/page-name.ts';
+import { entriesIn, pagesIn } from '../platform/changelog.ts';
 import { breadcrumbLd, homePath } from '../seo/meta.ts';
+
+/** How many pages an entry links to before "and {n} more" (decision 2). */
+const SHOWN_PAGES = 6;
 
 interface Props {
   lang: Lang;
@@ -21,7 +30,20 @@ const crumbs = [
   { name: common.breadcrumb.home, path: homePath(lang) },
   { name: t.h1, path: route.paths[lang] ?? '/' },
 ];
-const entries = entriesIn(lang);
+const entries = entriesIn(lang).map((entry) => {
+  const text = t.entries[entry.id];
+  if (!text) throw new Error(`What's new: no ${lang} text for the entry ${entry.id}`);
+  // The page itself is not a link of its own entries: the person is on it.
+  const links = pagesIn(entry, lang).flatMap((id) => {
+    if (id === route.id) return [];
+    const href = pagePath(id, lang);
+    const name = pageName(id, lang);
+    return href && name ? [{ href, name }] : [];
+  });
+  const shown = links.slice(0, SHOWN_PAGES);
+  const rest = links.length - shown.length;
+  return { id: entry.id, date: entry.date, text, shown, more: rest > 0 ? fmt(t.more, { n: groupDigits(rest, lang) }) : '' };
+});
 ---
 <BaseLayout lang={lang} route={route} title={t.title} description={t.description} schema={[breadcrumbLd(crumbs)]} wide>
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
@@ -31,16 +53,21 @@ const entries = entriesIn(lang);
       <p>{t.intro}</p>
     </div>
     <ol class="fo-changes">
-      {entries.map((entry) => {
-        const text = t.entries[entry.id];
-        return (
-          <li id={entry.id} class="fo-change">
-            <time datetime={entry.date}>{longDate(entry.date, lang)}</time>
-            {text && <h2 class="fo-h3">{text.title}</h2>}
-            {text && <p>{text.body}</p>}
-          </li>
-        );
-      })}
+      {entries.map((entry) => (
+        <li id={entry.id} class="fo-change">
+          <h2 class="fo-change__title">{entry.text.title}</h2>
+          <p class="fo-change__date"><time datetime={entry.date}>{longDate(entry.date, lang)}</time></p>
+          <p>{entry.text.body}</p>
+          {entry.shown.length > 0 && (
+            <p class="fo-change__pages">
+              {entry.shown.map((link, index) => (
+                <>{index > 0 && ', '}<a href={link.href}>{link.name}</a></>
+              ))}
+              {entry.more && ` ${entry.more}`}
+            </p>
+          )}
+        </li>
+      ))}
     </ol>
   </div>
 </BaseLayout>

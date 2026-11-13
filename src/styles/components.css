@@ -1006,6 +1006,20 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-footer a:hover { text-decoration: underline; text-underline-offset: 3px; }
 /* F19a (DECISOES § 754): the date of the newest change at the base, in the muted ink of the signature beside it. */
 .fo-footer .fo-footer__updated { color: var(--on-deep-muted); font-size: 14px; white-space: nowrap; text-decoration: underline; text-underline-offset: 3px; }
+/* F19a · What's new (decision 2; DECISOES § 756): the entries, newest first, one under the other in the measure of the
+   prose, a hairline between them. The title in the H2 of the prose, the date muted under it, the text, then the pages it
+   touched as inline links of a sentence (target size: inline, WCAG 2.5.8). No image, no ad, nothing that moves: the text
+   is in the Figtree that never swaps (as the 404 and the sections of the home), so a paragraph that the fallback font wraps
+   in another number of lines never moves the entries under it when Figtree arrives (es at 360 px moved them 26 px). */
+.fo-view--whats-new { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-steady); }
+.fo-changes { list-style: none; margin: 0; padding: 0; max-width: var(--fo-measure); }
+.fo-change { padding-block: var(--space-6); border-top: var(--stroke-hair) solid var(--hairline); scroll-margin-top: var(--space-4); }
+.fo-change:last-child { padding-bottom: 0; }
+.fo-change > p { margin: 0 0 var(--space-2); overflow-wrap: anywhere; }
+.fo-change > p:last-child { margin-bottom: 0; }
+.fo-change__title { margin: 0; font: 600 24px/30px var(--fo-font-display); }
+.fo-change > .fo-change__date { margin: var(--space-1) 0 var(--space-3); font-size: 14px; color: var(--ink-muted); }
+.fo-change__pages { font-size: 15px; }
 .fo-footer__base { max-width: var(--page-max); margin: var(--space-8) auto 0; padding-top: var(--space-4); border-top: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 30%, transparent); display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); justify-content: space-between; align-items: center; font-size: 14px; color: var(--on-deep-muted); }
 /* F12 · o café (DECISOES § 437): the coffee line opens the footer, on the edges of the columns, with a hairline under
    it and a 48 px target (it was the 32 px line of the links, at the base, 24 to 46 px from the AdSense anchor). */

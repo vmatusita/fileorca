@@ -383,3 +383,38 @@ test('the image and PDF pages load nothing of the home and health calculators or
     expect(calc.some((id) => part.test(id) && F7_MODULE.test(id)), `${part} é um módulo da calculadora`).toBe(true);
   }
 });
+
+// F19a (decisions 2 and 7, criterion 9; DECISOES § 757): What's new and How it works are pages of the site, like the About:
+// no island, no ad and no script of their own. Each fits the budgets with no worker and no wasm, and loads the very JS files
+// of the About, name and hash (the About measured in a fresh browser of its own); from the About to either, and from one to
+// the other, the next page costs its HTML.
+const ABOUT_PAGE = routeById('about').paths.en ?? '';
+const SITE_PAGES = (['whats-new', 'how-it-works'] as const).map((id) => routeById(id).paths.en ?? '');
+for (const path of SITE_PAGES) {
+  test(`initial JS and requests of ${path} fit the budgets, with the very JS files of the About`, async ({ page, browser, baseURL }) => {
+    const origin = new URL(baseURL ?? 'http://127.0.0.1:4173').origin;
+    const own = await expectInitialBudget(page, origin, path, { files: 'at most 2' });
+    const context = await browser.newContext();
+    const about = await context.newPage();
+    const seen = new Set<string>();
+    about.on('request', (request) => {
+      const url = new URL(request.url());
+      if (url.origin === origin && request.resourceType() === 'script') seen.add(url.pathname);
+    });
+    const { settled } = settler(about);
+    expect((await about.goto(ABOUT_PAGE))?.status(), ABOUT_PAGE).toBe(200);
+    await settled();
+    const aboutFiles = [...seen].sort();
+    await context.close();
+    expect([...own].sort(), `${path} = ${ABOUT_PAGE}`).toEqual(aboutFiles);
+  });
+}
+for (const [first, second] of [
+  [ABOUT_PAGE, SITE_PAGES[0] ?? ''],
+  [SITE_PAGES[0] ?? '', SITE_PAGES[1] ?? ''],
+  [SITE_PAGES[1] ?? '', ABOUT_PAGE],
+] as const) {
+  test(`requests: ${first} then ${second} (F19a)`, async ({ page, baseURL }) => {
+    await expectNextPage(page, new URL(baseURL ?? 'http://127.0.0.1:4173').origin, first, second);
+  });
+}
