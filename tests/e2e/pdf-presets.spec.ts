@@ -105,9 +105,15 @@ test('PDF to PNG: no format choice, PNG from the start, "PNG · <resolution>" in
   await expect(adjust).toContainText(`${pngTexts.panel.options.png} · ${pngTexts.panel.options.medium}`);
   await adjust.click();
   await expect(root(page).locator('input[name="fo-images-format"]')).toHaveCount(0);
+  // The option runs the tool again, and the new result replaces the Download link and revokes the old file: wait for the
+  // new address before reading it. Reading in a loop met the revoked one in WebKit on Linux ("TypeError: Load failed" from
+  // the fetch, which a poll does not retry), in the first full CI run of the F18 (DECISOES § 750).
+  const download = root(page).locator('.fo-btn--download');
+  const before = await download.getAttribute('href');
   await option(page, pngTexts.panel.options.low);
   await expect(adjust).toContainText(`${pngTexts.panel.options.png} · ${pngTexts.panel.options.low}`);
-  await expect.poll(async () => filesOf(await takePdfDownload(page)).map((out) => imageSize(out.bytes).width), { timeout: 30_000 }).toEqual([612, 612]);
+  await expect.poll(() => download.getAttribute('href'), { timeout: 30_000 }).not.toBe(before);
+  expect(filesOf(await takePdfDownload(page)).map((out) => imageSize(out.bytes).width)).toEqual([612, 612]);
   // One page: one PNG, named as the page says ("report-page-1.png").
   await page.getByRole('button', { name: panel.result.startOver }).click();
   await choosePdfs(page, [pdfFile('pdf-escaneado-01-pagina-livro-cor.pdf')]);
