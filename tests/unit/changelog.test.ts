@@ -17,7 +17,7 @@
 import { execFileSync } from 'node:child_process';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { CHANGELOG, PAGE_GROUPS, birthOf, entriesIn, lastmodOf, newestIn, pagesIn, type ChangeEntry, type PageGroup } from '../../src/platform/changelog.ts';
-import { LANGS, ROUTES, type Lang, type RouteId } from '../../src/i18n/routes.ts';
+import { LANGS, ROUTES, type Lang } from '../../src/i18n/routes.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
 import { LAUNCH_DATE, parseLaunched } from '../../src/platform/site.ts';
 
