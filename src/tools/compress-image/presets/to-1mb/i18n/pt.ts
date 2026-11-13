@@ -8,16 +8,15 @@ export default {
   howHeading: 'Como deixar uma imagem com menos de 1 MB',
   howSteps: [
     'Solte na caixa as fotos grandes demais, escolha os arquivos ou cole com Ctrl V.',
-    'A Oli salva cada uma como um JPG de até 1 MB, guardando o máximo de detalhe que couber.',
-    'Baixe a imagem, ou o ZIP quando tiver comprimido várias.',
+    'A Oli deixa cada uma abaixo do limite, e não há nada para escolher.',
+    'Baixe a imagem comprimida.',
   ],
   specsHeading: 'A meta de 1 MB',
   specs: {
     caption: 'O que a Comprimir imagem para 1 MB garante e o que ela muda',
     head: ['Detalhe', 'O que a Oli faz'],
     rows: [
-      ['Meta', 'Todo arquivo fica com 1.000.000 de bytes ou menos.'],
-      ['Qual MB', 'O MB é lido como 1.000.000 de bytes, a leitura menor, então um limite de 1 MiB (1.048.576 bytes) também é respeitado.'],
+      ['Meta', 'Todo arquivo fica com 1 MB ou menos.'],
       ['Formato de saída', 'Sempre um JPG. Entram JPG, PNG e WebP.'],
       ['Transparência', 'As áreas transparentes ficam brancas, porque o JPG não tem transparência.'],
       ['Imagem com menos de 1 MB', 'Volta sem mudança, a não ser pelos metadados, no próprio formato.'],
@@ -37,7 +36,7 @@ export default {
     },
     {
       q: 'Posso manter o formato original, como o PNG?',
-      a: 'O resultado é um JPG, porque uma foto em PNG não cabe num tamanho definido sem mudar os pixels, e o JPG é aceito quase em todo lugar. Um arquivo que já cabe volta no próprio formato.',
+      a: 'Não quando o arquivo precisa diminuir: uma foto em PNG não cabe num tamanho definido sem mudar os pixels, e o JPG é aceito quase em todo lugar.',
     },
     {
       q: 'Quanta qualidade eu perco com 1 MB?',
@@ -45,16 +44,12 @@ export default {
     },
     {
       q: 'Por que minha imagem também ficou menor em pixels?',
-      a: 'Quando uma imagem tem detalhe demais para caber mesmo numa qualidade baixa, baixar ainda mais a qualidade deixaria a imagem quadriculada. Em vez disso, a Oli reduz um pouco as dimensões e mostra a nova largura e a nova altura.',
-    },
-    {
-      q: 'Dá para comprimir várias fotos para 1 MB de uma vez?',
-      a: 'Dá. Solte o conjunto inteiro. Cada arquivo fica com 1 MB ou menos, e o lote é baixado num só ZIP.',
+      a: 'Baixar ainda mais a qualidade deixaria quadriculada uma imagem com muito detalhe, e menos pixels numa boa qualidade ficam melhores.',
     },
   ],
   privacyHeading: 'Privacidade',
   privacyNote:
-    'Suas fotos são reduzidas para 1 MB no seu aparelho e nunca são enviadas a um servidor. Os arquivos novos deixam de fora os metadados da foto, inclusive a localização GPS.',
+    'Suas fotos são reduzidas para 1 MB no seu aparelho e nunca são enviadas a um servidor.',
   relatedHeading: 'Mais ferramentas de imagem',
   panel: {
     formats: 'JPG, PNG ou WebP',

@@ -9,7 +9,7 @@ export default {
   howSteps: [
     'Suelta tus imágenes JPG o PNG en el cuadro, elígelas o pégalas con Ctrl V.',
     'Deja WebP o elige AVIF, y luego la compresión Recomendada o la Fuerte.',
-    'Descarga la imagen convertida, o el ZIP si convertiste varias.',
+    'Descarga la imagen convertida.',
   ],
   specsHeading: 'Especificaciones',
   specs: {
@@ -21,7 +21,6 @@ export default {
       ['Compresión', 'La Recomendada equilibra tamaño y aspecto, y la Fuerte da el archivo más pequeño.'],
       ['Transparencia', 'Se conserva, tanto en WebP como en AVIF.'],
       ['Velocidad', 'Una foto más grande tarda más en guardarse, en los dos formatos. Cuál de los dos se guarda más rápido depende del navegador.'],
-      ['Compatibilidad', 'El WebP se abre en todos los navegadores actuales. El AVIF se abre en las versiones actuales de Chrome, Edge, Firefox y Safari, pero algunas apps y algunos editores antiguos no pueden leerlo.'],
       ['Lote', 'Sin límite de imágenes. Una imagen se descarga directamente, y varias llegan en un solo ZIP.'],
       ['Metadatos', 'Se eliminan Exif, XMP, IPTC y GPS, y se aplica la orientación de la foto.'],
     ],
@@ -34,11 +33,7 @@ export default {
     },
     {
       q: '¿Elijo WebP o AVIF?',
-      a: 'El WebP es la opción segura: todos los navegadores actuales lo abren. El AVIF da archivos más pequeños, pero algunas apps antiguas no pueden abrirlo.',
-    },
-    {
-      q: '¿El WebP conserva la transparencia de un PNG?',
-      a: 'Sí, y el AVIF también. Un PNG con fondo transparente lo conserva cuando lo conviertes a cualquiera de los dos formatos.',
+      a: 'El WebP es la opción segura: se abre en todos los navegadores actuales. El AVIF se abre en las versiones actuales de Chrome, Edge, Firefox y Safari, pero algunas apps y algunos editores antiguos no pueden leerlo.',
     },
     {
       q: '¿Todos los sitios web aceptan un archivo WebP?',
@@ -51,7 +46,7 @@ export default {
   ],
   privacyHeading: 'Privacidad',
   privacyNote:
-    'Tus imágenes se convierten en tu navegador, y tus archivos nunca salen de tu dispositivo ni llegan a un servidor. Los archivos nuevos omiten los metadatos de la foto, incluida la ubicación GPS.',
+    'Tus imágenes se convierten en tu navegador, y tus archivos nunca salen de tu dispositivo ni llegan a un servidor.',
   relatedHeading: 'Más herramientas de imagen',
   panel: {
     formats: 'JPG o PNG',

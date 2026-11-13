@@ -9,7 +9,7 @@ export default {
   howSteps: [
     'Suelta tus imágenes AVIF en el cuadro, elígelas o pégalas con Ctrl V.',
     'Oli convierte cada una en JPG, y no hay nada que ajustar.',
-    'Descarga el JPG, o el ZIP si convertiste varias.',
+    'Descarga el JPG.',
   ],
   specsHeading: 'Especificaciones',
   specs: {
@@ -19,7 +19,7 @@ export default {
       ['Acepta', 'Archivos AVIF, reconocidos por el contenido del archivo y no por el nombre.'],
       ['Resultado', 'JPG. Sale un archivo por cada AVIF.'],
       ['Transparencia', 'El JPG no tiene transparencia, así que queda blanca, y el resultado te lo dice.'],
-      ['Tamaño', 'Un JPG de la misma imagen suele pesar más que el AVIF, porque el AVIF comprime mejor.'],
+      ['Tamaño', 'Un JPG de la misma imagen suele pesar más que el AVIF.'],
       ['Lote', 'Sin límite de imágenes. Una imagen se descarga directamente, y varias llegan en un solo ZIP.'],
       ['Metadatos', 'Se eliminan Exif, XMP, IPTC y GPS, y se aplica la orientación de la foto.'],
     ],
@@ -36,11 +36,7 @@ export default {
     },
     {
       q: '¿Convertir AVIF a JPG baja la calidad?',
-      a: 'El JPG comprime con pérdida, así que el archivo nuevo no es una copia perfecta, y suele pesar más que el AVIF. Conserva el AVIF si necesitas el original.',
-    },
-    {
-      q: '¿Qué pasa con un fondo transparente?',
-      a: 'El JPG no puede guardar transparencia, así que FileOrca rellena esas zonas con blanco, y el resultado te lo dice.',
+      a: 'El JPG comprime con pérdida, así que el archivo nuevo no es una copia perfecta. Conserva el AVIF si necesitas el original.',
     },
     {
       q: '¿Por qué algunas imágenes llegan en AVIF?',
@@ -49,7 +45,7 @@ export default {
   ],
   privacyHeading: 'Privacidad',
   privacyNote:
-    'Tus imágenes se convierten en tu navegador, y tus archivos nunca salen de tu dispositivo ni llegan a un servidor. Los archivos JPG omiten los metadatos de la foto, incluida la ubicación GPS.',
+    'Tus imágenes se convierten en tu navegador, y tus archivos nunca salen de tu dispositivo ni llegan a un servidor.',
   relatedHeading: 'Más herramientas de imagen',
   panel: {
     formats: 'AVIF',

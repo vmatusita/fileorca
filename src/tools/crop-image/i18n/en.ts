@@ -9,7 +9,7 @@ export default {
   howSteps: [
     'Drop your images on the box, choose them, or paste them with Ctrl V.',
     'Pick Square, 4:5, 16:9 or Free, then drag the box or its corners, or type its position and size.',
-    'Download the cropped image, or the ZIP when you cropped several.',
+    'Download the cropped image.',
   ],
   specsHeading: 'Specifications',
   specs: {
@@ -17,10 +17,10 @@ export default {
     head: ['Detail', 'What happens'],
     rows: [
       ['Takes', 'JPG, PNG and WebP, recognized from the file content and not from the name. HEIC photos go through HEIC to JPG first, and AVIF files through AVIF to JPG.'],
-      ['Shapes', 'Square, which is the default, 4:5, 16:9 or Free. The box opens centered, so a result is ready as soon as you drop an image.'],
+      ['Shapes', 'Square, 4:5, 16:9 or Free.'],
       ['Moving the box', 'Drag the box or its corners, or focus it and use the arrow keys. Shift with the arrow keys changes its size.'],
       ['Exact values', 'Type the x, y, width and height of the box in pixels of the image, which is the way to crop without a pointer.'],
-      ['Batch', 'Each image gets the centered crop in the shape you picked. Pick an image in the list to adjust its own box.'],
+      ['Batch', 'Each image gets the centered crop in the shape you picked. Pick an image in the list to adjust its own box, and the others keep theirs.'],
       ['Output', 'The same format as the file you dropped, with the pixels of the box and no scaling. PNG and WebP keep their transparency.'],
       ['Quality', 'JPG and WebP are saved again after the cut. PNG is saved without loss.'],
       ['Metadata', 'Exif, XMP, IPTC and GPS are removed, and the photo orientation is applied before you crop.'],
@@ -30,7 +30,7 @@ export default {
   faq: [
     {
       q: 'How do I crop a photo to a square?',
-      a: 'Square is the default shape. The box opens centered with equal sides, so you can download right away, or drag it over the part of the photo you want to keep.',
+      a: 'Square is the default shape, and the box opens centered, so a result is ready as soon as you drop the photo. Download it as it is, or move the box first.',
     },
     {
       q: 'How do I crop an image to 4:5 for Instagram?',
@@ -38,24 +38,16 @@ export default {
     },
     {
       q: 'Does cropping lower the quality of an image?',
-      a: 'Cropping cuts pixels away and does not stretch the ones that stay, so the part you keep is as sharp as the original. JPG and WebP are saved again after the cut, which is the only change. PNG is saved without loss.',
+      a: 'Cropping cuts pixels away and does not stretch the ones that stay, so the part you keep is as sharp as the original.',
     },
     {
       q: 'Can I crop without a fixed shape?',
       a: 'Yes. Pick Free and drag any side or corner of the box. With Free the width and the height change independently.',
     },
-    {
-      q: 'Can I crop with the keyboard?',
-      a: 'Yes. Focus the crop box, move it with the arrow keys, and hold Shift with the arrow keys to change its size. You can also type the x, y, width and height of the box in the fields below the image.',
-    },
-    {
-      q: 'Can I crop many photos at once?',
-      a: 'Yes. Drop them all and each one gets the centered crop in the shape you picked. Pick one in the list to move its box, and the other photos keep theirs.',
-    },
   ],
   privacyHeading: 'Privacy',
   privacyNote:
-    'Your images are cropped on your device and never sent to a server. The saved copies leave out the photo metadata, including the GPS location.',
+    'Your images are cropped on your device and never sent to a server.',
   relatedHeading: 'More image tools',
   panel: {
     formats: 'JPG, PNG or WebP',

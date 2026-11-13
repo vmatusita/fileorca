@@ -9,7 +9,7 @@ export default {
   howSteps: [
     'Solte as imagens na caixa, escolha os arquivos ou cole com Ctrl V.',
     'Escolha Por tamanho e digite a largura e a altura, ou escolha Por porcentagem e digite um número.',
-    'Baixe a imagem redimensionada, ou o ZIP quando tiver redimensionado várias.',
+    'Baixe a imagem redimensionada.',
   ],
   specsHeading: 'Especificações',
   specs: {
@@ -17,7 +17,7 @@ export default {
     head: ['Detalhe', 'O que acontece'],
     rows: [
       ['Aceita', 'JPG, PNG e WebP, reconhecidos pelo conteúdo do arquivo e não pelo nome. Fotos HEIC passam antes pela ferramenta HEIC para JPG, e arquivos AVIF, pela ferramenta AVIF para JPG.'],
-      ['Por tamanho', 'Você digita a largura e a altura em pixels. A proporção fica travada, e cada imagem cabe dentro dessa caixa.'],
+      ['Por tamanho', 'Você digita a largura e a altura em pixels. A proporção fica travada, e cada imagem cabe dentro dessa caixa: uma foto de 4000 × 3000 numa caixa de 1000 × 1000 sai com 1000 × 750.'],
       ['Por porcentagem', 'Você digita uma porcentagem da largura e da altura atuais, a mesma para todas as imagens do lote.'],
       ['Nunca amplia', 'Se você pedir mais pixels do que a imagem tem, ela fica no tamanho original, e o resultado avisa.'],
       ['Saída', 'O mesmo formato do arquivo que você soltou. PNG e WebP mantêm a transparência.'],
@@ -30,16 +30,12 @@ export default {
   faqHeading: 'Perguntas',
   faq: [
     {
-      q: 'Como redimensiono uma imagem para um tamanho exato em pixels?',
-      a: 'Escolha Por tamanho e digite a largura e a altura de que você precisa. A proporção fica travada, então cada imagem cabe dentro dessa caixa: uma foto de 4000 × 3000 numa caixa de 1000 × 1000 sai com 1000 × 750.',
-    },
-    {
       q: 'Redimensionar diminui a qualidade da imagem?',
-      a: 'Diminuir uma imagem mantém a nitidez no tamanho novo. Aumentar só consegue esticar os pixels que ela já tem, o que deixa tudo borrado, por isso a Redimensionar imagem nunca amplia: se você pedir mais pixels do que a imagem tem, recebe o tamanho original de volta, e o resultado avisa.',
+      a: 'Diminuir uma imagem mantém a nitidez no tamanho novo. Aumentar só consegue esticar os pixels que ela já tem, o que deixa tudo borrado, e é por isso que a Redimensionar imagem nunca amplia.',
     },
     {
       q: 'É melhor redimensionar por pixels ou por porcentagem?',
-      a: 'Use pixels quando um formulário ou um site pede um tamanho, como 800 × 600. Use porcentagem quando você só quer tudo menor na mesma medida, como 50% para metade da largura e metade da altura. Num lote de fotos variadas, a porcentagem diminui cada uma na mesma medida, enquanto o tamanho faz cada uma caber na mesma caixa.',
+      a: 'Use pixels quando um formulário ou um site pede um tamanho, como 800 × 600. Use porcentagem quando você só quer tudo menor na mesma medida, como 50% para metade da largura e metade da altura.',
     },
     {
       q: 'Mudar o DPI muda o tamanho da imagem?',
@@ -49,14 +45,10 @@ export default {
       q: 'O arquivo fica mais leve depois de redimensionar?',
       a: 'Normalmente sim, porque menos pixels dão um arquivo menor. Para um tamanho de arquivo exato, como 100 KB, use a ferramenta Comprimir imagem para 100 KB.',
     },
-    {
-      q: 'Minha imagem é enviada para algum lugar?',
-      a: 'Não. O FileOrca redimensiona a imagem no seu aparelho, dentro do navegador. Abra a aba Rede do navegador enquanto redimensiona: nenhuma requisição leva o seu arquivo.',
-    },
   ],
   privacyHeading: 'Privacidade',
   privacyNote:
-    'Suas imagens são redimensionadas no seu aparelho e nunca são enviadas a um servidor. As cópias salvas deixam de fora os metadados da foto, inclusive a localização GPS.',
+    'Suas imagens são redimensionadas no seu aparelho e nunca são enviadas a um servidor.',
   relatedHeading: 'Mais ferramentas de imagem',
   presets: {
     heading: 'Tamanhos prontos',

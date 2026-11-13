@@ -16,11 +16,11 @@ export default {
     caption: 'Imagen a PDF: formatos que acepta, resultado y límites',
     head: ['Detalle', 'Qué pasa'],
     rows: [
-      ['Acepta', 'JPG, PNG y WebP, reconocidos por el contenido del archivo y no por el nombre. Las fotos HEIC pasan antes por HEIC a JPG, y los archivos AVIF, por AVIF a JPG.'],
+      ['Acepta', 'JPG, PNG y WebP, reconocidos por el contenido del archivo y no por el nombre.'],
       ['Resultado', 'Un solo PDF para todo el lote, con una imagen por página, en el orden de la lista.'],
       ['Tamaño de la imagen', 'La opción predeterminada. Cada página toma el tamaño de su imagen, sin borde blanco.'],
       ['Carta y A4', 'La imagen entera cabe dentro de la hoja con un margen de 0.5 pulgadas, que son 36 puntos. La hoja gira para coincidir con cada imagen.'],
-      ['Imágenes en el PDF', 'Las fotos entran como JPG, y las imágenes con transparencia entran como PNG. Las dos se guardan de nuevo a partir de los píxeles, con la orientación de la foto aplicada.'],
+      ['Imágenes en el PDF', 'Las fotos entran como JPG, guardadas de nuevo a partir de los píxeles, lo que puede costar un poco de calidad. Las imágenes con transparencia entran como PNG, sin pérdida. Se aplica la orientación de la foto.'],
       ['Datos del PDF', 'El PDF no tiene título ni autor tomados de los nombres de tus archivos. FileOrca solo aparece como el programa que lo creó.'],
       ['Lote', 'Sin límite de imágenes. Un lote siempre da un solo PDF.'],
       ['Metadatos', 'Exif, XMP, IPTC y GPS nunca llegan al PDF.'],
@@ -29,24 +29,12 @@ export default {
   faqHeading: 'Preguntas',
   faq: [
     {
-      q: '¿Cómo pongo varias imágenes en un solo PDF?',
-      a: 'Suéltalas todas juntas. Oli pone una imagen en cada página, en el orden de la lista, y te da un solo PDF.',
-    },
-    {
       q: '¿Qué tamaño de página debo elegir?',
-      a: 'Tamaño de la imagen hace que cada página tenga el tamaño de su imagen, lo que sirve para fotos que solo quieres ver. Carta y A4 son hojas estándar para imprimir, o para formularios que piden una página normal; la imagen queda dentro de la hoja con un margen.',
+      a: 'Tamaño de la imagen sirve para fotos que solo quieres ver en pantalla. Carta y A4 son hojas estándar, para imprimir o para formularios que piden una página normal.',
     },
     {
-      q: '¿Cómo cambio el orden de las páginas?',
-      a: 'Las páginas siguen el orden de la lista en la pantalla. Arrastra una fila a otro lugar o presiona sus botones de flecha para subirla o bajarla; también funcionan con el teclado. La papelera de una fila saca esa imagen de la lista, y Deshacer la devuelve. Si el PDF ya está listo, Oli lo rehace en el orden nuevo, sin preparar las imágenes otra vez.',
-    },
-    {
-      q: '¿Mis fotos pierden calidad en el PDF?',
-      a: 'Una foto se guarda de nuevo como JPG cuando entra, lo que puede costar un poco de calidad. Una imagen con transparencia entra como PNG, sin pérdida.',
-    },
-    {
-      q: '¿El PDF incluye la ubicación de mis fotos?',
-      a: 'No. Las imágenes entran al PDF a partir de sus píxeles y no del archivo original, así que los datos Exif y GPS no pasan. El PDF tampoco tiene título ni autor tomados de los nombres de tus archivos.',
+      q: '¿Puedo cambiar la lista después de que el PDF está listo?',
+      a: 'Sí. La papelera de una fila saca esa imagen de la lista, y Deshacer la devuelve. Si el PDF ya está listo y cambias el orden, Oli lo rehace sin preparar las imágenes otra vez.',
     },
     {
       q: '¿Por qué mi PDF pesa tanto?',
@@ -54,12 +42,12 @@ export default {
     },
     {
       q: '¿Puedo poner en un PDF las fotos HEIC de mi iPhone?',
-      a: 'No directamente. Conviértelas antes con HEIC a JPG, y después agrega aquí los archivos JPG.',
+      a: 'No directamente. Conviértelas antes con HEIC a JPG, y después agrega aquí los archivos JPG. Un AVIF pasa por AVIF a JPG de la misma forma.',
     },
   ],
   privacyHeading: 'Privacidad',
   privacyNote:
-    'Oli arma el PDF con tus imágenes en tu navegador, y tus archivos nunca salen de tu dispositivo ni llegan a un servidor. El PDF omite los metadatos de la foto, incluida la ubicación GPS.',
+    'Oli arma el PDF con tus imágenes en tu navegador, y tus archivos nunca salen de tu dispositivo ni llegan a un servidor.',
   relatedHeading: 'Más herramientas de imagen',
   panel: {
     formats: 'JPG, PNG o WebP',

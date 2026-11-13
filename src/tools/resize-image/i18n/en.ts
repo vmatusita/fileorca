@@ -9,7 +9,7 @@ export default {
   howSteps: [
     'Drop your images on the box, choose them, or paste them with Ctrl V.',
     'Pick By size and type a width and a height, or pick By percentage and type a number.',
-    'Download the resized image, or the ZIP when you resized several.',
+    'Download the resized image.',
   ],
   specsHeading: 'Specifications',
   specs: {
@@ -17,7 +17,7 @@ export default {
     head: ['Detail', 'What happens'],
     rows: [
       ['Takes', 'JPG, PNG and WebP, recognized from the file content and not from the name. HEIC photos go through HEIC to JPG first, and AVIF files through AVIF to JPG.'],
-      ['By size', 'You type a width and a height in pixels. The proportions stay locked, and each image fits inside that box.'],
+      ['By size', 'You type a width and a height in pixels. The proportions stay locked, and each image fits inside that box: a 4000 × 3000 photo in a 1000 × 1000 box comes out as 1000 × 750.'],
       ['By percentage', 'You type a percentage of the current width and height, the same for every image in the batch.'],
       ['Never enlarges', 'If you ask for more pixels than the image has, it keeps its original size, and the result says so.'],
       ['Output', 'The same format as the file you dropped. PNG and WebP keep their transparency.'],
@@ -30,16 +30,12 @@ export default {
   faqHeading: 'Questions',
   faq: [
     {
-      q: 'How do I resize an image to a specific size in pixels?',
-      a: 'Choose By size, then type the width and the height you need. The proportions stay locked, so each image fits inside that box: a 4000 × 3000 photo in a 1000 × 1000 box comes out as 1000 × 750.',
-    },
-    {
       q: 'Does resizing lower the quality of an image?',
-      a: 'Making an image smaller keeps it sharp at its new size. Making it larger can only stretch the pixels it already has, which looks blurry, so Resize image never enlarges: if you ask for more pixels than the image has, you get the original size back and the result tells you so.',
+      a: 'Making an image smaller keeps it sharp at its new size. Making it larger can only stretch the pixels it already has, which looks blurry, and that is why Resize image never enlarges.',
     },
     {
       q: 'Should I resize by pixels or by percentage?',
-      a: 'Use pixels when a form or a website asks for a size, such as 800 × 600. Use a percentage when you only want everything smaller by the same amount, such as 50% for half the width and half the height. In a batch of mixed photos, a percentage shrinks each one by the same amount, while a size makes each one fit the same box.',
+      a: 'Use pixels when a form or a website asks for a size, such as 800 × 600. Use a percentage when you only want everything smaller by the same amount, such as 50% for half the width and half the height.',
     },
     {
       q: 'Does changing the DPI change the size of an image?',
@@ -49,14 +45,10 @@ export default {
       q: 'Will the file be lighter after I resize it?',
       a: 'Usually yes, because fewer pixels make a smaller file. For an exact file size, such as 100 KB, use Compress image to 100 KB.',
     },
-    {
-      q: 'Does my image get uploaded anywhere?',
-      a: "No. FileOrca resizes the image on your device, in your browser. Open your browser's Network tab while you resize: no request carries your file.",
-    },
   ],
   privacyHeading: 'Privacy',
   privacyNote:
-    'Your images are resized on your device and never sent to a server. The saved copies leave out the photo metadata, including the GPS location.',
+    'Your images are resized on your device and never sent to a server.',
   relatedHeading: 'More image tools',
   presets: {
     heading: 'Ready-made sizes',

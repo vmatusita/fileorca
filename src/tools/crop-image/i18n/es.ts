@@ -9,7 +9,7 @@ export default {
   howSteps: [
     'Suelta tus imágenes en el cuadro, elígelas o pégalas con Ctrl V.',
     'Elige Cuadrado, 4:5, 16:9 o Libre, y arrastra el recuadro o sus esquinas, o escribe su posición y su tamaño.',
-    'Descarga la imagen recortada, o el ZIP si recortaste varias.',
+    'Descarga la imagen recortada.',
   ],
   specsHeading: 'Especificaciones',
   specs: {
@@ -17,10 +17,10 @@ export default {
     head: ['Detalle', 'Qué pasa'],
     rows: [
       ['Acepta', 'JPG, PNG y WebP, reconocidos por el contenido del archivo y no por el nombre. Las fotos HEIC pasan antes por HEIC a JPG, y los archivos AVIF, por AVIF a JPG.'],
-      ['Formas', 'Cuadrado, que es la opción predeterminada, 4:5, 16:9 o Libre. El recuadro se abre centrado, así que hay un resultado listo en cuanto sueltas una imagen.'],
+      ['Formas', 'Cuadrado, 4:5, 16:9 o Libre.'],
       ['Mover el recuadro', 'Arrastra el recuadro o sus esquinas, o selecciónalo y usa las flechas del teclado. Mayús con las flechas cambia su tamaño.'],
       ['Valores exactos', 'Escribe la x, la y, el ancho y el alto del recuadro en píxeles de la imagen: así puedes recortar sin un puntero.'],
-      ['Lote', 'Cada imagen recibe el recorte centrado en la forma que elegiste. Elige una imagen en la lista para ajustar su propio recuadro.'],
+      ['Lote', 'Cada imagen recibe el recorte centrado en la forma que elegiste. Elige una imagen en la lista para ajustar su propio recuadro, y las demás conservan el suyo.'],
       ['Resultado', 'El mismo formato del archivo que soltaste, con los píxeles del recuadro y sin escalar. PNG y WebP conservan su transparencia.'],
       ['Calidad', 'JPG y WebP se guardan de nuevo después del recorte. El PNG se guarda sin pérdida.'],
       ['Metadatos', 'Se eliminan Exif, XMP, IPTC y GPS, y la orientación de la foto se aplica antes de recortar.'],
@@ -30,7 +30,7 @@ export default {
   faq: [
     {
       q: '¿Cómo recorto una foto en cuadrado?',
-      a: 'Cuadrado es la forma predeterminada. El recuadro se abre centrado y con los lados iguales, así que puedes descargar enseguida, o arrastrarlo sobre la parte de la foto que quieres conservar.',
+      a: 'Cuadrado es la forma predeterminada, y el recuadro se abre centrado, así que hay un resultado listo en cuanto sueltas la foto. Descárgalo así o mueve el recuadro antes.',
     },
     {
       q: '¿Cómo recorto una imagen en 4:5 para Instagram?',
@@ -38,24 +38,16 @@ export default {
     },
     {
       q: '¿Recortar baja la calidad de una imagen?',
-      a: 'Al recortar se eliminan píxeles y no se estiran los que quedan, así que la parte que conservas es tan nítida como el original. JPG y WebP se guardan de nuevo después del recorte, y ese es el único cambio. El PNG se guarda sin pérdida.',
+      a: 'Al recortar se eliminan píxeles y no se estiran los que quedan, así que la parte que conservas es tan nítida como el original.',
     },
     {
       q: '¿Puedo recortar sin una forma fija?',
       a: 'Sí. Elige Libre y arrastra cualquier lado o esquina del recuadro. Con Libre, el ancho y el alto cambian por separado.',
     },
-    {
-      q: '¿Puedo recortar con el teclado?',
-      a: 'Sí. Selecciona el recuadro de recorte, muévelo con las flechas y mantén Mayús con las flechas para cambiar su tamaño. También puedes escribir la x, la y, el ancho y el alto del recuadro en los campos debajo de la imagen.',
-    },
-    {
-      q: '¿Puedo recortar muchas fotos a la vez?',
-      a: 'Sí. Suéltalas todas y cada una recibe el recorte centrado en la forma que elegiste. Elige una en la lista para mover su recuadro, y las demás fotos conservan el suyo.',
-    },
   ],
   privacyHeading: 'Privacidad',
   privacyNote:
-    'Tus imágenes se recortan en tu navegador, y tus archivos nunca salen de tu dispositivo ni llegan a un servidor. Las copias guardadas omiten los metadatos de la foto, incluida la ubicación GPS.',
+    'Tus imágenes se recortan en tu navegador, y tus archivos nunca salen de tu dispositivo ni llegan a un servidor.',
   relatedHeading: 'Más herramientas de imagen',
   panel: {
     formats: 'JPG, PNG o WebP',

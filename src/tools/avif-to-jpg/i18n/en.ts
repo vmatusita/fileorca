@@ -9,7 +9,7 @@ export default {
   howSteps: [
     'Drop your AVIF images on the box, choose them, or paste them with Ctrl V.',
     'Oli turns each one into a JPG, and there is nothing to set.',
-    'Download the JPG, or the ZIP when you converted several.',
+    'Download the JPG.',
   ],
   specsHeading: 'Specifications',
   specs: {
@@ -19,7 +19,7 @@ export default {
       ['Takes', 'AVIF files, recognized from the file content and not from the name.'],
       ['Output', 'JPG. One file comes out for each AVIF.'],
       ['Transparency', 'JPG has no transparency, so it turns white, and the result says so.'],
-      ['Size', 'A JPG of the same picture is usually larger than the AVIF, because AVIF compresses better.'],
+      ['Size', 'A JPG of the same picture is usually larger than the AVIF.'],
       ['Batch', 'No limit on the number of images. One image downloads directly, and several come in one ZIP.'],
       ['Metadata', 'Exif, XMP, IPTC and GPS are removed, and the photo orientation is applied.'],
     ],
@@ -36,11 +36,7 @@ export default {
     },
     {
       q: 'Does converting AVIF to JPG lose quality?',
-      a: 'JPG compresses with loss, so the new file is not a perfect copy, and it is usually larger than the AVIF. Keep the AVIF if you need the original.',
-    },
-    {
-      q: 'What happens to a transparent background?',
-      a: 'JPG cannot store transparency, so FileOrca fills those areas with white, and the result tells you so.',
+      a: 'JPG compresses with loss, so the new file is not a perfect copy. Keep the AVIF if you need the original.',
     },
     {
       q: 'Why do some images come as AVIF?',
@@ -49,7 +45,7 @@ export default {
   ],
   privacyHeading: 'Privacy',
   privacyNote:
-    'Your images are converted on your device and never sent to a server. The JPG files leave out the photo metadata, including the GPS location.',
+    'Your images are converted on your device and never sent to a server.',
   relatedHeading: 'More image tools',
   panel: {
     formats: 'AVIF',

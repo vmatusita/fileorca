@@ -8,17 +8,16 @@ export default {
   howHeading: 'How to get an image under 100 KB',
   howSteps: [
     'Drop the images that a form refused on the box, choose them, or paste them with Ctrl V.',
-    'Oli saves each one as a JPG of 100 KB or less, and makes the picture smaller too when the detail is too much.',
-    'Check the new size on the result, then download the image or the ZIP.',
+    'Oli compresses each one, and there is nothing to set.',
+    'Check the new size on the result, then download the image.',
   ],
   specsHeading: 'The 100 KB target',
   specs: {
     caption: 'What the 100 KB preset guarantees and what it changes',
     head: ['Detail', 'What Oli does'],
     rows: [
-      ['Target', 'Every file is 100,000 bytes or smaller.'],
-      ['Which KB', 'KB is read as 1,000 bytes, the smaller of the two readings, so the file also passes forms that count 1,024 bytes per KB.'],
-      ['Output format', 'Always a JPG, the format that forms and portals ask for most. JPG, PNG and WebP go in.'],
+      ['Target', 'Every file is 100 KB or smaller.'],
+      ['Output format', 'Always a JPG. JPG, PNG and WebP go in.'],
       ['Transparency', 'Transparent areas turn white, because JPG has no transparency.'],
       ['Image that already fits', 'It comes back as it was, in its own format, without the photo metadata.'],
       ['Very detailed image', 'When the quality alone cannot reach the target, Oli also reduces the dimensions and shows you the new width and height.'],
@@ -37,24 +36,20 @@ export default {
     },
     {
       q: 'Why is the result a JPG, even if I dropped a PNG?',
-      a: 'JPG is the format that forms ask for most, and it reaches a small size far better than PNG for photos. A PNG photo of a few megabytes cannot be squeezed to 100 KB without changing its pixels. Transparent areas turn white, because JPG has no transparency.',
+      a: 'JPG is the format that forms ask for most, and it reaches a small size far better than PNG for photos: a PNG photo of a few megabytes cannot be squeezed to 100 KB without changing its pixels.',
     },
     {
       q: 'Will the picture look worse at 100 KB?',
-      a: 'A little, because the file gets much smaller. When the image is large, Oli first reduces its dimensions, which keeps it sharp, and then searches for the best quality that still fits. The before and after slider shows you the difference.',
+      a: 'A little, because the file gets much smaller. The before and after slider shows you the difference.',
     },
     {
       q: 'What if the form also asks for an exact size in pixels?',
-      a: 'Use Resize image to set the width and the height first, then come back here for the file size. If the picture is very detailed, Oli may reduce the dimensions a bit more, and it tells you the new size.',
-    },
-    {
-      q: 'What if my image is already under 100 KB?',
-      a: 'It comes back as it was, in its own format, without the photo metadata. Oli never gives you a file bigger than the one you dropped.',
+      a: 'Use Resize image to set the width and the height first, then come back here for the file size.',
     },
   ],
   privacyHeading: 'Privacy',
   privacyNote:
-    'Your images are shrunk to 100 KB on your device and never sent to a server. The new files leave out the photo metadata, including the GPS location.',
+    'Your images are shrunk to 100 KB on your device and never sent to a server.',
   relatedHeading: 'More image tools',
   panel: {
     formats: 'JPG, PNG or WebP',

@@ -10,9 +10,9 @@ export default {
   h1: 'Compress image',
   howHeading: 'How it works',
   howSteps: [
-    'Drop your JPG, PNG or WebP images on the box, choose them, or paste them. Add as many as you like.',
-    'Pick Recommended or Strong, or Up to a size with the maximum in KB. Oli compresses each image in your browser, one after another, and redoes the batch if you change the level.',
-    'Download one image, or all of them together in a ZIP. Your original files stay untouched.',
+    'Drop your images on the box, choose them, or paste them.',
+    'Pick Recommended or Strong, or Up to a size and type the maximum in KB. Oli compresses each image, one after another, and redoes the batch if you change the level.',
+    'Download the compressed images.',
   ],
   specsHeading: 'What goes in and what comes out',
   specs: {
@@ -29,12 +29,11 @@ export default {
       ['Batch', 'No limit on the number of images. Several images download together as one ZIP.'],
       ['Already small', 'If the new copy would not be smaller, you get the original back, without its photo metadata.'],
       ['Photo metadata', 'Camera model, date and GPS location are removed from every file.'],
-      ['HEIC and AVIF', 'Not compressed here. Turn a HEIC into a JPG first with HEIC to JPG, and an AVIF with AVIF to JPG.'],
     ],
   },
   presets: {
     heading: 'Compress to a target size',
-    lead: 'For any other limit, pick Up to a size above and type the maximum in KB, from 20 to 10,000.',
+    lead: 'For any other limit, use Up to a size above.',
     caption: 'Presets of Compress image and what each one does',
     head: ['Preset', 'What it does'],
   },
@@ -42,40 +41,24 @@ export default {
   faq: [
     {
       q: 'Does compressing an image reduce its quality?',
-      a: 'JPG and WebP lose a little detail, because the file is saved again with some information left out. At Recommended the difference is hard to see at normal size, and Strong trades more detail for the smallest file. PNG loses nothing, because Oli saves it without loss. Your original file is never changed, so you can always go back to it.',
-    },
-    {
-      q: 'How do I make an image fit a size limit, like 200 KB?',
-      a: 'Pick Up to a size and type the limit in the Maximum size box, in KB. Oli brings each image down to that size or less, as a JPG. A form that counts 1 KB as 1,024 bytes takes it too, because Oli counts 1 KB as 1,000 bytes, the smaller reading. A transparent PNG gets a white background.',
+      a: 'JPG and WebP lose a little detail, because the file is saved again with some information left out. At Recommended the difference is hard to see at normal size, and the before and after slider on the result shows it up close. Your original file is never changed, so you can always go back to it.',
     },
     {
       q: 'Why does my PNG barely get smaller?',
-      a: 'PNG keeps every pixel exactly as it is, so there is little to take out, and a photo saved as PNG is large because its tiny color changes are hard to pack. Oli only tidies the file, which often saves a little. If it is a photo and you do not need transparency, saving it as a JPG or WebP usually gives a much smaller file.',
-    },
-    {
-      q: 'What happens to the GPS location in my photo?',
-      a: 'Oli saves each compressed copy from the pixels alone, so the GPS location, the camera model and the date taken do not travel to the new file. That also holds when the original comes back unchanged because it was already small: that copy leaves without its photo metadata too.',
-    },
-    {
-      q: 'Can I compress many images at once?',
-      a: 'Yes. Drop or paste as many images as you like: Oli compresses them one after another, and each one gets its own download. When you want them all, one button gives you a ZIP. A big batch of large photos takes longer on a phone than on a computer, because your own device does the work.',
-    },
-    {
-      q: 'Does my image get uploaded anywhere?',
-      a: "No. FileOrca compresses the images on your device, in your browser. Open your browser's Network tab while you compress: no request carries your files.",
+      a: 'A photo saved as PNG is large because its tiny color changes are hard to pack, and Oli only tidies the file, which often saves a little. If it is a photo and you do not need transparency, PNG to JPG or Convert to WebP usually makes a much smaller file.',
     },
     {
       q: 'Why did the file come back the same size?',
-      a: 'Some images are already well compressed. When the new copy would not be smaller, Oli gives you back the original instead of a bigger file, and that copy has no photo metadata either.',
+      a: 'Some images are already well compressed by the phone, the camera or the app that saved them, so there is little left to take out.',
     },
     {
       q: 'Can I compress an iPhone photo in HEIC?',
-      a: 'Not here: Compress image takes JPG, PNG and WebP. Turn the HEIC into a JPG with HEIC to JPG first, then compress the JPG if you want it smaller.',
+      a: 'Not here. Turn it into a JPG with HEIC to JPG first, then compress the JPG if you want it smaller. An AVIF goes through AVIF to JPG the same way.',
     },
   ],
   privacyHeading: 'Privacy',
   privacyNote:
-    'Images are processed on your device and are never sent to a server. Each saved copy also leaves out the photo metadata, including the GPS location.',
+    'Images are processed on your device and are never sent to a server.',
   relatedHeading: 'More image tools',
   panel: {
     formats: 'JPG, PNG or WebP',

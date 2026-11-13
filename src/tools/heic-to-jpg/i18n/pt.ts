@@ -9,7 +9,7 @@ export default {
   howSteps: [
     'Solte as fotos HEIC na caixa, escolha os arquivos ou cole com Ctrl V.',
     'Mantenha o JPG, ou escolha PNG se quiser a foto sem mais nenhuma perda.',
-    'Baixe a foto convertida, ou o ZIP quando tiver convertido várias.',
+    'Baixe a foto convertida.',
   ],
   specsHeading: 'Especificações',
   specs: {
@@ -34,19 +34,11 @@ export default {
     },
     {
       q: 'Converter HEIC em JPG diminui a qualidade?',
-      a: 'O JPG comprime com perda, então o arquivo novo não é uma cópia bit a bit da foto, e no uso normal a diferença é pequena. Escolha PNG para não perder mais nada; o arquivo vai ficar bem maior.',
-    },
-    {
-      q: 'O que acontece com a minha Live Photo?',
-      a: 'A Oli converte só a imagem principal do arquivo, então você recebe a foto parada. O vídeo curto da Live Photo não vai para o JPG, nem os dados de profundidade de uma foto no modo Retrato, nem o mapa de HDR.',
-    },
-    {
-      q: 'O JPG guarda a data e a localização?',
-      a: 'Não. O JPG é salvo só a partir dos pixels, então a localização GPS, o modelo da câmera e a data da foto ficam de fora. Se você precisa desses dados, guarde o HEIC original.',
+      a: 'O JPG comprime com perda, então o arquivo novo não é uma cópia bit a bit da foto, mas no uso normal a diferença é pequena. A opção PNG custa um arquivo bem maior.',
     },
     {
       q: 'Por que as cores ficam diferentes depois da conversão?',
-      a: 'O iPhone fotografa numa faixa de cores ampla chamada Display P3. O FileOrca converte para sRGB, o padrão que toda tela e todo app esperam, então as cores ficam consistentes. Uma foto muito saturada pode ficar um pouco menos viva, porque o sRGB cobre uma faixa menor.',
+      a: 'O iPhone fotografa numa faixa de cores ampla chamada Display P3, e o sRGB cobre uma faixa menor, então uma foto muito saturada pode ficar um pouco menos viva depois da conversão.',
     },
     {
       q: 'O iPhone pode salvar em JPG em vez de HEIC?',
@@ -55,7 +47,7 @@ export default {
   ],
   privacyHeading: 'Privacidade',
   privacyNote:
-    'Suas fotos são convertidas no seu aparelho e nunca são enviadas a um servidor. Os arquivos novos deixam de fora os metadados da foto, inclusive a localização GPS.',
+    'Suas fotos são convertidas no seu aparelho e nunca são enviadas a um servidor.',
   relatedHeading: 'Mais ferramentas de imagem',
   panel: {
     formats: 'HEIC ou HEIF',

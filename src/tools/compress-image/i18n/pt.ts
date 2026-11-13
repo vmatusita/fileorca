@@ -11,9 +11,9 @@ export default {
   h1: 'Comprimir imagem',
   howHeading: 'Como funciona',
   howSteps: [
-    'Solte as imagens JPG, PNG ou WebP na caixa, escolha os arquivos ou cole as imagens. Quantas quiser.',
-    'Escolha Recomendada ou Forte, ou "Até um tamanho" com o máximo em KB. A Oli comprime cada imagem no seu navegador, uma depois da outra, e refaz o lote se você mudar o nível.',
-    'Baixe uma imagem ou todas juntas num ZIP. Os arquivos originais continuam intactos.',
+    'Solte as imagens na caixa, escolha os arquivos ou cole as imagens.',
+    'Escolha Recomendada ou Forte, ou "Até um tamanho" e digite o máximo em KB. A Oli comprime cada imagem, uma depois da outra, e refaz o lote se você mudar o nível.',
+    'Baixe as imagens comprimidas.',
   ],
   specsHeading: 'O que entra e o que sai',
   specs: {
@@ -30,12 +30,11 @@ export default {
       ['Lote', 'Sem limite de imagens. Várias imagens são baixadas juntas num só ZIP.'],
       ['Já está pequeno', 'Se a cópia nova não ficar menor, você recebe o original de volta, sem os metadados da foto.'],
       ['Metadados da foto', 'Modelo da câmera, data e localização GPS saem de todos os arquivos.'],
-      ['HEIC e AVIF', 'Não são comprimidos aqui. Transforme o HEIC em JPG antes, com a ferramenta HEIC para JPG, e o AVIF, com a ferramenta AVIF para JPG.'],
     ],
   },
   presets: {
     heading: 'Comprimir para um tamanho certo',
-    lead: 'Para qualquer outro limite, escolha "Até um tamanho" acima e digite o máximo em KB, de 20 a 10.000.',
+    lead: 'Para qualquer outro limite, use "Até um tamanho" acima.',
     caption: 'Ajustes prontos da Comprimir imagem e o que cada um faz',
     head: ['Ajuste pronto', 'O que faz'],
   },
@@ -43,40 +42,24 @@ export default {
   faq: [
     {
       q: 'Comprimir diminui a qualidade da imagem?',
-      a: 'No JPG e no WebP um pouco de detalhe se perde, porque o arquivo é salvo de novo com parte da informação de fora. Na compressão Recomendada a diferença é difícil de notar no tamanho normal, e a Forte troca mais detalhe pelo menor arquivo possível. O PNG não perde nada, porque a Oli o salva sem perda. O arquivo original nunca é alterado, então dá para voltar a ele sempre que quiser.',
-    },
-    {
-      q: 'Como deixo uma imagem dentro de um limite, como 200 KB?',
-      a: 'Escolha "Até um tamanho" e digite o limite no campo "Tamanho máximo", em KB. A Oli deixa cada imagem desse tamanho ou menos, em JPG. Um formulário que conta 1 KB como 1.024 bytes também a aceita, porque a Oli conta 1 KB como 1.000 bytes, a leitura menor. Um PNG com transparência ganha fundo branco.',
+      a: 'No JPG e no WebP um pouco de detalhe se perde, porque o arquivo é salvo de novo com parte da informação de fora. Na Recomendada a diferença é difícil de notar no tamanho normal, e a comparação de antes e depois do resultado mostra a diferença de perto. O arquivo original nunca é alterado, então dá para voltar a ele sempre que quiser.',
     },
     {
       q: 'Por que meu PNG quase não diminui?',
-      a: 'O PNG guarda cada pixel exatamente como está, então sobra pouco para tirar, e uma foto em PNG fica grande porque as pequenas mudanças de cor são difíceis de compactar. A Oli só arruma o arquivo, o que costuma economizar um pouco. Se for uma foto e você não precisa de transparência, salvar como JPG ou WebP costuma dar um arquivo bem menor.',
-    },
-    {
-      q: 'O que acontece com a localização GPS da minha foto?',
-      a: 'A Oli salva cada cópia comprimida só a partir dos pixels, então a localização GPS, o modelo da câmera e a data da foto não vão para o arquivo novo. Vale também quando o original volta sem mudança por já estar pequeno: essa cópia também sai sem os metadados da foto.',
-    },
-    {
-      q: 'Dá para comprimir várias imagens de uma vez?',
-      a: 'Dá. Solte ou cole quantas imagens quiser: a Oli comprime uma depois da outra, e cada uma ganha o próprio download. Para levar todas, um botão entrega um ZIP. Um lote grande de fotos pesadas demora mais no celular do que no computador, porque quem faz o trabalho é o seu aparelho.',
-    },
-    {
-      q: 'Minha imagem é enviada para algum lugar?',
-      a: 'Não. A compressão acontece no seu aparelho, dentro do navegador. Abra a aba Rede do navegador enquanto comprime: nenhuma requisição leva os seus arquivos.',
+      a: 'Uma foto em PNG fica grande porque as pequenas mudanças de cor são difíceis de compactar, e a Oli só arruma o arquivo, o que costuma economizar um pouco. Se for uma foto e você não precisa de transparência, a PNG para JPG ou a Converter para WebP costuma dar um arquivo bem menor.',
     },
     {
       q: 'Por que o arquivo voltou com o mesmo tamanho?',
-      a: 'Algumas imagens já estão bem comprimidas. Quando a nova cópia não ficaria menor, a Oli devolve o original em vez de um arquivo maior, e essa cópia também sai sem os metadados da foto.',
+      a: 'Algumas imagens já vêm bem comprimidas pelo celular, pela câmera ou pelo app que as salvou, então sobra pouco para tirar.',
     },
     {
       q: 'Posso comprimir uma foto do iPhone em HEIC?',
-      a: 'Aqui não: a Comprimir imagem aceita JPG, PNG e WebP. Primeiro transforme o HEIC em JPG com a ferramenta HEIC para JPG, e depois comprima o JPG se quiser que ele fique menor.',
+      a: 'Aqui não. Primeiro transforme o HEIC em JPG com a ferramenta HEIC para JPG, e depois comprima o JPG se quiser que ele fique menor. Um AVIF passa pela ferramenta AVIF para JPG do mesmo jeito.',
     },
   ],
   privacyHeading: 'Privacidade',
   privacyNote:
-    'As imagens são processadas no seu aparelho e nunca são enviadas a um servidor. Cada cópia salva também deixa de fora os metadados da foto, inclusive a localização GPS.',
+    'As imagens são processadas no seu aparelho e nunca são enviadas a um servidor.',
   relatedHeading: 'Mais ferramentas de imagem',
   panel: {
     formats: 'JPG, PNG ou WebP',

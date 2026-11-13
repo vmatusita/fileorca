@@ -16,11 +16,11 @@ export default {
     caption: 'Image to PDF: formats taken, output and limits',
     head: ['Detail', 'What happens'],
     rows: [
-      ['Takes', 'JPG, PNG and WebP, recognized from the file content and not from the name. HEIC photos go through HEIC to JPG first, and AVIF files through AVIF to JPG.'],
+      ['Takes', 'JPG, PNG and WebP, recognized from the file content and not from the name.'],
       ['Output', 'One PDF for the whole batch, with one image per page, in the order of the list.'],
       ['Image size', 'The default. Each page takes the size of its image, with no white border.'],
       ['Letter and A4', 'The whole image fits inside the sheet with a margin of 0.5 inch, which is 36 points. The sheet turns to match each image.'],
-      ['Images in the PDF', 'Photos go in as JPG, and images with transparency go in as PNG. Both are saved again from the pixels, with the photo orientation applied.'],
+      ['Images in the PDF', 'Photos go in as JPG, saved again from the pixels, which can cost a little quality. Images with transparency go in as PNG, without loss. The photo orientation is applied.'],
       ['PDF details', 'The PDF has no title or author taken from your file names. FileOrca is only named as the program that made it.'],
       ['Batch', 'No limit on the number of images. A batch always gives one PDF.'],
       ['Metadata', 'Exif, XMP, IPTC and GPS never reach the PDF.'],
@@ -29,24 +29,12 @@ export default {
   faqHeading: 'Questions',
   faq: [
     {
-      q: 'How do I put several images into one PDF?',
-      a: 'Drop them all together. Oli puts one image on each page, in the order of the list, and gives you one PDF.',
-    },
-    {
       q: 'Which page size should I choose?',
-      a: 'Image size makes each page the size of its picture, which suits photos you only want to view. Letter and A4 are standard sheets for printing, or for forms that ask for a normal page; the image sits inside the sheet with a margin.',
+      a: 'Image size suits photos you only want to view on a screen. Letter and A4 are standard sheets, for printing or for forms that ask for a normal page.',
     },
     {
-      q: 'How do I change the order of the pages?',
-      a: 'The pages follow the order of the list on screen. Drag a row to a new place, or press the arrow buttons on the row to move it up or down; they work with the keyboard too. The trash button on a row takes that image out, and Undo brings it back. If the PDF is already made, Oli makes it again in the new order without preparing the images again.',
-    },
-    {
-      q: 'Will my photos lose quality in the PDF?',
-      a: 'A photo is saved again as a JPG when it goes in, which can cost a little quality. An image with transparency goes in as a PNG, without loss.',
-    },
-    {
-      q: 'Does the PDF include the location of my photos?',
-      a: 'No. Images go into the PDF from their pixels and not from the original file, so Exif and GPS data are not carried over. The PDF also has no title or author taken from your file names.',
+      q: 'Can I change the list after the PDF is made?',
+      a: 'Yes. The trash button on a row takes that image out, and Undo brings it back. If the PDF is already made and you change the order, Oli makes it again without preparing the images again.',
     },
     {
       q: 'Why is my PDF so big?',
@@ -54,12 +42,12 @@ export default {
     },
     {
       q: 'Can I put HEIC photos from my iPhone into a PDF?',
-      a: 'Not directly. Convert them with HEIC to JPG first, then add the JPG files here.',
+      a: 'Not directly. Convert them with HEIC to JPG first, then add the JPG files here. An AVIF goes through AVIF to JPG the same way.',
     },
   ],
   privacyHeading: 'Privacy',
   privacyNote:
-    'Your images are put into the PDF on your device and never sent to a server. The PDF leaves out the photo metadata, including the GPS location.',
+    'Your images are put into the PDF on your device and never sent to a server.',
   relatedHeading: 'More image tools',
   panel: {
     formats: 'JPG, PNG or WebP',

@@ -13,18 +13,17 @@ export default {
   howSteps: [
     'Suelta tus fotos en el cuadro, elígelas o pégalas con Ctrl V.',
     'Oli quita los metadatos de cada archivo, y no hay nada que ajustar.',
-    'Descarga la foto limpia, o el ZIP si limpiaste varias.',
+    'Descarga la foto limpia.',
   ],
   specsHeading: 'Especificaciones',
   specs: {
     caption: 'Quitar metadatos de la foto: formatos que acepta, qué se quita y qué se queda',
     head: ['Detalle', 'Qué pasa'],
     rows: [
-      ['Acepta', 'JPG, PNG y WebP, reconocidos por el contenido del archivo y no por el nombre. Las fotos HEIC y AVIF se rechazan con un enlace a HEIC a JPG o a AVIF a JPG, que también omiten los metadatos.'],
+      ['Acepta', 'JPG, PNG y WebP, reconocidos por el contenido del archivo y no por el nombre. Las fotos HEIC y AVIF se rechazan con un enlace al convertidor que las abre.'],
       ['Qué se quita', 'Los datos Exif, con la ubicación GPS, la fecha y la hora, el teléfono o la cámara y sus ajustes, la miniatura y el nombre del dueño; los datos XMP e IPTC; los comentarios; y las notas de texto que puede llevar un PNG.'],
       ['Qué se queda', 'La imagen en sí, byte por byte: no se decodifica ni se guarda de nuevo, así que no se pierde nada. El perfil de color también se queda, así que los colores se ven iguales.'],
       ['Fotos rotadas', 'Un JPG guardado de lado conserva un bloque Exif mínimo, solo con su orientación, para seguir viéndose derecho. No queda nada más de los datos Exif.'],
-      ['Imágenes extra', 'Algunos teléfonos guardan más cosas dentro del JPG, después de la foto, como una segunda imagen o el video de una foto en movimiento, cada una con sus propios metadatos. Esa parte se omite, y la foto se queda.'],
       ['Animación', 'Un WebP animado sigue animado, con todos sus cuadros.'],
       ['Resultado', 'El mismo formato del archivo que soltaste. El archivo pierde solo el peso de lo que se quitó, y queda igual cuando no había nada que quitar.'],
       ['Lote', 'Sin límite de fotos. Una foto se descarga directamente, y varias llegan en un solo ZIP.'],
@@ -37,20 +36,16 @@ export default {
       a: 'EXIF es información que un teléfono o una cámara escribe dentro del archivo de la foto: cuándo y, a menudo, dónde se tomó, el dispositivo y sus ajustes, y una miniatura. No se ve en la imagen, pero cualquiera que reciba el archivo puede leerla.',
     },
     {
-      q: '¿Quitar los datos EXIF cambia mi foto?',
-      a: 'No. Oli quita solo los metadatos y copia los datos de la imagen tal como están, sin decodificarlos ni guardarlos de nuevo, así que cada píxel sigue igual y no hay pérdida de calidad. El perfil de color también se queda, así que los colores se ven iguales.',
-    },
-    {
       q: '¿Por qué un JPG rotado conserva un poco de Exif?',
-      a: 'Muchos teléfonos guardan la imagen de lado y agregan una etiqueta, la orientación, que les dice a las apps cómo girarla. Sin la etiqueta, la foto se vería de lado, y girar los píxeles obligaría a guardar el JPG de nuevo, con algo de pérdida. Por eso un JPG rotado conserva un bloque Exif mínimo, solo con la orientación, y nada más: ni ubicación, ni fecha, ni cámara.',
+      a: 'Muchos teléfonos guardan la imagen de lado y agregan una etiqueta, la orientación, que les dice a las apps cómo girarla. Sin la etiqueta, la foto se vería de lado, y girar los píxeles obligaría a guardar el JPG de nuevo, con algo de pérdida.',
     },
     {
       q: '¿Puedo quitar la ubicación de una foto HEIC o AVIF?',
       a: 'En esta página no. HEIC a JPG y AVIF a JPG convierten esas fotos en archivos JPG, y el JPG que crean no lleva metadatos, ni siquiera la ubicación.',
     },
     {
-      q: '¿Puedo limpiar muchas fotos a la vez?',
-      a: 'Sí. Suéltalas juntas. Cada foto sale por separado, en el mismo formato, y la descarga es un solo ZIP cuando son varias.',
+      q: '¿Qué pasa con el video de una foto en movimiento?',
+      a: 'Algunos teléfonos guardan más cosas dentro del JPG, después de la foto, como una segunda imagen o el video de una foto en movimiento, cada una con sus propios metadatos. Esa parte se omite, y la foto se queda.',
     },
   ],
   privacyHeading: 'Privacidad',
