@@ -83,8 +83,8 @@ export default {
   faqHeading: 'Questions about refinancing',
   faq: [
     {
-      q: 'What does the break-even month tell me?',
-      a: 'Before it, refinancing has cost you money; after it, it starts to save.',
+      q: 'Does it matter if I pay the closing costs or add them to the loan?',
+      a: 'Yes. Added to the loan, the costs become part of the new balance and pay interest too, so the new payment and the interest are higher and the break-even month does not come sooner.',
     },
     {
       q: 'Why are there two break-even numbers?',

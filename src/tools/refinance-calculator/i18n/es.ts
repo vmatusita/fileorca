@@ -91,8 +91,8 @@ export default {
   faqHeading: 'Preguntas sobre el refinanciamiento',
   faq: [
     {
-      q: '¿Qué te dice el mes del punto de equilibrio?',
-      a: 'Antes de ese mes, refinanciar te ha costado dinero; después, empieza a ahorrarte.',
+      q: '¿Importa si pago los costos de cierre o los sumo al préstamo?',
+      a: 'Sí. Sumados al préstamo, los costos pasan a formar parte del saldo nuevo y también pagan intereses, así que el pago nuevo y los intereses son mayores y el mes del punto de equilibrio no llega antes.',
     },
     {
       q: '¿Por qué hay dos puntos de equilibrio?',
