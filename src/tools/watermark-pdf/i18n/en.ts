@@ -11,9 +11,9 @@ const texts: PdfToolTexts<WatermarkTexts> = {
   h1: 'Watermark PDF',
   howHeading: 'How it works',
   howSteps: [
-    'Drop your PDFs on the box, choose them, or paste them. Add as many as you like.',
+    'Drop your PDFs on the box, choose them, or paste them.',
     'Type the text of the watermark, then pick its size, how strong it looks, and whether it runs diagonally or straight across.',
-    'Press Add watermark. Oli stamps the text on every page in your browser, and you download one PDF, or all of them together in a ZIP.',
+    'Press Add watermark, then download the marked PDFs.',
   ],
   specsHeading: 'What goes in and what comes out',
   specs: {
@@ -21,13 +21,12 @@ const texts: PdfToolTexts<WatermarkTexts> = {
     head: ['Detail', 'What happens'],
     rows: [
       ['Files', 'PDF files, as many as you like. Oli checks what is inside each file, not its name. Several results download together as one ZIP.'],
-      ['Kind of mark', 'Text only. This tool does not add image watermarks.'],
       ['Where it goes', 'In the center of every page, in gray. The position follows the page as it appears on screen, including its crop and rotation.'],
       ['Size', 'Small, Medium or Large: the text spans about 35%, 55% or 80% of the page diagonal, or of the page width when the mark is horizontal. A short word never grows taller than a third of the page.'],
       ['Opacity', 'Light is 15%, Medium is 30% (the default) and Strong is 50%. The lighter the mark, the easier the page reads underneath.'],
       ['Direction', 'Diagonal runs at 45° on the screen. Horizontal runs straight across the page.'],
-      ['Font and characters', 'Helvetica Bold. Letters of the basic Latin alphabet and common accents work. Other characters are left out of the mark, and the help under the text field warns you.'],
-      ['How it is added', 'The mark is drawn into the page itself, not on a layer that comes off with one click. Someone with a PDF editor can still remove it, so a watermark marks a file but does not lock it.'],
+      ['Font and characters', 'Helvetica Bold. Letters of the basic Latin alphabet and common accents work.'],
+      ['How it is added', 'The mark is drawn into the page itself, not on a layer of its own.'],
       ['What stays', 'Form fields, links, bookmarks and document properties stay as they were. Only the XFA form layer, which most PDF apps cannot read, is removed; the regular form fields keep working.'],
       ['Protected PDFs', 'A PDF with a password to open, or with restrictions, is refused with a link to Unlock PDF. Your original files are never changed.'],
     ],
@@ -40,19 +39,15 @@ const texts: PdfToolTexts<WatermarkTexts> = {
     },
     {
       q: 'Can someone remove the watermark?',
-      a: 'The mark is drawn into the content of each page, so it does not come off with a single click like a separate layer. Someone with a PDF editor can still take it out. If the goal is to keep people from opening the file, set a password instead.',
+      a: 'It does not come off with a single click, because it is part of each page. Someone with a PDF editor can still take it out, so a watermark marks a file but does not lock it. To keep people from opening the file, set a password with Protect PDF.',
     },
     {
       q: 'Why are some characters missing from my watermark?',
-      a: 'Oli draws the mark in Helvetica Bold, which covers the basic Latin alphabet and common accented letters. Other characters, such as Cyrillic, Greek or Chinese letters, are left out, and the help under the text field warns you when that happens. If nothing is left to draw, Oli asks for a different text.',
+      a: 'The font of the mark has no shapes for them: letters such as Cyrillic, Greek or Chinese are left out, and the help under the text field warns you when that happens. If nothing is left to draw, Oli asks for a different text.',
     },
     {
-      q: 'Is my PDF uploaded?',
-      a: 'No. Oli reads each PDF and writes the new one on your device, in your browser. Nothing is sent to a server, and the text you type for the watermark stays on your device too.',
-    },
-    {
-      q: 'Does the watermark change the rest of my PDF?',
-      a: 'No. Form fields, links, bookmarks and document properties stay as they were, and the watermark is drawn on top of the page. The only thing taken out is the XFA form layer, which most PDF apps cannot read; the regular form fields keep working.',
+      q: 'Can I mark only some of the pages?',
+      a: 'Not here: the mark goes on every page. To mark only a part of a file, take that part out with Split PDF, mark it here, then join the parts again with Merge PDF.',
     },
   ],
   privacyHeading: 'Privacy',

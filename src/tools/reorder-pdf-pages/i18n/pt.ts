@@ -11,9 +11,9 @@ const texts: PdfToolTexts<ReorderTexts> = {
   h1: 'Organizar páginas do PDF',
   howHeading: 'Como funciona',
   howSteps: [
-    'Solte um PDF na caixa, escolha o arquivo ou cole: a Oli trabalha com um PDF por vez e mostra uma miniatura de cada página, com uma lupa que abre a página em tamanho grande.',
-    'Arraste uma página para o novo lugar, use as setas dela ou o teclado (a tecla Espaço pega, as setas movem e a tecla Espaço solta), ou aperte Inverter a ordem para virar o PDF inteiro.',
-    'Aperte Salvar a nova ordem e baixe o PDF novo, enquanto o seu arquivo original continua intacto.',
+    'Solte um PDF na caixa, escolha o arquivo ou cole: a Oli mostra uma miniatura de cada página, com uma lupa que abre a página em tamanho grande.',
+    'Ponha as páginas na ordem que você quer, com o mouse, as setas de cada página ou o teclado, ou aperte Inverter a ordem para virar o PDF inteiro.',
+    'Aperte Salvar a nova ordem e baixe o PDF novo.',
   ],
   specsHeading: 'O que entra e o que sai',
   specs: {
@@ -23,7 +23,6 @@ const texts: PdfToolTexts<ReorderTexts> = {
       ['Arquivos', 'Um PDF por vez. A Oli confere que é um PDF pelo que há dentro do arquivo, não pelo nome.'],
       ['Miniaturas', 'A Oli desenha uma imagem pequena de cada página com o PDF.js, para você ver o que está movendo.'],
       ['Mover páginas', 'Arraste uma página para o novo lugar, ou use os botões de cada página para mover uma posição para antes ou para depois.'],
-      ['Teclado', 'As setas andam entre as páginas. Espaço pega uma página, as setas a movem e Espaço a solta.'],
       ['Inverter a ordem', 'Um botão põe a última página primeiro e a primeira página por último.'],
       ['O que muda', 'Só a ordem das páginas. As páginas em si, os links, os marcadores e os campos de formulário ficam iguais.'],
       ['O que fica', 'As propriedades e os metadados do documento ficam como eram, e a Oli não acrescenta data nem informação do aparelho. Só a camada de formulário XFA, que a maioria dos programas de PDF não lê, sai; os campos de formulário comuns continuam funcionando.'],
@@ -34,24 +33,20 @@ const texts: PdfToolTexts<ReorderTexts> = {
   faqHeading: 'Perguntas',
   faq: [
     {
-      q: 'Como mudo a ordem das páginas de um PDF?',
-      a: 'Solte o PDF e arraste cada página para onde você quer, ou use as setas da página. Quando a ordem estiver certa, aperte Salvar a nova ordem e baixe o arquivo novo. Inverter a ordem vira o documento inteiro de uma vez.',
+      q: 'Dá para girar ou tirar páginas aqui também?',
+      a: 'Aqui não: esta ferramenta só muda a ordem. A Gerenciar páginas do PDF move, gira e tira páginas numa grade só.',
     },
     {
       q: 'Dá para mover as páginas pelo teclado?',
       a: 'Dá. Use as setas para andar entre as páginas, aperte Espaço para pegar uma, use as setas para mover e aperte Espaço para soltar. Os botões de cada página também funcionam pelo teclado.',
     },
     {
-      q: 'Os links, os marcadores e os campos de formulário continuam funcionando?',
-      a: 'Sim. Organizar muda só a ordem das páginas, então os links e os marcadores continuam levando às mesmas páginas, e os campos de formulário ficam no mesmo lugar delas. Os números de página que já estão impressos nas páginas ficam onde estão, então podem sair da sequência.',
-    },
-    {
-      q: 'Meu PDF é enviado para algum lugar?',
-      a: 'Não. A Oli lê e grava o PDF no seu aparelho, no navegador. O PDF.js desenha as miniaturas, e o arquivo novo é montado ali mesmo. Abra a aba Rede do navegador enquanto usa a ferramenta: nenhuma requisição leva os seus arquivos.',
+      q: 'E os números de página impressos nas páginas?',
+      a: 'Eles fazem parte de cada página e vão junto com ela, então depois da nova ordem podem sair da sequência.',
     },
     {
       q: 'Dá para organizar um PDF que tem senha?',
-      a: 'Direto, não. Um PDF que pede senha para abrir, ou que tem restrições, é recusado com um link para Desbloquear PDF. Tire a proteção lá primeiro e depois volte para organizar as páginas.',
+      a: 'Do jeito que ele está, não. Tire a proteção na Desbloquear PDF primeiro e depois volte para organizar as páginas.',
     },
   ],
   privacyHeading: 'Privacidade',

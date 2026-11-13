@@ -12,9 +12,9 @@ const texts: PdfToolTexts<WatermarkTexts> = {
   h1: "Marca d'água no PDF",
   howHeading: 'Como funciona',
   howSteps: [
-    'Solte seus PDFs na caixa, escolha os arquivos ou cole, quantos quiser.',
+    'Solte seus PDFs na caixa, escolha os arquivos ou cole.',
     "Digite o texto da marca d'água e escolha o tamanho, a força e se ela fica na diagonal ou na horizontal.",
-    "Aperte Adicionar marca d'água: a Oli carimba o texto em todas as páginas no seu navegador, e você baixa um PDF ou todos juntos num ZIP.",
+    "Aperte Adicionar marca d'água e baixe os PDFs marcados.",
   ],
   specsHeading: 'O que entra e o que sai',
   specs: {
@@ -22,13 +22,12 @@ const texts: PdfToolTexts<WatermarkTexts> = {
     head: ['Detalhe', 'O que acontece'],
     rows: [
       ['Arquivos', 'Arquivos PDF, quantos quiser. A Oli confere o que há dentro de cada arquivo, não o nome dele. Vários resultados são baixados juntos num ZIP só.'],
-      ['Tipo de marca', "Só texto. Esta ferramenta não coloca marca d'água de imagem."],
       ['Onde fica', 'No centro de cada página, em cinza. A posição segue a página como ela aparece na tela, com a área de corte e o giro.'],
       ['Tamanho', 'Pequeno, Médio ou Grande: o texto ocupa cerca de 35%, 55% ou 80% da diagonal da página, ou da largura quando a marca é horizontal. Uma palavra curta nunca fica mais alta que um terço da página.'],
       ['Opacidade', 'A opção Clara é 15%, a Média é 30% (o padrão) e a Forte é 50%. Quanto mais clara a marca, mais fácil ler a página por baixo.'],
       ['Direção', 'A diagonal fica a 45° na tela. A horizontal atravessa a página em linha reta.'],
-      ['Fonte e caracteres', 'Helvetica Bold. Funcionam as letras do alfabeto latino básico e os acentos comuns, e as aspas curvas e os travessões viram aspas retas e hífen. Os outros caracteres ficam de fora da marca, e a ajuda embaixo do campo de texto avisa.'],
-      ['Como entra', 'A marca é desenhada na própria página, não numa camada que sai com um clique. Quem tem um editor de PDF ainda consegue tirar a marca, então ela identifica o arquivo, mas não tranca.'],
+      ['Fonte e caracteres', 'Helvetica Bold. Funcionam as letras do alfabeto latino básico e os acentos comuns, e as aspas curvas e os travessões viram aspas retas e hífen.'],
+      ['Como entra', 'A marca é desenhada na própria página, não numa camada separada.'],
       ['O que fica', 'Os campos de formulário, os links, os marcadores e as propriedades do documento ficam como eram. Só a camada de formulário XFA, que a maioria dos programas de PDF não lê, sai; os campos de formulário comuns continuam funcionando.'],
       ['PDFs protegidos', 'Um PDF com senha para abrir, ou com restrições, é recusado com um link para Desbloquear PDF. Os seus arquivos originais nunca mudam.'],
     ],
@@ -41,19 +40,15 @@ const texts: PdfToolTexts<WatermarkTexts> = {
     },
     {
       q: "Alguém consegue tirar a marca d'água?",
-      a: 'A marca é desenhada no conteúdo de cada página, então ela não sai com um clique, como sairia uma camada separada. Quem tem um editor de PDF ainda consegue tirar a marca. Se o objetivo é impedir que as pessoas abram o arquivo, coloque uma senha.',
+      a: 'Ela não sai com um clique, porque faz parte de cada página. Quem tem um editor de PDF ainda consegue tirar a marca, então ela identifica o arquivo, mas não tranca. Para impedir que as pessoas abram o arquivo, coloque uma senha com a Proteger PDF.',
     },
     {
       q: "Por que faltam alguns caracteres na minha marca d'água?",
-      a: 'A Oli desenha a marca em Helvetica Bold, que cobre o alfabeto latino básico e as letras com os acentos comuns. Outros caracteres, como letras cirílicas, gregas ou chinesas, ficam de fora, e a ajuda embaixo do campo de texto avisa quando isso acontece. Se não sobrar nada para desenhar, a Oli pede outro texto.',
+      a: 'A fonte da marca não tem o desenho deles: letras cirílicas, gregas ou chinesas, por exemplo, ficam de fora, e a ajuda embaixo do campo de texto avisa quando isso acontece. Se não sobrar nada para desenhar, a Oli pede outro texto.',
     },
     {
-      q: 'Meu PDF é enviado para algum lugar?',
-      a: "Não. A Oli lê cada PDF e grava o novo no seu aparelho, no navegador. Nada vai para um servidor, e o texto que você digita para a marca d'água também fica no seu aparelho.",
-    },
-    {
-      q: "A marca d'água muda o resto do meu PDF?",
-      a: 'Não. Os campos de formulário, os links, os marcadores e as propriedades do documento ficam como eram, e a marca é desenhada por cima da página. A única coisa que sai é a camada de formulário XFA, que a maioria dos programas de PDF não lê; os campos de formulário comuns continuam funcionando.',
+      q: 'Dá para marcar só algumas páginas?',
+      a: 'Aqui não: a marca vai em todas as páginas. Para marcar só uma parte do arquivo, tire essa parte com a Dividir PDF, marque aqui e depois junte as partes de novo com a Juntar PDF.',
     },
   ],
   privacyHeading: 'Privacidade',
