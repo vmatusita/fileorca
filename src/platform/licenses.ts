@@ -315,3 +315,11 @@ export function isForbiddenLicense(expression: string): boolean {
   return /\b(AGPL|SSPL|BUSL|Elastic|Commons[- ]Clause|CC-BY-NC|NonCommercial|PolyForm-Noncommercial)\b/i.test(expression)
     || /(^|[^L])GPL/.test(expression);
 }
+
+/**
+ * The id of a package's row on the Licenses page ("@jsquash/jpeg" gives "pkg-jsquash-jpeg"). F19a (decision 7; DECISOES
+ * § 761): the Licenses page names its rows with it, and the table of How it works links each library to that row.
+ */
+export function licenseAnchor(name: string): string {
+  return `pkg-${name.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '')}`;
+}
