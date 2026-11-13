@@ -276,6 +276,29 @@ for (const id of F18_IDS) {
   });
 }
 
+// F19a (decisions 2 and 7, criterion 9; DECISOES § 757): What's new and How it works, read from the route map, in the three
+// languages: the same first visit with no gesture, at 360 px with Figtree late. In Chromium the CLS of the load is 0 (0.001
+// for the rounding of the measure, as above); in both browsers the trail, the H1 and the notice stay where the first paint
+// put them. One test per page and its two translations, as the F18 block.
+const F19A_IDS = ['whats-new', 'how-it-works'] as const;
+for (const id of F19A_IDS) {
+  const pages = LANGS.map((lang) => routeById(id).paths[lang] ?? `(${id} sem página em ${lang})`);
+  test(`F19a: ${pages.join(', ')} load with no layout shift at 360 px, Figtree late`, async ({ browser, browserName }) => {
+    test.setTimeout(120_000);
+    expect(pages).toHaveLength(3);
+    const wrong: string[] = [];
+    const seen: string[] = [];
+    for (const path of pages) {
+      const visit = await firstVisit(browser, browserName, path, 360);
+      seen.push(`${path} ${visit.cls.toFixed(3)}`);
+      if (browserName === 'chromium' && visit.cls > 0.001) wrong.push(`${path}: CLS ${visit.cls.toFixed(3)} (${visit.moved.join('; ')})`);
+      if (JSON.stringify(visit.after) !== JSON.stringify(visit.before)) wrong.push(`${path}: a trilha, o H1 ou o aviso saíram do lugar`);
+    }
+    if (browserName === 'chromium') console.log(`[cls] ${browserName} F19a 360: ${seen.join(', ')}`);
+    expect(wrong).toEqual([]);
+  });
+}
+
 // F12 (decision 11 and criterion 11; DECISOES § 422): the same first visits on the test build, with the boxes of the ad
 // map (the 37 units of the worst case), which reserve their room in the HTML from the first paint: nothing above them moves
 // either, and the shift of each page is printed next to the one of the default build.
