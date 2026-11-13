@@ -18,6 +18,8 @@ import RichText from '../../components/RichText.astro';
 import ToolCard from '../../components/ToolCard.astro';
 import GuideCard from '../../components/GuideCard.astro';
 import AdBreak from '../../ads/AdBreak.astro';
+import Updated from '../../components/Updated.astro';
+import HowToCheck from '../../components/HowToCheck.astro';
 import { routeById, type Lang } from '../../i18n/routes.ts';
 import { TEXTS } from '../../i18n/texts.ts';
 import { breadcrumbLd, homePath, webApplicationLd } from '../../seo/meta.ts';
@@ -115,8 +117,9 @@ const guides = tool ? guidesOfTool(tool).map((guide) => guideCardData(guide, lan
   <AdBreak />
   <section class="fo-section fo-prose" data-content="privacy" aria-labelledby="privacy-note">
     <h2 id="privacy-note">{t.privacyHeading}</h2>
-    <p>{t.privacyNote}</p>
+    <p>{t.privacyNote}<HowToCheck lang={lang} /></p>
   </section>
+  <Updated id={id} lang={lang} />
   <AdBreak />
   <section class="fo-section" data-content="related" aria-labelledby="related">
     <h2 id="related">{t.relatedHeading}</h2>

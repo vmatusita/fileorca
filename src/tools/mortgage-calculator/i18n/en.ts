@@ -66,7 +66,7 @@ export default {
   formulaHeading: 'The formula',
   formula: [
     'The principal and interest payment is M = P × r × (1 + r)^n ÷ ((1 + r)^n − 1). P is the loan (the price minus the down payment), r is the monthly rate (the yearly rate divided by 12) and n is the number of monthly payments.',
-    'Each month the interest is the balance times r, rounded to the cent. The rest of the payment lowers the balance, and the last payment is whatever closes it, so it can differ from the others by a few cents.',
+    'Each month the interest is the balance times r, rounded to the cent, and the rest of the payment lowers the balance.',
     'The monthly total adds one twelfth of the yearly property tax and insurance, plus the PMI and HOA dues.',
   ],
   premisesHeading: 'Assumptions',
@@ -88,24 +88,20 @@ export default {
   faqHeading: 'Questions about mortgage payments',
   faq: [
     {
-      q: 'What does the monthly payment include?',
-      a: 'Principal and interest, plus one twelfth of the yearly property tax and home insurance, and any PMI and HOA dues you enter. Lenders often call the first four PITI, and collect taxes and insurance through an escrow account.',
+      q: 'What is PITI?',
+      a: 'Principal, interest, taxes and insurance: lenders often call those four parts of the payment PITI, and collect the taxes and insurance through an escrow account.',
     },
     {
       q: 'Why is the last payment a little different?',
-      a: 'The payment is rounded to the cent, and so is the interest of each month. After hundreds of payments those cents add up, so the last payment is whatever closes the balance exactly.',
+      a: 'After hundreds of payments, the cents gained or lost in rounding add up, so the last payment is whatever closes the balance exactly and can differ from the others by a few cents.',
     },
     {
       q: 'Where does the interest rate come from?',
-      a: 'You type it. The starting value is an example, not a quote. Use the rate on your Loan Estimate, or try a few rates to see how much each point changes the payment.',
+      a: 'The starting value is an example, not a quote. Use the rate on your Loan Estimate, or try a few rates to see how much each point changes the payment.',
     },
     {
-      q: 'When does PMI go away?',
-      a: 'On most conventional loans you can ask to cancel it once the balance reaches 80% of the original value, and it ends on its own at 78%. The calculator keeps the amount you enter for the whole term; set it to zero to see the payment without it.',
-    },
-    {
-      q: 'Can I share or save my numbers?',
-      a: 'Copy link puts your numbers after the # of the address, so the same page opens with them. Download PDF and CSV save the inputs, the result and the whole schedule on your device.',
+      q: 'How do I see the payment once PMI is gone?',
+      a: 'Set PMI per month to zero. The monthly payment then shows what you would pay without it, with the same principal and interest, taxes, insurance and HOA dues.',
     },
   ],
   privacyHeading: 'Privacy',

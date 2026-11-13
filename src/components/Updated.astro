@@ -1,0 +1,21 @@
+---
+// The line "Updated {date} · What's new" at the end of the content of the image, PDF and QR code pages, right before the
+// related tools (F19a, decision 4; DECISOES § 754). The date is the <lastmod> of the page in its sitemap, from the same
+// source (lastmodOf, src/platform/changelog.ts), in a <time datetime> and in the long form of the language. A plain
+// paragraph out of every content block (no data-content): the gates of the blocks and of the repetition never count it,
+// and it changes no ad position, no density and no layout shift (static text, in the HTML from the start).
+import { pathFor, type Lang, type RouteId } from '../i18n/routes.ts';
+import { TEXTS } from '../i18n/texts.ts';
+import { longDate } from '../i18n/dates.ts';
+import { lastmodOf } from '../platform/changelog.ts';
+
+interface Props {
+  id: RouteId;
+  lang: Lang;
+}
+const { id, lang } = Astro.props;
+const common = TEXTS[lang].common;
+const date = lastmodOf(id, lang);
+const [before = '', after = ''] = common.trust.updated.split('{date}');
+---
+<p class="fo-updated" data-updated>{before}<time datetime={date}>{longDate(date, lang)}</time>{after} · <a href={pathFor('whats-new', lang)}>{common.footer.whatsNew}</a></p>

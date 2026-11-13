@@ -72,11 +72,11 @@ export default {
     },
     {
       q: 'Why does the calculator add interest monthly even with yearly compounding?',
-      a: 'Deposits are monthly, so the balance is updated every month at the monthly rate that gives the same yearly result. It is a declared convention, so a bank statement can differ by a few cents.',
+      a: 'Because deposits are monthly, the balance has to be updated every month. It is a declared convention, so a bank statement can differ by a few cents.',
     },
     {
       q: 'Is the rate a return I can expect?',
-      a: 'No. It is a number you choose to see what it would do. A savings account pays a stated rate; an investment can earn more, less or lose money.',
+      a: 'No. A savings account pays a stated rate; an investment can earn more, less or lose money.',
     },
   ],
   privacyHeading: 'Privacy',

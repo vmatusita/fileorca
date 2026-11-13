@@ -1,0 +1,142 @@
+---
+// How it works (F19a, decision 7; DECISOES § 759 to § 761): what happens to a file, what runs as WebAssembly, what goes over
+// the network and what never does, how to check it in the browser and what the check does not prove, five parts in this
+// order, each a section with its id. An Article by the author with the dates of the changelog (the birth of the page and its
+// newest change), the breadcrumb, the index "On this page" in the right column from 1280 px (as the Licenses), and no ad.
+// Every sentence is a span or a step with `data-claim`, the key tests/unit/how-it-works.test.ts ties to its proof; the
+// table of the libraries is made at build time from src/platform/engines.ts and the Licenses page (licenseAnchor), and links
+// only to pages of the site. The page never names the code host of FileOrca.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import PageIndex from '../components/PageIndex.astro';
+import { pathFor, routeById, type Lang } from '../i18n/routes.ts';
+import { TEXTS } from '../i18n/texts.ts';
+import type { HowItWorksSentences } from '../i18n/types.ts';
+import { CHANGELOG, birthOf, lastmodOf } from '../platform/changelog.ts';
+import { ENGINES } from '../platform/engines.ts';
+import { licenseAnchor } from '../platform/licenses.ts';
+import { articleLd, breadcrumbLd, homePath, personLd } from '../seo/meta.ts';
+import { IMAGE_PAGES, type ImagePageId } from '../tools/image/registry.ts';
+import type { PdfPageId } from '../tools/pdf/registry.ts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const route = routeById('how-it-works');
+const t = TEXTS[lang]['how-it-works'];
+const common = TEXTS[lang].common;
+const path = route.paths[lang] ?? '/';
+const crumbs = [
+  { name: common.breadcrumb.home, path: homePath(lang) },
+  { name: t.h1, path },
+];
+// The dates of the Article are those of the changelog: the birth of the page in the language and its newest change.
+const modified = lastmodOf('how-it-works', lang);
+const born = birthOf('how-it-works', lang);
+const published = born === undefined ? modified : (CHANGELOG[born]?.date ?? modified);
+// The five parts, in the order of decision 7, with the ids the index links to.
+const PARTS = [
+  { id: 'file', heading: t.file.heading },
+  { id: 'webassembly', heading: t.wasm.heading },
+  { id: 'network', heading: t.network.heading },
+  { id: 'check', heading: t.check.heading },
+  { id: 'limits', heading: t.limits.heading },
+] as const;
+const index = PARTS.map((part) => ({ id: part.id, text: part.heading }));
+// A sentence with its links: {privacy} and {licenses} are the pages of the language, named as in the footer.
+const LINKS = {
+  privacy: { href: pathFor('privacy', lang), name: common.footer.privacy },
+  licenses: { href: pathFor('licenses', lang), name: common.footer.licenses },
+} as const;
+type LinkKey = keyof typeof LINKS;
+const partsOf = (text: string) =>
+  text.split(/(\{(?:privacy|licenses)\})/).filter((part) => part !== '').map((part) => {
+    const key = /^\{(privacy|licenses)\}$/.exec(part)?.[1] as LinkKey | undefined;
+    return key ? { link: LINKS[key] } : { text: part };
+  });
+const sentences = (paragraph: HowItWorksSentences, part: string) => Object.entries(paragraph).map(([key, text]) => ({ claim: `${part}.${key}`, parts: partsOf(text) }));
+const STEPS = ['chrome', 'firefox', 'safari', 'watch', 'phone'] as const;
+// The table: the tool pages of each library by their names in the language, linked to their pages.
+const toolName = (id: ImagePageId | PdfPageId): string => (Object.hasOwn(IMAGE_PAGES, id) ? common.tools[id as ImagePageId].name : common.pdf[id as PdfPageId].name);
+const [filesBefore = '', filesAfter = ''] = t.wasm.table.files.split('{files}');
+const [licenseBefore = '', licenseAfter = ''] = t.wasm.table.license.split('{pkg}');
+const licensesPath = pathFor('licenses', lang);
+---
+<BaseLayout lang={lang} route={route} title={t.title} description={t.description} schema={[breadcrumbLd(crumbs), articleLd(t.h1, t.description, path, lang, published, modified, 'how-it-works'), personLd()]} wide>
+  <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
+  <article class="fo-view fo-view--stack fo-view--side fo-view--how">
+    <div class="fo-view__part">
+      <h1 class="fo-h1">{t.h1}</h1>
+      <p class="fo-prose"><span data-claim="intro">{t.intro}</span></p>
+    </div>
+    <PageIndex label={common.pageIndex} entries={index} />
+    <div class="fo-view__part">
+      <section class="fo-section fo-prose fo-how" id="file">
+        <h2>{t.file.heading}</h2>
+        {t.file.paragraphs.map((paragraph) => (
+          <p>{sentences(paragraph, 'file').map((sentence, at) => <>{at > 0 && ' '}<span data-claim={sentence.claim}>{sentence.parts.map((part) => ('link' in part ? <a href={part.link.href}>{part.link.name}</a> : part.text))}</span></>)}</p>
+        ))}
+      </section>
+      <section class="fo-section fo-prose fo-how" id="webassembly">
+        <h2>{t.wasm.heading}</h2>
+        {t.wasm.paragraphs.map((paragraph) => (
+          <p>{sentences(paragraph, 'wasm').map((sentence, at) => <>{at > 0 && ' '}<span data-claim={sentence.claim}>{sentence.parts.map((part) => ('link' in part ? <a href={part.link.href}>{part.link.name}</a> : part.text))}</span></>)}</p>
+        ))}
+        <table class="fo-table fo-engines" role="table" data-engines>
+          <caption class="fo-sr">{t.wasm.table.caption}</caption>
+          <thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader">{t.wasm.table.library}</th><th scope="col" role="columnheader">{t.wasm.table.does}</th><th scope="col" role="columnheader">{t.wasm.table.tools}</th></tr></thead>
+          <tbody role="rowgroup">
+            {ENGINES.map((engine) => (
+              <tr role="row" data-engine={engine.id} data-kind={engine.kind}>
+                <th scope="row" role="rowheader">
+                  <span class="fo-engines__name">{engine.library}</span>
+                  <span class="fo-engines__line">{engine.kind === 'wasm' ? t.wasm.table.wasm : t.wasm.table.js}</span>
+                  {engine.wasm.length > 0 && (
+                    <span class="fo-engines__line">{filesBefore}{engine.wasm.map((file, at) => <>{at > 0 && ', '}<code data-wasm={file}>{file}</code></>)}{filesAfter}</span>
+                  )}
+                  <span class="fo-engines__line">{licenseBefore}<a href={`${licensesPath}#${licenseAnchor(engine.pkg)}`} data-license={engine.pkg}>{engine.pkg}</a>{licenseAfter}</span>
+                </th>
+                <td role="cell">{t.wasm.does[engine.id]}</td>
+                <td role="cell">
+                  <ul class="fo-engines__tools">
+                    {engine.tools.map((id) => <li><a href={pathFor(id, lang)}>{toolName(id)}</a></li>)}
+                  </ul>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {t.wasm.after.map((paragraph) => (
+          <p>{sentences(paragraph, 'wasm').map((sentence, at) => <>{at > 0 && ' '}<span data-claim={sentence.claim}>{sentence.parts.map((part) => ('link' in part ? <a href={part.link.href}>{part.link.name}</a> : part.text))}</span></>)}</p>
+        ))}
+      </section>
+      <section class="fo-section fo-prose fo-how" id="network">
+        <h2>{t.network.heading}</h2>
+        {t.network.paragraphs.map((paragraph) => (
+          <p>{sentences(paragraph, 'network').map((sentence, at) => <>{at > 0 && ' '}<span data-claim={sentence.claim}>{sentence.parts.map((part) => ('link' in part ? <a href={part.link.href}>{part.link.name}</a> : part.text))}</span></>)}</p>
+        ))}
+      </section>
+      <section class="fo-section fo-prose fo-how" id="check">
+        <h2>{t.check.heading}</h2>
+        {t.check.paragraphs.map((paragraph) => (
+          <p>{sentences(paragraph, 'check').map((sentence, at) => <>{at > 0 && ' '}<span data-claim={sentence.claim}>{sentence.parts.map((part) => ('link' in part ? <a href={part.link.href}>{part.link.name}</a> : part.text))}</span></>)}</p>
+        ))}
+        {STEPS.map((group) => (
+          <>
+            <h3 class="fo-h3">{t.check[group].heading}</h3>
+            <ol class="fo-steps">
+              {Object.entries(t.check[group].steps).map(([key, text]) => <li data-claim={`check.${group}.${key}`}>{text}</li>)}
+            </ol>
+          </>
+        ))}
+      </section>
+      <section class="fo-section fo-prose fo-how" id="limits">
+        <h2>{t.limits.heading}</h2>
+        {t.limits.paragraphs.map((paragraph) => (
+          <p>{sentences(paragraph, 'limits').map((sentence, at) => <>{at > 0 && ' '}<span data-claim={sentence.claim}>{sentence.parts.map((part) => ('link' in part ? <a href={part.link.href}>{part.link.name}</a> : part.text))}</span></>)}</p>
+        ))}
+      </section>
+    </div>
+  </article>
+</BaseLayout>

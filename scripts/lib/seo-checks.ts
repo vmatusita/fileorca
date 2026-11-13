@@ -77,15 +77,41 @@ export function robotsProblems(robots: string, origin: string): string[] {
   return problems;
 }
 
-/** A urlset sitemap with the expected absolute URLs, no duplicates, under 50,000 entries. */
-export function validateSitemap(xml: string, expected: string[], origin: string): string[] {
+/**
+ * F19a (decision 3; DECISOES § 753): what the <lastmod> of a sitemap must be. `today` is the day of the build in UTC (no
+ * date after it); `lastmods`, the date each URL must have (the lastmodOf of src/platform/changelog.ts).
+ */
+export interface LastmodRules {
+  today?: string;
+  lastmods?: ReadonlyMap<string, string>;
+}
+
+/** A real day in the form AAAA-MM-DD ("2026-02-30" is not one). */
+export function isIsoDay(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
+/**
+ * A urlset sitemap with the expected absolute URLs, no duplicates, under 50,000 entries. F19a: every <url> is a <loc> and
+ * a <lastmod> with a real day, never after the day of the build, and the one the changelog gives the page.
+ */
+export function validateSitemap(xml: string, expected: string[], origin: string, rules: LastmodRules = {}): string[] {
   const problems: string[] = [];
   if (!xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>')) problems.push('sem declaração XML UTF-8');
   if (!xml.includes('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')) problems.push('sem urlset com o namespace');
   if (!xml.trimEnd().endsWith('</urlset>')) problems.push('urlset não fecha');
-  const urls = [...xml.matchAll(/<url><loc>([^<]+)<\/loc><\/url>/g)].map((match) => match[1] ?? '');
+  const entries = [...xml.matchAll(/<url><loc>([^<]+)<\/loc><lastmod>([^<]*)<\/lastmod><\/url>/g)].map((match) => ({ url: match[1] ?? '', lastmod: match[2] ?? '' }));
+  const urls = entries.map((entry) => entry.url);
   const opened = (xml.match(/<url>/g) ?? []).length;
-  if (opened !== urls.length) problems.push('entrada <url> sem <loc> simples');
+  if (opened !== urls.length) problems.push('entrada <url> sem <loc> e <lastmod> simples');
+  for (const { url, lastmod } of entries) {
+    if (!isIsoDay(lastmod)) problems.push(`lastmod fora do formato AAAA-MM-DD em ${url}: ${lastmod}`);
+    else if (rules.today !== undefined && lastmod > rules.today) problems.push(`lastmod de ${url} (${lastmod}) depois do dia do build (${rules.today})`);
+    const want = rules.lastmods?.get(url);
+    if (want !== undefined && want !== lastmod) problems.push(`lastmod de ${url} é ${lastmod}, e o changelog diz ${want}`);
+  }
   if (urls.length > 50_000) problems.push('mais de 50.000 URLs');
   if (new Set(urls).size !== urls.length) problems.push('URL repetida');
   for (const url of urls) {

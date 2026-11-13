@@ -8,8 +8,8 @@ export default {
   howHeading: 'Cómo convertir WebP a JPG',
   howSteps: [
     'Suelta tus imágenes WebP en el cuadro, elígelas o pégalas con Ctrl V.',
-    'Deja JPG, o elige PNG si la imagen tiene una transparencia que quieres conservar.',
-    'Descarga la imagen convertida, o el ZIP si convertiste varias.',
+    'Deja JPG, o elige PNG.',
+    'Descarga la imagen convertida.',
   ],
   specsHeading: 'Especificaciones',
   specs: {
@@ -20,7 +20,7 @@ export default {
       ['Resultado', 'JPG, que es la opción predeterminada, o PNG. Sale un archivo por cada WebP.'],
       ['Transparencia', 'El JPG no tiene transparencia, así que queda blanca. El PNG la conserva.'],
       ['WebP animado', 'Queda en su primer fotograma, y el resultado te lo dice.'],
-      ['Tamaño', 'Un JPG de la misma imagen suele pesar más que el WebP, porque el WebP comprime mejor. En las fotos, un PNG pesa todavía más.'],
+      ['Tamaño', 'Un JPG de la misma imagen suele pesar más que el WebP, y en las fotos un PNG pesa todavía más.'],
       ['Lote', 'Sin límite de imágenes. Una imagen se descarga directamente, y varias llegan en un solo ZIP.'],
       ['Metadatos', 'Se eliminan Exif, XMP, IPTC y GPS, y se aplica la orientación de la foto.'],
     ],
@@ -29,15 +29,11 @@ export default {
   faq: [
     {
       q: '¿Por qué los sitios web guardan las imágenes en WebP?',
-      a: 'Los archivos WebP suelen ser más pequeños que los JPG para la misma imagen, así que las páginas cargan más rápido. Muchos sitios envían WebP a los navegadores que lo admiten, y tu navegador guarda lo que recibió. Un JPG hecho a partir de él se abre en cualquier editor y formulario.',
-    },
-    {
-      q: '¿Qué pasa con un fondo transparente?',
-      a: 'El JPG no puede guardar transparencia, así que FileOrca rellena esas zonas con blanco. Para conservar la transparencia, elige PNG.',
+      a: 'Las páginas que usan WebP cargan más rápido, así que muchos sitios envían WebP a los navegadores que lo admiten, y tu navegador guarda lo que recibió. Un JPG hecho a partir de él se abre en cualquier editor y formulario.',
     },
     {
       q: '¿Puedo convertir un WebP animado a JPG?',
-      a: 'Sí, pero un JPG es una sola imagen. El WebP animado queda en su primer fotograma, y el resultado te lo dice. Para conservar el movimiento, quédate con el WebP.',
+      a: 'Sí, pero un JPG es una sola imagen, así que el movimiento se pierde. Para conservarlo, quédate con el WebP.',
     },
     {
       q: '¿Por qué el JPG pesa más que el WebP?',
@@ -47,14 +43,10 @@ export default {
       q: '¿Puedo simplemente cambiar el nombre del archivo .webp a .jpg?',
       a: 'No. Cambiar el nombre solo cambia el nombre, y los datos de adentro siguen siendo WebP, así que algunas apps y formularios lo siguen rechazando. Convertir escribe un JPG de verdad.',
     },
-    {
-      q: '¿Mi imagen se sube a algún lugar?',
-      a: 'No. FileOrca convierte la imagen en tu dispositivo, dentro del navegador. Abre la pestaña Red del navegador mientras conviertes: ninguna solicitud lleva tu archivo.',
-    },
   ],
   privacyHeading: 'Privacidad',
   privacyNote:
-    'Tus imágenes se convierten en tu navegador, y tus archivos nunca salen de tu dispositivo ni llegan a un servidor. Los archivos nuevos omiten los metadatos de la foto, incluida la ubicación GPS.',
+    'Tus imágenes se convierten en tu navegador, y tus archivos nunca salen de tu dispositivo ni llegan a un servidor.',
   relatedHeading: 'Más herramientas de imagen',
   panel: {
     formats: 'WebP',

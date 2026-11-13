@@ -8,20 +8,20 @@ export default {
   howHeading: 'How to get an image under 1 MB',
   howSteps: [
     'Drop the photos that are too big on the box, choose them, or paste them with Ctrl V.',
-    'Oli saves each one as a JPG of 1 MB or less, keeping as much detail as fits.',
-    'Download the image, or the ZIP when you compressed several.',
+    'Oli brings each one under the limit, and there is nothing to set.',
+    'Download the compressed image.',
   ],
   specsHeading: 'The 1 MB target',
   specs: {
     caption: 'What the 1 MB preset guarantees and what it changes',
     head: ['Detail', 'What Oli does'],
     rows: [
-      ['Target', 'Every file is 1,000,000 bytes or smaller.'],
-      ['Which MB', 'MB is read as 1,000,000 bytes, the smaller reading, so a limit of 1 MiB (1,048,576 bytes) is also met.'],
+      ['Target', 'Every file is 1 MB or smaller.'],
       ['Output format', 'Always a JPG. JPG, PNG and WebP go in.'],
       ['Transparency', 'Transparent areas turn white, because JPG has no transparency.'],
       ['Image already under 1 MB', 'It comes back unchanged except for the metadata, in its own format.'],
       ['Photo that is too detailed', 'If the quality alone cannot reach the target, Oli also reduces the dimensions and tells you the new width and height.'],
+      ['Batch', 'Several images download together as one ZIP.'],
       ['Metadata', 'Exif, XMP, IPTC and GPS are not kept in the new files.'],
     ],
   },
@@ -37,7 +37,7 @@ export default {
     },
     {
       q: 'Can I keep the original format, such as PNG?',
-      a: 'The result is a JPG, because a PNG photo cannot be squeezed to a set size without changing its pixels, and JPG is accepted nearly everywhere. A file that already fits comes back in its own format.',
+      a: 'Not for a file that has to shrink: a PNG photo cannot be squeezed to a set size without changing its pixels, and JPG is accepted nearly everywhere.',
     },
     {
       q: 'How much quality do I lose at 1 MB?',
@@ -45,16 +45,12 @@ export default {
     },
     {
       q: 'Why did my picture also get smaller in pixels?',
-      a: 'When an image is too detailed to fit even at a low quality, lowering the quality further would make it look blocky. Oli reduces the dimensions a bit instead, and shows you the new width and height.',
-    },
-    {
-      q: 'Can I compress many photos to 1 MB at once?',
-      a: 'Yes. Drop the whole set. Each file is brought to 1 MB or less, and the batch downloads as one ZIP.',
+      a: 'Lowering the quality further would make a very detailed image look blocky, and fewer pixels at a good quality look better.',
     },
   ],
   privacyHeading: 'Privacy',
   privacyNote:
-    'Your photos are shrunk to 1 MB on your device and never sent to a server. The new files leave out the photo metadata, including the GPS location.',
+    'Your photos are shrunk to 1 MB on your device and never sent to a server.',
   relatedHeading: 'More image tools',
   panel: {
     formats: 'JPG, PNG or WebP',

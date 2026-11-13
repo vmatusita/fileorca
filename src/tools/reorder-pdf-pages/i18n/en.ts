@@ -10,9 +10,9 @@ const texts: PdfToolTexts<ReorderTexts> = {
   h1: 'Reorder PDF pages',
   howHeading: 'How it works',
   howSteps: [
-    'Drop a PDF on the box, choose one, or paste it. Oli works on one PDF at a time and shows a thumbnail of every page; the magnifier on a page opens it large.',
-    'Drag a page to its new place, use the arrows on each page, or use the keyboard: Space picks a page up, the arrow keys move it, Space drops it. Reverse order flips the whole PDF.',
-    'Press Save new order, then download the new PDF. Your original file stays untouched.',
+    'Drop a PDF on the box, choose one, or paste it. Oli shows a thumbnail of every page, and the magnifier on a page opens it large.',
+    'Put the pages in the order you want, with the mouse, the arrows on each page or the keyboard. Reverse order flips the whole PDF.',
+    'Press Save new order, then download the new PDF.',
   ],
   specsHeading: 'What goes in and what comes out',
   specs: {
@@ -22,7 +22,6 @@ const texts: PdfToolTexts<ReorderTexts> = {
       ['Files', 'One PDF at a time. Oli checks that it is a PDF from what is inside the file, not from its name.'],
       ['Thumbnails', 'Oli draws a small picture of every page with PDF.js, so you can see what you are moving.'],
       ['Moving pages', 'Drag a page to its new place, or use the buttons on each page to move it one place earlier or later.'],
-      ['Keyboard', 'The arrow keys move between pages. Space picks a page up, the arrow keys move it, and Space drops it.'],
       ['Reverse order', 'One button puts the last page first and the first page last.'],
       ['What changes', 'Only the order of the pages. The pages themselves, their links, bookmarks and form fields stay the same.'],
       ['What stays', 'Document properties and metadata stay as they were, and Oli adds no date or device information. Only the XFA form layer, which most PDF apps cannot read, is removed; the regular form fields keep working.'],
@@ -33,24 +32,20 @@ const texts: PdfToolTexts<ReorderTexts> = {
   faqHeading: 'Questions',
   faq: [
     {
-      q: 'How do I change the order of pages in a PDF?',
-      a: 'Drop the PDF, then drag each page to where you want it, or use the arrows on the page. When the order looks right, press Save new order and download the new file. Reverse order flips the whole document in one press.',
+      q: 'Can I also turn or remove pages here?',
+      a: 'Not here: this tool changes only the order. Organize PDF moves, turns and takes out pages in one grid.',
     },
     {
       q: 'Can I move pages with the keyboard?',
       a: 'Yes. Use the arrow keys to move between pages, press Space to pick one up, use the arrow keys to move it, then press Space to drop it. The buttons on each page work with the keyboard too.',
     },
     {
-      q: 'Will links, bookmarks and form fields still work?',
-      a: 'Yes. Reordering changes only the order of the pages, so links and bookmarks still lead to the same pages and form fields keep their place on them. Page numbers already printed on the pages stay where they are, so they may no longer be in order.',
-    },
-    {
-      q: 'Is my PDF uploaded?',
-      a: "No. Oli reads and writes the PDF on your device, in your browser. PDF.js draws the thumbnails and the new file is built right there. Open your browser's Network tab while you use the tool: no request carries your files.",
+      q: 'What about page numbers printed on the pages?',
+      a: 'They are part of each page and move with it, so after a new order they may no longer run in sequence.',
     },
     {
       q: 'Can I reorder a PDF that has a password?',
-      a: 'Not directly. A PDF that needs a password to open, or that has restrictions, is refused with a link to Unlock PDF. Take the protection off there first, then come back and reorder the pages.',
+      a: 'Not as it is. Take the protection off in Unlock PDF first, then come back and reorder the pages.',
     },
   ],
   privacyHeading: 'Privacy',

@@ -9,7 +9,7 @@ export default {
   howSteps: [
     'Suelta tus fotos HEIC en el cuadro, elígelas o pégalas con Ctrl V.',
     'Deja JPG, o elige PNG si quieres la foto sin más pérdida.',
-    'Descarga la foto convertida, o el ZIP si convertiste varias.',
+    'Descarga la foto convertida.',
   ],
   specsHeading: 'Especificaciones',
   specs: {
@@ -34,19 +34,11 @@ export default {
     },
     {
       q: '¿Convertir HEIC a JPG baja la calidad?',
-      a: 'El JPG comprime con pérdida, así que el archivo nuevo no es una copia bit a bit de la foto, y al verla normalmente la diferencia es pequeña. Elige PNG para no perder más; el archivo será mucho más grande.',
-    },
-    {
-      q: '¿Qué pasa con mi Live Photo?',
-      a: 'Oli convierte solo la imagen principal del archivo, así que recibes la foto fija. El video corto de una Live Photo no está en el JPG, y tampoco los datos de profundidad de una foto en modo Retrato ni el mapa HDR.',
-    },
-    {
-      q: '¿El JPG conserva la fecha y la ubicación?',
-      a: 'No. El JPG se guarda solo a partir de los píxeles, así que la ubicación GPS, el modelo de la cámara y la fecha de la foto quedan fuera. Si necesitas esos datos, conserva el HEIC original.',
+      a: 'El JPG comprime con pérdida, así que el archivo nuevo no es una copia bit a bit de la foto, pero al verla normalmente la diferencia es pequeña. La opción PNG cuesta un archivo mucho más grande.',
     },
     {
       q: '¿Por qué los colores se ven distintos después de convertir?',
-      a: 'El iPhone toma fotos con una gama de color amplia llamada Display P3. FileOrca la convierte a sRGB, el estándar que esperan todas las pantallas y todas las apps, así que los colores se ven iguales en todas partes. Una foto muy saturada puede verse un poco menos viva, porque el sRGB cubre una gama más pequeña.',
+      a: 'El iPhone toma fotos con una gama de color amplia llamada Display P3, y el sRGB cubre una gama más pequeña, así que una foto muy saturada puede verse un poco menos viva después de convertirla.',
     },
     {
       q: '¿Mi iPhone puede guardar JPG en lugar de HEIC?',
@@ -55,7 +47,7 @@ export default {
   ],
   privacyHeading: 'Privacidad',
   privacyNote:
-    'Tus fotos se convierten en tu navegador, y tus archivos nunca salen de tu dispositivo ni llegan a un servidor. Los archivos nuevos omiten los metadatos de la foto, incluida la ubicación GPS.',
+    'Tus fotos se convierten en tu navegador, y tus archivos nunca salen de tu dispositivo ni llegan a un servidor.',
   relatedHeading: 'Más herramientas de imagen',
   panel: {
     formats: 'HEIC o HEIF',

@@ -13,10 +13,10 @@ const texts: PdfToolTexts<OrganizeTexts> = {
   h1: 'Organizar PDF',
   howHeading: 'Cómo funciona',
   howSteps: [
-    'Suelta un PDF en el cuadro, elígelo o pégalo. Oli trabaja con un PDF a la vez y muestra una miniatura de cada página; la lupa de una página la abre en tamaño grande.',
-    'Elige páginas tocándolas o escribiendo números como 1-3, 5, y usa la barra de arriba de la cuadrícula para girarlas a la derecha o a la izquierda, o para quitarlas del PDF nuevo.',
-    'Mueve una página con sus flechas o arrástrala con el mouse. Una página que quitaste se queda en la cuadrícula, atenuada, hasta que la restaures.',
-    'Presiona Guardar los cambios y descarga el PDF nuevo; tu archivo original no se toca.',
+    'Suelta un PDF en el cuadro, elígelo o pégalo.',
+    'Elige páginas tocándolas o escribiendo sus números, y usa la barra de arriba de la cuadrícula para girarlas a la derecha o a la izquierda, o para quitarlas del PDF nuevo.',
+    'Mueve una página con sus flechas o arrástrala con el mouse.',
+    'Presiona Guardar los cambios y descarga el PDF nuevo.',
   ],
   specsHeading: 'Qué entra y qué sale',
   specs: {
@@ -44,19 +44,15 @@ const texts: PdfToolTexts<OrganizeTexts> = {
     },
     {
       q: '¿Cuándo conviene usar Eliminar páginas de PDF o Rotar PDF?',
-      a: 'Usa Eliminar páginas de PDF cuando solo necesitas quitar páginas, y Rotar PDF cuando solo necesitas girar páginas, o girar las páginas de varios PDF a la vez. Organizar PDF trabaja con un PDF a la vez y sirve para un archivo que necesita más de uno de estos arreglos.',
+      a: 'Usa Eliminar páginas de PDF cuando solo necesitas quitar páginas, y Rotar PDF cuando solo necesitas girar páginas, o girar las páginas de varios PDF a la vez. Organizar PDF sirve para un archivo que necesita más de uno de estos arreglos.',
     },
     {
       q: '¿Puedo deshacer un cambio antes de guardar?',
-      a: 'Sí. Una página que quitaste se queda en la cuadrícula, atenuada: elígela y presiona "Devolver". Un giro se deshace con un giro en el otro sentido, y una página que moviste vuelve con las flechas. Después del resultado, la cuadrícula sigue en pantalla, y cualquier cambio trae de vuelta el botón para guardar otro PDF. Tu archivo original nunca cambia.',
+      a: 'Sí. Elige una página que quitaste y presiona "Devolver"; un giro se deshace con un giro en el otro sentido, y una página que moviste vuelve con las flechas. Después del resultado, la cuadrícula sigue en pantalla, y cualquier cambio trae de vuelta el botón para guardar otro PDF. Tu archivo original nunca cambia.',
     },
     {
-      q: '¿Los formularios, los enlaces y los marcadores siguen funcionando?',
-      a: 'En las páginas que conservas, sí. Los campos de formulario se quedan, los marcadores y los enlaces entre páginas siguen llevando a las mismas páginas en su nuevo lugar, y los enlaces a la web se quedan. Un enlace a una página que quitaste se elimina, porque esa página ya no está en el archivo.',
-    },
-    {
-      q: '¿Mi PDF se sube a algún lugar?',
-      a: 'No. FileOrca lee y escribe tu PDF en tu dispositivo, en tu navegador, y PDF.js también dibuja allí las miniaturas. Abre la pestaña Red de tu navegador mientras organizas las páginas: ninguna solicitud lleva tus archivos.',
+      q: '¿Las capas ocultas siguen ocultas?',
+      a: 'Sí. El PDF nuevo conserva las capas que usan las páginas que conservas, cada una visible u oculta como estaba en tu archivo, así que una capa que el autor ocultó sigue oculta.',
     },
   ],
   privacyHeading: 'Privacidad',

@@ -69,8 +69,8 @@ export default {
   worksHeading: 'Como o SAC e a PRICE são calculados',
   formulaHeading: 'As fórmulas',
   formula: [
-    'Na PRICE (sistema francês), a parcela é P = S × i × (1 + i)^n ÷ ((1 + i)^n − 1), em que S é o saldo, i a taxa ao mês e n o número de meses. Os juros saem do saldo, e a amortização é a diferença entre a parcela e os juros: no começo quase tudo é juros.',
-    'No SAC (sistema de amortização constante), a amortização é o saldo dividido pelos meses que faltam, e a parcela é essa amortização mais os juros do mês. Como o saldo cai mais rápido, os juros e a parcela diminuem ao longo do contrato.',
+    'Na PRICE (sistema francês), a parcela é P = S × i × (1 + i)^n ÷ ((1 + i)^n − 1), em que S é o saldo, i a taxa ao mês e n o número de meses. Os juros saem do saldo, e a amortização é a diferença entre a parcela e os juros.',
+    'No SAC (sistema de amortização constante), a amortização é o saldo dividido pelos meses que faltam, e a parcela é essa amortização mais os juros do mês.',
     'A taxa mensal sai da anual por capitalização: i = (1 + a)^(1/12) − 1. Com a TR, o saldo é multiplicado por (1 + TR) no começo de cada mês, antes dos juros.',
   ],
   premisesHeading: 'Premissas',
@@ -91,19 +91,19 @@ export default {
     },
     {
       q: 'Por que a parcela do SAC diminui?',
-      a: 'No SAC você amortiza a mesma fatia do saldo todo mês. Com o saldo menor, os juros do mês seguinte também são menores, então a parcela vai caindo até o fim.',
+      a: 'Com o saldo menor a cada mês, os juros do mês seguinte também são menores, então a parcela vai caindo até o fim.',
     },
     {
       q: 'O que a TR faz com o financiamento?',
-      a: 'A TR corrige o saldo devedor todo mês, antes dos juros. Com a TR acima de zero o saldo cai mais devagar, e as parcelas e os juros sobem. Use a TR do seu contrato, ou 0 para ver o financiamento sem correção.',
+      a: 'Com a TR acima de zero o saldo cai mais devagar, e as parcelas e os juros sobem. Use a TR do seu contrato, ou 0 para ver o financiamento sem correção.',
     },
     {
       q: 'Por que meus juros são ao ano, se pago por mês?',
-      a: 'Os contratos dizem a taxa efetiva ao ano e ao mês. O simulador converte a anual em mensal por capitalização, a conta que faz a taxa mensal render exatamente a anual em 12 meses.',
+      a: 'Os contratos dizem a taxa efetiva ao ano e ao mês, e as duas são a mesma taxa: a mensal, capitalizada por 12 meses, rende exatamente a anual.',
     },
     {
       q: 'As parcelas aqui batem com as do banco?',
-      a: 'Ficam perto, mas o banco soma seguros que mudam com o saldo e a idade, taxas de administração e a TR de cada mês. Use o resultado para comparar sistemas e prazos, e confira os números na proposta.',
+      a: 'Ficam perto. Use o resultado para comparar sistemas e prazos, e confira os números na proposta do banco.',
     },
   ],
   privacyHeading: 'Privacidade',

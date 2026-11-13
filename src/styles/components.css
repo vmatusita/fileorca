@@ -1004,6 +1004,24 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
 .fo-footer a { color: var(--on-deep); text-decoration: none; font-size: 15px; line-height: 32px; }
 .fo-footer a:hover { text-decoration: underline; text-underline-offset: 3px; }
+/* F19a (DECISOES § 754): the date of the newest change at the base, in the muted ink of the signature beside it. */
+.fo-footer .fo-footer__updated { color: var(--on-deep-muted); font-size: 14px; white-space: nowrap; text-decoration: underline; text-underline-offset: 3px; }
+/* F19a · What's new (decision 2; DECISOES § 756): the entries, newest first, one under the other in the measure of the
+   prose, a hairline between them. The title in the H2 of the prose, the date muted under it, the text, then the pages it
+   touched as inline links of a sentence (target size: inline, WCAG 2.5.8). No image, no ad, nothing that moves: the text
+   is in the Figtree that never swaps (as the 404 and the sections of the home), so a paragraph that the fallback font wraps
+   in another number of lines never moves the entries under it when Figtree arrives (es at 360 px moved them 26 px). */
+.fo-view--whats-new { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-steady); }
+/* F19a (DECISOES § 774): How it works too, for the same reason; pt and es at 360 px moved its paragraphs (CLS 0.007). */
+.fo-view--how { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-steady); }
+.fo-changes { list-style: none; margin: 0; padding: 0; max-width: var(--fo-measure); }
+.fo-change { padding-block: var(--space-6); border-top: var(--stroke-hair) solid var(--hairline); scroll-margin-top: var(--space-4); }
+.fo-change:last-child { padding-bottom: 0; }
+.fo-change > p { margin: 0 0 var(--space-2); overflow-wrap: anywhere; }
+.fo-change > p:last-child { margin-bottom: 0; }
+.fo-change__title { margin: 0; font: 600 24px/30px var(--fo-font-display); }
+.fo-change > .fo-change__date { margin: var(--space-1) 0 var(--space-3); font-size: 14px; color: var(--ink-muted); }
+.fo-change__pages { font-size: 15px; }
 .fo-footer__base { max-width: var(--page-max); margin: var(--space-8) auto 0; padding-top: var(--space-4); border-top: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 30%, transparent); display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); justify-content: space-between; align-items: center; font-size: 14px; color: var(--on-deep-muted); }
 /* F12 · o café (DECISOES § 437): the coffee line opens the footer, on the edges of the columns, with a hairline under
    it and a 48 px target (it was the 32 px line of the links, at the base, 24 to 46 px from the AdSense anchor). */
@@ -1034,7 +1052,11 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
   .fo-footer__col > h2, .fo-footer__more > h2 { margin-bottom: var(--space-1); }
   .fo-footer .fo-footer__hub, .fo-footer .fo-footer__solo a, .fo-footer .fo-footer__col--site a { display: flex; align-items: center; min-height: var(--tap-min); margin-bottom: 0; line-height: 20px; }
   .fo-footer__col--site { grid-column: 1 / -1; }
-  .fo-footer__col--site ul { display: flex; flex-wrap: wrap; column-gap: var(--space-5); }
+  /* F19a (DECISOES § 754): 16 px between the FileOrca links (20 px before), so the seven of them keep two rows at 360 px. */
+  .fo-footer__col--site ul { display: flex; flex-wrap: wrap; column-gap: var(--space-4); }
+  /* F19a (DECISOES § 754): the date of the newest change, in the line of the signature, is a 48 px target too: 14 px of
+     padding above and below its 20 px line, taken back by a -14 px margin, so the line box of the signature stays as it was. */
+  .fo-footer .fo-footer__updated { display: inline-block; padding-block: 14px; margin-block: -14px; line-height: 20px; }
 }
 @supports selector(::details-content) {
   @media (min-width: 768px) {
@@ -1919,4 +1941,59 @@ html:has(.fo-wall[open]) [data-oli]:not(.fo-wall__oli) { visibility: hidden; }
 @media (max-width: 479px) {
   .fo-merge__row:not([data-state="error"]) { grid-template-columns: minmax(0, 1fr) auto auto auto; grid-template-areas: "card card card card" ". moves remove view"; }
   .fo-merge__row > :is(.fo-merge__view, .fo-merge__gap) { grid-area: view; }
+}
+
+/* F19a · frente C (decisions 5 to 7; DECISOES § 758 to § 763). How it works: the five parts are prose sections, each with
+   its id; the steps of each browser are the numbered list of the tool pages (.fo-steps) under an H3. The table of the
+   libraries keeps the 15 px of every .fo-table; its row header holds the name, the kind (WebAssembly or JavaScript), the
+   files and the link to the Licenses row, each on a line of its own, and every cell breaks a long name or file name rather
+   than pushing the page sideways at 320 px. The links of the table are 24 px targets. */
+.fo-how .fo-h3 { margin: var(--space-6) 0 var(--space-2); }
+.fo-how .fo-steps { margin: 0 0 var(--space-3); }
+.fo-how .fo-engines { margin: var(--space-2) 0 var(--space-4); }
+.fo-table.fo-engines th[scope="row"] { overflow-wrap: anywhere; font-weight: 500; }
+.fo-engines__name { display: block; font-weight: 700; }
+.fo-engines__line { display: block; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.fo-engines code { font-size: 13px; }
+.fo-prose .fo-engines__tools { margin: 0; padding: 0; list-style: none; }
+.fo-engines a { display: inline-block; min-height: 24px; line-height: 24px; }
+/* The About: Victor's photo under the H1, a circle of 160 px, only when the files of pnpm sobre:foto exist (§ 762); with
+   no files there is no element at all. The author box at the end of every guide (§ 763): a card with the hairline of the
+   tables, the photo of 64 px beside the text when it exists, and the heading at the size of an H3. */
+.fo-about__photo { display: block; margin: var(--space-4) 0; }
+.fo-about__photo img { display: block; width: 160px; height: 160px; border-radius: 50%; }
+.fo-author { display: flex; gap: var(--space-4); align-items: flex-start; padding: var(--space-5); border: var(--stroke-hair) solid var(--hairline); border-radius: var(--radius-md); }
+.fo-author__photo { flex: none; }
+.fo-author__photo img { display: block; width: 64px; height: 64px; border-radius: 50%; }
+.fo-author__text { min-width: 0; }
+.fo-section.fo-author h2 { margin: 0 0 var(--space-2); font: 700 18px/26px var(--fo-font-text); }
+.fo-author p { margin: 0 0 var(--space-2); }
+.fo-author p:last-child { margin-bottom: 0; }
+/* The link "How to check" (src/components/HowToCheck.astro) ends a sentence, at the home and in the privacy note of every
+   tool and calculator: underlined like a link of running text (global.css), which its class takes it out of, so colour is
+   never the only cue (axe link-in-text-block, dark theme). The same for the links in the row header of the table. */
+main :where(p, li, td, th) a.fo-howtocheck, .fo-engines th a { text-decoration-line: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+main :where(p, li, td, th) a.fo-howtocheck:hover, .fo-engines th a:hover { text-decoration-thickness: 3px; }
+/* The name in a signature ("Reviewed by Victor Yuki Matusita", § 763) keeps the ink of the line it is in, the muted ink
+   that passes on every ground of the page (the band of a hub included), and is told apart by its underline. */
+.fo-reviewed a[rel="author"] { color: inherit; }
+/* How it works from 1280 px: the grid of the Licenses (the head, then the parts; the index in the right column), § 759. */
+@media (min-width: 1280px) {
+  .fo-view--how { grid-template-rows: auto 1fr; }
+}
+/* The table of the libraries (§ 761): from 600 px the tools take the widest column, a name per line, never cut inside a
+   word; under 600 px each library is a block of its own (its name and lines, what it does, then its tools in rows that
+   wrap), the heads of the columns only for screen readers, and the roles of the markup keep it a table for them (Safari
+   drops the semantics of a table drawn as blocks). */
+.fo-engines__tools a { overflow-wrap: normal; }
+@media (min-width: 600px) {
+  .fo-engines td:last-child { width: 40%; }
+}
+@media (max-width: 599px) {
+  .fo-engines, .fo-engines tbody, .fo-engines tr, .fo-engines th, .fo-engines td { display: block; }
+  .fo-engines thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .fo-engines tbody tr { padding: var(--space-3) 0; border-bottom: var(--stroke-hair) solid var(--hairline); }
+  .fo-table.fo-engines :is(th, td) { padding: 0; border: 0; }
+  .fo-table.fo-engines td { margin-top: var(--space-2); }
+  .fo-prose .fo-engines__tools { display: flex; flex-wrap: wrap; column-gap: var(--space-4); }
 }

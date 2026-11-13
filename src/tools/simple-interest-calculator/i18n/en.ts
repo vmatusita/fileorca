@@ -42,7 +42,7 @@ export default {
   formulaHeading: 'The formula',
   formula: [
     'I = P × r × t, where P is the principal, r the yearly rate and t the time in years: months ÷ 12, or days ÷ 365. The total is P + I.',
-    'Unlike compound interest, the interest does not earn interest, so it grows by the same amount every year.',
+    'The interest grows by the same amount every year.',
   ],
   premisesHeading: 'Assumptions',
   exampleHeading: 'Worked example',
@@ -54,19 +54,19 @@ export default {
   faq: [
     {
       q: 'What is the difference between simple and compound interest?',
-      a: 'Simple interest is charged on the principal only. Compound interest is also charged on the interest already added, so it grows faster over time.',
+      a: 'Compound interest is also charged on the interest already added, so over time it grows faster than simple interest.',
     },
     {
       q: 'Which loans use simple interest?',
       a: 'Many short loans and some car loans charge interest on what you owe, without adding unpaid interest to the balance. Check how your contract counts it.',
     },
     {
-      q: 'Why a 365-day year?',
-      a: 'It is the calendar year and the one the calculator declares. Some banks use 360 days, which gives a little more interest for the same number of days.',
+      q: 'Does it work for a loan I repay each month?',
+      a: 'No. Here the whole principal stays out for the whole time. A loan you repay each month is charged interest on a falling balance, which the loan amortization calculator works out.',
     },
     {
       q: 'Can the time be a fraction of a year?',
-      a: 'Yes: choose months or days. Eighteen months, for example, is a year and a half.',
+      a: 'Yes. Eighteen months, for example, counts as a year and a half.',
     },
   ],
   privacyHeading: 'Privacy',

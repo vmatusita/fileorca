@@ -8,20 +8,20 @@ export default {
   howHeading: 'Cómo dejar una imagen en menos de 100 KB',
   howSteps: [
     'Suelta en el cuadro las imágenes que un formulario rechazó, elígelas o pégalas con Ctrl V.',
-    'Oli guarda cada una como un JPG de 100 KB o menos, y también reduce sus dimensiones cuando tiene demasiado detalle.',
-    'Revisa el tamaño nuevo en el resultado y descarga la imagen o el ZIP.',
+    'Oli comprime cada una, y no hay nada que ajustar.',
+    'Revisa el tamaño nuevo en el resultado y descarga la imagen.',
   ],
   specsHeading: 'El objetivo de 100 KB',
   specs: {
     caption: 'Lo que garantiza el ajuste de 100 KB y lo que cambia',
     head: ['Detalle', 'Qué hace Oli'],
     rows: [
-      ['Objetivo', 'Cada archivo pesa 100,000 bytes o menos.'],
-      ['Qué KB', 'El KB se cuenta como 1,000 bytes, la menor de las dos lecturas, así que el archivo también pasa en los formularios que cuentan 1,024 bytes por KB.'],
-      ['Formato de salida', 'Siempre un JPG, el formato que más piden los formularios y los portales. Entran JPG, PNG y WebP.'],
+      ['Objetivo', 'Cada archivo pesa 100 KB o menos.'],
+      ['Formato de salida', 'Siempre un JPG. Entran JPG, PNG y WebP.'],
       ['Transparencia', 'Las zonas transparentes quedan blancas, porque el JPG no tiene transparencia.'],
       ['Imagen que ya cabe', 'Vuelve tal como estaba, en su propio formato, sin los metadatos de la foto.'],
       ['Imagen con mucho detalle', 'Cuando la calidad sola no alcanza el objetivo, Oli también reduce las dimensiones y te muestra el nuevo ancho y el nuevo alto.'],
+      ['Lote', 'Varias imágenes se descargan juntas en un solo ZIP.'],
       ['Privacidad del archivo', 'Exif, XMP, IPTC y GPS quedan fuera de cada archivo nuevo.'],
     ],
   },
@@ -37,24 +37,20 @@ export default {
     },
     {
       q: '¿Por qué el resultado es un JPG, aunque haya soltado un PNG?',
-      a: 'El JPG es el formato que más piden los formularios, y en las fotos llega a un tamaño pequeño mucho mejor que el PNG. Una foto PNG de unos cuantos megabytes no se puede reducir a 100 KB sin cambiar sus píxeles. Las zonas transparentes quedan blancas, porque el JPG no tiene transparencia.',
+      a: 'El JPG es el formato que más piden los formularios, y en las fotos llega a un tamaño pequeño mucho mejor que el PNG: una foto PNG de unos cuantos megabytes no se puede reducir a 100 KB sin cambiar sus píxeles.',
     },
     {
       q: '¿La imagen se verá peor a 100 KB?',
-      a: 'Un poco, porque el archivo queda mucho más pequeño. Cuando la imagen es grande, Oli primero reduce sus dimensiones, lo que la mantiene nítida, y después busca la mejor calidad que todavía cabe. El control de antes y después te muestra la diferencia.',
+      a: 'Un poco, porque el archivo queda mucho más pequeño. El control de antes y después te muestra la diferencia.',
     },
     {
       q: '¿Y si el formulario también pide un tamaño exacto en píxeles?',
-      a: 'Usa primero Redimensionar imagen para fijar el ancho y el alto, y después vuelve aquí para el peso del archivo. Si la imagen tiene mucho detalle, Oli puede reducir un poco más las dimensiones, y te dice el tamaño nuevo.',
-    },
-    {
-      q: '¿Y si mi imagen ya pesa menos de 100 KB?',
-      a: 'Vuelve tal como estaba, en su propio formato, sin los metadatos de la foto. Oli nunca te da un archivo más grande que el que soltaste.',
+      a: 'Usa primero Redimensionar imagen para fijar el ancho y el alto, y después vuelve aquí para el peso del archivo.',
     },
   ],
   privacyHeading: 'Privacidad',
   privacyNote:
-    'Oli reduce tus imágenes a 100 KB en tu navegador, y tus archivos nunca salen de tu dispositivo ni llegan a un servidor. Los archivos nuevos omiten los metadatos de la foto, incluida la ubicación GPS.',
+    'Oli reduce tus imágenes a 100 KB en tu navegador, y tus archivos nunca salen de tu dispositivo ni llegan a un servidor.',
   relatedHeading: 'Más herramientas de imagen',
   panel: {
     formats: 'JPG, PNG o WebP',

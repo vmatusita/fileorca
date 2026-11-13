@@ -15,10 +15,10 @@ const texts: PdfToolTexts<OrganizeTexts> = {
   h1: 'Gerenciar páginas do PDF',
   howHeading: 'Como funciona',
   howSteps: [
-    'Solte um PDF na caixa, escolha o arquivo ou cole. A Oli trabalha com um PDF por vez e mostra uma miniatura de cada página; a lupa de uma página abre a página em tamanho grande.',
-    'Marque as páginas tocando nelas ou digitando números como 1-3, 5, e use a barra acima da grade para girar as páginas para a direita ou para a esquerda, ou para tirar as páginas do PDF novo.',
-    'Mova uma página com as setas dela, ou arraste com o mouse. Uma página que você tirou fica na grade, mais clara, até você devolver.',
-    'Aperte Salvar as mudanças e baixe o PDF novo. O seu arquivo original continua intacto.',
+    'Solte um PDF na caixa, escolha o arquivo ou cole.',
+    'Marque as páginas tocando nelas ou digitando os números delas, e use a barra acima da grade para girar as páginas para a direita ou para a esquerda, ou para tirar as páginas do PDF novo.',
+    'Mova uma página com as setas dela, ou arraste com o mouse.',
+    'Aperte Salvar as mudanças e baixe o PDF novo.',
   ],
   specsHeading: 'O que entra e o que sai',
   specs: {
@@ -46,19 +46,15 @@ const texts: PdfToolTexts<OrganizeTexts> = {
     },
     {
       q: 'Quando é melhor usar a Excluir páginas do PDF ou a Girar PDF?',
-      a: 'Use a Excluir páginas do PDF quando você só precisa tirar páginas, e a Girar PDF quando só precisa girar páginas, ou girar as páginas de vários PDFs de uma vez. A Gerenciar páginas do PDF trabalha com um PDF por vez e serve para um arquivo que precisa de mais de uma dessas correções.',
+      a: 'Use a Excluir páginas do PDF quando você só precisa tirar páginas, e a Girar PDF quando só precisa girar páginas, ou girar as páginas de vários PDFs de uma vez. A Gerenciar páginas do PDF serve para um arquivo que precisa de mais de uma dessas correções.',
     },
     {
       q: 'Dá para desfazer uma mudança antes de salvar?',
-      a: 'Dá. Uma página que você tirou fica na grade, mais clara: marque a página e aperte "Devolver". Um giro volta com um giro para o outro lado, e uma página que você moveu volta com as setas. Depois do resultado a grade continua na tela, e qualquer mudança traz o botão de volta para salvar outro PDF. O seu arquivo original nunca muda.',
+      a: 'Dá. Marque uma página que você tirou e aperte "Devolver"; um giro volta com um giro para o outro lado, e uma página que você moveu volta com as setas. Depois do resultado a grade continua na tela, e qualquer mudança traz o botão de volta para salvar outro PDF. O seu arquivo original nunca muda.',
     },
     {
-      q: 'Os formulários, os links e os marcadores continuam funcionando?',
-      a: 'Nas páginas que ficam, sim. Os campos de formulário ficam, os marcadores e os links entre páginas ainda levam às mesmas páginas no novo lugar delas, e os links para a web ficam. Um link para uma página que você tirou sai, porque essa página não está mais no arquivo.',
-    },
-    {
-      q: 'Meu PDF é enviado para algum lugar?',
-      a: 'Não. O FileOrca lê e grava o seu PDF no seu aparelho, no navegador, e o PDF.js desenha as miniaturas ali também. Abra a aba Rede do navegador enquanto mexe nas páginas: nenhuma requisição leva os seus arquivos.',
+      q: 'As camadas escondidas continuam escondidas?',
+      a: 'Continuam. O PDF novo fica com as camadas que as páginas mantidas usam, cada uma ligada ou desligada como estava no seu arquivo, então uma camada que o autor escondeu continua escondida.',
     },
   ],
   privacyHeading: 'Privacidade',

@@ -8,8 +8,8 @@ export default {
   howHeading: 'Como fazer uma miniatura do YouTube',
   howSteps: [
     'Solte suas fotos na caixa, escolha os arquivos ou cole com Ctrl V.',
-    'A Oli corta cada uma a partir do centro para preencher o 16:9 e salva como um JPG de 1280 × 720.',
-    'Baixe a miniatura, ou o ZIP quando tiver feito várias, e adicione no YouTube Studio.',
+    'A Oli faz a miniatura, e não há nada para escolher.',
+    'Baixe a miniatura e adicione no YouTube Studio.',
   ],
   specsHeading: 'O tamanho da miniatura',
   specs: {
@@ -17,11 +17,11 @@ export default {
     head: ['Detalhe', 'O que a Oli faz'],
     rows: [
       ['Tamanho', '1280 × 720 pixels, uma imagem 16:9.'],
-      ['Formato', 'Sempre um JPG, salvo para ficar abaixo de 2 MB, o limite das miniaturas personalizadas adicionadas pelo celular.'],
+      ['Formato', 'Sempre um JPG, salvo para ficar abaixo de 2 MB.'],
       ['Imagem que não é 16:9', 'É cortada a partir do centro para preencher o quadro, e uma linha no resultado avisa. A imagem nunca fica deformada.'],
       ['Outra parte da imagem', 'Corte a imagem antes na ferramenta Cortar imagem para escolher a parte que fica, e depois traga para cá.'],
       ['Transparência', 'As áreas transparentes ficam brancas, porque o JPG não tem transparência.'],
-      ['O que o YouTube pede', 'Ajuda do YouTube sobre miniaturas personalizadas (https://support.google.com/youtube/answer/72431, consultada em 31 de outubro de 2026): 16:9, pelo menos 640 pixels de largura, JPG ou PNG, e 3840 × 2160 recomendado para vídeos. O FileOrca faz 1280 × 720, que fica dentro dessas regras.'],
+      ['Lote', 'Várias miniaturas são baixadas juntas num só ZIP.'],
       ['Dados da foto', 'Exif, XMP, IPTC e GPS ficam fora de toda miniatura.'],
     ],
   },
@@ -29,32 +29,24 @@ export default {
   faq: [
     {
       q: 'Qual é o tamanho de uma miniatura do YouTube?',
-      a: 'A Ajuda do YouTube (https://support.google.com/youtube/answer/72431, consultada em 31 de outubro de 2026) pede uma imagem 16:9 com pelo menos 640 pixels de largura, em JPG ou PNG, e recomenda 3840 × 2160 para vídeos. O FileOrca faz 1280 × 720, que fica dentro dessas regras e deixa o arquivo leve.',
+      a: 'A Ajuda do YouTube (https://support.google.com/youtube/answer/72431, consultada em 31 de outubro de 2026) pede uma imagem 16:9 com pelo menos 640 pixels de largura, em JPG ou PNG, e recomenda 3840 × 2160 para vídeos. O tamanho que esta ferramenta faz fica dentro dessas regras.',
     },
     {
       q: 'Por que o YouTube diz que minha miniatura é grande demais?',
-      a: 'A causa mais comum é o tamanho do arquivo: a Ajuda do YouTube indica 2 MB para uma miniatura personalizada adicionada pelo celular, e um PNG de 1280 × 720 pode passar disso. Esta ferramenta salva um JPG, que fica bem abaixo desse limite.',
-    },
-    {
-      q: 'O que acontece se a minha imagem não for 16:9?',
-      a: 'A Oli corta a imagem a partir do centro para preencher o quadro, então as bordas saem e a imagem nunca fica deformada. Se a parte importante estiver fora do centro, use antes a ferramenta Cortar imagem para escolher a parte, e depois traga o resultado para cá.',
+      a: 'A causa mais comum é o tamanho do arquivo: a Ajuda do YouTube indica 2 MB para uma miniatura personalizada adicionada pelo celular, e um PNG de 1280 × 720 pode passar disso.',
     },
     {
       q: 'Por que minha miniatura fica borrada?',
       a: 'Uma miniatura fica borrada quando a imagem de origem é pequena, porque há poucos pixels para ficar nítida em 1280 × 720. Uma imagem menor que 1280 × 720 é ampliada para preencher o quadro, o resultado avisa, e ela pode ficar menos nítida. Comece com uma imagem de pelo menos 1280 pixels de largura.',
     },
     {
-      q: 'Posso usar um PNG na miniatura?',
-      a: 'O YouTube aceita PNG, mas esta ferramenta salva um JPG, que deixa o arquivo leve. O JPG não tem transparência, então as áreas transparentes ficam brancas.',
-    },
-    {
       q: 'É melhor usar 1280 × 720 ou 3840 × 2160?',
-      a: 'Os dois são 16:9, então os dois servem. A Ajuda do YouTube recomenda 3840 × 2160 para vídeos, e esta ferramenta faz 1280 × 720, um tamanho que carrega rápido e fica bem abaixo do limite de 2 MB do celular.',
+      a: 'Os dois são 16:9, então o YouTube aceita qualquer um. O 3840 × 2160 guarda mais detalhe numa tela grande, e o 1280 × 720 faz um arquivo mais leve, que carrega rápido.',
     },
   ],
   privacyHeading: 'Privacidade',
   privacyNote:
-    'Suas imagens viram miniaturas no seu aparelho e nunca são enviadas a um servidor. Os arquivos novos deixam de fora os metadados da foto, inclusive a localização GPS.',
+    'Suas imagens viram miniaturas no seu aparelho e nunca são enviadas a um servidor.',
   relatedHeading: 'Mais ferramentas de imagem',
   panel: {
     formats: 'JPG, PNG ou WebP',

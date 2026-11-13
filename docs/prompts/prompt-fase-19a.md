@@ -1,0 +1,376 @@
+# Fase 19a: Confiança e conteúdo para a revisão do AdSense
+
+## Prompt (copie o bloco inteiro)
+
+```text
+ultracode
+
+# Missão
+
+Rode a F19a do FileOrca, "Confiança e conteúdo", a primeira de duas runs que respondem à recusa do AdSense de 13/nov/2026 ("Conteúdo de baixo valor": o site precisa mostrar valor único, curadoria e manutenção contínuas e interesse do usuário). A F19b, depois desta, faz os guias novos; esta run não cria guia.
+
+Ao terminar:
+
+- existe a página **Novidades** em en, pt e es (`/whats-new/`, `/pt/novidades/`, `/es/novedades/`), com as mudanças que a pessoa vê, do lançamento (31/out/2026) até esta run, cada uma com a data provada contra o merge no git;
+- todo `<url>` dos três sitemaps tem `<lastmod>`, tirado da mesma fonte da página Novidades, e nunca antes de uma data que a própria página mostra ou declara;
+- as páginas de imagem, PDF e QR code mostram "Atualizado em" com a data do `lastmod`, e o rodapé mostra a data da novidade mais nova, com link para a página Novidades;
+- o **Sobre** diz quando o site foi ao ar (a data vem dos dados, não do texto), aponta a Novidades e a página Como funciona, e tem o lugar da foto pronto: sem arquivo, nenhuma foto aparece; com o arquivo que o `pnpm sobre:foto` gera, ela aparece, sem metadado nenhum;
+- os guias e as calculadoras ligam o nome do autor ao Sobre, e cada guia termina com um quadro do autor;
+- existe a página **Como funciona** em en, pt e es (`/how-it-works/`, `/pt/como-funciona/`, `/es/como-funciona/`): o que acontece com o arquivo, o que roda em WebAssembly, o que vai pela rede e o que nunca vai, e como conferir no navegador. Sem link para o repositório do FileOrca e sem citar GitHub, repositório ou código aberto;
+- nas páginas de ferramenta, de preset, de calculadora e do QR code, nos três idiomas, cada fato aparece numa parte só da página, e um portão novo do `gate:conteudo` reprova a repetição;
+- o relatório está em `docs/relatorios/fase-19a.md`, a revisão em `docs/relatorios/REVISAO-F19a.md`, e a PR da branch `fase-19a` sai pronta, com o CI completo verde, e o CI a mescla sozinho.
+
+# Contexto
+
+Você está na raiz do clone de `vmatusita/fileorca`, numa máquina Windows, com o Git Bash. A main está na F18 (o Organizar PDF, o Remover dados EXIF e as presets Extrair páginas, PDF para PNG e Espelhar imagem) ou num commit mais novo. Confira com `git log --oneline -5` e guarde no plano o SHA da `origin/main` do começo da run: ele é o "ponto de partida".
+
+No clone, sem commit:
+
+- `docs/prompts/prompt-fase-19a.md` e `docs/prompts/prompt-fase-19a.txt` (este prompt) e `docs/prompts/prompt-fase-19b.md` e `.txt` (o da próxima run, que esta não toca nem commita);
+- a pasta `Claude outputs/`, que fica fora de tudo.
+
+O que você precisa saber antes de planejar:
+
+- **Por que esta run existe.** O AdSense recusou o fileorca.com por "conteúdo de baixo valor". O código já passa no `gate:prontidao` (páginas obrigatórias, `ads.txt`, meta, robots). O que falta é o que um revisor humano lê: sinais de manutenção (nenhum `lastmod`, nenhum histórico de mudanças, o Sobre sem data e sem foto), prova do diferencial (o "zero upload" aparece como frase, não como prova) e texto que se repete (na página do Comprimir imagem, o "nada é enviado" aparece no título, na descrição, no FAQ e na privacidade; o GPS aparece na tabela, em duas respostas do FAQ e na privacidade; o "1 KB = 1.000 bytes" na tabela, no FAQ e no painel). O link do repositório não entra na Como funciona por escolha do Victor.
+- **O que já existe e esta run reaproveita:**
+  - as rotas e o mapa de páginas em `src/i18n/routes.ts` (o `TRANSLATED_PATHS`, as rotas institucionais `about`, `privacy`, `terms`, `contact`, `licenses` e `support`, sem `adArea`);
+  - o sitemap em `src/seo/sitemap.ts` e `src/pages/sitemap-[lang].xml.ts` (só `<loc>` hoje);
+  - o JSON-LD em `src/seo/meta.ts`: `personLd()` (o `@id` `https://fileorca.com/#victor`), `articleLd()` com `author` e `dateModified`; os guias e as calculadoras já põem o `personLd()` no grafo;
+  - as assinaturas: `src/tools/guides/Reviewed.astro` (guia de arquivo, "Reviewed by" com a data curta) e `src/tools/calc/Reviewed.astro` (calculadoras, hubs e guias de dinheiro); as datas em `GUIDE_REVIEWED_ON`, `GUIDE_PUBLISHED_ON` (`src/tools/guides/registry.ts`) e no `datesOf()` das calculadoras;
+  - o Sobre em `src/views/AboutView.astro` e `src/i18n/{en,pt,es}/about.ts`; o comentário do topo já diz que a foto é pendência do Victor e que nunca entra imagem de mentira;
+  - o `LAUNCHED = true` de `src/platform/site.ts`, que foi ao ar no merge da F2, em 31/out/2026 (DECISOES § 75);
+  - as licenças em `src/platform/licenses.ts`, que já sabem quais codecs estão compilados em cada `.wasm` (o `texts` com `label`);
+  - as provas técnicas do lançamento em `tests/e2e/launch-claims.spec.ts` (nenhum byte do arquivo sai do navegador: todo pedido é GET para a própria origem, sem corpo; com a página e o codec carregados, a ferramenta segue funcionando sem rede) e em `tests/e2e/sw-offline.spec.ts`;
+  - o `gate:conteudo` (`scripts/gates/conteudo.ts` e as funções puras de `scripts/lib/conteudo.ts`, testadas no `tests/unit/conteudo.test.ts`): os blocos `how`, `specs`, `faq`, `privacy` e `related`, pelo menos 4 perguntas no FAQ, a nota de privacidade com pelo menos 40 caracteres (na calculadora, a frase "Your numbers stay on your device" do idioma; no PDF, onde o trabalho acontece e que nada é enviado), as afirmações sem medida (`findClaims`);
+  - o `gate:prontidao` (`scripts/lib/prontidao.ts`), que pede palavras suficientes por AdSlot no build com anúncios;
+  - os relatórios de cada fase em `docs/relatorios/fase-NN.md`, cujo resumo diz o que mudou para a pessoa: é a matéria-prima da página Novidades.
+- **O próximo § livre do `DECISOES.md` é o 751.** Se a main já tiver um maior, siga do seguinte, na ordem. O grupo novo do `docs/PENDENCIAS.md` é o 29.
+- **A linha de base:** meça no ponto de partida o número de testes do Vitest, o `--list` do Playwright por navegador, os JS de `dist/_astro/` e o número de URLs de cada sitemap (88 en, 60 pt e 75 es no site no ar em 13/nov; use os seus números).
+- **O repositório é público** (§ 338): o que você commita, a PR, os logs e os artefatos ficam públicos.
+- **O CI roda por classe** (F9): a PR em rascunho roda o job leve; a PR pronta roda tudo e, como esta run não mexe em `.github/`, é mesclada sozinha.
+- **O rótulo `ci`** só existe se o Victor o criou. As notas da regra 1 do `CLAUDE.md` dizem o que fazer nos dois casos.
+
+Leia antes de planejar, nesta ordem de autoridade:
+
+1. Este prompt. Ele é a ficha da run e vence o resto.
+2. O `PLANO-MELHORIAS.md` (as regras de toda run e a tabela "Mudanças no contrato") e o `PLANO-FILEORCA.md` ("Decisões fechadas", "SEO agressivo dentro das regras", "Páginas obrigatórias", "Execução por IA"). Esta run não muda o contrato: as páginas novas e o `lastmod` não conflitam com nenhuma linha dele.
+3. O `CLAUDE.md`, inteiro.
+4. De `docs/claude/`: o `idiomas.md` (guias, `lint:texto`, glossário), o `anuncios.md` (as páginas sem anúncio, a distância e a densidade), o `design-e-oli.md` (as pegadinhas gerais e a F13b, institucionais e rodapé), o `playwright.md`, o `windows-git-bash.md` e, do `ci.md`, as pegadinhas gerais e as seções das partes do CI.
+5. Do `DECISOES.md`, só buscando o §: § 13, § 68, § 75, § 95, § 98, § 162, § 188, § 205, § 207, § 223, § 338, § 394, § 396, § 540, § 544, § 557, § 558, § 583, § 586, § 587, § 733, e o que eles citarem.
+6. Do `docs/design/`: o `README.md` (voz, layout e anúncios) e os README do Footer, do ToolPage e do PrivacySeal.
+7. Do `docs/PENDENCIAS.md`: "Como ler", o Resumo, o grupo 15 (a foto do Sobre) e o 28; e o `tests/unit/pendencias.test.ts`.
+8. Do `docs/i18n/`: o glossário de pt e o de es.
+
+# Escopo
+
+Dentro:
+
+- a fonte das novidades, a página Novidades e o `lastmod` (decisões 1 a 4);
+- o Sobre: a data de lançamento, os links e o lugar da foto, com o `pnpm sobre:foto` (decisão 5);
+- a autoria nos guias e nas calculadoras (decisão 6);
+- a página Como funciona (decisão 7);
+- o corte da repetição e o portão novo (decisão 8);
+- os links novos: rodapé, bloco de privacidade de cada ferramenta, faixa de confiança da home, Sobre e Privacidade;
+- os testes, os portões e os documentos que isso pede.
+
+Fora (não toque):
+
+- guia novo, mudança no texto de guia além do quadro do autor e do link do nome (a F19b faz os guias);
+- o motor, as ilhas e o comportamento de qualquer ferramenta ou calculadora: só os textos das páginas mudam, nunca os do painel (o texto dentro de `#fo-tool-root`), a não ser para manter a mesma palavra que a tabela usa;
+- as contas, os oráculos e as fixtures;
+- o título e a descrição (meta) das páginas: ficam como estão, mesmo que repitam um fato do corpo;
+- o `lighthouserc.json`, o `.github/`, o `.githooks/` e o `.claude/settings.json`;
+- chave nova no `localStorage`, no `sessionStorage` ou no IndexedDB; evento ou parâmetro novo no GA4; dependência nova;
+- link para o repositório do FileOrca, em qualquer página nova ou mudada;
+- os anúncios: nenhuma posição nova, nenhum anúncio nas duas páginas novas;
+- o `PLANO-FILEORCA.md`, o `PLANO-MELHORIAS.md`, o `PLANO-UX-QV.md`, o `CLAUDE.md` (só o índice, se um arquivo novo de `docs/claude/` nascer, e não deve nascer) e os § antigos;
+- os itens do `docs/PENDENCIAS.md` que esta ficha não cita.
+
+# Decisões já tomadas (registre cada uma no DECISOES.md, a partir do § 751)
+
+1. **A fonte única das novidades.** Um registro de dados, `src/platform/changelog.ts` (só dados, importável no Node e nunca numa ilha), com uma entrada por mudança que a pessoa vê:
+   - `id`, `date` (`AAAA-MM-DD`, o dia do merge em Brasília), `pr` (o número da PR; `null` só na entrada desta run, até a próxima run conferir), `kind` e `pages`;
+   - `kind: 'conteudo'` quando muda o que a pessoa lê ou usa na página (texto, ferramenta, conta, guia); `kind: 'site'` quando muda só o que é de todas as páginas (menu, tema, rodapé, aviso de cookies, assinatura, quadro do autor). Só `conteudo` move o `lastmod`;
+   - `pages`: os `RouteId` que a mudança tocou, ou um seletor nomeado (todas as ferramentas de imagem, todas as de PDF, todas as calculadoras de uma área), resolvido pelos registros e nunca por lista copiada à mão;
+   - os textos de cada entrada em `src/i18n/{en,pt,es}/whats-new.ts`: título curto e uma a três frases na voz do site (`docs/design/README.md`), dizendo o que mudou para a pessoa. Sem contagem de ferramentas (ela muda e briga com o `tool-count`), sem nome de fase, de CI ou de teste, sem número que não venha dos registros.
+
+   O histórico vem dos relatórios (`docs/relatorios/fase-NN.md` e `ajuste-*.md`, o resumo do que muda para a pessoa) e das datas de merge (`gh pr list --state merged --base main --json number,title,headRefName,mergedAt --limit 200`, só leitura, convertidas para o dia em America/Sao_Paulo). Começa no lançamento (a F2, 31/out/2026) e vai até esta run. Fica de fora o que a pessoa não vê: CI, testes, revisões, protótipos, documentação. Uma entrada aparece num idioma quando toca pelo menos uma página que existe nele, ou quando é `site`.
+
+   `tests/unit/changelog.test.ts` prova: os `id` únicos; as datas em ordem; todo `RouteId` existe; toda rota indexável de todo idioma tem pelo menos uma entrada `conteudo` (a do nascimento dela); cada entrada com `pr` bate com a data do merge daquela PR no histórico do git da main, com tolerância de um dia (descubra o método de merge da main, squash ou merge commit, e registre no §); só a entrada mais nova pode ter `pr: null`; os textos existem em cada idioma onde a entrada aparece. O CI clona o histórico inteiro (§ 75).
+
+2. **A página Novidades.** A rota `whats-new` (`/whats-new/`, `/pt/novidades/`, `/es/novedades/`), indexável, no sitemap e no hreflang, com OG e breadcrumb, sem `adArea` e sem anúncio. A view lista as entradas do idioma, da mais nova para a mais velha: a data em `<time datetime>`, o título, o texto e os links para as páginas que a entrada tocou, naquele idioma (até seis; o resto vira "e mais N"). Nenhuma imagem nova. O rodapé ganha o link na coluna do FileOrca, junto do Sobre.
+
+3. **O `lastmod`.** `lastmodOf(routeId, lang)` é a data da entrada `conteudo` mais nova que tocou a rota naquele idioma. O `sitemapXml()` escreve `<lastmod>` em todo `<url>`. O `gate:seo` (ou um portão vizinho) reprova URL sem `lastmod`, data fora do formato `AAAA-MM-DD` e data depois do dia do build em UTC. Um Vitest prova a regra que liga as datas: o `lastmod` de uma página nunca é anterior a uma data que ela mostra ou declara (o `dateModified` do Article, o "Reviewed" de guias e calculadoras, a medida dos guias de arquivo); onde essa conta falhar com os dados de hoje, quem está errado é o histórico, e a correção vai no `changelog.ts`, com §.
+
+4. **A data à vista.** Duas linhas novas, as duas tiradas da mesma fonte:
+   - nas páginas de ferramenta e de preset de imagem e de PDF e no QR code, uma linha discreta no fim do conteúdo, antes das relacionadas: "Atualizado em <data> · Novidades" (no idioma da página, com `<time datetime>`), igual ao `lastmod` dela. As calculadoras e os guias já mostram a própria data de revisão e não ganham outra;
+   - no rodapé de toda página, a data da novidade mais nova, com link para a Novidades.
+
+   Nenhuma das duas muda a distância dos anúncios, a densidade nem o CLS.
+
+5. **O Sobre.**
+   - **A data de lançamento** vem de `LAUNCH_DATE = '2026-10-31'` em `src/platform/site.ts`, que é a data da primeira entrada do `changelog.ts`; o teste do changelog já prova essa data contra o merge da F2. O texto diz o dia no formato longo do idioma.
+   - **Os links:** um parágrafo curto aponta a Como funciona e a Novidades.
+   - **A foto:** o Victor ainda não tem a foto, e nenhuma imagem de mentira entra. Faça o lugar e o caminho:
+     - `pnpm sobre:foto <arquivo>` (`scripts/sobre/foto.ts`) lê uma foto, corta o quadrado do centro, gera os tamanhos que o Sobre e o quadro do autor usam (WebP e um JPG de reserva, com largura e altura fixas) em `public/about/`, sem nenhum metadado (Exif, XMP, IPTC, GPS), usando o motor de imagem do próprio site no Node (o mesmo caminho do `guias:medir`) e nenhuma dependência nova. No fim ele imprime o `metadataReport` de cada saída;
+     - um Vitest roda o script sobre uma fixture com GPS (`fixtures/images/jpg-01-pixel2-retrato-gps.jpg`) numa pasta temporária, nunca em `public/`, e prova os tamanhos e a ausência de metadados;
+     - o `AboutView` mostra a foto só quando os arquivos existem em `public/about/` no build (com `alt` com o nome do Victor, `width` e `height`), e o `personLd()` ganha `image` só nesse caso. Sem os arquivos, o HTML não tem foto, nem `<img>` vazio, nem caixa reservada. Um teste prova os dois casos;
+     - o passo a passo vai no `docs/OPERACAO.md`, e a linha "Sobre e Oli" do grupo 15 do `PENDENCIAS.md` ganha a referência ao script, sem sair da tabela.
+
+6. **A autoria.** Nos 10 guias de arquivo (en, pt e es), nos 5 guias de dinheiro (en e es) e nas calculadoras:
+   - o nome na assinatura ("Reviewed by Victor Yuki Matusita · data") vira link para o Sobre do idioma;
+   - cada guia termina com um quadro do autor, antes das relacionadas: o nome com link, uma frase de quem ele é (a mesma ideia do Sobre) e uma frase de como os números do guia foram obtidos (guia de arquivo: medidos com o motor do próprio site nos arquivos de teste, na data da medida; guia de dinheiro: calculados pelas contas da calculadora, conferidas contra um oráculo independente). A foto entra quando existir (decisão 5). O quadro tem `data-content="author"`, fica fora da contagem de palavras do guia (o `checkFileGuide` conta 800 a 1.500 palavras do texto próprio) e não muda o `lastmod` (é `site`).
+
+   O JSON-LD não muda além do `image` da decisão 5: o `articleLd()` já aponta o `#victor`, e o `personLd()` já está no grafo.
+
+7. **A página Como funciona.** A rota `how-it-works` (`/how-it-works/`, `/pt/como-funciona/`, `/es/como-funciona/`), indexável, sem `adArea` e sem anúncio, com Article (autor e datas) e breadcrumb. As partes, nesta ordem:
+   1. **O que acontece com o arquivo:** a página baixa o código; o arquivo é lido na memória do navegador; o trabalho é feito ali; o resultado é criado ali e baixado da memória. Na calculadora, os números ficam no aparelho (a mesma regra da Privacidade: depois do `#`, fora de evento e de URL).
+   2. **O que roda em WebAssembly:** uma tabela gerada no build (biblioteca, o que faz, quais ferramentas a usam, link para a Licenças), a partir do `licenses.ts` e de um mapa nos registros. Um teste prova que todo `.wasm` de `dist/_astro/` tem a linha dele e que toda linha tem o arquivo. O que é JavaScript (PDF.js, pdf-lib) aparece como JavaScript.
+   3. **O que vai pela rede e o que nunca vai:** os arquivos da página, de fileorca.com; o Google Analytics, só com o Aceitar; os anúncios do Google, como a Privacidade descreve. Nunca o arquivo, o nome dele, a senha ou o número digitado. O texto bate com a Privacidade, que é a fonte, e aponta para ela.
+   4. **Como conferir no navegador:** passos curtos para a aba Rede no Chrome e no Edge, no Firefox e no Safari do computador, e o teste do modo avião no celular (carregue a ferramenta, ligue o modo avião, use). Cada passo de navegador vem da documentação oficial dele, lida nesta run (WebFetch, só leitura), citada com a data da leitura; o que a documentação não confirmar sai.
+   5. **O que o teste não prova:** uma ou duas frases honestas (uma extensão instalada no navegador lê qualquer página; o teste vale para a página que você abriu, e pode ser refeito a qualquer hora).
+
+   Cada frase técnica corresponde a uma prova: estenda o `launch-claims.spec.ts` (ou um spec novo ao lado dele) com uma lista das frases da página e o teste que prova cada uma, no estilo da § 205. Frase sem prova sai.
+
+   A página não tem link para o repositório do FileOrca e não diz "GitHub", "repositório", "open source", "código aberto" nem "código abierto" (a escolha do Victor). Um teste lê a página nos três idiomas e reprova essas palavras e qualquer link para `github.com/vmatusita`. Os links da Licenças para os repositórios das bibliotecas continuam.
+
+   Ela ganha links do bloco de privacidade de toda ferramenta (decisão 8), da faixa de confiança da home ("Your files stay with you" e equivalentes), do Sobre, da Privacidade e do rodapé (coluna do FileOrca).
+
+8. **Um fato, um lugar.** Nas páginas de ferramenta, de preset, de calculadora e do QR code, em en, pt e es:
+   - **Onde se conta:** os blocos de texto do `<main>` fora da ilha (introdução, `how`, `specs`, as presets, `faq`, `privacy`, a linha dos guias, o lead das relacionadas). Não se conta: o título e a descrição (meta), o H1, o PrivacySeal, a ilha (o painel e as falas dela), a navegação, os cartões, o rodapé, a linha "Atualizado em".
+   - **A regra:** cada fato aparece em um bloco só. A casa padrão: o que a ferramenta faz, aceita, limita e devolve fica na tabela (`specs`); os passos ficam no `how`; o "processado no aparelho, nunca enviado" fica no `privacy`, numa ou duas frases e com o link "Como conferir" para a Como funciona; o FAQ responde só o que a tabela e os passos não dizem, ou é ele a casa do fato e a tabela não repete. Escolha a casa por tipo de página e registre o mapa num §.
+   - **O FAQ** "Is my file uploaded?" (e os equivalentes) sai das páginas de ferramenta: a casa desse fato é o bloco de privacidade. Toda página continua com pelo menos 4 perguntas reais; a que cair abaixo ganha uma pergunta específica da ferramenta, com resposta conferida no motor, na tabela ou na fonte oficial.
+   - **Sem enchimento.** O texto que sai não volta com outras palavras. Se um portão cair (as 4 perguntas, os 40 caracteres da privacidade, as palavras por AdSlot do `gate:prontidao`), entra conteúdo específico: um exemplo resolvido com números do motor ou das fixtures, um limite real, um caso de borda. Nunca afrouxe o portão.
+   - **pt e es** seguem o mesmo mapa, com o glossário de cada um.
+   - **O portão:** `scripts/lib/repeticao.ts` (funções puras), chamado pelo `gate:conteudo` em todas essas páginas e idiomas:
+     - uma lista de fatos recorrentes por idioma, cada um com padrões (no estilo do `findClaims`), montada a partir da varredura da linha de base (passo 2 de "Como trabalhar"). Pelo menos: o envio e o aparelho; os metadados e o GPS; o "1 KB = 1.000 bytes"; o "já pequeno, volta o original"; o PNG sem perda; a transparência que vira branco; o lote e o ZIP; o original intocado; os números da calculadora que ficam no aparelho; o grátis e o sem conta. A lista final vai num §;
+     - reprova um fato em mais de um bloco, e duas frases quase iguais em blocos diferentes da mesma página (palavras normalizadas, semelhança alta, frase de pelo menos 8 palavras; o limiar vai num §);
+     - Vitest com mutantes: um fato em dois blocos reprova; o mesmo fato no título e num bloco passa; o mesmo fato na ilha e num bloco passa; uma frase copiada em dois blocos reprova.
+   - **No relatório:** por tipo de página e idioma, as ocorrências de cada fato e as palavras do `<main>` antes e depois.
+
+9. **A entrada desta run** na Novidades: as páginas novas e a limpeza dos textos, com `pr: null` e a data do dia da run em Brasília. Ela é `conteudo` para as páginas cujo texto mudou.
+
+10. **Os testes antigos que mudam.** Muitos specs e Vitest leem textos de FAQ, contagens de blocos, o rodapé e o Sobre. Cada teste antigo que mudou vai num §, um por um, com o porquê (formato da § 341). Nenhum teste é pulado, desligado ou afrouxado: o limite que existe continua.
+
+11. **A válvula.** Se a run estourar, o corte da repetição das calculadoras (dinheiro, casa e saúde) pode ir para uma run curta `ajuste-repeticao-calculadoras`: o portão da decisão 8 nasce valendo para as páginas de imagem, PDF e QR code nos três idiomas, e a extensão às calculadoras vira pendência no grupo 29, com o §. Nunca se corta: a Novidades, o `lastmod`, a Como funciona, o Sobre, a autoria e o corte nas páginas de imagem, PDF e QR code.
+
+# Armadilhas conhecidas
+
+- **O `build.format` do Astro** faz de toda página um `.../index.astro`, e o `exactOptionalPropertyTypes` pega campo opcional pela metade: rode o `pnpm tipos` cedo.
+- **O `serve-dist` devolve o 404 mais próximo** para rota que falta: teste de página exige o status 200.
+- **Rota nova mexe em muita coisa:** o tipo `RouteId`, o `TRANSLATED_PATHS`, o hreflang, o OG (`src/pages/og/[lang]/[id].png.ts`), o `gate:links`, as órfãs, o `fo-ad-map.spec.ts` (conta as páginas), o `ads.spec.ts` e o `gate:prontidao` (as páginas sem anúncio), o `institutional.spec.ts` e o `institutional-pages.test.ts`. Procure quem lê o mapa de rotas antes de criar.
+- **As datas:** o `guias:medir` grava o dia em UTC e as runs datam pelo dia em Brasília (§ 207 e § 223). O `lastmod` nunca fica antes da medida nem depois do dia do build.
+- **O `.text` do `node-html-parser` cola o texto de elementos vizinhos:** para contar palavras ou procurar frases, use `structuredText`.
+- **O `lint:texto` só lê os textos alterados contra `origin/main`,** e esta run altera muitos: ele demora. Rode por partes enquanto escreve.
+- **Contagem por extenso também é número à mão** nos guias; nos textos novos, nenhuma contagem de ferramentas (use os registros e o `tool-count`).
+- **O rodapé tem testes de largura** (`footer-phone.spec.ts`, `footer-phone.test.ts`): a 360 px, link novo e a linha da data não podem quebrar a coluna.
+- **A home é contada pelas palavras do `<main>`** (§ 571: 3 caixas de anúncio pedem 450 palavras, e a partir de 600 entra a lateral 2; ache o teste que guarda essa faixa hoje): o link novo na faixa de confiança não pode empurrar a contagem para fora.
+- **Uma foto do Victor no Git sem tirar o Exif** levaria o GPS da casa dele para um repositório público: o script tira tudo, e o original nunca entra no Git (o `Claude outputs/` fica fora).
+- **Dois Playwright no mesmo checkout** convivem com `--output=<pasta própria>` no segundo, e cada worktree usa o próprio `FO_PORT` (`docs/claude/playwright.md`). O Playwright do Windows pode não sair depois do último teste: veja o que fazer lá. O `net::ERR_NO_BUFFER_SPACE` no meio do `verificar --partes` é dos soquetes do Windows: rode de novo.
+- **A guarda da worktree isolada recusa heredoc com `node` ou `git` no mesmo `&&`:** grave o arquivo com a ferramenta de escrita e rode cada comando sozinho (`docs/claude/windows-git-bash.md`).
+- **O "antes":** monte o `dist/` da `origin/main` numa worktree à parte (`dist-base`), nunca trocando a branch do clone principal.
+
+# Critérios de aceitação (cada um com evidência no relatório)
+
+1. A Novidades existe nos três idiomas, com as entradas do lançamento até esta run, e o `changelog.test.ts` prova as datas contra o git.
+2. Todo `<url>` dos três sitemaps tem `<lastmod>`; o portão e o Vitest das datas passam; nenhuma página tem `lastmod` antes de uma data que ela mostra.
+3. A linha "Atualizado em" das páginas de imagem, PDF e QR code é igual ao `lastmod` delas, e a data do rodapé é a da entrada mais nova.
+4. O Sobre diz a data de lançamento a partir do `LAUNCH_DATE`; sem os arquivos em `public/about/` não há foto no HTML; o `pnpm sobre:foto` passa no Vitest sobre a fixture com GPS, sem metadado na saída.
+5. Todos os guias e calculadoras ligam o nome ao Sobre; os 40 guias (10 × 3 + 5 × 2) têm o quadro do autor, e o `checkFileGuide` continua contando 800 a 1.500 palavras sem ele.
+6. A Como funciona existe nos três idiomas, com as cinco partes; a tabela de WebAssembly bate com o `dist/`; cada frase técnica tem a prova; nenhuma palavra proibida nem link para o repositório.
+7. O portão de repetição passa em todas as páginas de ferramenta, preset, calculadora e QR code nos três idiomas (ou nas de imagem, PDF e QR code, se a válvula da decisão 11 agiu), e reprova os mutantes; a tabela do antes e depois está no relatório.
+8. Nenhum portão afrouxado: o `gate:conteudo`, o `gate:prontidao`, o `gate:seo`, o `gate:links`, o `gate:dinheiro-saude` e o `launch-kit.test.ts` verdes.
+9. As duas páginas novas sem anúncio, com os JS do Sobre (o `budgets.spec.ts` e o `i18n-budgets.spec.ts`), Lighthouse ≥ 90 nas quatro categorias, axe sem violação e CLS sem gesto 0. No build com anúncios, a distância e a densidade das páginas de ferramenta passam como antes.
+10. Nada sai do aparelho, e nenhum evento, parâmetro ou chave nova aparece: o `image-privacy.spec.ts`, o `pdf-privacy.spec.ts`, o `money-privacy.spec.ts`, o `launch-claims.spec.ts` e o `events.spec.ts` passam.
+11. O `lint:texto` dá 0 erro; o `english-leak.test.ts`, o `glossary.test.ts`, o `claude-md.test.ts` e o `pendencias.test.ts` passam.
+12. Os testes antigos que mudaram estão num §, um por um.
+13. O `docs/claude/idiomas.md` ganhou a seção F19a (o mapa de fatos e a regra de que toda run que muda texto visível acrescenta a entrada dela no `changelog.ts`), o `docs/OPERACAO.md` ganhou a foto e a Novidades, o `PENDENCIAS.md` ganhou o grupo 29.
+14. O `pnpm verificar --partes` passou na máquina, com a saída real no relatório, e o CI completo está verde.
+15. A revisão adversarial está em `docs/relatorios/REVISAO-F19a.md`, sem achado alto ou médio aberto.
+
+# Verificação: rode de verdade
+
+- **A linha de base, antes de mudar código,** no `dist-base`: `pnpm install --frozen-lockfile` e `pnpm build`; o número de testes do Vitest; o `pnpm exec playwright test --list` de cada navegador; a lista dos JS de `dist/_astro/`; os sitemaps; as palavras do `<main>` de cada página do escopo da decisão 8; e a varredura de repetição (passo 2 de "Como trabalhar"). Os controles negativos: as rotas novas dão 404, os sitemaps não têm `lastmod`.
+- **Em cada fatia:** `pnpm tipos`, `pnpm lint`, `pnpm build`, o Vitest dos arquivos tocados e os specs que a fatia toca, nos dois projetos (`--project=chromium` e `--project=webkit`), entre eles: `institutional.spec.ts`, `navigation.spec.ts`, `footer-phone.spec.ts`, `home-sea.spec.ts`, `guide-page.spec.ts`, `tool-guides.spec.ts`, `tool-slot.spec.ts`, `tool-i18n.spec.ts`, `money-card.spec.ts`, `qr-code.spec.ts`, `a11y.spec.ts`, `layout-shift.spec.ts`, `budgets.spec.ts`, `i18n-budgets.spec.ts`, `launch-claims.spec.ts`, os de privacidade e o `events.spec.ts`; no build de teste com IDs de anúncio, o `ads.spec.ts` e o `fo-ad-map.spec.ts`. E os portões: `pnpm gate:conteudo`, `gate:seo`, `gate:links`, `gate:dinheiro-saude` e o `gate:prontidao`.
+
+  Leia a falha, corrija a causa e repita até passar.
+- **Nunca afrouxe um limite** para um teste passar: o limite é o deste prompt e o do projeto.
+- **O Lighthouse das páginas novas** com uma configuração temporária em `.cache/`, sem mudar o `lighthouserc.json`.
+- **O `pnpm verificar --partes` roda uma vez,** no último commit de código, com a máquina livre. Se uma parte falhar, rode a mesma parte no ponto de partida, numa worktree: falhando igual, a falha não é desta run (registre num § e siga); senão, ache o que esta run mudou e corrija.
+- **No CI:** acompanhe com `gh pr checks <n> --watch` e leia os logs com `gh run view <id> --log`. O `pnpm ci:custo <id>` da última execução vai no relatório (regra 5).
+
+# Autonomia e decisões
+
+Você está rodando sozinho, e ninguém vai responder. Não pare para perguntar nem espere confirmação, em hipótese nenhuma.
+
+Régua de decisão:
+
+1. Este prompt.
+2. O `PLANO-MELHORIAS.md`, o `PLANO-FILEORCA.md`, o `CLAUDE.md`, o `docs/claude/` e o `docs/design/`.
+3. O `DECISOES.md` e o código: as páginas institucionais (o Sobre, a Licenças), os guias e os portões que existem.
+4. Na dúvida, a opção mais simples e mais reversível que não piore o orçamento, a acessibilidade, o anúncio nem o tempo do CI.
+
+Toda decisão que não está escrita aqui vira um § no `DECISOES.md`, com as alternativas e o porquê. Exemplos: os seletores de páginas do changelog; o texto de cada entrada; o mapa de fatos por tipo de página; o limiar das frases quase iguais; a pergunta nova de cada FAQ que caiu abaixo de 4; os tamanhos da foto; as fontes oficiais de cada navegador; a forma da tabela de WebAssembly; cada teste antigo que mudou.
+
+Anti-loop: depois de três tentativas com a mesma falha, mude de abordagem e registre a troca.
+
+Bloqueio real não para a run: siga com o resto e registre a pendência, com o que falta para resolver. Exemplos: o rótulo `ci` não existe; uma página de documentação de navegador não abre (o passo sai, e a pendência vai para o grupo 29); a data de uma PR antiga não aparece no `gh` (use o git e registre); a main muda no meio da run (`git fetch` e `git merge origin/main` na branch, nunca rebase, renumerando os § se colidirem).
+
+# Git e segurança
+
+- **Começo:**
+  - `git switch main` e `git pull --ff-only`;
+  - o `git status` pode mostrar, sem rastreio, os quatro arquivos de prompt e a pasta `Claude outputs/`. Qualquer outra coisa: não mexa, não commite e registre;
+  - `git switch -c fase-19a`. O primeiro commit leva os dois arquivos deste prompt (`prompt-fase-19a.md` e `.txt`). Os da F19b ficam sem commit;
+  - se os arquivos deste prompt não estiverem lá, grave este prompt, exatamente como o recebeu, em `docs/prompts/prompt-fase-19a.txt`.
+- **Commits** pequenos e frequentes, com mensagem em inglês no padrão da main. Adicione por caminho, nunca `git add -A`.
+- **A PR em rascunho** abre logo depois do primeiro push, num comando separado do push: `gh pr create --draft --base main --head fase-19a`, com o título "F19a: confiança e conteúdo (Novidades, Como funciona, lastmod, Sobre, autoria, repetição)". O título e a descrição vão em português, e a descrição diz que o merge é do CI.
+- **Push nos marcos.** O Workers Builds publica a prévia de cada push (`https://fase-19a-fileorca.vmatusita.workers.dev/`), no build padrão, sem anúncio.
+- **Agentes em worktree** (regra 6 do `CLAUDE.md`): o primeiro passo de cada um é `git merge --ff-only fase-19a`, e todo merge de volta leva o trailer `Co-Authored-By` (`git merge --no-ff -F <arquivo>`). As worktrees são removidas no fim com `git worktree remove`.
+- **No GitHub, a run só faz isto:** o push da branch; na PR dela, `gh pr create`, `gh pr ready`, `gh pr edit` (só a descrição e o rótulo `ci`) e o `gh pr ready --undo` depois de uma execução final vermelha; leitura (`git fetch`, `gh pr list`, `gh pr view`, `gh run`, `gh pr checks`, `gh label list` e `gh api` sem método); um `gh run rerun` por falha que pareça instável, registrado.
+- **Na web, só leitura:** a documentação dos navegadores da decisão 7.
+- **Nunca:** push na main, force push, `git reset --hard`, `--amend` ou `--no-verify`; mexer em `core.hooksPath` ou em `.githooks/`; `gh pr merge`, `gh label` (além do `list`), `gh api` com método de escrita, `gh secret`, `gh variable` ou `gh repo`; editar o `PLANO-FILEORCA.md`; commitar uma foto que não saiu do `pnpm sobre:foto`; postar, criar conta ou mexer no Search Console e no AdSense (são do Victor); `wrangler deploy` em qualquer forma. O `.claude/settings.json` nega boa parte disso. Não tente contornar.
+
+# Como trabalhar
+
+1. **Explorar,** com subagentes Sonnet em paralelo, cada um voltando só com um resumo:
+   - (a) este prompt num checklist "requisito → onde vai ficar → que teste ou comando prova";
+   - (b) as rotas institucionais de ponta a ponta (registro, view, textos, hreflang, OG, sitemap, rodapé, órfãs, portões e specs que leem o mapa);
+   - (c) o histórico: as PRs mescladas e as datas em Brasília, o método de merge da main, e o resumo de cada relatório de fase e de ajuste, já separado em "a pessoa vê" e "não vê";
+   - (d) as datas que as páginas mostram ou declaram hoje (guias, calculadoras, medidas) e o que o `lastmod` precisa respeitar;
+   - (e) o `gate:conteudo`, o `gate:prontidao` e os testes que leem FAQ, privacidade e contagens de blocos;
+   - (f) o que vai para a Como funciona: os `.wasm` do `dist/`, o `licenses.ts`, o `launch-claims.spec.ts`, o `sw-offline.spec.ts` e a Privacidade nos três idiomas.
+2. **A linha de base e a varredura.** Além da seção "Verificação", um subagente lê todas as páginas do escopo da decisão 8 nos três idiomas e devolve, por página, as frases que dizem o mesmo fato em blocos diferentes. Essa varredura dá a lista de fatos do portão e a tabela do "antes".
+3. **Planejar.** Escreva `docs/relatorios/fase-19a-plano.md`, autossuficiente. Ele é o gabarito da revisão final e traz: o ponto de partida e a linha de base; os § reservados; a lista de entradas do changelog com data e PR; o mapa de fatos por tipo de página; a interface que as frentes dividem (os ids das rotas, as chaves dos textos novos, o `changelog.ts`, o `repeticao.ts`) e o dono de cada arquivo que mais de uma frente toca (os `common.ts`, o `routes.ts`, o rodapé, o `conteudo.ts`); quem faz o quê e a ordem das fatias; cada critério ligado a um teste ou comando.
+4. **Implementar** em fatias, cada uma com as verificações verdes antes da próxima:
+   1. **O agente principal:** o primeiro commit, o push e a PR em rascunho; as rotas `whats-new` e `how-it-works` com views mínimas; o `changelog.ts` com a forma e as primeiras entradas; o `LAUNCH_DATE`; o `lastmodOf()` no sitemap; os § reservados. Com o `pnpm tipos` e o `pnpm build` verdes, commit e push.
+   2. **As frentes ao mesmo tempo,** cada uma num agente `opus` na sua worktree, a partir desse commit:
+      - **N (novidades e datas):** o histórico completo do changelog nos três idiomas, a página Novidades, o `lastmod`, a linha "Atualizado em", a data do rodapé, o `changelog.test.ts`, o portão das datas;
+      - **C (Como funciona e Sobre):** a página Como funciona nos três idiomas, a tabela de WebAssembly e o teste dela, as frases e as provas, o teste das palavras proibidas, o Sobre (data, links, lugar da foto), o `pnpm sobre:foto` e o Vitest dele, a autoria (o link do nome e o quadro do autor), os links da home e da Privacidade;
+      - **R (repetição):** o `repeticao.ts` e os mutantes, o portão no `gate:conteudo` e o corte dos textos de imagem, PDF e QR code nos três idiomas, depois o das calculadoras (a válvula da decisão 11 age aqui), os testes antigos que leem esses textos e o `lint:texto`.
+
+      O agente principal faz, ao mesmo tempo, o que não colide com elas: o `docs/claude/`, o `docs/OPERACAO.md`, o `PENDENCIAS.md` e os §.
+   3. **O agente principal junta as frentes,** resolve os conflitos, deixa o `pnpm tipos` verde, roda os specs das frentes nos dois navegadores e os de anúncio no build de teste, e faz a conferência no Linux com o rótulo `ci`, se ele existir.
+   4. **O agente principal fecha:** o orçamento contra o `dist-base`, o Lighthouse das páginas novas, a tabela do antes e depois da repetição, as imagens do relatório (a Novidades, a Como funciona, o Sobre, uma página de ferramenta e um guia com o quadro do autor, a 360 e a 1280 px, claro e escuro).
+5. **A revisão adversarial final,** no método da F3 (`docs/claude/windows-git-bash.md`): sobre um commit fixo da branch, numa worktree só de leitura, com o próprio `pnpm install --frozen-lockfile`, o próprio build e o próprio build de teste; contra este prompt e o plano; cada lente com o próprio `FO_PORT`, escrevendo só no `.cache/lente-<x>/`. A run mexe em texto de dinheiro e saúde e em afirmações de privacidade, então são cinco lentes Sonnet em contexto limpo (regra 3), apontando só lacunas de correção ou de requisito, nunca preferência de estilo:
+   - (a) **os textos e a repetição:** o mapa de fatos, o portão e os mutantes, o que saiu e o que entrou em en, pt e es, nenhum enchimento, as perguntas novas;
+   - (b) **o SEO e as datas:** as rotas, o hreflang, o sitemap e o `lastmod`, o changelog contra o git, as linhas de data, o OG, o schema, as órfãs, os links;
+   - (c) **a privacidade e as provas:** a Como funciona frase por frase contra os specs e a Privacidade, as palavras proibidas, a tabela de WebAssembly, o script da foto e os metadados;
+   - (d) **dinheiro e saúde:** os textos das calculadoras e dos guias de dinheiro que mudaram (o sentido não muda, nenhuma fonte some, o `gate:dinheiro-saude`);
+   - (e) **o site, o anúncio, o orçamento, a acessibilidade e o CI:** o rodapé a 360 px, as páginas sem anúncio, a distância e a densidade, os JS, o axe, o Lighthouse, o CLS e as partes.
+
+   Cada achado médio ou acima tem um cético próprio, que tenta refutá-lo ("na dúvida, refutado"); os baixos de cada lente vão a um cético só. As correções ficam num agente só (`opus`), e uma segunda passada das lentes dos achados corrigidos revisa o diff delas. Os baixos que sobrarem vão para o grupo 29 do `docs/PENDENCIAS.md`. Tudo fica em `docs/relatorios/REVISAO-F19a.md`.
+6. **Fechar:** o `pnpm verificar --partes`, o relatório e o fim pela regra 1 do `CLAUDE.md` (com tudo commitado, o `gh pr ready` antes do último push, ou a espera da execução leve antes dele).
+
+# Relatório final
+
+Escreva `docs/relatorios/fase-19a.md` em português, no formato do `fase-18.md`, commitado na branch antes do `gh pr ready`. Ele traz:
+
+- o resumo: o que muda para a pessoa e para o revisor do AdSense, em até cinco linhas;
+- o que entrou, por decisão, com os arquivos e os §;
+- a evidência de cada critério, com a saída real dos comandos e dos specs, e os controles negativos com a mensagem de erro;
+- as tabelas: as entradas da Novidades (data, PR, páginas); os sitemaps antes e depois (URLs e `lastmod`); a repetição antes e depois por tipo de página e idioma; as palavras do `<main>` antes e depois; a tabela de WebAssembly; o orçamento das páginas novas; o Lighthouse;
+- o número de testes do Vitest e do `--list` de cada navegador, antes e depois, e os testes antigos que mudaram, com o § de cada um;
+- a saída real do `pnpm verificar --partes`, com o tempo de cada parte e a soma;
+- o custo (regra 5): o `pnpm ci:custo` da última execução antes do relatório; o da execução final vai na descrição da PR;
+- o resumo da revisão, apontando para o `REVISAO-F19a.md`;
+- as imagens de `docs/relatorios/fase-19a/`;
+- o link da prévia;
+- as decisões novas, apontando os §, e o que a válvula cortou, se cortou;
+- **a lista do que é do Victor, em passos:**
+  1. `git pull` e, na prévia ou no fileorca.com depois do deploy, ler a Como funciona, a Novidades e o Sobre no celular e no computador, e abrir uma ferramenta para ver o bloco de privacidade e a linha "Atualizado em".
+  2. No Search Console: em Sitemaps, reenviar o `sitemap-index.xml` (agora com `lastmod`); em Inspeção de URL, pedir a indexação das seis páginas novas (a lista vai aqui, com os caminhos).
+  3. A foto, quando tiver: salvar em `Claude outputs\victor.jpg`, rodar `pnpm sobre:foto "Claude outputs\victor.jpg"`, conferir os arquivos em `public\about\` e mandar numa branch `ajuste-foto-sobre` com PR (o CI mescla), ou pedir uma run curta.
+  4. Não pedir a nova revisão do AdSense ainda: primeiro a F19b (os guias novos) na main, depois algumas semanas com cliques orgânicos subindo no Search Console.
+  5. Rodar a F19b com o `docs/prompts/prompt-fase-19b.txt`, depois do merge desta.
+  6. Criar o rótulo `ci` (Issues → Labels), se ainda não existir.
+
+Termine a resposta final com um resumo de cinco linhas em português, o link da PR, o estado do CI (mesclada ou esperando, e por quê) e os passos do Victor.
+
+# Idioma
+
+Em português: a narrativa, o plano, a revisão, o relatório, o `DECISOES.md`, o `docs/PENDENCIAS.md`, o `docs/claude/`, o `docs/OPERACAO.md` e a descrição da PR. O site fala inglês, português e espanhol, nos arquivos de tradução de cada idioma.
+
+Em inglês: o código, os nomes de arquivo, os identificadores, as classes do CSS e os commits.
+```
+
+## Como executar
+
+São quatro etapas: o pré-voo, a run, o acompanhamento e a volta.
+
+### 1. Pré-voo (uns 10 min)
+
+No PowerShell:
+
+```powershell
+cd C:\Users\vmatusita\projetos\fileorca
+git switch main
+git pull --ff-only
+git log -1 --oneline        # a F18 ou mais novo
+git status                  # sem rastreio: os 4 arquivos de prompt (19a e 19b) e "Claude outputs\"
+git config core.hooksPath   # tem que responder .githooks
+gh auth status              # logado
+claude --version            # o modo auto pede 2.1.83 ou mais
+```
+
+Depois:
+
+1. **Os arquivos do prompt.** Os quatro (`prompt-fase-19a.md`, `.txt`, `prompt-fase-19b.md`, `.txt`) já estão em `docs\prompts\`. A F19a commita só os dela.
+2. **Crie o rótulo `ci`, se ainda não criou (30 s).** No GitHub: Issues → Labels → New label, com o nome `ci`. Com ele, a run confere tudo no Linux no meio do caminho; sem ele, isso só sai na execução final, e nas últimas fases a falta custou uma volta a mais.
+3. **A foto fica para depois** (você escolheu assim). A run deixa o `pnpm sobre:foto` pronto e nenhuma foto aparece até você rodá-lo.
+4. **A energia:** `powercfg /change standby-timeout-ac 0`. Volte ao normal depois da run.
+5. **O disco:** a run faz o build do site e o build de teste várias vezes, em até cinco worktrees (a base, três frentes e a revisão). Deixe uns 20 GB livres.
+
+### 2. Rodar
+
+```powershell
+claude --model opus --permission-mode auto -n fase-19a
+```
+
+Cole o conteúdo inteiro de `docs\prompts\prompt-fase-19a.txt` e deixe rodar.
+
+Opcional, logo depois de colar:
+
+```text
+/goal a Novidades e a Como funciona no ar nos três idiomas, lastmod em todo url dos sitemaps, o portão de repetição verde no gate:conteudo, o pnpm verificar --partes verde, docs/relatorios/REVISAO-F19a.md sem achado alto ou médio aberto e a PR da fase-19a pronta, com o ci-ok verde
+```
+
+Um avaliador separado confere essa condição a cada turno.
+
+Se cair ou o limite acabar, retome com `claude --resume fase-19a` e mande: "continue de onde parou: leia docs/relatorios/fase-19a-plano.md, o git log da branch fase-19a e o estado da PR, e siga".
+
+Headless, se preferir disparar e sair:
+
+```powershell
+$OutputEncoding = [System.Text.UTF8Encoding]::new()
+Get-Content -Raw -Encoding utf8 docs\prompts\prompt-fase-19a.txt |
+  claude -p --model opus --permission-mode auto --output-format json > $HOME\run-fase-19a.json
+(Get-Content $HOME\run-fase-19a.json | ConvertFrom-Json).session_id   # guarde: é o único jeito de retomar
+```
+
+**Por que o modo `auto`:** a run instala pacotes, faz builds, roda o Playwright, abre a PR e lê o `gh`, tudo coberto pelo `auto`. O que ela não pode fazer (push na main, merge, reset) já é negado pelo `.claude/settings.json` e pelo hook, e o prompt não pede nada disso; um pedido bloqueado repetido abortaria a sessão no headless. Para baratear, `$env:CLAUDE_CODE_SUBAGENT_MODEL = "sonnet"` antes do comando põe os subagentes no Sonnet; as frentes já pedem `opus` pelo nome.
+
+### 3. Acompanhar
+
+- O plano aparece em `docs\relatorios\fase-19a-plano.md` logo no começo: é o melhor lugar para ver se a run entendeu.
+- A PR em rascunho aparece no GitHub depois do primeiro push, e a prévia em `https://fase-19a-fileorca.vmatusita.workers.dev/`.
+- `gh pr checks <n>` mostra o CI.
+
+### 4. Ao voltar
+
+1. Leia o `docs\relatorios\fase-19a.md`: as evidências são saídas reais coladas, não frases.
+2. Confira a tabela do antes e depois da repetição e abra duas páginas de ferramenta na prévia: o texto tem de estar mais curto e sem dizer a mesma coisa duas vezes.
+3. Leia a Como funciona inteira: cada frase técnica precisa bater com o que você sabe do site.
+4. Siga a lista do que é seu, no fim do relatório.
+5. Se algo veio errado duas vezes, não emende: peça um prompt novo para esta skill com o que aprendeu.
+
+## Suposições que fiz
+
+- A F19a não muda o contrato do projeto: as páginas novas e o `lastmod` não conflitam com nenhuma linha das "Decisões fechadas". Os guias novos, sim (o PLANO diz que não há guia novo depois da F5), e por isso a linha 16 da tabela "Mudanças no contrato" fica com a F19b.
+- Os caminhos novos são `/whats-new/` (`/pt/novidades/`, `/es/novedades/`) e `/how-it-works/` (`/pt/como-funciona/`, `/es/como-funciona/`). Se preferir outros, troque nas decisões 2 e 7 antes de rodar.
+- "Sem link do repositório" virou "sem link e sem citar GitHub, repositório ou código aberto" na Como funciona. O resto do site não muda nesse ponto.
+- As duas páginas novas não têm anúncio, como o Sobre e a Licenças.
+- O título e a descrição (meta) das páginas ficam como estão, mesmo repetindo o "sem upload": são o anúncio da página na busca, não o corpo dela.
+- A linha "Atualizado em" entra só nas páginas de imagem, PDF e QR code; as calculadoras e os guias já mostram a data de revisão deles.
+- A data de lançamento é 31/out/2026, o merge da F2 (DECISOES § 75); a run prova contra o git.
+- Os números da linha de base (§ 751 e grupo 29) são os da main com a F18; se houver run depois dela, a run segue do próximo livre.

@@ -91,6 +91,8 @@ export function isCalcPage(routeId: string): boolean {
 export function requiredSchemaTypes(routeId: string): string[] {
   if (routeId === 'home') return ['Organization', 'WebSite'];
   if (routeId === 'about') return ['Organization', 'BreadcrumbList', 'Person', 'AboutPage'];
+  // F19a (decision 7; DECISOES § 759): How it works is an Article by the author, like a guide.
+  if (routeId === 'how-it-works') return ['Organization', 'BreadcrumbList', 'Article', 'Person'];
   if (isImagePage(routeId)) return ['Organization', 'BreadcrumbList', 'WebApplication'];
   // The QR code generator (F7): a WebApplication (UtilitiesApplication) and the BreadcrumbList Home › QR code generator.
   if (isQrPage(routeId)) return ['Organization', 'BreadcrumbList', 'WebApplication'];

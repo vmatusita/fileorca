@@ -62,13 +62,12 @@ export default {
       heading: 'Por qué un pago adicional ahorra intereses',
       paragraphs: [
         'Los intereses se cobran sobre el saldo. Un pago adicional baja el saldo de inmediato, así que cada mes siguiente cobra un poco menos de intereses, y una parte mayor del mismo pago regular va al capital. El efecto se acumula: los pagos adicionales del principio ahorran más que los del final, porque recortan más meses de intereses.',
-        'El pago regular no cambia. Lo que cambia es el número del último pago: el préstamo simplemente termina antes.',
       ],
     },
     {
       heading: 'Antes de pagar de más',
       paragraphs: [
-        'Pídele a tu administrador del préstamo que aplique el adicional al capital, y revisa que el préstamo no tenga multa por pago anticipado. Hay quien primero arma un fondo de emergencia o paga las deudas con tasas más altas; la calculadora de deudas las compara.',
+        'Pídele a tu administrador del préstamo que aplique el adicional al capital. Hay quien primero arma un fondo de emergencia o paga las deudas con tasas más altas; la calculadora de deudas las compara.',
       ],
     },
   ],
@@ -98,11 +97,11 @@ export default {
   faq: [
     {
       q: '¿Conviene más pagar de más cada mes o una vez al año?',
-      a: 'El mismo total pagado antes ahorra un poco más, porque baja el saldo antes. Prueba los dos en la calculadora con el mismo monto al año.',
+      a: 'Pagar cada mes ahorra un poco más que pagar el mismo total una vez al año. Prueba los dos en la calculadora.',
     },
     {
       q: '¿Un pago adicional baja mi pago mensual?',
-      a: 'No. En un préstamo normal de tasa fija el pago sigue igual y el préstamo termina antes. Recalcular el pago después de un pago grande, algo que algunos prestamistas ofrecen a cambio de un cargo, es otra cosa.',
+      a: 'No. Recalcular el pago después de un pago grande, algo que algunos prestamistas ofrecen a cambio de un cargo, es otra cosa.',
     },
     {
       q: '¿Me puede cobrar el prestamista por pagar antes?',
@@ -110,7 +109,7 @@ export default {
     },
     {
       q: '¿El pago único tiene que ser en el primer año?',
-      a: 'No. Elige el número del pago con el que lo harás; un pago único hecho más tarde en el préstamo ahorra menos intereses que el mismo monto al principio.',
+      a: 'No. Puede ir con cualquier pago del plazo, hasta el último.',
     },
   ],
   privacyHeading: 'Privacidad',

@@ -82,7 +82,7 @@ const OWN_PAGES: Record<MenuSection, readonly RouteId[]> = {
   support: ['support'],
 };
 /** The pages that belong to no section: the home, the institutional and legal pages, and the pages out of the sitemaps. */
-export const NO_SECTION: readonly RouteId[] = ['home', 'privacy', 'terms', 'about', 'contact', 'licenses', 'offline', 'open-with', 'not-found'];
+export const NO_SECTION: readonly RouteId[] = ['home', 'privacy', 'terms', 'about', 'contact', 'licenses', 'whats-new', 'how-it-works', 'offline', 'open-with', 'not-found'];
 
 export interface PageSection {
   section: MenuSection;

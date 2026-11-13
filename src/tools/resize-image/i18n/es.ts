@@ -9,7 +9,7 @@ export default {
   howSteps: [
     'Suelta tus imágenes en el cuadro, elígelas o pégalas con Ctrl V.',
     'Elige Por tamaño y escribe un ancho y un alto, o elige Por porcentaje y escribe un número.',
-    'Descarga la imagen redimensionada, o el ZIP si redimensionaste varias.',
+    'Descarga la imagen redimensionada.',
   ],
   specsHeading: 'Especificaciones',
   specs: {
@@ -17,7 +17,7 @@ export default {
     head: ['Detalle', 'Qué pasa'],
     rows: [
       ['Acepta', 'JPG, PNG y WebP, reconocidos por el contenido del archivo y no por el nombre. Las fotos HEIC pasan antes por HEIC a JPG, y los archivos AVIF, por AVIF a JPG.'],
-      ['Por tamaño', 'Escribes un ancho y un alto en píxeles. Las proporciones quedan fijas, y cada imagen cabe dentro de ese recuadro.'],
+      ['Por tamaño', 'Escribes un ancho y un alto en píxeles. Las proporciones quedan fijas, y cada imagen cabe dentro de ese recuadro: una foto de 4000 × 3000 en un recuadro de 1000 × 1000 sale de 1000 × 750.'],
       ['Por porcentaje', 'Escribes un porcentaje del ancho y del alto actuales, el mismo para todas las imágenes del lote.'],
       ['Nunca amplía', 'Si pides más píxeles de los que tiene la imagen, conserva su tamaño original, y el resultado te lo dice.'],
       ['Resultado', 'El mismo formato del archivo que soltaste. PNG y WebP conservan su transparencia.'],
@@ -30,16 +30,12 @@ export default {
   faqHeading: 'Preguntas',
   faq: [
     {
-      q: '¿Cómo redimensiono una imagen a un tamaño exacto en píxeles?',
-      a: 'Elige Por tamaño y escribe el ancho y el alto que necesitas. Las proporciones quedan fijas, así que cada imagen cabe dentro de ese recuadro: una foto de 4000 × 3000 en un recuadro de 1000 × 1000 sale de 1000 × 750.',
-    },
-    {
       q: '¿Redimensionar baja la calidad de una imagen?',
-      a: 'Achicar una imagen la mantiene nítida en su nuevo tamaño. Agrandarla solo puede estirar los píxeles que ya tiene, y eso se ve borroso, así que Redimensionar imagen nunca amplía: si pides más píxeles de los que tiene la imagen, recibes el tamaño original y el resultado te lo dice.',
+      a: 'Achicar una imagen la mantiene nítida en su nuevo tamaño. Agrandarla solo puede estirar los píxeles que ya tiene, y eso se ve borroso, por eso Redimensionar imagen nunca amplía.',
     },
     {
       q: '¿Conviene redimensionar por píxeles o por porcentaje?',
-      a: 'Usa píxeles cuando un formulario o un sitio web pide un tamaño, como 800 × 600. Usa un porcentaje cuando solo quieres que todo quede más pequeño en la misma medida, como 50 % para la mitad del ancho y la mitad del alto. En un lote de fotos distintas, un porcentaje achica cada una en la misma medida, mientras que un tamaño hace que todas quepan en el mismo recuadro.',
+      a: 'Usa píxeles cuando un formulario o un sitio web pide un tamaño, como 800 × 600. Usa un porcentaje cuando solo quieres que todo quede más pequeño en la misma medida, como 50 % para la mitad del ancho y la mitad del alto.',
     },
     {
       q: '¿Cambiar los DPI cambia el tamaño de una imagen?',
@@ -49,14 +45,10 @@ export default {
       q: '¿El archivo pesará menos después de redimensionarlo?',
       a: 'Casi siempre sí, porque menos píxeles dan un archivo más pequeño. Para un peso exacto, como 100 KB, usa Comprimir imagen a 100 KB.',
     },
-    {
-      q: '¿Mi imagen se sube a algún lugar?',
-      a: 'No. FileOrca redimensiona la imagen en tu dispositivo, dentro del navegador. Abre la pestaña Red del navegador mientras redimensionas: ninguna solicitud lleva tu archivo.',
-    },
   ],
   privacyHeading: 'Privacidad',
   privacyNote:
-    'Tus imágenes se redimensionan en tu navegador, y tus archivos nunca salen de tu dispositivo ni llegan a un servidor. Las copias guardadas omiten los metadatos de la foto, incluida la ubicación GPS.',
+    'Tus imágenes se redimensionan en tu navegador, y tus archivos nunca salen de tu dispositivo ni llegan a un servidor.',
   relatedHeading: 'Más herramientas de imagen',
   presets: {
     heading: 'Tamaños listos',

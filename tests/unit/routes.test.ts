@@ -68,7 +68,8 @@ describe('mapa de rotas', () => {
       // generator, after the file guides and before the institutional pages.
       HOUSE_HUB_ID, HEALTH_HUB_ID, ...LIFE_CALC_IDS, QR_ID,
       // F8 (DECISOES § 289 and § 290): the offline page and the page of the share target, before the 404.
-      'privacy', 'terms', 'about', 'contact', 'licenses', 'support', 'offline', 'open-with', 'not-found',
+      // F19a (decisions 2 and 7; DECISOES § 752): What's new and How it works after Support, before the pages out of the sitemaps.
+      'privacy', 'terms', 'about', 'contact', 'licenses', 'support', 'whats-new', 'how-it-works', 'offline', 'open-with', 'not-found',
     ]);
     expect([0, BR_IDS.length], 'the Brazilian money pages join the map together').toContain(brRoutes().length);
     // F7: the hubs and the 11 calculators are the area "casa-saude", and the QR code generator alone is "utilidades".

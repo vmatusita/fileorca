@@ -12,10 +12,10 @@ const texts: PdfToolTexts<OrganizeTexts> = {
   h1: 'Organize PDF',
   howHeading: 'How it works',
   howSteps: [
-    'Drop a PDF on the box, choose one, or paste it. Oli works on one PDF at a time and shows a thumbnail of every page; the magnifier on a page opens it large.',
-    'Pick pages by tapping them or by typing numbers like 1-3, 5, then use the bar above the grid to turn them right or left, or to take them out of the new PDF.',
-    'Move a page with the arrows on it, or drag it with the mouse. A page you took out stays in the grid, faded, until you put it back.',
-    'Press Save changes, then download the new PDF. Your original file stays untouched.',
+    'Drop a PDF on the box, choose one, or paste it.',
+    'Pick pages by tapping them or by typing their numbers, then use the bar above the grid to turn them right or left, or to take them out of the new PDF.',
+    'Move a page with the arrows on it, or drag it with the mouse.',
+    'Press Save changes, then download the new PDF.',
   ],
   specsHeading: 'What goes in and what comes out',
   specs: {
@@ -43,19 +43,15 @@ const texts: PdfToolTexts<OrganizeTexts> = {
     },
     {
       q: 'When should I use Delete PDF pages or Rotate PDF instead?',
-      a: 'Use Delete PDF pages when you only need to take pages out, and Rotate PDF when you only need to turn pages, or to turn the pages of several PDFs at once. Organize PDF works on one PDF at a time and suits a file that needs more than one of these fixes.',
+      a: 'Use Delete PDF pages when you only need to take pages out, and Rotate PDF when you only need to turn pages, or to turn the pages of several PDFs at once. Organize PDF suits a file that needs more than one of these fixes.',
     },
     {
       q: 'Can I undo a change before I save?',
-      a: 'Yes. A page you took out stays in the grid, faded: pick it and press Put back. A turn goes back with a turn the other way, and a page you moved goes back with the arrows. After the result the grid stays on screen, and any change brings the button back to save another PDF. Your original file is never changed.',
+      a: 'Yes. Pick a page you took out and press Put back; a turn goes back with a turn the other way, and a page you moved goes back with the arrows. After the result the grid stays on screen, and any change brings the button back to save another PDF. Your original file is never changed.',
     },
     {
-      q: 'Will forms, links and bookmarks still work?',
-      a: 'On the pages you keep, yes. Form fields stay, bookmarks and links between pages still lead to the same pages in their new place, and links to the web stay. A link to a page you took out is removed, because that page is no longer in the file.',
-    },
-    {
-      q: 'Is my PDF uploaded?',
-      a: "No. FileOrca reads and writes your PDF on your device, in your browser, and PDF.js draws the thumbnails there too. Open your browser's Network tab while you organize the pages: no request carries your files.",
+      q: 'Do hidden layers stay hidden?',
+      a: 'Yes. The new PDF keeps the layers that the pages you keep use, each one on or off as your file had it, so a layer the author hid stays hidden.',
     },
   ],
   privacyHeading: 'Privacy',

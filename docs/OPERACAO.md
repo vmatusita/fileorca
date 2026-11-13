@@ -125,6 +125,22 @@ Saído do ensaio do Dependabot da F8 (DECISOES § 299):
 - **`@cantoo/pdf-lib`, `@neslinesli93/qpdf-wasm`, `@jsquash/*`, `fflate`, `pdfjs-dist` ou `@playwright/test`:** depois do merge, rode `pnpm guias:medir --check` (com `pnpm build` antes). Se der diferença, uma run curta mede de novo com `pnpm guias:medir` e commita o `data/guides-measured.json`.
 - **Codecs (`@jsquash/*`, `libheif-js`, qpdf):** confira na página /licenses se as versões das bibliotecas compiladas mudaram (o teste não pega isso sozinho).
 
+## A foto do Sobre
+
+Escrito na F19a (DECISOES § 762). O Sobre e o quadro do autor dos guias mostram a foto só quando os arquivos dela existem na pasta `about` do `public/` no build; sem eles, a página não tem foto nem caixa reservada. Nenhuma foto de mentira entra.
+
+1. Salve a foto em `Claude outputs\victor.jpg` (a pasta fica fora do Git).
+2. Rode `pnpm sobre:foto "Claude outputs\victor.jpg"`. O script corta o quadrado do centro, gera os tamanhos que o Sobre e o quadro do autor usam (WebP e JPG) com o motor de imagem do próprio site, sem nenhum metadado (Exif, XMP, IPTC, GPS), e no fim imprime o relatório de metadados de cada arquivo: todos têm de dizer que não há nada.
+3. Confira os arquivos gerados e o Sobre num `pnpm build` local.
+4. Mande numa branch `ajuste-foto-sobre`, com PR (o CI mescla), ou peça uma run curta. Nunca commite o arquivo original: ele tem o GPS de onde a foto foi tirada.
+
+## A página Novidades
+
+Escrito na F19a (DECISOES § 751 a § 757). A Novidades, o `<lastmod>` dos sitemaps, a linha "Atualizado em" das ferramentas e a data do rodapé saem do mesmo arquivo, `src/platform/changelog.ts`.
+
+- **Toda run que muda o que a pessoa vê** acrescenta a entrada dela no fim do `src/platform/changelog.ts` (com `pr: null`, que a run seguinte troca pelo número da PR) e o texto dela em `src/i18n/{en,pt,es}/whats-new.ts`. O `tests/unit/changelog.test.ts` reprova uma entrada sem texto, uma data fora da ordem, um número de PR que não bate com o merge e uma página nova sem a entrada do nascimento dela.
+- **Depois do merge de uma run que mudou páginas:** no Search Console, Sitemaps, reenvie o `sitemap-index.xml` se quiser que o Google leia os `<lastmod>` novos antes da próxima visita dele.
+
 ## Revisão mensal (30 minutos)
 
 - [ ] Search Console: páginas entre as posições 5 e 15 ganham conteúdo e link interno (anote para uma run).

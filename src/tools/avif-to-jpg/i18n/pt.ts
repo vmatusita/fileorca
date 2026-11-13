@@ -9,7 +9,7 @@ export default {
   howSteps: [
     'Solte as imagens AVIF na caixa, escolha os arquivos ou cole com Ctrl V.',
     'A Oli transforma cada uma em JPG, e não há nada para escolher.',
-    'Baixe o JPG, ou o ZIP quando tiver convertido várias.',
+    'Baixe o JPG.',
   ],
   specsHeading: 'Especificações',
   specs: {
@@ -19,7 +19,7 @@ export default {
       ['Aceita', 'Arquivos AVIF, reconhecidos pelo conteúdo do arquivo e não pelo nome.'],
       ['Saída', 'JPG. Sai um arquivo para cada AVIF.'],
       ['Transparência', 'O JPG não tem transparência, então ela fica branca, e o resultado avisa.'],
-      ['Tamanho', 'Um JPG da mesma imagem costuma ficar maior que o AVIF, porque o AVIF comprime melhor.'],
+      ['Tamanho', 'Um JPG da mesma imagem costuma ficar maior que o AVIF.'],
       ['Lote', 'Sem limite de imagens. Uma imagem é baixada direto, e várias vêm num só ZIP.'],
       ['Metadados', 'Exif, XMP, IPTC e GPS são removidos, e a orientação da foto é aplicada.'],
     ],
@@ -36,11 +36,7 @@ export default {
     },
     {
       q: 'Converter AVIF em JPG diminui a qualidade?',
-      a: 'O JPG comprime com perda, então o arquivo novo não é uma cópia perfeita, e ele costuma ficar maior que o AVIF. Guarde o AVIF se você precisar do original.',
-    },
-    {
-      q: 'O que acontece com um fundo transparente?',
-      a: 'O JPG não guarda transparência, então o FileOrca preenche essas áreas com branco, e o resultado avisa.',
+      a: 'O JPG comprime com perda, então o arquivo novo não é uma cópia perfeita. Guarde o AVIF se você precisar do original.',
     },
     {
       q: 'Por que algumas imagens vêm em AVIF?',
@@ -49,7 +45,7 @@ export default {
   ],
   privacyHeading: 'Privacidade',
   privacyNote:
-    'Suas imagens são convertidas no seu aparelho e nunca são enviadas a um servidor. Os arquivos JPG deixam de fora os metadados da foto, inclusive a localização GPS.',
+    'Suas imagens são convertidas no seu aparelho e nunca são enviadas a um servidor.',
   relatedHeading: 'Mais ferramentas de imagem',
   panel: {
     formats: 'AVIF',

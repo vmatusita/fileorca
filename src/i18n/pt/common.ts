@@ -34,6 +34,8 @@ export default {
     terms: 'Termos',
     licenses: 'Licenças',
     contact: 'Contato',
+    whatsNew: 'Novidades',
+    howItWorks: 'Como funciona',
     utilityColumn: 'Utilidades',
     guidesAll: 'Todos os guias',
     tools: {
@@ -48,6 +50,10 @@ export default {
     guidesTopicsRest: 'de guias',
     coffee: 'Me ajude a manter o FileOrca grátis: paga um café?',
     signature: 'Feito por {name} em {city}',
+  },
+  trust: {
+    updated: 'Atualizado em {date}',
+    howToCheck: 'Como conferir',
   },
   cookie: {
     title: 'Cookies',

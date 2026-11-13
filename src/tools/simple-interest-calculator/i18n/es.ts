@@ -46,7 +46,7 @@ export default {
   formulaHeading: 'La fórmula',
   formula: [
     'I = P × r × t, donde P es el capital, r la tasa anual y t el tiempo en años: meses ÷ 12, o días ÷ 365. El total es P + I.',
-    'A diferencia del interés compuesto, los intereses no ganan intereses, así que crecen lo mismo cada año.',
+    'Los intereses crecen lo mismo cada año.',
   ],
   premisesHeading: 'Supuestos',
   exampleHeading: 'Ejemplo resuelto',
@@ -68,19 +68,19 @@ export default {
   faq: [
     {
       q: '¿Qué diferencia hay entre el interés simple y el compuesto?',
-      a: 'El interés simple se cobra solo sobre el capital. El interés compuesto también se cobra sobre los intereses ya sumados, así que crece más rápido con el tiempo.',
+      a: 'El interés compuesto también se cobra sobre los intereses ya sumados, así que con el tiempo crece más rápido que el simple.',
     },
     {
       q: '¿Qué préstamos usan interés simple?',
       a: 'Muchos préstamos cortos y algunos préstamos para auto cobran intereses sobre lo que debes, sin sumar al saldo los intereses no pagados. Revisa cómo los cuenta tu contrato.',
     },
     {
-      q: '¿Por qué un año de 365 días?',
-      a: 'Es el año del calendario y el que la calculadora declara. Algunos bancos usan 360 días, lo que da un poco más de intereses por el mismo número de días.',
+      q: '¿Sirve para un préstamo que pago cada mes?',
+      a: 'No. Aquí todo el capital sigue prestado durante todo el tiempo. Un préstamo que pagas cada mes cobra intereses sobre un saldo que baja, y eso lo calcula la calculadora de amortización.',
     },
     {
       q: '¿El tiempo puede ser una fracción de año?',
-      a: 'Sí: elige meses o días. Dieciocho meses, por ejemplo, son un año y medio.',
+      a: 'Sí. Dieciocho meses, por ejemplo, cuentan como un año y medio.',
     },
   ],
   privacyHeading: 'Privacidad',

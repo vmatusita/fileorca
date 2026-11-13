@@ -66,7 +66,7 @@ export default {
   formulaHeading: 'La fórmula',
   formula: [
     'El pago de capital e intereses es M = P × r × (1 + r)^n ÷ ((1 + r)^n − 1). P es el préstamo (el precio menos el pago inicial), r es la tasa mensual (la tasa anual dividida entre 12) y n es el número de pagos mensuales.',
-    'Cada mes, los intereses son el saldo por r, redondeados al centavo. El resto del pago reduce el saldo, y el último pago es lo que falte para cerrarlo, así que puede diferir de los demás por unos centavos.',
+    'Cada mes, los intereses son el saldo por r, redondeados al centavo, y el resto del pago reduce el saldo.',
     'El total mensual suma una doceava parte de los impuestos sobre la propiedad y del seguro de cada año, más el PMI y la cuota de HOA.',
   ],
   premisesHeading: 'Supuestos',
@@ -92,24 +92,20 @@ export default {
   faqHeading: 'Preguntas sobre el pago de la hipoteca',
   faq: [
     {
-      q: '¿Qué incluye el pago mensual?',
-      a: 'El capital y los intereses, más una doceava parte de los impuestos sobre la propiedad y del seguro de la vivienda de cada año, y el seguro hipotecario privado (PMI) y la cuota de la asociación de propietarios (HOA) que escribas. Los prestamistas suelen llamar PITI a los cuatro primeros, y cobran los impuestos y el seguro a través de una cuenta de depósito en garantía.',
+      q: '¿Qué es el PITI?',
+      a: 'El capital, los intereses, los impuestos y el seguro: los prestamistas suelen llamar PITI a esas cuatro partes del pago, y cobran los impuestos y el seguro a través de una cuenta de depósito en garantía.',
     },
     {
       q: '¿Por qué el último pago es un poco distinto?',
-      a: 'El pago se redondea al centavo, y los intereses de cada mes también. Después de cientos de pagos esos centavos se suman, así que el último pago es justo lo que falta para cerrar el saldo.',
+      a: 'Después de cientos de pagos, los centavos que se ganan o se pierden al redondear se suman, así que el último pago es justo lo que falta para cerrar el saldo y puede diferir de los demás por unos centavos.',
     },
     {
       q: '¿De dónde sale la tasa de interés?',
-      a: 'La escribes tú. El valor inicial es un ejemplo, no una cotización. Usa la tasa de tu Estimación de Préstamo, o prueba varias tasas para ver cuánto cambia el pago con cada punto.',
+      a: 'El valor inicial es un ejemplo, no una cotización. Usa la tasa de tu Estimación de Préstamo, o prueba varias tasas para ver cuánto cambia el pago con cada punto.',
     },
     {
-      q: '¿Cuándo se quita el PMI?',
-      a: 'En la mayoría de los préstamos convencionales puedes pedir que se cancele cuando el saldo llega al 80 % del valor original, y termina solo al 78 %. La calculadora mantiene el monto que escribes durante todo el plazo; ponlo en cero para ver el pago sin él.',
-    },
-    {
-      q: '¿Puedo compartir o guardar mis números?',
-      a: 'El botón Copiar enlace pone tus números después del # de la dirección, así que la misma página se abre con ellos. Los botones Descargar PDF y CSV guardan lo que escribiste, el resultado y la tabla completa en tu dispositivo.',
+      q: '¿Cómo veo el pago cuando ya no tenga PMI?',
+      a: 'Pon el PMI al mes en cero. El pago mensual muestra entonces lo que pagarías sin él, con el mismo capital e intereses, los mismos impuestos y seguro y la misma cuota de HOA.',
     },
   ],
   privacyHeading: 'Privacidad',

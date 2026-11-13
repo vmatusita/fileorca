@@ -60,13 +60,12 @@ export default {
       heading: 'Why an extra payment saves interest',
       paragraphs: [
         'Interest is charged on the balance. An extra payment lowers the balance at once, so every later month charges a little less interest, and more of the same regular payment goes to principal. The effect adds up: early extras save more than late ones, because they shorten more months of interest.',
-        "The regular payment doesn't change. What changes is the last payment number: the loan simply ends sooner.",
       ],
     },
     {
       heading: 'Before you pay extra',
       paragraphs: [
-        'Ask your servicer to apply the extra to principal, and check that the loan has no prepayment penalty. Some people keep an emergency fund or pay off higher-rate debts first; the debt payoff calculator compares those debts.',
+        'Ask your servicer to apply the extra to principal. Some people keep an emergency fund or pay off higher-rate debts first; the debt payoff calculator compares those debts.',
       ],
     },
   ],
@@ -89,11 +88,11 @@ export default {
   faq: [
     {
       q: 'Is it better to pay extra monthly or once a year?',
-      a: 'The same total paid earlier saves a little more, because it lowers the balance sooner. Try both in the calculator with the same yearly amount.',
+      a: 'Paying monthly saves a little more than paying the same total once a year. Try both in the calculator.',
     },
     {
       q: 'Does an extra payment lower my monthly payment?',
-      a: 'No. On a regular fixed-rate loan the payment stays the same and the loan ends earlier. A recast, which some lenders offer for a fee, is a different thing.',
+      a: 'No. A recast, which some lenders offer for a fee, is a different thing.',
     },
     {
       q: 'Can a lender charge me for paying early?',
@@ -101,7 +100,7 @@ export default {
     },
     {
       q: 'Does the lump sum have to be in the first year?',
-      a: 'No. Pick the payment number it goes with; a lump sum later in the loan saves less interest than the same amount early on.',
+      a: 'No. It can go with any payment of the term, up to the last one.',
     },
   ],
   privacyHeading: 'Privacy',

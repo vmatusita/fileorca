@@ -36,14 +36,14 @@ export default {
   howSteps: [
     'Escribe el monto del préstamo, la tasa anual y el plazo en años.',
     'Mira el pago mensual y cuánto del total se va en intereses.',
-    'Abre la tabla: cada año muestra su saldo, y al abrir un año ves sus pagos.',
+    'Abre la tabla y cualquiera de sus años.',
     'Guarda la tabla en PDF o CSV para abrirla en una hoja de cálculo.',
   ],
   worksHeading: 'Cómo funciona la amortización',
   formulaHeading: 'La fórmula',
   formula: [
     'El pago es M = P × r × (1 + r)^n ÷ ((1 + r)^n − 1), donde P es el monto, r es la tasa anual dividida entre 12 y n es el número de meses.',
-    'Cada mes, intereses = saldo × r, redondeados al centavo; capital = M − intereses; el saldo nuevo es el anterior menos ese capital. Los primeros pagos son casi todo intereses; los últimos, casi todo capital.',
+    'Cada mes, intereses = saldo × r, redondeados al centavo; capital = M − intereses; el saldo nuevo es el anterior menos ese capital.',
   ],
   premisesHeading: 'Supuestos',
   exampleHeading: 'Ejemplo resuelto',
@@ -70,12 +70,12 @@ export default {
       a: 'El saldo que queda al final de ese año del préstamo. Abre un año para ver sus pagos uno por uno: el monto, el capital, los intereses y el saldo después de cada uno.',
     },
     {
-      q: '¿Por qué el último pago es distinto?',
-      a: 'El pago y los intereses de cada mes se redondean al centavo, y el último pago cierra lo que quede, así que puede ser unos centavos más o menos.',
+      q: '¿Un plazo más largo cuesta más?',
+      a: 'Con cualquier tasa mayor que cero, sí. Cada pago es más bajo, pero el saldo baja más despacio, así que los intereses se cobran sobre más dinero durante más meses. Prueba el mismo monto con varios plazos y compara los intereses en la frase.',
     },
     {
       q: '¿Sirve para cualquier préstamo?',
-      a: 'Para cualquier préstamo con tasa fija y pagos mensuales iguales: una hipoteca, un préstamo para auto, un préstamo personal o estudiantil. Un préstamo con un pago global al final tiene su propia calculadora.',
+      a: 'Una hipoteca, un préstamo para auto, un préstamo personal o estudiantil: cualquier préstamo que cumpla los supuestos de arriba.',
     },
   ],
   privacyHeading: 'Privacidad',

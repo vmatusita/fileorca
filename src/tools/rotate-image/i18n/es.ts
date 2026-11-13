@@ -8,8 +8,8 @@ export default {
   howHeading: 'Cómo rotar una imagen',
   howSteps: [
     'Suelta tus imágenes en el cuadro, elígelas o pégalas con Ctrl V.',
-    'Elige 90° a la derecha, 90° a la izquierda o 180°, y agrega un reflejo si quieres. Para solo reflejar, sin rotar, usa Reflejar imagen.',
-    'Descarga la imagen rotada, o el ZIP si rotaste varias.',
+    'Elige el giro, y agrega un reflejo si quieres.',
+    'Descarga la imagen rotada.',
   ],
   specsHeading: 'Especificaciones',
   specs: {
@@ -19,7 +19,7 @@ export default {
       ['Acepta', 'JPG, PNG y WebP, reconocidos por el contenido del archivo y no por el nombre. Las fotos HEIC pasan antes por HEIC a JPG, y los archivos AVIF, por AVIF a JPG.'],
       ['Rotar', '90° a la derecha, que es la opción predeterminada, 90° a la izquierda o 180°.'],
       ['Reflejar', 'Ninguno, que es la opción predeterminada, Horizontal o Vertical. Aquí el reflejo se combina con un giro; para solo reflejar, sin rotar, usa Reflejar imagen.'],
-      ['Lote', 'La rotación y el reflejo que elijas se aplican a todas las imágenes del lote. Sin límite de imágenes.'],
+      ['Lote', 'La rotación y el reflejo que elijas se aplican a todas las imágenes del lote. Sin límite de imágenes, y varias llegan en un solo ZIP.'],
       ['Punto de partida', 'Primero se aplica la orientación de la foto, así que rotas la imagen tal como la muestra un visor normal y no sus píxeles en bruto.'],
       ['Resultado', 'El mismo formato del archivo que soltaste, con los mismos píxeles girados. Un giro de 90° intercambia el ancho y el alto. PNG y WebP conservan su transparencia.'],
       ['Calidad', 'JPG y WebP se guardan de nuevo después del giro. El PNG se guarda sin pérdida.'],
@@ -30,19 +30,15 @@ export default {
   faq: [
     {
       q: '¿Por qué mi foto se ve de lado en una app y derecha en otra?',
-      a: 'Muchos teléfonos y cámaras guardan los píxeles en una dirección y agregan una pequeña etiqueta, llamada orientación, que dice cómo girar la imagen. Las apps que leen la etiqueta la muestran derecha, y las que la ignoran la muestran de lado. FileOrca aplica la etiqueta al guardar el archivo nuevo, así que los píxeles quedan bien y no queda ninguna etiqueta que se pueda leer mal.',
+      a: 'Muchos teléfonos y cámaras guardan los píxeles en una dirección y agregan una pequeña etiqueta, llamada orientación, que dice cómo girar la imagen. Las apps que leen la etiqueta la muestran derecha, y las que la ignoran la muestran de lado.',
     },
     {
       q: '¿Rotar un JPG baja su calidad?',
-      a: 'Un JPG o un WebP se guarda de nuevo después del giro, así que pasa una vez más por una compresión con pérdida. El PNG se guarda sin pérdida. Conserva tu original y rota una sola vez en lugar de hacerlo en varios pasos.',
-    },
-    {
-      q: '¿Cómo roto varias fotos a la vez?',
-      a: 'Suéltalas todas juntas. La rotación y el reflejo que elijas se aplican a todo el lote, y la descarga es un solo ZIP.',
+      a: 'Un poco, y la pérdida se suma cada vez que se guarda el archivo, así que conserva tu original y rota una sola vez en lugar de hacerlo en varios pasos.',
     },
     {
       q: '¿Cuál es la diferencia entre rotar y reflejar?',
-      a: 'Rotar gira la imagen alrededor de su centro, como girar una foto impresa sobre una mesa. Reflejar la voltea como si la vieras en un espejo: Horizontal intercambia la izquierda y la derecha, y Vertical intercambia arriba y abajo. El texto de una imagen reflejada se lee al revés. Para reflejar una imagen sin rotarla, usa Reflejar imagen.',
+      a: 'Rotar gira la imagen alrededor de su centro, como girar una foto impresa sobre una mesa. Reflejar la voltea como si la vieras en un espejo: Horizontal intercambia la izquierda y la derecha, y Vertical intercambia arriba y abajo. El texto de una imagen reflejada se lee al revés.',
     },
     {
       q: '¿Puedo rotar una imagen 45° o en otro ángulo?',
@@ -51,7 +47,7 @@ export default {
   ],
   privacyHeading: 'Privacidad',
   privacyNote:
-    'Tus imágenes se rotan en tu navegador, y tus archivos nunca salen de tu dispositivo ni llegan a un servidor. Las copias guardadas omiten los metadatos de la foto, incluida la ubicación GPS.',
+    'Tus imágenes se rotan en tu navegador, y tus archivos nunca salen de tu dispositivo ni llegan a un servidor.',
   relatedHeading: 'Más herramientas de imagen',
   // F18 (decision 5; DECISOES § 725): the table of the presets of this tool, with their links.
   presets: {

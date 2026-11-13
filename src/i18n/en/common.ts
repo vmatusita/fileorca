@@ -35,6 +35,8 @@ export default {
     terms: 'Terms',
     licenses: 'Licenses',
     contact: 'Contact',
+    whatsNew: "What's new",
+    howItWorks: 'How it works',
     guidesAll: 'All guides',
     tools: {
       all: 'All {n}',
@@ -50,6 +52,10 @@ export default {
     guidesTopicsRest: 'of guides',
     coffee: 'Help keep FileOrca free: buy me a coffee',
     signature: 'Made by {name} in {city}',
+  },
+  trust: {
+    updated: 'Updated {date}',
+    howToCheck: 'How to check',
   },
   cookie: {
     title: 'Cookies',

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { compareAlternates, validateHreflang, validateSitemap, type PageHead } from '../../scripts/lib/seo-checks.ts';
 import { alternatesFor, collectionPageLd, graph } from '../../src/seo/meta.ts';
-import { sitemapIndexXml, sitemapUrls, sitemapXml } from '../../src/seo/sitemap.ts';
+import { sitemapEntries, sitemapIndexXml, sitemapUrls, sitemapXml } from '../../src/seo/sitemap.ts';
 import { QR_ID, ROUTES, routeById, type RouteDef, type RouteId } from '../../src/i18n/routes.ts';
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { BR_CALC_IDS, BR_HUB_ID, CALC_PAGE_IDS, GUIDE_IDS, HEALTH_HUB_ID, HOUSE_HUB_ID, LIFE_CALC_IDS, MONEY_HUB_ID, isBrCalc } from '../../src/tools/calc/registry.ts';
@@ -87,7 +87,9 @@ describe('sitemaps', () => {
   // the institutional ones (19 before), and the other 13 pages of the image area in Portuguese and Spanish (11 before).
   // F18 (DECISOES § 743): Remove EXIF data and Flip image in the image area (23 in English, the other 15 in pt and es), and
   // Organize PDF and the 2 PDF presets in the PDF area (16: the hub, 13 tools and 2 presets; 13 before), in each language.
-  const SIZES = { en: 23 + 24 + 16 + 10 + f7Rows.length + 1, pt: 8 + 15 + 16 + brRows + 1 + 10 + 1, es: 8 + 15 + 16 + 1 + CALC_PAGE_IDS.length + GUIDE_IDS.length + 1 + 10 + 1 } as const;
+  // F19a (decisions 2 and 7; DECISOES § 752): What's new and How it works, one page each in every language (the institutional
+  // part grows by 2: 25 in English with the image area, 10 in Portuguese and Spanish).
+  const SIZES = { en: 25 + 24 + 16 + 10 + f7Rows.length + 1, pt: 10 + 15 + 16 + brRows + 1 + 10 + 1, es: 10 + 15 + 16 + 1 + CALC_PAGE_IDS.length + GUIDE_IDS.length + 1 + 10 + 1 } as const;
 
   it('builds one valid sitemap per language and an index, with the counts of the route map', () => {
     expect([0, 1 + BR_CALC_IDS.length]).toContain(brRows);
@@ -140,12 +142,60 @@ describe('sitemaps', () => {
   });
 
   it('flags missing, extra, duplicated and foreign URLs', () => {
-    const xml = sitemapXml('en').replace('</urlset>', `  <url><loc>${O}/</loc></url>\n  <url><loc>https://evil.test/</loc></url>\n</urlset>`);
+    // F19a (DECISOES § 753): the extra entries carry a <lastmod>, as every entry of the sitemap does now.
+    const xml = sitemapXml('en').replace('</urlset>', `  <url><loc>${O}/</loc><lastmod>2026-11-13</lastmod></url>\n  <url><loc>https://evil.test/</loc><lastmod>2026-11-13</lastmod></url>\n</urlset>`);
     const problems = validateSitemap(xml, [...sitemapUrls('en'), `${O}/missing/`], O).join('\n');
     expect(problems).toMatch(/repetida/);
     expect(problems).toMatch(/fora do domínio/);
     expect(problems).toMatch(/faltam/);
     expect(problems).toMatch(/sobram/);
+  });
+
+  // F19a (decision 3; DECISOES § 753 and § 757): the mutants of the <lastmod>. The real sitemaps pass with the rules of the
+  // gate (the build day and the dates of the changelog); each mutant breaks one rule and is caught by it.
+  describe('the <lastmod> of every <url>', () => {
+    const lang = 'pt' as const;
+    const entries = sitemapEntries(lang);
+    const lastmods = new Map(entries.map((entry) => [entry.url, entry.lastmod]));
+    const today = [...lastmods.values()].sort().at(-1) ?? '';
+    const [first] = entries;
+    const url = first?.url ?? '';
+    const real = sitemapXml(lang);
+    const tag = `<loc>${url}</loc><lastmod>${first?.lastmod}</lastmod>`;
+    const mutate = (to: string) => {
+      expect(real).toContain(tag);
+      return real.replace(tag, () => to);
+    };
+
+    it('passes on the real sitemaps with the build day and the changelog', () => {
+      for (const each of ['en', 'pt', 'es'] as const) {
+        const map = new Map(sitemapEntries(each).map((entry) => [entry.url, entry.lastmod]));
+        expect(validateSitemap(sitemapXml(each), sitemapUrls(each), O, { today, lastmods: map }), each).toEqual([]);
+      }
+    });
+
+    it('fails a <url> without <lastmod>', () => {
+      expect(validateSitemap(mutate(`<loc>${url}</loc>`), sitemapUrls(lang), O, { today, lastmods }).join('\n')).toMatch(/sem <loc> e <lastmod>/);
+    });
+
+    it('fails a <lastmod> out of the form AAAA-MM-DD, or a day that does not exist', () => {
+      for (const bad of ['13/11/2026', '2026-11-13T10:00:00Z', '2026-02-30', '']) {
+        expect(validateSitemap(mutate(`<loc>${url}</loc><lastmod>${bad}</lastmod>`), sitemapUrls(lang), O, { today, lastmods }).join('\n'), bad).toMatch(/fora do formato AAAA-MM-DD/);
+      }
+    });
+
+    it('fails a <lastmod> after the day of the build', () => {
+      const yesterday = new Date(Date.parse(`${today}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10);
+      expect(validateSitemap(real, sitemapUrls(lang), O, { today: yesterday, lastmods }).join('\n')).toMatch(/depois do dia do build/);
+      expect(validateSitemap(mutate(`<loc>${url}</loc><lastmod>2099-01-01</lastmod>`), sitemapUrls(lang), O, { today, lastmods }).join('\n')).toMatch(/depois do dia do build/);
+    });
+
+    it('fails a <lastmod> other than the one the changelog gives the page', () => {
+      const other = first?.lastmod === '2026-11-01' ? '2026-11-02' : '2026-11-01';
+      const problems = validateSitemap(mutate(`<loc>${url}</loc><lastmod>${other}</lastmod>`), sitemapUrls(lang), O, { today, lastmods }).join('\n');
+      expect(problems).toMatch(/o changelog diz/);
+      expect(problems).not.toMatch(/fora do formato|depois do dia do build/);
+    });
   });
 
   it('escapes the JSON-LD so a text cannot close the script tag', () => {

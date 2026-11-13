@@ -11,21 +11,21 @@ const texts: PdfToolTexts<NumbersTexts> = {
   h1: 'Numerar páginas de PDF',
   howHeading: 'Cómo funciona',
   howSteps: [
-    'Suelta tus PDF en el cuadro, elígelos o pégalos con Ctrl V, todos los que quieras.',
-    'Elige dónde va el número, qué formato usa y desde qué número empieza, y Oli numera cada archivo en tu navegador y rehace el lote si cambias algo.',
-    'Descarga un PDF o todos juntos en un ZIP; tus archivos originales no se tocan.',
+    'Suelta tus PDF en el cuadro, elígelos o pégalos con Ctrl V.',
+    'Elige dónde va el número, qué formato usa y desde qué número empieza, y Oli numera cada archivo y rehace el lote si cambias algo.',
+    'Descarga los PDF numerados.',
   ],
   specsHeading: 'Qué entra y qué sale',
   specs: {
     caption: 'Lo que Numerar páginas de PDF recibe y entrega',
     head: ['Detalle', 'Qué pasa'],
     rows: [
-      ['Qué acepta', 'Archivos PDF, todos los que quieras. Oli revisa lo que hay dentro del archivo, no su nombre.'],
+      ['Qué acepta', 'Archivos PDF, todos los que quieras. Oli revisa lo que hay dentro del archivo, no su nombre. Dos o más vuelven juntos en un ZIP, y tus archivos originales no se tocan.'],
       ['Posición', 'Seis lugares: arriba o abajo, y a la izquierda, al centro o a la derecha. La opción predeterminada es abajo al centro.'],
       ['Formato', 'Cuatro formatos: 1, Página 1, Página 1 de 12 y 1 de 12. Las palabras "Página" y "de" salen en español.'],
       ['Primer número', 'Cualquier número entero de 1 a 9,999. El predeterminado es 1.'],
       ['Omitir la primera página', 'La primera página no lleva número, y la segunda recibe el primer número que elegiste. En los formatos con "de", el total es el número de la última página.'],
-      ['Aspecto del número', 'Helvetica, 10 pt, en negro, a 28 pt del borde de la página. Se mide sobre la página tal como se ve en pantalla, con el área de recorte y la rotación de cada página.'],
+      ['Aspecto del número', 'Helvetica, 10 pt, en negro, a 28 pt del borde de la página.'],
       ['Lo que se conserva', 'Los campos de formulario, los enlaces, los marcadores y los datos del documento quedan como estaban. Solo se quita la capa de formulario XFA, que leen algunas aplicaciones de escritorio; los campos de formulario normales siguen funcionando.'],
       ['Datos del documento', 'Se quedan el título, el autor y los datos XMP de tu archivo. Oli no agrega fecha, ni el nombre de un programa, ni nada de tu dispositivo.'],
       ['Contraseña o restricciones', 'Un PDF que necesita contraseña para abrirse, o que tiene restricciones de edición, se rechaza en su propia línea, con un enlace a Desbloquear PDF. Los demás archivos siguen adelante.'],
@@ -35,12 +35,12 @@ const texts: PdfToolTexts<NumbersTexts> = {
   faqHeading: 'Preguntas',
   faq: [
     {
-      q: '¿Cómo numero las páginas de un PDF?',
-      a: 'Suelta el PDF, elige dónde va el número y qué formato usa, y descarga el resultado. Oli escribe los números en las páginas en tu navegador y te da un archivo nuevo, y tu original queda como estaba.',
+      q: '¿Puedo numerar solo algunas páginas?',
+      a: 'Solo la primera página puede quedar sin número. Para numerar solo una parte del archivo, sácala con Dividir PDF, numérala aquí y después vuelve a juntar las partes con Unir PDF.',
     },
     {
-      q: '¿Puedo empezar a numerar desde un número distinto de 1?',
-      a: 'Sí. Escribe cualquier número entero de 1 a 9,999 como primer número. Para dejar una portada sin número, elige omitir la primera página: así la segunda página recibe el primer número que elegiste.',
+      q: '¿La numeración puede seguir la de otro archivo?',
+      a: 'Sí, con el primer número. Si la primera parte tiene 30 páginas, dale a la segunda el primer número 31, y sus páginas muestran 31, 32 y así sucesivamente.',
     },
     {
       q: '¿Qué pasa con las páginas giradas o recortadas?',
@@ -48,16 +48,11 @@ const texts: PdfToolTexts<NumbersTexts> = {
     },
     {
       q: '¿El número va a tapar algo de mis páginas?',
-      a: 'El número va en letra negra pequeña, a 28 pt del borde, y entra en el margen de la mayoría de los documentos. Si una página tiene contenido justo en el borde, el número puede quedar encima, así que revisa el resultado antes de enviarlo. Otra esquina suele dejar el espacio libre.',
-    },
-    {
-      q: '¿Mi PDF se sube a algún lugar?',
-      a: 'No. Oli lee y escribe el PDF en tu dispositivo, en tu navegador, y nada se envía a un servidor. Abre la pestaña Red de tu navegador mientras trabajas: ninguna solicitud lleva tu archivo.',
+      a: 'Puede, cuando una página tiene contenido justo en el borde: el número va en el margen, donde la mayoría de los documentos deja espacio. Revisa el resultado antes de enviarlo; otra esquina suele dejar el espacio libre.',
     },
   ],
   privacyHeading: 'Privacidad',
-  privacyNote:
-    'Tus PDF se numeran en tu dispositivo y nunca se envían a un servidor. El archivo nuevo conserva los datos del original y no recibe ninguno de tu dispositivo.',
+  privacyNote: 'Tus PDF se numeran en tu dispositivo y nunca se envían a un servidor.',
   relatedHeading: 'Herramientas relacionadas',
   panel: {
     suffix: 'numerado',

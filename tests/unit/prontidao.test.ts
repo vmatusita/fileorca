@@ -127,7 +127,8 @@ function makeSite(change: (dir: string) => void = () => {}, pdf = false): Site {
   write(dir, '/robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${ORIGIN}/sitemap-index.xml\n`);
   write(dir, '/sitemap-index.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${LANGS.map((lang) => `  <sitemap><loc>${ORIGIN}/sitemap-${lang}.xml</loc></sitemap>`).join('\n')}\n</sitemapindex>\n`);
   for (const lang of LANGS) {
-    const urls = pages.filter((page) => page.lang === lang && page.indexable).map((page) => `  <url><loc>${ORIGIN}${page.path}</loc></url>`);
+    // F19a (DECISOES § 753): every entry of a sitemap has its <lastmod>.
+    const urls = pages.filter((page) => page.lang === lang && page.indexable).map((page) => `  <url><loc>${ORIGIN}${page.path}</loc><lastmod>2026-11-13</lastmod></url>`);
     write(dir, `/sitemap-${lang}.xml`, `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`);
   }
   write(dir, '/_headers', "/*\n  X-Content-Type-Options: nosniff\n\nhttps://:version.:subdomain.workers.dev/*\n  X-Robots-Tag: noindex\n\n/404\n  X-Robots-Tag: noindex\n");
@@ -817,7 +818,7 @@ describe('gate:prontidao, (e) rastreável', () => {
   it('refuses a sitemap with a page that does not exist or is not indexable', () => {
     const site = makeSite((dir) => {
       rmSync(fileIn(dir, '/es/apoyo/'));
-      write(dir, '/sitemap-en.xml', readFileSync(join(dir, 'sitemap-en.xml'), 'utf8').replace('</urlset>', `  <url><loc>${ORIGIN}/404.html</loc></url>\n</urlset>`));
+      write(dir, '/sitemap-en.xml', readFileSync(join(dir, 'sitemap-en.xml'), 'utf8').replace('</urlset>', `  <url><loc>${ORIGIN}/404.html</loc><lastmod>2026-11-13</lastmod></url>\n</urlset>`));
     });
     const problems = failing(checkCrawlable(site)).join('\n');
     expect(problems).toMatch(/sitemap-es\.xml: https:\/\/fileorca\.com\/es\/apoyo\/ não existe no build/);

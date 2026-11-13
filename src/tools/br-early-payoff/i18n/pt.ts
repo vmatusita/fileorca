@@ -74,15 +74,15 @@ export default {
   faq: [
     {
       q: 'É melhor reduzir o prazo ou a parcela?',
-      a: 'Reduzir o prazo costuma economizar mais juros, porque o saldo some mais cedo. Reduzir a parcela deixa o orçamento do mês mais folgado. A calculadora mostra os dois lado a lado para você decidir.',
+      a: 'Reduzir o prazo costuma economizar mais juros, porque o saldo some mais cedo. Reduzir a parcela deixa o orçamento do mês mais folgado.',
     },
     {
-      q: 'O banco pode cobrar para eu antecipar?',
-      a: 'Não. Desde 2007 é proibido cobrar tarifa pela liquidação antecipada de contratos com pessoas físicas, e o Código de Defesa do Consumidor garante a redução proporcional dos juros quando você paga antes.',
+      q: 'O que o Código de Defesa do Consumidor garante a quem antecipa?',
+      a: 'A redução proporcional dos juros e dos demais acréscimos quando você paga antes do prazo, no todo ou em parte.',
     },
     {
       q: 'Onde eu vejo o saldo devedor e os meses que faltam?',
-      a: 'No aplicativo ou no extrato do financiamento, ou pedindo ao banco o valor para amortização. Use o saldo de hoje, sem as parcelas atrasadas.',
+      a: 'No aplicativo ou no extrato do financiamento, ou pedindo ao banco o valor para amortização, sem as parcelas atrasadas.',
     },
     {
       q: 'Vale a pena antecipar ou investir o dinheiro?',
@@ -90,7 +90,7 @@ export default {
     },
     {
       q: 'E se o contrato tem TR?',
-      a: 'A conta aqui é para taxa prefixada. Num financiamento com TR, o saldo também é corrigido todo mês, e o banco faz a conta com a TR do contrato. O simulador SAC × PRICE mostra o efeito da TR.',
+      a: 'Num financiamento com TR, o saldo também é corrigido todo mês. O simulador SAC × PRICE mostra o efeito dela.',
     },
   ],
   privacyHeading: 'Privacidade',

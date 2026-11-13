@@ -19,6 +19,16 @@ export default {
   linksHeading: 'Find Victor online',
   websiteLabel: "Victor's website",
   linkedinLabel: 'Victor on LinkedIn',
+  // F19a (decision 5; DECISOES § 758): the day the site went live comes from LAUNCH_DATE, never typed here.
+  since:
+    'FileOrca went live on {date}. The {whatsNew} page lists the changes since then, with their dates, and the {howItWorks} page shows what happens to your file and how to check it in your browser.',
+  // F19a (decision 6; DECISOES § 763): the author box at the end of every guide.
+  author: {
+    heading: 'About the author',
+    who: '{name} is a developer in Curitiba, Brazil, who makes and runs FileOrca on his own.',
+    fileGuide: 'The numbers of this guide were measured on {date} with the engine of the tools of this site, on the test files the guide lists.',
+    moneyGuide: 'The numbers of this guide come from the calculator inside it, whose math is checked against an independent calculation.',
+  },
   stats: {
     heading: 'FileOrca in numbers',
     image: 'image tools',

@@ -9,6 +9,8 @@ import AboutView from '../../src/views/AboutView.astro';
 import ContactView from '../../src/views/ContactView.astro';
 import LicensesView from '../../src/views/LicensesView.astro';
 import SupportView from '../../src/views/SupportView.astro';
+import WhatsNewView from '../../src/views/WhatsNewView.astro';
+import HowItWorksView from '../../src/views/HowItWorksView.astro';
 import HomeView from '../../src/views/HomeView.astro';
 import NotFoundView from '../../src/views/NotFoundView.astro';
 import GuidesHubView from '../../src/views/GuidesHubView.astro';
@@ -59,6 +61,9 @@ const NO_ADS = [
   ['contact', ContactView, {}],
   ['licenses', LicensesView, {}],
   ['support', SupportView, {}],
+  // F19a (decisions 2 and 7; DECISOES § 752): the two new pages have no ad area, so no ad either.
+  ['whats-new', WhatsNewView, {}],
+  ['how-it-works', HowItWorksView, {}],
   ['404', NotFoundView, {}],
 ] as const;
 // F12 (decision 3; DECISOES § 423): the home and the guides hub (born with no AdSlot in the F11) have the ads of the map

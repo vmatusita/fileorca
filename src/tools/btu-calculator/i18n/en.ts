@@ -68,19 +68,19 @@ export default {
     },
     {
       q: 'Why is a room of exactly 150 sq ft in the 6,000 row?',
-      a: 'Each Energy Star row runs from its first number up to the next one, without including it, so 150 sq ft starts the row of 150 up to 250. Only the last row includes its top, 2,500 sq ft.',
+      a: '150 sq ft is the first number of the row of 150 up to 250, not the end of the row of 100 up to 150.',
     },
     {
-      q: 'In what order are the adjustments made?',
-      a: 'Energy Star lists them without an order. This page takes the sun first, as 10% of the table value, then adds 600 for each person past two and 4,000 for a kitchen. A very sunny room of 9,000 gets 900 more, whatever the people and the kitchen add.',
+      q: 'Does the order of the adjustments matter?',
+      a: 'Only for the sunlight: a very sunny room of 9,000 gets 900 more, whatever the people and the kitchen add.',
     },
     {
       q: 'What if my room is larger than 2,500 sq ft?',
-      a: 'The Energy Star table stops at 2,500 sq ft, and so does the calculator. A larger space, or a whole home, needs a cooling load calculation by an HVAC professional.',
+      a: 'The calculator stops where the Energy Star table does. A larger space, or a whole home, needs a cooling load calculation by an HVAC professional.',
     },
     {
       q: 'Does the ceiling height matter?',
-      a: 'Yes. Energy Star calculates the capacities for an 8-foot ceiling. A room with a higher ceiling has more air to cool, so ask a professional before you buy.',
+      a: 'Yes. A higher ceiling holds more air to cool than the Energy Star table counts on.',
     },
   ],
   privacyHeading: 'Privacy',

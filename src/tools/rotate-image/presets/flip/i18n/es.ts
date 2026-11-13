@@ -11,8 +11,8 @@ export default {
   howHeading: 'Cómo reflejar una imagen',
   howSteps: [
     'Suelta tus imágenes en el cuadro, elígelas o pégalas con Ctrl V.',
-    'Deja Horizontal para intercambiar la izquierda y la derecha, o elige Vertical para intercambiar arriba y abajo.',
-    'Descarga la imagen reflejada, o el ZIP si reflejaste varias.',
+    'Deja Horizontal, o elige Vertical.',
+    'Descarga la imagen reflejada.',
   ],
   specsHeading: 'Qué hace el reflejo',
   specs: {
@@ -24,7 +24,7 @@ export default {
       ['Vertical', 'Arriba y abajo cambian de lugar, como en el reflejo de la imagen en el agua quieta.'],
       ['Sin rotación', 'La imagen solo se refleja, nunca se gira. Para girarla también, Rotar imagen combina un giro con un reflejo.'],
       ['Punto de partida', 'Primero se aplica la orientación de la foto, así que el reflejo voltea la imagen tal como la ves y no sus píxeles en bruto.'],
-      ['Lote', 'El reflejo que elijas se aplica a todas las imágenes del lote, sin límite de imágenes.'],
+      ['Lote', 'El reflejo que elijas se aplica a todas las imágenes del lote, sin límite de imágenes, y varias llegan en un solo ZIP.'],
       ['Resultado', 'El mismo formato y el mismo ancho y alto de la imagen que ves. PNG y WebP conservan su transparencia.'],
       ['Calidad', 'JPG y WebP se guardan de nuevo después del reflejo. El PNG se guarda sin pérdida.'],
       ['Metadatos', 'Se eliminan Exif, XMP, IPTC y GPS, y no queda ninguna etiqueta de orientación que se lea dos veces.'],
@@ -34,11 +34,11 @@ export default {
   faq: [
     {
       q: '¿Cuál es la diferencia entre reflejar y rotar una imagen?',
-      a: 'Rotar gira la imagen alrededor de su centro. Reflejar la voltea como un espejo: Horizontal intercambia la izquierda y la derecha, y Vertical intercambia arriba y abajo. El texto de una imagen reflejada se lee al revés.',
+      a: 'Rotar gira la imagen alrededor de su centro, y reflejar la voltea como un espejo, así que el texto de una imagen reflejada se lee al revés.',
     },
     {
       q: '¿Cómo arreglo una selfie que salió reflejada?',
-      a: 'Deja Horizontal. La izquierda y la derecha cambian de lugar, así que el texto que se leía al revés en la foto vuelve a leerse bien.',
+      a: 'Deja Horizontal: el texto que se leía al revés en la foto vuelve a leerse bien.',
     },
     {
       q: '¿Reflejar en vertical es lo mismo que poner la imagen de cabeza?',
@@ -46,16 +46,12 @@ export default {
     },
     {
       q: '¿Reflejar un JPG baja su calidad?',
-      a: 'Un JPG o un WebP se guarda de nuevo después del reflejo, así que pasa una vez más por una compresión con pérdida. El PNG se guarda sin pérdida. Refleja una sola vez a partir de tu original en lugar de hacerlo varias veces.',
-    },
-    {
-      q: '¿Puedo reflejar varias imágenes a la vez?',
-      a: 'Sí. Suéltalas juntas. El reflejo que elijas se aplica a todo el lote, y la descarga es un solo ZIP.',
+      a: 'Un poco, y la pérdida se suma cada vez que se guarda el archivo, así que refleja una sola vez a partir de tu original en lugar de hacerlo varias veces.',
     },
   ],
   privacyHeading: 'Privacidad',
   privacyNote:
-    'Tus imágenes se reflejan en tu dispositivo y nunca se envían a un servidor. Las copias reflejadas omiten los metadatos de la foto, incluida la ubicación GPS.',
+    'Tus imágenes se reflejan en tu dispositivo y nunca se envían a un servidor.',
   relatedHeading: 'Más herramientas de imagen',
   panel: {
     formats: 'JPG, PNG o WebP',

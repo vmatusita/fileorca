@@ -86,11 +86,11 @@ export default {
     },
     {
       q: '¿Por qué la calculadora suma intereses cada mes aunque la capitalización sea anual?',
-      a: 'Los depósitos son mensuales, así que el saldo se actualiza cada mes a la tasa mensual que da el mismo resultado anual. Es una convención declarada, así que un estado de cuenta del banco puede variar por unos centavos.',
+      a: 'Porque los depósitos son mensuales, el saldo tiene que actualizarse cada mes. Es una convención declarada, así que un estado de cuenta del banco puede variar por unos centavos.',
     },
     {
       q: '¿La tasa es un rendimiento que puedo esperar?',
-      a: 'No. Es un número que tú eliges para ver qué pasaría. Una cuenta de ahorros paga una tasa declarada; una inversión puede ganar más, menos o perder dinero.',
+      a: 'No. Una cuenta de ahorros paga una tasa declarada; una inversión puede ganar más, menos o perder dinero.',
     },
   ],
   privacyHeading: 'Privacidad',

@@ -80,19 +80,19 @@ export default {
   faq: [
     {
       q: 'Does a lower payment mean consolidation saves money?',
-      a: 'Not on its own. A longer term can lower the payment while the total interest goes up. Compare the total paid on both sides, not only the monthly payment.',
+      a: 'Not on its own. A longer term can lower the payment while the total interest goes up.',
     },
     {
       q: 'How is the origination fee counted?',
-      a: 'Here it is added to the new loan, so you borrow enough to pay off every debt and the fee. Its cost shows in the interest and fees of the new loan.',
+      a: 'Its cost shows in the interest and fees of the new loan, and you pay interest on it along with the balances.',
     },
     {
       q: 'What if I keep using the cards after consolidating?',
-      a: 'Then new balances grow next to the loan. The calculator assumes nothing new is charged on the debts you pay off.',
+      a: 'Then new balances grow next to the loan, and you pay both.',
     },
     {
       q: 'Why does it ask for the payment I make now?',
-      a: 'The current side pays each debt with that payment until it is gone. A higher payment there shortens it and lowers its interest.',
+      a: 'It sets how fast each debt is paid off as it is. A higher payment there shortens it and lowers its interest.',
     },
   ],
   privacyHeading: 'Privacy',

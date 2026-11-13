@@ -12,9 +12,9 @@ const texts: PdfToolTexts<SplitTexts> = {
   howHeading: 'Cómo funciona',
   howSteps: [
     'Suelta un PDF en el cuadro, elígelo o pégalo.',
-    'Elige cómo dividirlo: cada página en su propio archivo, rangos de páginas como 1-3, 5, 8-10, o las páginas que marques en la cuadrícula de miniaturas, donde la lupa abre cada página en tamaño grande.',
-    'Presiona Dividir PDF y Oli corta el archivo en tu navegador.',
-    'Descarga el resultado: un solo archivo se descarga por separado, y varios archivos llegan juntos en un ZIP.',
+    'Elige cómo dividirlo: cada página en su propio archivo, rangos de páginas que escribes, o las páginas que marques en la cuadrícula de miniaturas, donde la lupa abre cada página en tamaño grande.',
+    'Presiona Dividir PDF y Oli corta el archivo.',
+    'Descarga el resultado.',
   ],
   specsHeading: 'Qué entra y qué sale',
   specs: {
@@ -36,24 +36,20 @@ const texts: PdfToolTexts<SplitTexts> = {
   faqHeading: 'Preguntas',
   faq: [
     {
-      q: '¿Cómo divido un PDF en páginas sueltas?',
-      a: 'Elige la opción Cada página y presiona Dividir PDF. Oli guarda cada página como su propio PDF, con el nombre de tu archivo y -pagina-1, -pagina-2 y así sucesivamente, y los archivos llegan juntos en un ZIP.',
-    },
-    {
-      q: '¿Cómo divido un PDF por números de página?',
-      a: 'Elige Rangos de páginas y escríbelos como 1-3, 5, 8-10. Recibes un PDF por cada rango: aquí, las páginas 1 a 3, después la página 5 y después las páginas 8 a 10. Los archivos se llaman -parte-1, -parte-2 y -parte-3, en el orden en que escribiste los rangos.',
+      q: '¿Los rangos pueden superponerse o pasar de la última página?',
+      a: 'Pueden superponerse, porque cada rango da su propio archivo: 1-3 y 2-4 dan dos archivos que tienen las páginas 2 y 3. Un rango tiene que ir de la página menor a la mayor y quedarse dentro de las páginas que tiene el PDF; si no, el campo te pide que lo corrijas.',
     },
     {
       q: '¿Puedo sacar solo algunas páginas a un PDF nuevo?',
-      a: 'Sí. Con la opción Elegir páginas, marca en la cuadrícula de miniaturas las páginas que quieres, y Oli las junta en un solo PDF con -seleccionadas en el nombre. Las páginas mantienen el orden que tienen en el original.',
+      a: 'Sí, con la opción Elegir páginas aquí o con Extraer páginas de PDF, que solo hace eso. En los dos casos las páginas salen en el orden que tienen en tu archivo, sin importar el orden en que las marques.',
     },
     {
-      q: '¿Los formularios y los marcadores sobreviven a la división?',
-      a: 'Cada parte conserva los campos de formulario, los marcadores y los enlaces entre páginas que pertenecen a sus propias páginas. Un enlace a una página que quedó en otra parte no tiene adónde ir, así que se descarta. Los enlaces a la web se quedan.',
+      q: '¿Cada parte pesa menos que mi PDF?',
+      a: 'Casi siempre. Una parte lleva solo sus propias páginas y lo que estas usan, como sus imágenes. Una fuente que comparten muchas páginas va a cada parte que la necesita, así que todas las partes juntas pueden pesar más que tu PDF.',
     },
     {
-      q: '¿Mi PDF se sube a algún lugar?',
-      a: 'No. El PDF se lee y se escribe en tu dispositivo, dentro de tu navegador, y nada se envía a un servidor. Abre la pestaña Red de tu navegador mientras divides: ninguna solicitud lleva tu archivo.',
+      q: '¿Las capas ocultas siguen ocultas en las partes?',
+      a: 'Sí. Cada parte conserva las capas que usan sus páginas, cada una visible u oculta como estaba en tu PDF, así que una capa que el autor ocultó sigue oculta.',
     },
   ],
   privacyHeading: 'Privacidad',

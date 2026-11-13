@@ -50,7 +50,7 @@ export default {
   howHeading: 'Como usar a calculadora do cartão',
   howSteps: [
     'Digite o valor da fatura e o pagamento mínimo, como aparecem na fatura.',
-    'Digite os juros do rotativo e do parcelamento ao mês, que também estão na fatura.',
+    'Digite os juros do rotativo e do parcelamento ao mês.',
     'Depois do resultado, ajuste o número de parcelas e o IOF do parcelamento.',
     'Compare os dois caminhos e baixe as parcelas em PDF ou CSV.',
   ],
@@ -72,16 +72,16 @@ export default {
   faqHeading: 'Perguntas sobre rotativo e parcelamento',
   faq: [
     {
-      q: 'Quanto tempo a dívida pode ficar no rotativo?',
-      a: 'Só até o vencimento da fatura seguinte. Depois disso o banco tem de oferecer um parcelamento com condições melhores que as do rotativo, e o que foi parcelado não volta para o rotativo.',
+      q: 'O que acontece depois do vencimento da fatura seguinte?',
+      a: 'Depois do vencimento da fatura seguinte, o banco tem de oferecer um parcelamento com condições melhores que as do rotativo, e o que foi parcelado não volta para o rotativo.',
     },
     {
-      q: 'O que é o teto de juros do cartão?',
-      a: 'Desde janeiro de 2024, os juros e encargos do rotativo e do parcelamento da fatura, somados, não podem passar do valor original da dívida. Uma dívida de R$ 1.000 paga no máximo R$ 1.000 de juros e encargos.',
+      q: 'Desde quando vale o teto e como fica numa dívida de R$ 1.000?',
+      a: 'Vale desde janeiro de 2024. Numa dívida de R$ 1.000, os juros e encargos do rotativo e do parcelamento da fatura, somados, chegam a no máximo R$ 1.000.',
     },
     {
-      q: 'O IOF conta no teto?',
-      a: 'A regra fala em juros remuneratórios e encargos, como multa e juros de mora. O IOF é um imposto, então a calculadora deixa o IOF fora do teto e mostra o valor dele junto do parcelamento.',
+      q: 'Por que o IOF fica fora do teto?',
+      a: 'Porque a regra fala em juros remuneratórios e encargos, como multa e juros de mora, e o IOF é um imposto, não é juro nem encargo.',
     },
     {
       q: 'Onde eu acho as taxas do rotativo e do parcelamento?',
@@ -89,7 +89,7 @@ export default {
     },
     {
       q: 'Pagar o mínimo é sempre pior?',
-      a: 'Quase sempre custa mais, porque o rotativo cobra juros altos no primeiro mês e o saldo ainda vai para o parcelamento. A calculadora mostra a diferença em reais com as taxas do seu cartão.',
+      a: 'Quase sempre custa mais, porque o rotativo cobra juros altos no primeiro mês. A calculadora mostra a diferença em reais com as taxas do seu cartão.',
     },
   ],
   privacyHeading: 'Privacidade',

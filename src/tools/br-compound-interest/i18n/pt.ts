@@ -47,7 +47,7 @@ export default {
   worksHeading: 'Como os juros compostos são calculados',
   formulaHeading: 'A conta',
   formula: [
-    'Todo mês o saldo rende os juros do mês, saldo × i, e recebe o aporte. No mês seguinte, os juros incidem também sobre os juros que já entraram: são os juros sobre juros.',
+    'Todo mês o saldo rende os juros do mês, saldo × i, e recebe o aporte.',
     'Com a taxa ao ano a, a taxa do mês é i = (1 + a)^(1/12) − 1: em 12 meses, essa taxa mensal rende exatamente a taxa anual. Sem arredondar, o saldo final seria V × (1 + i)^n + A × ((1 + i)^n − 1) ÷ i.',
   ],
   premisesHeading: 'Premissas',
@@ -67,11 +67,11 @@ export default {
     },
     {
       q: 'Por que 12% ao ano não é 1% ao mês?',
-      a: 'Porque 1% ao mês capitalizado por 12 meses dá 12,68% ao ano. A taxa mensal equivalente a 12% ao ano é cerca de 0,95%. A calculadora faz essa conversão sozinha quando você escolhe "Ao ano".',
+      a: 'Porque 1% ao mês capitalizado por 12 meses dá 12,68% ao ano. A taxa mensal equivalente a 12% ao ano é cerca de 0,95%.',
     },
     {
       q: 'O resultado já desconta o imposto de renda?',
-      a: 'Não. O imposto e as taxas dependem da aplicação e do prazo, e mudam com as regras do governo. O resultado é bruto; confira o líquido no simulador da sua corretora ou do seu banco.',
+      a: 'Não. O imposto e as taxas dependem da aplicação e do prazo, e mudam com as regras do governo; confira o líquido no simulador da sua corretora ou do seu banco.',
     },
     {
       q: 'O aporte entra no começo ou no fim do mês?',

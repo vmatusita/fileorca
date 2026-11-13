@@ -98,8 +98,8 @@ export default {
       a: 'Sí. Con la misma tasa ves solo el efecto del plazo; con las tasas que te ofrecieron ves las ofertas reales.',
     },
     {
-      q: '¿Y el pago inicial y el PMI?',
-      a: 'El monto del préstamo es el mismo en los dos plazos, así que el PMI, los impuestos y el seguro no cambian la comparación. La calculadora de hipoteca los suma al pago.',
+      q: '¿Dónde veo los impuestos, el seguro y el PMI?',
+      a: 'En la calculadora de hipoteca, que los suma al pago de un plazo a la vez.',
     },
     {
       q: '¿La tabla muestra los dos préstamos?',

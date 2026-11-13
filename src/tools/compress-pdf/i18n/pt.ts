@@ -11,9 +11,9 @@ const texts: PdfToolTexts<CompressPdfTexts> = {
   h1: 'Comprimir PDF',
   howHeading: 'Como funciona',
   howSteps: [
-    'Solte seus PDFs na caixa, escolha os arquivos ou cole, quantos quiser.',
-    'Escolha Sem perda, Recomendada ou Forte, e a Oli comprime cada PDF no seu navegador, um depois do outro, refazendo o lote se você mudar o nível.',
-    'Baixe um PDF ou todos juntos num ZIP, e os seus arquivos originais continuam intactos.',
+    'Solte seus PDFs na caixa, escolha os arquivos ou cole.',
+    'Escolha Sem perda, Recomendada ou Forte, e a Oli comprime cada PDF, um depois do outro, refazendo o lote se você mudar o nível.',
+    'Baixe os PDFs comprimidos.',
   ],
   specsHeading: 'O que entra e o que sai',
   specs: {
@@ -34,7 +34,7 @@ const texts: PdfToolTexts<CompressPdfTexts> = {
         'Cada página vira uma imagem JPG a 100 ppi. O texto não pode mais ser selecionado nem buscado, e os campos de formulário, os links e os marcadores se perdem. A Oli avisa antes de você escolher.',
       ],
       ['Já otimizado', 'Se o resultado não ficar menor, você recebe o original de volta, byte por byte. A Oli nunca entrega um arquivo maior.'],
-      ['Lote', 'Sem limite de arquivos. Cada um ganha o próprio download, e dois ou mais vêm juntos num ZIP só.'],
+      ['Lote', 'Sem limite de arquivos. Cada um ganha o próprio download, e dois ou mais vêm juntos num ZIP só. Os seus arquivos originais continuam intactos.'],
       [
         'O que fica',
         'Em Sem perda e Recomendada, o texto, os formulários, os links e os marcadores ficam como estão, assim como os campos de informação e os metadados XMP do seu PDF. A Oli não acrescenta data, nome de programa (Producer) nem nada do seu aparelho.',
@@ -53,27 +53,23 @@ const texts: PdfToolTexts<CompressPdfTexts> = {
   faq: [
     {
       q: 'Quanto menor meu PDF vai ficar?',
-      a: 'Depende do que há dentro dele. Um PDF cheio de fotos pode diminuir bastante na Recomendada, enquanto um PDF quase só de texto tem pouco para tirar. A Oli mostra o tamanho antes e depois de cada arquivo, então você vê a economia de verdade, e a Forte é o nível que vai mais longe.',
+      a: 'Depende do que há dentro dele. Um PDF cheio de fotos pode diminuir bastante na Recomendada, enquanto um PDF quase só de texto tem pouco para tirar. A Oli mostra o tamanho antes e depois de cada arquivo, então você vê a economia de verdade, e num PDF de fotos a Forte é o nível que vai mais longe.',
     },
     {
       q: 'Comprimir diminui a qualidade do meu PDF?',
-      a: 'A Sem perda não muda nada do que você vê. A Recomendada salva as fotos de novo como JPEG na qualidade 75, o que pode custar um pouco de detalhe fino, mas o texto continua nítido e selecionável. A Forte transforma cada página numa imagem a 100 ppi, então a letra miúda fica menos nítida quando você amplia.',
+      a: 'Na Sem perda, não. Na Recomendada, uma foto salva de novo pode perder um pouco de detalhe fino, e o texto continua nítido e selecionável. Na Forte, a letra miúda fica menos nítida quando você amplia, porque virou parte de uma imagem.',
     },
     {
-      q: 'Ainda dá para selecionar o texto e usar o formulário depois de comprimir?',
-      a: 'Na Sem perda e na Recomendada, sim. Na Forte, não: cada página vira uma imagem, então o texto não pode ser selecionado nem buscado, e os campos de formulário, os links e os marcadores se perdem. A Oli avisa antes de você escolher. Se você precisa do texto, fique na Recomendada.',
+      q: 'Dá para comprimir um PDF que tem senha?',
+      a: 'Do jeito que ele está, não. Tire a senha na Desbloquear PDF, comprima aqui a cópia desbloqueada e depois ponha uma senha de novo com a Proteger PDF.',
     },
     {
       q: 'Por que meu PDF voltou com o mesmo tamanho?',
-      a: 'Alguns PDFs já estão bem compactados. Quando o resultado não ficaria menor, a Oli devolve o original, byte por byte, em vez de um arquivo maior, e avisa que ele já estava otimizado. Se você aceita imagens no lugar do texto, a Forte ainda pode deixar o arquivo menor.',
-    },
-    {
-      q: 'Meu PDF é enviado para algum lugar?',
-      a: 'Não. O FileOrca lê e grava o seu PDF no seu aparelho, no navegador, com o qpdf e o PDF.js. Abra a aba Rede do navegador enquanto comprime: nenhuma requisição leva os seus arquivos.',
+      a: 'Alguns PDFs já estão bem compactados. A Forte também nem sempre ajuda: numa página de texto, a imagem da página pode pesar mais que o texto que ela substitui.',
     },
   ],
   privacyHeading: 'Privacidade',
-  privacyNote: 'Os PDFs são comprimidos no seu aparelho, no navegador, e nunca são enviados a um servidor. Os seus arquivos originais continuam intactos.',
+  privacyNote: 'Os PDFs são comprimidos no seu aparelho, no navegador, e nunca são enviados a um servidor.',
   relatedHeading: 'Ferramentas relacionadas',
   panel: {
     suffix: 'comprimido',

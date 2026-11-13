@@ -66,7 +66,7 @@ export default {
   formulaHeading: 'La fórmula',
   formula: [
     'Los dos pagos usan M = P × r × (1 + r)^n ÷ ((1 + r)^n − 1), donde P es el saldo (más los costos de cierre si se suman al préstamo), r es la tasa anual dividida entre 12 y n es el número de meses.',
-    'Cada mes de las dos tablas, la calculadora suma los intereses pagados hasta ese momento. El mes del punto de equilibrio es el primero en que los costos de cierre más los intereses pagados del préstamo nuevo son menores o iguales a los intereses que el préstamo actual habría cobrado. Contar intereses, y no pagos, evita que un plazo más largo parezca un ahorro cuando solo reparte la deuda en más tiempo.',
+    'Cada mes de las dos tablas, la calculadora suma los intereses pagados hasta ese momento. El mes del punto de equilibrio es el primero en que los costos de cierre más los intereses pagados del préstamo nuevo son menores o iguales a los intereses que el préstamo actual habría cobrado.',
   ],
   premisesHeading: 'Supuestos',
   exampleHeading: 'Ejemplo resuelto',
@@ -91,12 +91,12 @@ export default {
   faqHeading: 'Preguntas sobre el refinanciamiento',
   faq: [
     {
-      q: '¿Qué es el mes del punto de equilibrio?',
-      a: 'Es el mes en que lo que ahorras en intereses ya pagó los costos de cierre. Antes de ese mes, refinanciar te ha costado dinero; después, empieza a ahorrarte.',
+      q: '¿Importa si pago los costos de cierre o los sumo al préstamo?',
+      a: 'Sí. Sumados al préstamo, los costos pasan a formar parte del saldo nuevo, así que el pago nuevo es mayor y, con cualquier tasa mayor que cero, los costos también pagan intereses: el mes del punto de equilibrio no llega antes.',
     },
     {
       q: '¿Por qué hay dos puntos de equilibrio?',
-      a: 'El atajo común divide los costos de cierre entre la baja del pago mensual. Cuando el préstamo nuevo es más largo, parte de esa baja viene de repartir la deuda en más años, así que el atajo puede verse mejor que los intereses reales. La calculadora muestra los dos.',
+      a: 'Porque el atajo común puede engañar. Cuando el préstamo nuevo es más largo, parte de la baja del pago mensual viene de repartir la deuda en más años, así que el atajo puede verse mejor que los intereses reales.',
     },
     {
       q: '¿Un refinanciamiento sin costos de cierre es gratis?',

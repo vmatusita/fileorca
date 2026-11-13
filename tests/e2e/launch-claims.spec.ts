@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { createServer } from 'node:http';
+import type { AddressInfo } from 'node:net';
 import { expect, test, type Page } from '@playwright/test';
 import { fixtureFile, takeDownload } from './lib/matrix.ts';
 import { dismissCookies, hydrated, startOver, type TestFile } from './lib/page.ts';
@@ -218,4 +221,72 @@ test.describe(() => {
     expect(sent.filter((request) => request.method !== 'GET' || request.body > 0), 'nothing is sent with a body').toEqual([]);
     expect(sent.filter((request) => new URL(request.url).search !== ''), 'nothing is sent in a query string').toEqual([]);
   });
+});
+
+// F19a (decision 7; DECISOES § 759): what the How it works page says and no test proved before. The list of the sentences
+// of that page and the test that proves each one is tests/unit/how-it-works-claims.test.ts.
+
+// "Download saves it from the memory of the browser": the result is a blob: address the page made from bytes it holds,
+// and taking it asks nothing of the network.
+test('Download saves the result from the memory of the browser: its address is a blob: made in the page', async ({ page, context }) => {
+  const requests: string[] = [];
+  const response = await page.goto('/compress-image/');
+  expect(response?.status()).toBe(200);
+  await hydrated(page);
+  await dismissCookies(page);
+  await page.mouse.move(0, 0);
+  await page.setInputFiles('input[type="file"]', fixtureFile('jpg-02-iphone6-paisagem-gps.jpg'));
+  await expect(page.locator('.fo-result')).toBeVisible({ timeout: 45_000 });
+  context.on('request', (request) => requests.push(request.url()));
+  const [download] = await Promise.all([page.waitForEvent('download'), page.locator('.fo-btn--download').click()]);
+  expect(download.url(), 'the address of what Download saves').toMatch(/^blob:/);
+  expect(new URL(download.url().slice('blob:'.length)).origin, 'a blob: of the page itself').toBe(new URL(page.url()).origin);
+  const saved = await download.path();
+  expect(saved, 'the download was saved').toBeTruthy();
+  expect([...new Uint8Array(readFileSync(saved ?? '')).subarray(0, JPEG.length)], 'a real JPEG').toEqual([...JPEG]);
+  expect(requests.filter((url) => !/^(blob|data|about):/.test(url)), 'taking the result asks nothing of the network').toEqual([]);
+});
+
+// "The tool does the work there, with the code your browser downloaded from fileorca.com": Compress image writes the JPEG
+// with MozJPEG, whose .wasm the page fetches from its own origin, with a GET and no body, the first time it is needed.
+test('Compress image makes a JPEG smaller with the MozJPEG .wasm, fetched from the site', async ({ page, context }) => {
+  const requests: { url: string; method: string; body: number }[] = [];
+  context.on('request', (request) => requests.push({ url: request.url(), method: request.method(), body: request.postDataBuffer()?.length ?? 0 }));
+  const response = await page.goto('/compress-image/');
+  expect(response?.status()).toBe(200);
+  await hydrated(page);
+  await dismissCookies(page);
+  await page.mouse.move(0, 0);
+  const origin = new URL(page.url()).origin;
+  const before = requests.length;
+  await page.setInputFiles('input[type="file"]', fixtureFile('jpg-02-iphone6-paisagem-gps.jpg'));
+  await expect(page.locator('.fo-result')).toBeVisible({ timeout: 45_000 });
+  const wasm = requests.slice(before).filter((request) => /\/_astro\/mozjpeg_enc[-.][\w-]{8}\.wasm$/.test(new URL(request.url).pathname));
+  expect(wasm.length, 'the MozJPEG encoder was fetched for the file').toBeGreaterThan(0);
+  expect(wasm.every((request) => new URL(request.url).origin === origin && request.method === 'GET' && request.body === 0), 'from the site, with a GET and no body').toBe(true);
+  const result = await takeDownload(page);
+  expect([...result.bytes.subarray(0, JPEG.length)]).toEqual([...JPEG]);
+});
+
+// "Copy link puts them after the #, the part of an address your browser keeps to itself and never sends to a server": a
+// server of the test records the request line each browser sends for an address with a #, as it reaches the wire.
+test('the part of an address after the # never reaches the server: the browser keeps it to itself', async ({ page }) => {
+  const targets: string[] = [];
+  const server = createServer((request, response) => {
+    targets.push(request.url ?? '');
+    response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+    response.end('<!doctype html><html lang="en"><head><title>Hash</title></head><body><p>Hash</p></body></html>');
+  });
+  await new Promise<void>((done) => server.listen(0, '127.0.0.1', done));
+  const { port } = server.address() as AddressInfo;
+  try {
+    const fragment = '#v=1&p=4817&r=6.25';
+    await page.goto(`http://127.0.0.1:${port}/mortgage-calculator/${fragment}`);
+    expect(await page.evaluate(() => location.hash), 'the page keeps the part after the #').toBe(fragment);
+    const asked = targets.filter((target) => !target.startsWith('/favicon'));
+    expect(asked, 'the server got the address without it').toEqual(['/mortgage-calculator/']);
+    expect(targets.some((target) => target.includes('#') || target.includes('4817')), 'nothing of it in any request').toBe(false);
+  } finally {
+    await new Promise<void>((done) => server.close(() => done()));
+  }
 });

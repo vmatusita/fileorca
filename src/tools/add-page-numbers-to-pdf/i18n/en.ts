@@ -11,21 +11,21 @@ const texts: PdfToolTexts<NumbersTexts> = {
   h1: 'Add page numbers to PDF',
   howHeading: 'How it works',
   howSteps: [
-    'Drop your PDFs on the box, choose them, or paste them with Ctrl V. Add as many as you like.',
-    'Pick where the number goes, which format it uses and the number to start from. Oli numbers each file in your browser and redoes the batch if you change a choice.',
-    'Download one PDF, or all of them together in a ZIP. Your original files stay untouched.',
+    'Drop your PDFs on the box, choose them, or paste them with Ctrl V.',
+    'Pick where the number goes, which format it uses and the number to start from. Oli numbers each file and redoes the batch if you change a choice.',
+    'Download the numbered PDFs.',
   ],
   specsHeading: 'What goes in and what comes out',
   specs: {
     caption: 'What Add page numbers to PDF takes in and gives back',
     head: ['Detail', 'What happens'],
     rows: [
-      ['Takes', 'PDF files, as many as you like. Oli checks what is inside the file, not its name.'],
+      ['Takes', 'PDF files, as many as you like. Oli checks what is inside the file, not its name. Two or more come back together in one ZIP, and your original files stay untouched.'],
       ['Position', 'Six places: top or bottom, and left, center or right. The default is bottom center.'],
       ['Format', 'Four formats: 1, Page 1, Page 1 of 12 and 1 of 12. The word "Page" always comes out in English.'],
       ['First number', 'Any whole number from 1 to 9999. The default is 1.'],
       ['Skip the first page', 'The first page gets no number, and the second page gets the first number you chose. In the "of" formats, the total is the number on the last page.'],
-      ['Look of the number', 'Helvetica, 10 pt, black, 28 pt from the edge of the page. It is measured on the page as it appears on screen, with the crop box and the rotation of each page.'],
+      ['Look of the number', 'Helvetica, 10 pt, black, 28 pt from the edge of the page.'],
       ['What stays', 'Form fields, links, bookmarks and the document details stay as they were. Only the XFA form layer, which a few desktop apps read, is removed; the regular form fields still work.'],
       ['Document details', 'The title, the author and the XMP details of your file stay. Oli adds no date, producer or anything from your device.'],
       ['Password or restrictions', 'A PDF that needs a password to open, or has editing restrictions, is turned down on its own line, with a link to Unlock PDF. The other files go on.'],
@@ -35,12 +35,12 @@ const texts: PdfToolTexts<NumbersTexts> = {
   faqHeading: 'Questions',
   faq: [
     {
-      q: 'How do I add page numbers to a PDF?',
-      a: 'Drop the PDF, choose where the number goes and which format it uses, then download the result. Oli writes the numbers on the pages in your browser and gives you a new file, and your original stays as it was.',
+      q: 'Can I number only some of the pages?',
+      a: 'Only the first page can be left without a number. To number just a part of a file, take that part out with Split PDF, number it here, then join the parts again with Merge PDF.',
     },
     {
-      q: 'Can I start numbering from a number other than 1?',
-      a: 'Yes. Type any whole number from 1 to 9999 as the first number. To leave a cover page without a number, choose to skip the first page: the second page then gets the first number you chose.',
+      q: 'Can the numbers go on from another file?',
+      a: 'Yes, through the first number. If part one has 30 pages, give part two the first number 31, and its pages show 31, 32 and so on.',
     },
     {
       q: 'What happens to pages that are rotated or cropped?',
@@ -48,16 +48,11 @@ const texts: PdfToolTexts<NumbersTexts> = {
     },
     {
       q: 'Will the number cover something on my pages?',
-      a: 'The number is small black type 28 pt from the edge, which fits inside the margin of most documents. If a page has content right at the edge, the number can overlap it, so look at the result before you send it. A different corner usually clears the way.',
-    },
-    {
-      q: 'Is my PDF uploaded?',
-      a: "No. Oli reads and writes the PDF on your device, in your browser, and nothing is sent to a server. Open your browser's Network tab while you work: no request carries your file.",
+      a: 'It can, when a page has content right at the edge: the number sits in the margin, where most documents leave room. Look at the result before you send it; a different corner usually clears the way.',
     },
   ],
   privacyHeading: 'Privacy',
-  privacyNote:
-    'Your PDFs are numbered on your device and are never sent to a server. The new file keeps the details of the original and gets none from your device.',
+  privacyNote: 'Your PDFs are numbered on your device and are never sent to a server.',
   relatedHeading: 'Related tools',
   panel: {
     suffix: 'numbered',

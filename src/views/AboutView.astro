@@ -1,19 +1,25 @@
 ---
-// About: who makes the site (Person schema), why it exists and the orca fact. No photo yet:
-// the photo is a pending item for Victor (public/about/victor.jpg), never a placeholder image.
+// About: who makes the site (Person schema), why it exists and the orca fact.
 // F13b (decision 8; UX-17 A, pages.html; DECISOES § 583 and § 586): the card "FileOrca in numbers" after the first
 // paragraph (outside the prose, whose list and paragraph rules would win inside it), in the right column from 1280 px,
 // sticky; and the Oli wave beside the section "Orcas are dolphins", 96 px and 128 px from 768 px, looking left at the text.
 // She greets once and rests (the move of the wave, § 460), and the page has no ad.
+// F19a (decision 5; DECISOES § 758 and § 762): after the counts, the day the site went live, from LAUNCH_DATE in the long
+// form of the language (never typed in the text), with the links to What's new and How it works. Victor's photo, under the
+// H1, only when the files of `pnpm sobre:foto` are in public/about/ at build (src/platform/about-photo.ts): a WebP with its
+// JPG for the browsers that do not read WebP, 160 × 160, the alt with his name. With no files the page has no photo, no
+// empty <img> and no box kept for one; no stand-in image ever enters.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
 import Oli from '../components/Oli.astro';
 import StatsCard from '../components/StatsCard.astro';
-import { routeById, type Lang } from '../i18n/routes.ts';
+import { pathFor, routeById, type Lang } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
 import { fmt } from '../i18n/format.ts';
+import { longDate } from '../i18n/dates.ts';
 import { countValues } from '../components/tool-count.ts';
-import { AUTHOR } from '../platform/site.ts';
+import { AUTHOR, LAUNCH_DATE } from '../platform/site.ts';
+import { aboutPhoto } from '../platform/about-photo.ts';
 import { breadcrumbLd, homePath, personLd } from '../seo/meta.ts';
 
 interface Props {
@@ -31,17 +37,35 @@ const crumbs = [
   { name: t.h1, path: route.paths[lang] ?? '/' },
 ];
 const aboutPage = { '@type': 'AboutPage', name: t.h1, mainEntity: { '@id': 'https://fileorca.com/#victor' } };
+const photo = aboutPhoto()?.about;
+// The paragraph of the launch: its date and its two links, in the order the text of the language puts them.
+const LINKS: Record<string, { href: string; name: string }> = {
+  whatsNew: { href: pathFor('whats-new', lang), name: common.footer.whatsNew },
+  howItWorks: { href: pathFor('how-it-works', lang), name: common.footer.howItWorks },
+};
+const since = t.since.split(/(\{(?:date|whatsNew|howItWorks)\})/).filter((part) => part !== '');
 ---
 <BaseLayout lang={lang} route={route} title={t.title} description={t.description} schema={[breadcrumbLd(crumbs), personLd(), aboutPage]} oli={['wave']} wide>
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
   <article class="fo-view fo-view--stack fo-view--side fo-view--about">
     <div class="fo-prose">
       <h1 class="fo-h1">{t.h1}</h1>
+      {photo && (
+        <picture class="fo-about__photo" data-photo="about">
+          <source type="image/webp" srcset={photo.webp} />
+          <img src={photo.jpg} width={photo.width} height={photo.height} alt={AUTHOR.name} />
+        </picture>
+      )}
       {first && <p>{fmt(first, counts)}</p>}
     </div>
     <StatsCard lang={lang} />
     <div class="fo-prose">
       {rest.map((paragraph) => <p>{fmt(paragraph, counts)}</p>)}
+      <p data-about="since">{since.map((part) => {
+        if (part === '{date}') return <time datetime={LAUNCH_DATE}>{longDate(LAUNCH_DATE, lang)}</time>;
+        const link = LINKS[part.slice(1, -1)];
+        return link && /^\{\w+\}$/.test(part) ? <a href={link.href}>{link.name}</a> : part;
+      })}</p>
       <h2>{t.whyHeading}</h2>
       {t.why.map((paragraph) => <p>{paragraph}</p>)}
       <section class="fo-orca" aria-labelledby="orca-title">

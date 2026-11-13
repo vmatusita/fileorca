@@ -43,7 +43,7 @@ export default {
   },
   howHeading: 'How to use the due date calculator',
   howSteps: [
-    'Choose what to count from: the first day of the last period, the conception date or an IVF transfer.',
+    'In "Count from", choose the last period, conception, or an IVF transfer of a day-3 or day-5 embryo.',
     'Enter that date.',
     'Read the due date, the weeks along today and when each trimester starts; save them as a PDF or a CSV.',
   ],
@@ -51,7 +51,7 @@ export default {
   formulaHeading: 'The formula',
   formula: [
     'Due date = first day of the last period + 280 days, the 40 weeks the NICHD counts from the last period. From a conception date: + 266 days. From an IVF transfer: + 263 days for a day-3 embryo, + 261 days for a day-5 embryo.',
-    'The weeks along are the days from the first day of the last period to today, in weeks and days; the day is read from your device. Full term starts at 39 weeks, and the second and third trimesters at weeks 13 and 29.',
+    'The weeks along are the days from the first day of the last period to today, in weeks and days; the day is read from your device.',
   ],
   premisesHeading: 'Assumptions',
   exampleHeading: 'Worked example',
@@ -64,24 +64,24 @@ export default {
     { label: 'MedlinePlus, "When you pass your due date"', href: 'https://medlineplus.gov/ency/patientinstructions/000515.htm' },
   ],
   disclaimer:
-    'This calculator is an educational tool for adults 18 and older, not medical advice. A due date is an estimate: most births come between 37 and 42 weeks. Your doctor or midwife sets the due date of a pregnancy, often with an early ultrasound.',
+    'This calculator is an educational tool for adults 18 and older, not medical advice. Your doctor or midwife sets the due date of a pregnancy, often with an early ultrasound.',
   faqHeading: 'Questions about the due date',
   faq: [
     {
       q: 'Why count from the last period and not from conception?',
-      a: 'The first day of the last period is a date most people know, while the day of conception is rarely known. Counting from it adds about two weeks before conception, so a pregnancy is 40 weeks long on paper.',
+      a: 'The first day of the last period is a date most people know, while the day of conception is rarely known. Counting from it adds about two weeks before conception.',
     },
     {
       q: 'How exact is the due date?',
-      a: 'It is an estimate. Few babies arrive on the due date itself; most births come between 37 and 42 weeks. An ultrasound early in the pregnancy dates it more exactly, and your doctor or midwife may change the date after one.',
+      a: 'It is an estimate: few babies arrive on the due date itself, and most births come between 37 and 42 weeks.',
     },
     {
       q: 'How do IVF due dates work?',
-      a: 'The transfer date is known, so the count starts there: 263 days for a day-3 embryo and 261 days for a day-5 embryo, which is 266 days from fertilization.',
+      a: 'The transfer date is known, so the count starts there. A day-3 embryo is already 3 days past fertilization and a day-5 embryo 5 days, so both counts end on the day a count from conception would.',
     },
     {
       q: 'What if my cycle is longer or shorter than 28 days?',
-      a: 'The count from the last period assumes about 28 days with ovulation near the middle. With a longer or shorter cycle, the date can be off by a few days: count from a known conception date, or ask your doctor or midwife.',
+      a: 'The date can be off by a few days: count from a known conception date, or ask your doctor or midwife.',
     },
     {
       q: 'When is full term?',

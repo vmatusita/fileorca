@@ -5,6 +5,7 @@ import { HEALTH_HUB_ID, HOME_MONEY_IDS, HOUSE_HUB_ID, LIFE_HUB_IDS } from '../..
 import { IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { GUIDES_HUB_ID } from '../../src/tools/guides/registry.ts';
+import { newestIn } from '../../src/platform/changelog.ts';
 import { describedViolations } from './lib/axe.ts';
 import { dismissCookies } from './lib/page.ts';
 
@@ -27,7 +28,11 @@ async function box(locator: Locator) {
   return found ?? { x: 0, y: 0, width: 0, height: 0 };
 }
 
-/** The links of the footer as the starting point had them, in order (they come from the registries). */
+/**
+ * The links of the footer as the starting point had them, in order (they come from the registries). F19a (decisions 2, 4
+ * and 7; DECISOES § 752 and § 754): What's new and How it works after About, and the date of the newest change at the base,
+ * linked to that entry of What's new.
+ */
 function footerLinks(lang: Lang): string[] {
   const guidesHub = pagePath(GUIDES_HUB_ID, lang) ?? '';
   const exists = (ids: readonly string[]) => ids.flatMap((id) => pagePath(id as RouteId, lang) ?? []);
@@ -39,7 +44,8 @@ function footerLinks(lang: Lang): string[] {
     ...(lang === 'en' ? [pagePath(HOUSE_HUB_ID, 'en') ?? '', ...exists(LIFE_HUB_IDS.house), pagePath(HEALTH_HUB_ID, 'en') ?? '', ...exists(LIFE_HUB_IDS.health)] : []),
     pagePath(QR_ID, lang) ?? '',
     guidesHub, ...(lang === 'pt' ? ['image', 'pdf'] : ['image', 'pdf', 'money']).map((group) => `${guidesHub}#${group}`),
-    ...(['about', 'privacy', 'terms', 'licenses', 'contact'] as const).map((id) => pathFor(id, lang)),
+    ...(['about', 'whats-new', 'how-it-works', 'privacy', 'terms', 'licenses', 'contact'] as const).map((id) => pathFor(id, lang)),
+    `${pathFor('whats-new', lang)}#${newestIn(lang).id}`,
   ];
 }
 
@@ -63,9 +69,10 @@ test.describe('the footer on the phone: the hub in sight and the tools in a disc
       // Two columns.
       expect(await footer.locator('.fo-footer__cols').evaluate((cols) => getComputedStyle(cols).gridTemplateColumns.split(' ').length)).toBe(2);
       // In sight and 48 px: the coffee line, the hub of each category and "All guides", the QR code and the FileOrca links.
-      const inSight = footer.locator('.fo-footer__coffee, .fo-footer__hub, .fo-footer__solo a, .fo-footer__col--site a, summary');
+      const inSight = footer.locator('.fo-footer__coffee, .fo-footer__hub, .fo-footer__solo a, .fo-footer__col--site a, summary, .fo-footer__updated');
       // en: the coffee, 6 hubs ("All guides" one of them), 6 summaries, the QR code and 5 FileOrca links; pt and es: 1, 4, 4, 1, 5.
-      expect(await inSight.count()).toBe(lang === 'en' ? 19 : 15);
+      // F19a (DECISOES § 754): 7 FileOrca links (What's new and How it works after About) and the date at the base, 48 px too.
+      expect(await inSight.count()).toBe(lang === 'en' ? 22 : 18);
       for (const link of await inSight.all()) expect((await box(link)).height, (await link.textContent()) ?? '').toBeGreaterThanOrEqual(48);
       // The tools are in closed disclosures; opened, each tool keeps the 32 px line of before (§ 381, b-04).
       const first = footer.locator('details.fo-footer__tools').first();

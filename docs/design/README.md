@@ -17,7 +17,7 @@ FileOrca é um site de ferramentas grátis que rodam no navegador: imagem, PDF e
 2. **Um lugar só.** DropZone, WaterLevel e ResultCard ocupam o mesmo retângulo, da mesma altura em todos os estados (356px no celular, 340px a partir de 768px), e a faixa de baixo, com as opções antes do resultado e os chips e o "Ajustar" depois, também tem altura fixa. Nada cresce sem um gesto da pessoa. A página não pula e o olho não procura (F13a, DECISOES § 463 e § 466).
 3. **Uma ação amarela.** Em cada tela, só o Baixar é `sun`. O resto é neutro ou ghost.
 4. **Diga com números.** "2.4 MB → 780 KB", "−68%", "you'll pay $382,637 in interest". Nunca "Optimized!" sem número.
-5. **Privacidade que dá para conferir.** "Your files never leave your device" no PrivacySeal, e o FAQ ensina a abrir a aba Rede.
+5. **Privacidade que dá para conferir.** "Your files never leave your device" no PrivacySeal; a nota de privacidade de cada ferramenta e calculadora termina no link "How to check", e a página How it works ensina a abrir a aba Rede e o teste do modo avião (F19a, DECISOES § 771; antes, "e o FAQ ensina a abrir a aba Rede").
 6. **Nada se perde.** O original fica intacto, um erro no lote não para os outros arquivos, o cenário da calculadora vive no link. "Start over" é ghost e nunca apaga sem querer.
 7. **Polegar primeiro.** Alvo mínimo `tap-min` (48px) em tudo que se toca, Baixar em bloco no celular, painel inteiro acima da dobra a 360×740.
 8. **Rápido de verdade.** Resposta ao toque em `dur-instant`. O WaterLevel só aparece se o trabalho passar de 400ms. Nada pisca.

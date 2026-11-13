@@ -41,8 +41,12 @@ const PDF_HUBS = TRANSLATED.map((lang) => pathOf(PDF_HUB_ID, lang));
 // F11 (decision 5; DECISOES § 399): and the guides hub of each language, held to the rules of the category hubs.
 const HUBS = TRANSLATED.flatMap((lang) => [pathOf('image-tools', lang), pathOf(PDF_HUB_ID, lang), pathOf(moneyHubId(lang), lang), pathOf(GUIDES_HUB_ID, lang)]);
 const SUPPORT_PAGES = TRANSLATED.map((lang) => pathOf('support', lang));
+// F19a (decisions 2 and 7, criterion 9; DECISOES § 757): What's new and How it works in pt and es, pages of the site with no
+// island, held to the budgets of a page with no island and, below, to the very JS files of the About of their language.
+const SITE_IDS = ['whats-new', 'how-it-works'] as const;
+const SITE_PAGES = TRANSLATED.flatMap((lang) => SITE_IDS.map((id) => pathOf(id, lang)));
 
-for (const path of [...TOOL_PAGES, ...QR_PAGES, ...PDF_PAGES, ...CALC_PAGES_LIST, ...FILE_GUIDE_PAGES, ...HUBS, ...SUPPORT_PAGES]) {
+for (const path of [...TOOL_PAGES, ...QR_PAGES, ...PDF_PAGES, ...CALC_PAGES_LIST, ...FILE_GUIDE_PAGES, ...HUBS, ...SUPPORT_PAGES, ...SITE_PAGES]) {
   test(`initial JS and requests of ${path} fit the budgets, with no worker and no wasm`, async ({ page, baseURL }) => {
     const isTool = TOOL_PAGES.includes(path) || QR_PAGES.includes(path);
     const isPdf = PDF_PAGES.includes(path);
@@ -106,6 +110,8 @@ const SAME_FILES: [string, string][] = [
     // F11: the guides hub of the language loads the files of /guides/.
     [pathOf(GUIDES_HUB_ID, 'en'), pathOf(GUIDES_HUB_ID, lang)],
   ]),
+  // F19a: What's new and How it works load the files of the About of the same language.
+  ...TRANSLATED.flatMap((lang) => SITE_IDS.map((id): [string, string] => [pathOf('about', lang), pathOf(id, lang)])),
 ];
 
 for (const [english, translated] of SAME_FILES) {

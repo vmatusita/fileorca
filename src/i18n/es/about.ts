@@ -19,6 +19,16 @@ export default {
   linksHeading: 'Encuentra a Victor en internet',
   websiteLabel: 'Sitio web de Victor',
   linkedinLabel: 'Victor en LinkedIn',
+  // F19a (decisión 5; DECISOES § 758): el día en que el sitio se lanzó viene de LAUNCH_DATE, nunca escrito aquí.
+  since:
+    'FileOrca se lanzó el {date}. La página {whatsNew} enumera los cambios desde entonces, con sus fechas, y la página {howItWorks} muestra qué pasa con tu archivo y cómo comprobarlo en tu navegador.',
+  // F19a (decisión 6; DECISOES § 763): el cuadro del autor al final de cada guía.
+  author: {
+    heading: 'Sobre el autor',
+    who: '{name} es desarrollador en Curitiba, Brasil, y hace y mantiene FileOrca él solo.',
+    fileGuide: 'Las cifras de esta guía se midieron el {date} con el motor de las herramientas de este sitio, en los archivos de prueba que la guía enumera.',
+    moneyGuide: 'Las cifras de esta guía salen de la calculadora que trae, y sus cuentas se comprueban con un cálculo independiente.',
+  },
   stats: {
     heading: 'FileOrca en números',
     image: 'herramientas de imagen',

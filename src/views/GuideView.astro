@@ -17,6 +17,7 @@ import Breadcrumb from '../components/Breadcrumb.astro';
 import ToolCard from '../components/ToolCard.astro';
 import AdBreak from '../ads/AdBreak.astro';
 import Reviewed from '../tools/calc/Reviewed.astro';
+import AuthorBox from '../components/AuthorBox.astro';
 import CalcIsland from '../tools/calc/CalcIsland.astro';
 import { pathFor, routeById } from '../i18n/routes.ts';
 import { fmt } from '../i18n/format.ts';
@@ -129,6 +130,8 @@ const firstInside = (t.sections[0]?.paragraphs.length ?? 0) > 1;
     </div>
   </section>
   <AdBreak />
+  {/* F19a (decision 6; DECISOES § 763): the author box, right before the related calculators. */}
+  <AuthorBox lang={lang} kind="money" />
   <section class="fo-section" aria-labelledby="related">
     <h2 id="related">{t.relatedHeading}</h2>
     <ul class="fo-grid">

@@ -70,7 +70,7 @@ export default {
   faq: [
     {
       q: 'Why is the deposit lower than the goal divided by the months?',
-      a: 'Interest does part of the work, and what you have already saved grows too. At 0% the deposit is exactly what is left divided by the months, rounded up to the cent.',
+      a: 'Interest does part of the work, and what you have already saved grows too. At 0%, with no interest, it is what is left divided by the months.',
     },
     {
       q: 'Which rate should I use?',
@@ -78,7 +78,7 @@ export default {
     },
     {
       q: 'What if I miss a month?',
-      a: 'The plan assumes a deposit every month. To catch up, run it again with what you have saved by then and the months that are left.',
+      a: 'To catch up, run it again with what you have saved by then and the months that are left.',
     },
     {
       q: 'Can it plan for a goal many years away?',
