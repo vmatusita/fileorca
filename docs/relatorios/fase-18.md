@@ -384,6 +384,8 @@ A projeção (§ 747; `.cache/f18/proj/proj-slice1.md` e `proj-final.md`) usa os
 
 O CI desta PR roda com 14 partes no WebKit, e nenhuma passa de 700 s no central. Com as 15 da PR 34, a 7/15 passaria de 592 s para 726 s por causa dos testes desta run; como a PR 34 está aberta e mexe no mesmo `ci.yml`, a run não abriu uma segunda PR (decisão 25): a divisão fica no § 747 e no F18 m-2. Com 16 partes a maior seria a 7/16 (671 s); com **17**, a 5/17 (657 s), a recomendada. Os specs que mais somam: `a11y` (+34 testes), `pdf-matrix` (+10), `clearance` (+9, pelo `PDF_WALKS`), `axe-pdf-states` (+9), `island-pdf-organize` (+17), `image-matrix` (+8). O tempo de verdade de cada parte vai na descrição da PR.
 
+**O que a execução completa mostrou** (`43432440540`, no `c461e0d`, § 747): a parte WebKit 4/14 reprovou por tempo, com os 198 testes verdes e 908,9 s, acima do limite de 900 s (o `clearance` com 1.015 s de soma e o `budgets` com 256 s). A projeção acima errou essa parte: as partes que montam o build de teste dos anúncios pagam uns 228 s de custo fixo, e as outras uns 38 s, e ela usava um número só. Com os tempos reais de cada teste dessa execução (`.cache/f18/proj/real-parts.mjs`), o alto de cada configuração do WebKit fica: 14 partes, 909 s (a 4/14); **15 partes (a PR 34), 780 s** (a 11/15; a 4/15 com 727 s, o `clearance` dividido); 16 partes, 838 s; 17 partes, 881 s (com 16 e 17 o `clearance` cai inteiro numa parte). As 15 da PR 34 resolvem, e a recomendação de 17 do § 747 ficou substituída. O Victor escolheu mesclar a PR 34, e a `fase-18` junta a main e roda a execução completa de novo.
+
 ## O custo
 
 `pnpm ci:custo 43423241405`, a execução leve do push do `b09c9f0` (a última antes deste relatório):
@@ -394,11 +396,13 @@ O CI desta PR roda com 14 partes no WebKit, e nenhuma passa de 700 s no central.
 
 As execuções leves da run, uma por push: `9900ca8` verde (o prompt gravado, `43052964661`); `50ba4e6` vermelha (`43060300237`: a fatia 1, com os testes de contagem, de lista e de placeholders que as frentes ainda iam mudar, como o `routes`, o `consent`, o `conteudo`, o `english-leak` e o `launch-kit`); `9ac7608` vermelha (`43068541201`: o `pdf-matrix-table.test.ts`, que esperava as linhas do Organizar na tabela da F18, ainda sem a frente O); `31b9770` verde (`43090084926`, o commit da revisão); `b09c9f0` verde (`43423241405`). Nenhum commit foi feito por causa das vermelhas. O custo da execução completa, depois do `gh pr ready`, vai na descrição da PR.
 
+`pnpm ci:custo 43432440540`, a primeira execução completa (`c461e0d`, classe **completo**, resultado `failure` pela WebKit 4/14): **218** minutos cobrados, **17,6 min** de parede, 27 jobs rodaram e 4 foram pulados; o maior `verificar` foi o da WebKit 4/14, com 908,9 s, e 2 das 25 partes passaram do alvo de 700 s (a 4/14 e a 11/14, com 707 s).
+
 ## A conferência no Linux
 
 Não houve no meio da run: o rótulo `ci` não existe (`gh label list` de 11/nov/2026, só leitura), como na F15, na F16 e na F17, e criá-lo é do Victor (§ 746). A execução completa depois do `gh pr ready` faz esse papel: é a primeira vez que as cinco páginas e as matrizes delas rodam no WebKit do Linux.
 
-O que a execução completa final achar (o id, o resultado e o tempo de cada parte, as matrizes de imagem e de PDF no WebKit do Linux, as linhas `[webp 12 MP]` e `[avif 12 MP]` do runner nos dois navegadores e qualquer falha que só aconteça lá, com a correção) vai na descrição da PR vmatusita/fileorca#35, editada depois do merge (decisão 25): este relatório é commitado antes do `gh pr ready`, como o CLAUDE.md manda, e a execução completa roda sobre ele.
+A primeira execução completa (`43432440540`, no `c461e0d`, 13/nov/2026): 25 partes, 24 verdes; a WebKit 4/14 reprovou só por tempo (908,9 s, os 198 testes verdes), e a correção é a divisão em 15 da PR 34 (§ 747). As matrizes de imagem e de PDF rodaram no WebKit do Linux pela primeira vez e passaram. As linhas do runner: `[webp 12 MP] chromium 1.4`, `[avif 12 MP] chromium 3.6`, `[webp 12 MP] webkit 3.0`, `[avif 12 MP] webkit 3.3`: no runner o AVIF demorou mais nos dois navegadores, por pouco no WebKit, e na máquina o WebKit salvou o WebP mais devagar (§ 739); a frase nova do Converter para WebP, "qual dos dois salva mais rápido depende do navegador", segue certa nos dois lugares. O resultado da execução completa depois da junção com a main vai na descrição da PR.
 
 ## A revisão
 
@@ -455,6 +459,6 @@ Uma linha cada, sem virar pendência:
 2. No Search Console, pedir a indexação das 15 páginas novas: `/organize-pdf/`, `/pt/gerenciar-paginas-pdf/`, `/es/organizar-pdf/`, `/split-pdf/extract-pages/`, `/pt/dividir-pdf/extrair-paginas/`, `/es/dividir-pdf/extraer-paginas/`, `/pdf-to-jpg/to-png/`, `/pt/pdf-para-jpg/para-png/`, `/es/pdf-a-jpg/a-png/`, `/rotate-image/flip/`, `/pt/girar-imagem/espelhar/`, `/es/rotar-imagen/reflejar/`, `/remove-exif-data/`, `/pt/remover-metadados-foto/`, `/es/quitar-metadatos-foto/`. Se quiser, também os três guias de localização, que trocaram a ferramenta: `/guides/remove-location-from-photos/`, `/pt/guias/remover-localizacao-das-fotos/`, `/es/guias/quitar-la-ubicacion-de-las-fotos/`.
 3. Se a linha do `PLANO-FILEORCA.md` ainda faltar, pô-la (o texto está no grupo 24, F14 m-1).
 4. Criar o rótulo `ci` (Issues → Labels), se ainda não existir.
-5. Mesclar a PR 34 (as partes do CI da F17, `ajuste-ci-partes-f17`), se ainda não mesclou, e depois, numa PR separada com a execução completa, passar o WebKit de 15 para 17 partes (`--shard=k/17`, as duas linhas novas da matriz e o `tests/unit/verificar.test.ts`), como o grupo 28 diz (F18 m-2, § 747). Esta run não abriu PR das partes.
+5. Mesclar a PR 34 (as partes do CI da F17, `ajuste-ci-partes-f17`): a F18 depende dela, porque com o WebKit em 14 partes a 4/14 passa de 900 s (§ 747). Depois, acompanhar as partes nas próximas execuções completas, como o F18 m-2 diz: com 15, a 11/15 e a 4/15 podem ficar acima do alvo de 700 s.
 6. Nada de F18b: o Organizar PDF entrou nesta run.
 7. Por 2 semanas, acompanhar no GA4 o `tool_start` e o `tool_complete` das páginas novas, pelo `tool`: `remove-exif-data` (`outcome` `cleaned`), `rotate-image-flip` (`rotated`), `organize-pdf` (`organized`), `split-pdf-extract-pages` (`split`) e `pdf-to-jpg-to-png` (`converted`).
