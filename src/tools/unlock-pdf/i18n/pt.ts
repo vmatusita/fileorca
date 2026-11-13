@@ -34,7 +34,7 @@ const texts: PdfToolTexts<UnlockTexts> = {
   faq: [
     {
       q: 'Qual é a diferença entre senha para abrir e restrições?',
-      a: 'A senha para abrir impede qualquer pessoa de ler o PDF. As restrições são definidas por quem fez o arquivo: dá para ler, mas coisas como editar, imprimir ou copiar o texto ficam bloqueadas.',
+      a: 'A senha para abrir impede qualquer pessoa de ler o PDF. As restrições são definidas por quem fez o arquivo, e o arquivo continua legível.',
     },
     {
       q: 'Consigo abrir um PDF se esqueci a senha?',

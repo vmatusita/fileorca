@@ -34,7 +34,7 @@ const texts: PdfToolTexts<UnlockTexts> = {
   faq: [
     {
       q: '¿Qué diferencia hay entre una contraseña para abrir y las restricciones?',
-      a: 'Una contraseña para abrir impide que alguien lea el PDF. Las restricciones las pone quien creó el archivo: puedes leerlo, pero cosas como editar, imprimir o copiar texto están bloqueadas.',
+      a: 'Una contraseña para abrir impide que alguien lea el PDF. Las restricciones las pone quien creó el archivo, y aun así puedes leerlo.',
     },
     {
       q: '¿Puedo abrir un PDF si olvidé la contraseña?',

@@ -33,7 +33,7 @@ const texts: PdfToolTexts<UnlockTexts> = {
   faq: [
     {
       q: 'What is the difference between a password to open and restrictions?',
-      a: 'A password to open stops anyone from reading the PDF at all. Restrictions are set by whoever made the file: you can read it, but things like editing, printing or copying text are blocked.',
+      a: 'A password to open stops anyone from reading the PDF at all. Restrictions are set by whoever made the file, and you can still read it.',
     },
     {
       q: 'Can I open a PDF if I forgot the password?',
