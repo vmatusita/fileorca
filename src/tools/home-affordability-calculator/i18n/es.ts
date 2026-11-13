@@ -83,7 +83,7 @@ export default {
   faq: [
     {
       q: '¿Por qué una tasa más alta baja el precio?',
-      a: 'Una parte mayor de cada pago se va en intereses, así que el mismo margen mensual paga un préstamo más pequeño. Prueba una tasa un punto más alta o más baja para ver cuánto se mueve el precio.',
+      a: 'Una parte mayor de cada pago se va en intereses, así que el mismo margen mensual paga un préstamo más pequeño. Prueba subir o bajar la tasa un punto para ver cuánto se mueve el precio.',
     },
     {
       q: '¿Por qué el precio es más bajo que el que me dijo un prestamista?',

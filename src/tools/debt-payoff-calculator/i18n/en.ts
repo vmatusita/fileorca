@@ -71,7 +71,7 @@ export default {
     },
     {
       q: 'Why choose the snowball, then?',
-      a: 'For the quick wins of clearing small balances, which some people prefer to paying less interest.',
+      a: 'For the quick wins of clearing small balances, which some people value more than paying less interest.',
     },
     {
       q: 'Which one should I choose?',
