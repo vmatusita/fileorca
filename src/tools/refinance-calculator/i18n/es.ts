@@ -92,7 +92,7 @@ export default {
   faq: [
     {
       q: '¿Importa si pago los costos de cierre o los sumo al préstamo?',
-      a: 'Sí. Sumados al préstamo, los costos pasan a formar parte del saldo nuevo y también pagan intereses, así que el pago nuevo y los intereses son mayores y el mes del punto de equilibrio no llega antes.',
+      a: 'Sí. Sumados al préstamo, los costos pasan a formar parte del saldo nuevo, así que el pago nuevo es mayor y, con cualquier tasa mayor que cero, los costos también pagan intereses: el mes del punto de equilibrio no llega antes.',
     },
     {
       q: '¿Por qué hay dos puntos de equilibrio?',

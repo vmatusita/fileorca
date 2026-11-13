@@ -84,7 +84,7 @@ export default {
   faq: [
     {
       q: 'Does it matter if I pay the closing costs or add them to the loan?',
-      a: 'Yes. Added to the loan, the costs become part of the new balance and pay interest too, so the new payment and the interest are higher and the break-even month does not come sooner.',
+      a: 'Yes. Added to the loan, the costs become part of the new balance, so the new payment is higher and, at any rate above zero, the costs pay interest too: the break-even month does not come sooner.',
     },
     {
       q: 'Why are there two break-even numbers?',
