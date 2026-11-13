@@ -188,6 +188,18 @@ describe('the sentences of How it works and their proofs (F19a, decision 7; DECI
     for (const lang of LANGS) expect(claimKeys(TEXTS[lang]['how-it-works']), lang).toEqual(KEYS);
   });
 
+  it('never says the work runs on a single thread: the tools start Web Workers', () => {
+    // The site does start workers (the proof of wasm.threads only covers COOP/COEP, SharedArrayBuffer and multi-thread codecs).
+    const clients = ['src/tools/image/engine-client.ts', 'src/tools/pdf/client.ts'];
+    for (const file of clients) expect(readFileSync(file, 'utf8'), `${file} cria um Worker`).toMatch(/new Worker\(/);
+    const whole = /\b(?:all|everything)\b[^.]{0,40}\b(?:single|one) thread|\btodo\b[^.]{0,40}\b(?:un )?solo hilo|\btudo\b[^.]{0,40}(?:linha de execução só|uma só linha)/i;
+    for (const lang of LANGS) {
+      const t = TEXTS[lang]['how-it-works'];
+      const every = [t.intro, ...t.wasm.paragraphs.flatMap((p) => Object.values(p)), ...t.wasm.after.flatMap((p) => Object.values(p))];
+      for (const text of every) expect(text, `${lang}: diz que o trabalho todo roda numa linha só`).not.toMatch(whole);
+    }
+  });
+
   it('finds every test it cites, by its file and its title', () => {
     const problems = Object.values(PROOFS).flatMap((proofs) => (proofs === 'limit' ? [] : proofs.flatMap(proofProblems)));
     expect(problems).toEqual([]);

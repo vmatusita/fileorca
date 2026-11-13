@@ -66,7 +66,7 @@ export default {
       {
         native: 'To read a picture, a tool asks the browser first; WebAssembly steps in for a picture too large for the browser to draw in one piece and for a format the browser cannot read.',
         js: 'PDF.js, which draws the pages of a PDF, and pdf-lib, which builds and edits PDF files, are JavaScript; only the two image decoders inside PDF.js are WebAssembly.',
-        threads: 'All of it runs on a single thread, and no page needs the isolation headers that some sites ask of the browser.',
+        threads: 'Each library is built to run on one thread, so no page uses shared memory or needs the isolation headers that some sites ask of the browser.',
         licenses: 'The {licenses} page has the license of each library; libheif, under the LGPL-3.0, stays a separate file, unchanged.',
       },
     ],
