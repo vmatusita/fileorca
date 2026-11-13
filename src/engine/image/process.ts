@@ -2,7 +2,8 @@
 // worker, or on the page when the worker has no OffscreenCanvas (DECISOES § 22). It never throws:
 // every error becomes an EngineFailure with the reason the page shows next to that file, so a bad
 // file cannot stop a batch. A new output is always written from the decoded pixels, which is what
-// removes Exif, XMP, IPTC and GPS; a file that gets no gain goes back through strip.ts (§ 33).
+// removes Exif, XMP, IPTC and GPS; a file that gets no gain goes back through strip.ts (§ 33), and so does every file
+// of the strip operation, which asks for exactly that (§ 731).
 // Self-contained: nothing here imports from outside src/engine/image/.
 
 import { decodeSource } from './decode.ts';
@@ -68,8 +69,11 @@ function output(run: Run, blob: Blob, format: OutputFormat, width: number, heigh
   return result;
 }
 
-/** The original pixels with the metadata stripped: no gain, no encoder, or nothing to change (§ 33). */
-function originalStripped(run: Run, outcome: 'no-gain' | 'cannot-encode' | 'fits'): EngineOutput {
+/**
+ * The original pixels with the metadata stripped: no gain, no encoder, or nothing to change (§ 33); or what the strip
+ * operation asked for, its own result ('new', § 731).
+ */
+function originalStripped(run: Run, outcome: EngineOutput['outcome']): EngineOutput {
   if (!STRIPPABLE.includes(run.format)) throw new EngineError('encode', 'no way to clean this format without decoding it');
   let stripped: { bytes: Uint8Array; type: string };
   try {
@@ -278,6 +282,12 @@ async function runOperation(run: Run, op: Operation, decoded: Decoded): Promise<
       onProgress(100);
       return output(run, blob, transparent ? 'png' : 'jpeg', width, height, 'new', preview);
     }
+
+    case 'strip': {
+      // processImage answers strip before decoding; this keeps the switch whole and gives the same answer if it comes here.
+      onProgress(100);
+      return originalStripped(run, 'new');
+    }
   }
 }
 
@@ -325,7 +335,13 @@ export async function processImage(file: Blob, op: Operation, accepts: readonly 
     const run: Run = { file, bytes, format, info, notes: [], onProgress, owned };
 
     // Answers that need no decoding at all.
-    if (op.kind === 'target' && file.size <= op.maxBytes && STRIPPABLE.includes(format)) {
+    if (op.kind === 'strip') {
+      // The file's own image data without its metadata, with no decoder and no gain test (§ 731): the pixels that came in,
+      // at any size (no pixel limit applies), and an animated WebP with every frame.
+      onProgress(100);
+      return originalStripped(run, 'new');
+    }
+    if (op.kind === 'target'&& file.size <= op.maxBytes && STRIPPABLE.includes(format)) {
       onProgress(100);
       return originalStripped(run, 'fits');
     }

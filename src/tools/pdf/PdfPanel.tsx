@@ -1,4 +1,4 @@
-// The PDF tool island, shared by the 12 PDF tools (F5a, decision 6; DECISOES § 148). One entry for all of them
+// The PDF tool island, shared by the 13 PDF tools and the 2 PDF presets (F5a, F18, decision 6; DECISOES § 148). One entry for all of them
 // (PdfIsland.astro), hydrated from data-props (DECISOES § 23). The image island's model (§ 69), grown for PDF:
 //  - files come from a drop anywhere on the panel, the picker or Ctrl+V; each one is read first (pages, lock, form) by
 //    the engine, which never trusts the name;
@@ -287,7 +287,8 @@ interface BandView {
 }
 
 export default function PdfPanel(props: PdfPanelData) {
-  const { lang, page, t, texts, files: mode, run: runMode, suffix, chips, links, icons, ink, coffeeHref, origins, carryLine } = props;
+  // F18 (decision 5): `page` is the page (a tool or a preset); `base` the tool it is, where the code means "this tool".
+  const { lang, page, base, t, texts, files: mode, run: runMode, suffix, chips, links, icons, ink, coffeeHref, origins, carryLine } = props;
   const tool = PDF_TOOLS[page];
   const { Options } = tool;
   const model = useRef<Model>(newModel());
@@ -383,10 +384,10 @@ export default function PdfPanel(props: PdfPanelData) {
       else {
         item.info = result;
         item.status = 'waiting';
-        const takesLocks = page === 'unlock-pdf' || (page === 'pdf-to-jpg' && result.lock === 'restricted');
+        const takesLocks = base === 'unlock-pdf' || (base === 'pdf-to-jpg' && result.lock === 'restricted');
         if (result.lock === 'password' && !takesLocks) refuse(item, { reason: 'needs-password' });
         else if (result.lock === 'restricted' && !takesLocks) refuse(item, { reason: 'restricted' });
-        else if (page === 'unlock-pdf' && result.lock === 'none') refuse(item, { reason: 'not-encrypted' });
+        else if (base === 'unlock-pdf' && result.lock === 'none') refuse(item, { reason: 'not-encrypted' });
       }
       render();
     }
@@ -580,6 +581,7 @@ export default function PdfPanel(props: PdfPanelData) {
       (item.outputs ?? []).map((output) => ({
         source: item.file.name,
         output,
+        // F18 (decision 7): the page, not the base: Extract pages (a preset of Split) names its one PDF with its suffix.
         tag: output.kind !== 'pdf' ? `${t.files.page}-${output.index ?? 1}` : page === 'split-pdf' ? splitTag(t.files, (stateRef.current as { mode?: string }).mode, output.index ?? 1) : suffix,
       })),
     );
@@ -605,7 +607,7 @@ export default function PdfPanel(props: PdfPanelData) {
         const engine = await client();
         const blob = await engine.zip(entries.map((entry, i) => ({ name: names[i] ?? `${i}.bin`, blob: new Blob([entry.output.bytes as BlobPart]) })));
         if (m.runId !== id) return;
-        m.bundle = { blob, url: URL.createObjectURL(blob), name: `${page === 'pdf-to-jpg' ? t.files.imagesZip : t.files.zip}.zip` };
+        m.bundle = { blob, url: URL.createObjectURL(blob), name: `${base === 'pdf-to-jpg' ? t.files.imagesZip : t.files.zip}.zip` };
       } catch {
         for (const item of done) refuse(item, { reason: 'load' });
       }
@@ -654,7 +656,7 @@ export default function PdfPanel(props: PdfPanelData) {
   function says(done: Item[]): string {
     const many = done.length > 1;
     // F13a (D-10): Rotate says how many pages turned and which way.
-    if (page === 'rotate-pdf') {
+    if (base === 'rotate-pdf') {
       const state = stateRef.current as { turn?: number; scope?: string; turns?: Record<number, number> };
       const words = texts.options as unknown as { doneOne: string; donePicked: string; rightTurn: string; halfTurn: string; leftTurn: string };
       const turn = state.turn === 2 ? words.halfTurn : state.turn === 3 ? words.leftTurn : words.rightTurn;
@@ -666,7 +668,7 @@ export default function PdfPanel(props: PdfPanelData) {
       }
       return pages === 1 ? fmt(words.doneOne, { turn }) : fmt(texts.done, { pages, turn });
     }
-    if (page === 'compress-pdf') {
+    if (base === 'compress-pdf') {
       const { before, after } = totals(done);
       const saved = before > 0 ? (1 - after / before) * 100 : 0;
       if (!done.some((item) => item.outcome === 'new') || !worthSaying(saved)) return many ? t.result.unchangedMany : t.result.unchanged;
@@ -1233,7 +1235,7 @@ export default function PdfPanel(props: PdfPanelData) {
   } else if (resultOnScreen && delivered) {
     const { before, after } = totals(done);
     const saved = before > 0 ? (1 - after / before) * 100 : 0;
-    const gained = page === 'compress-pdf' && done.some((item) => item.outcome === 'new') && worthSaying(saved);
+    const gained = base === 'compress-pdf' && done.some((item) => item.outcome === 'new') && worthSaying(saved);
     const outputs = done.reduce((sum, item) => sum + (item.outputs?.length ?? 0), 0);
     const pages = done.reduce((sum, item) => sum + (item.outputs ?? []).reduce((inner, output) => inner + (output.pages ?? 0), 0), 0) || (done[0]?.info?.pages ?? 1);
     const notes = [...new Set(m.notes)].map((note) => NOTE_KEY[note]).filter((key): key is NonNullable<typeof key> => key !== null);
@@ -1511,16 +1513,16 @@ export default function PdfPanel(props: PdfPanelData) {
 
   function rowProps(item: Item): FileCardProps {
     const name = nameOf(item);
-    const base = { name, category: 'pdf' as const, labels, icon: icons.pdf };
-    if (item.status === 'reading') return { ...base, state: 'waiting', status: t.queue.reading, onCancel: () => removeItem(item) };
-    if (item.status === 'error' && item.failure && !(item.failure.reason === 'wrong-password' && item.info)) return { ...base, state: 'error', reason: reasonOf(item), onRemove: () => removeItem(item) };
-    if (item.status === 'working') return { ...base, state: 'working', status: t.queue.working, progress: 0.5, onCancel: () => removeItem(item) };
-    if (item.status === 'done' && item.outputs && page === 'compress-pdf') {
+    const card = { name, category: 'pdf' as const, labels, icon: icons.pdf };
+    if (item.status === 'reading') return { ...card, state: 'waiting', status: t.queue.reading, onCancel: () => removeItem(item) };
+    if (item.status === 'error' && item.failure && !(item.failure.reason === 'wrong-password' && item.info)) return { ...card, state: 'error', reason: reasonOf(item), onRemove: () => removeItem(item) };
+    if (item.status === 'working') return { ...card, state: 'working', status: t.queue.working, progress: 0.5, onCancel: () => removeItem(item) };
+    if (item.status === 'done' && item.outputs && base === 'compress-pdf') {
       const after = item.outputs.reduce((sum, output) => sum + output.bytes.length, 0);
       const gained = (1 - after / item.file.size) * 100;
-      return { ...base, state: 'done', before: fileSize(item.file.size, lang), after: fileSize(after, lang), ...(item.outcome === 'new' && worthSaying(gained) ? { gain: MINUS + percent(gained, lang) } : { note: t.queue.unchanged }) };
+      return { ...card, state: 'done', before: fileSize(item.file.size, lang), after: fileSize(after, lang), ...(item.outcome === 'new' && worthSaying(gained) ? { gain: MINUS + percent(gained, lang) } : { note: t.queue.unchanged }) };
     }
-    return { ...base, state: 'done', before: fileSize(item.file.size, lang), note: pagesLabel(item.info) };
+    return { ...card, state: 'done', before: fileSize(item.file.size, lang), note: pagesLabel(item.info) };
   }
 
   /**

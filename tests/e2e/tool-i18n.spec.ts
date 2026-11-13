@@ -39,6 +39,9 @@ const IMAGE_INPUT: Record<ImagePageId, string[]> = {
   'avif-to-jpg': ['gen-avif.avif'],
   'convert-to-webp': [JPG],
   'image-to-pdf': [JPG, JPG_2],
+  // F18: Remove EXIF data and Flip image take a JPG, as their sisters do.
+  'remove-exif-data': [JPG],
+  'rotate-image-flip': [JPG],
 };
 
 /** Every string of a text object, deep. */
@@ -190,6 +193,8 @@ const EXPECTED_NAME: Record<PdfToolId, (suffix: string, files: PdfFileWords) => 
   'sign-pdf': (suffix) => new RegExp(`^${MIXED}-${suffix}\\.pdf$`),
   'protect-pdf': (suffix) => new RegExp(`^${MIXED}-${suffix}\\.pdf$`),
   'unlock-pdf': (suffix) => new RegExp(`^gen-cifrado-aes256-${suffix}\\.pdf$`),
+  // F18: the walk of Organize PDF (tests/e2e/lib/pdf-states.ts) turns, takes out and moves pages of the mixed file: one PDF.
+  'organize-pdf': (suffix) => new RegExp(`^${MIXED}-${suffix}\\.pdf$`),
   'reorder-pdf-pages': (suffix) => new RegExp(`^${MIXED}-${suffix}\\.pdf$`),
   'watermark-pdf': (suffix) => new RegExp(`^${MIXED}-${suffix}\\.pdf$`),
 };

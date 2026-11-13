@@ -7,6 +7,7 @@
 // and the action gives the result with the note of where they came from. Protect PDF takes nothing along (its PDF needs a
 // password). Image to PDF takes its PDF to Compress PDF (which runs by itself) and to Merge PDF, where a PDF added to the
 // list makes it another batch, and the note goes. Nothing leaves the device on the way, and the empty box is there too.
+// F18 (decision 11; DECISOES § 734): Organize PDF (after Merge PDF) and Extract pages (after Unlock PDF) wait the same way.
 //
 // The default of the Playwright config blocks service workers: this spec allows them, with a server of its own per test (a
 // clean origin), as handoff.spec.ts does. Its name puts it right before handoff.spec.ts (DECISOES § 663).
@@ -22,6 +23,8 @@ import mergeTexts from '../../src/tools/merge-pdf/i18n/en.ts';
 import splitTexts from '../../src/tools/split-pdf/i18n/en.ts';
 import protectTexts from '../../src/tools/protect-pdf/i18n/en.ts';
 import reorderTexts from '../../src/tools/reorder-pdf-pages/i18n/en.ts';
+import extractTexts from '../../src/tools/split-pdf/presets/extract-pages/i18n/en.ts';
+import organizeTexts from '../../src/tools/organize-pdf/i18n/en.ts';
 import { dataLayer, generatedJpeg, hydrated } from './lib/page.ts';
 import { arriveFrom } from './lib/inbox.ts';
 import { actionOf } from './lib/pdf-privacy.ts';
@@ -266,6 +269,50 @@ test('Unlock PDF, then "Split this PDF": the PDF waits in Split for the button, 
   await gave(page, sentence, fmt(splitTexts.panel.doneMany, { count: 3 }));
 });
 
+// F18 (decision 11; DECISOES § 734): the two pages of the run with an action are destinations as Split PDF is: Extract pages
+// after Unlock PDF (the PDF waits for the pages and the button, and gives one PDF with the note) and Organize PDF after Merge
+// PDF (the merged PDF waits in the grid, with its pages, for the action).
+test('Unlock PDF, then "Extract pages from this PDF": the PDF waits in Extract pages for the pages and the button, and gives one PDF with the note', async ({ page }) => {
+  if (await workerOff(page, server)) return;
+  await recordRegion(page);
+  await underTheWorker(page);
+  await resultOf(page, '/unlock-pdf/', pdfFile('gen-cifrado-dono.pdf', 'locked.pdf'));
+  const extract = chipOf(page, '/split-pdf/extract-pages/');
+  await expect(extract).toHaveAttribute('data-carry', '');
+  await expect(extract).toHaveText(pdfTexts.carry.chips['split-pdf-extract-pages'].one);
+  await extract.click();
+  const sentence = fromOne(common.pdf['unlock-pdf'].name);
+  await waiting(page, '/split-pdf/extract-pages/', sentence);
+  await expect(region(page)).toHaveText(`${sentence} ${pdfTexts.queue.readyOne}`);
+  await expect(page.locator('#fo-tool-root .fo-pages__grid > li')).toHaveCount(3, { timeout: 30_000 });
+  const action = page.getByRole('button', { name: actionOf(extractTexts), exact: true });
+  await expect(action).toBeFocused();
+  await page.getByLabel(pdfTexts.grid.rangeLabel).fill('1, 3');
+  await page.getByRole('button', { name: pdfTexts.grid.rangeApply, exact: true }).click();
+  await action.click();
+  await gave(page, sentence, extractTexts.panel.done);
+  await expect(page.locator('.fo-btn--download')).toHaveAttribute('download', /-extracted\.pdf$/);
+});
+
+test('Merge PDF, then "Organize the pages of this PDF": the merged PDF waits in Organize PDF with its pages, for the action', async ({ page }) => {
+  if (await workerOff(page, server)) return;
+  await recordRegion(page);
+  await underTheWorker(page);
+  await resultOf(page, '/merge-pdf/', TWO_PDFS, async (page) => {
+    await page.locator('#fo-tool-root .fo-merge-panel .fo-btn--brand').click();
+  });
+  const organize = chipOf(page, '/organize-pdf/');
+  await expect(organize).toHaveAttribute('data-carry', '');
+  await expect(organize).toHaveText(pdfTexts.carry.chips['organize-pdf'].one);
+  await organize.click();
+  const sentence = fromOne(common.pdf['merge-pdf'].name);
+  await waiting(page, '/organize-pdf/', sentence);
+  await expect(region(page)).toHaveText(`${sentence} ${pdfTexts.queue.readyOne}`);
+  // The 8 pages of the first PDF and the 2 of the second, in the grid, waiting for the action.
+  await expect(page.locator('#fo-tool-root .fo-pages__grid > li')).toHaveCount(10, { timeout: 30_000 });
+  await expect(page.getByRole('button', { name: actionOf(organizeTexts), exact: true })).toBeFocused();
+});
+
 test('Delete PDF pages, then "Reorder the pages of this PDF": the PDF waits in Reorder for the new order and the button', async ({ page }) => {
   if (await workerOff(page, server)) return;
   await recordRegion(page);
@@ -397,6 +444,9 @@ test('the empty box in the tools with an action: a chip sent the PDF and none ar
     { path: '/split-pdf/', tool: 'split-pdf', from: 'unlock-pdf', name: common.pdf['unlock-pdf'].name, count: 1 },
     { path: '/reorder-pdf-pages/', tool: 'reorder-pdf-pages', from: 'delete-pdf-pages', name: common.pdf['delete-pdf-pages'].name, count: 1 },
     { path: '/protect-pdf/', tool: 'protect-pdf', from: 'sign-pdf', name: common.pdf['sign-pdf'].name, count: 2 },
+    // F18 (decision 11; DECISOES § 734): the two destinations with an action of the run.
+    { path: '/organize-pdf/', tool: 'organize-pdf', from: 'merge-pdf', name: common.pdf['merge-pdf'].name, count: 1 },
+    { path: '/split-pdf/extract-pages/', tool: 'split-pdf-extract-pages', from: 'unlock-pdf', name: common.pdf['unlock-pdf'].name, count: 1 },
   ]) {
     await visit(page, server, '/', { island: false });
     const order = Array.from({ length: kase.count }, (_, i) => i);

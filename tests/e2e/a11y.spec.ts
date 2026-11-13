@@ -8,11 +8,12 @@ import ptCalcShared from '../../src/tools/calc/i18n/pt.ts';
 import esCalcShared from '../../src/tools/calc/i18n/es.ts';
 import { IMAGE_PAGES, IMAGE_PRESET_IDS, IMAGE_TOOL_IDS, type ImagePageId } from '../../src/tools/image/registry.ts';
 import { CALC_PAGE_IDS, GUIDE_IDS, LIFE_CALC_IDS, LIFE_CALC_PAGES, type LifeCalcId } from '../../src/tools/calc/registry.ts';
-import { PDF_PAGES, PDF_TOOL_IDS, type PdfToolId } from '../../src/tools/pdf/registry.ts';
+import { PDF_PAGES, PDF_PRESET_IDS, PDF_TOOL_IDS, type PdfPageId, type PdfToolId } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 import { violationsEverywhere } from './lib/axe.ts';
 import { animationsDone, chooseImages, coffeeLineInOneUse, dismissCookies, hydrated, jpegBatch, openAdjust, openCompare, searchWithoutResult, slowEngine, useImage, type TestFile } from './lib/page.ts';
 import { walkPdfTool } from './lib/pdf-states.ts';
+import { choosePdfs, openTool } from './lib/pdf-tools.ts';
 
 // axe-core (WCAG 2.2 AA and best practices, tests/e2e/lib/axe.ts) on every page, at 360 and 1280px, in both
 // themes. It runs with reduced motion (DECISOES § 57): the site animates only transform and opacity, so the
@@ -63,14 +64,15 @@ async function searchDialogOpen(page: Page): Promise<void> {
 // Nothing typed: every tool and preset page is listed and the list scrolls inside the box. F4: the English search
 // also lists the calculators, their presets and the guides (DECISOES § 125), read from their registry; F5a: and the PDF tools;
 // F5b: and the file guides (DECISOES § 190). F7: and the 11 home and health calculators and the QR code generator, read from
-// the registry and the route map (the count grows by construction, DECISOES § 259).
+// the registry and the route map (the count grows by construction, DECISOES § 259). F18 (decision 5; DECISOES § 743): and the
+// PDF presets, listed after the PDF tools as the image presets after the image tools.
 async function searchDialogListed(page: Page): Promise<void> {
   await page.goto('/');
   await page.getByRole('button', { name: /Search tools/ }).click();
   await expect(page.locator('#fo-search-dialog')).toBeVisible();
   const utilities = ROUTES.filter((route) => route.id === QR_ID && route.paths.en).length;
   await expect(page.getByRole('option')).toHaveCount(
-    IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length + PDF_TOOL_IDS.length + CALC_PAGE_IDS.length + GUIDE_IDS.length + FILE_GUIDE_IDS.length + LIFE_CALC_IDS.length + utilities,
+    IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length + PDF_TOOL_IDS.length + PDF_PRESET_IDS.length + CALC_PAGE_IDS.length + GUIDE_IDS.length + FILE_GUIDE_IDS.length + LIFE_CALC_IDS.length + utilities,
   );
   await animationsDone(page);
 }
@@ -389,6 +391,9 @@ const IMAGE_FILE: Partial<Record<ImagePageId, { fixture: string; mimeType: strin
   'png-to-jpg': { fixture: 'gen-png-transparente.png', mimeType: 'image/png' },
   // F17 (decision 13): AVIF to JPG takes AVIF only; Convert to WebP takes the JPEG drawn in the page, as the others.
   'avif-to-jpg': { fixture: 'gen-avif.avif', mimeType: 'image/avif' },
+  // F18 (decision 19): Remove EXIF data on a photo with its GPS and Orientation in the Exif (the JPEG drawn in the page has no
+  // metadata); Flip image takes the JPEG drawn in the page, as Rotate image.
+  'remove-exif-data': { fixture: 'gen-jpg-02-orientacao8.jpg', mimeType: 'image/jpeg' },
 };
 
 // F17 (decision 13; DECISOES § 715): the six pages of AVIF to JPG and Convert to WebP in the states the passes above do not
@@ -426,6 +431,65 @@ test.describe('axe nas páginas da F17 com o resultado, o antes e depois e a rec
         else await expect(link, 'a JPG has no converter to point to').toHaveCount(0);
         await animationsDone(page);
         expect(await violationsEverywhere(page), 'the refused file').toEqual([]);
+      });
+    }
+  }
+});
+
+// F18 (decision 19; DECISOES § 742): the fifteen pages of the run in the states the page-by-page pass does not read on them.
+// Remove EXIF data and Flip image: the result (with "Adjust" open where the page has it: the mirror of Flip image), then a
+// HEIC and an AVIF, each refused with the link to its converter in the page's language (CONVERTER_FOR). The PDF pages: a
+// photo refused with the link to Image to PDF of the language. Their result, and the grid of Organize PDF and of Extract
+// pages, are walked in axe-pdf-states.spec.ts and in the specs of the grid, as every PDF page's (tests/e2e/lib/pdf-states.ts,
+// PDF_WALKS: the tools and the presets, in the three languages, at the same widths and themes, in both browsers). F18
+// junction (DECISOES § 743): the result of the two presets was read here too, the same state at the same reach; it is read
+// once, there.
+const F18_IMAGE_IDS = ['remove-exif-data', 'rotate-image-flip'] as const;
+const F18_PDF_IDS: readonly PdfPageId[] = ['organize-pdf', ...PDF_PRESET_IDS];
+const F18_REFUSED: [format: 'heic' | 'avif', file: { fixture: string; mimeType: string }, converter: 'heic-to-jpg' | 'avif-to-jpg'][] = [
+  ['heic', { fixture: 'heic-08-iphone13pro-paisagem-hdr-ios17.heic', mimeType: 'image/heic' }, 'heic-to-jpg'],
+  ['avif', { fixture: 'gen-avif.avif', mimeType: 'image/avif' }, 'avif-to-jpg'],
+];
+
+test.describe('axe nas páginas da F18 com o resultado e a recusa, a 360 e 1280px, nos temas escuro e claro', () => {
+  test.use({ reducedMotion: 'reduce' });
+
+  for (const id of F18_IMAGE_IDS) {
+    for (const lang of ['en', ...TRANSLATED] as const) {
+      const path = routeById(id).paths[lang] ?? '';
+      test(`${path}: the result, then a HEIC and an AVIF refused with the link to their converter`, async ({ page }) => {
+        expect((await page.goto(path))?.status(), path).toBe(200);
+        await hydrated(page);
+        await dismissCookies(page);
+        const own = IMAGE_FILE[id];
+        await chooseImages(page, own ? [fixtureFile(own)] : await jpegBatch(page, 1));
+        await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
+        if (await page.locator('details.fo-adjust').count()) await openAdjust(page);
+        await animationsDone(page);
+        expect(await violationsEverywhere(page), 'the result').toEqual([]);
+
+        for (const [format, file, converter] of F18_REFUSED) {
+          await chooseImages(page, [fixtureFile(file)]);
+          await expect(page.locator('.fo-drop[data-state="error"]')).toBeVisible({ timeout: 30_000 });
+          await expect(page.locator('.fo-drop__why a'), `the link of a ${format} to its converter in ${lang}`).toHaveAttribute('href', routeById(converter).paths[lang] ?? '');
+          await animationsDone(page);
+          expect(await violationsEverywhere(page), `a ${format} refused`).toEqual([]);
+        }
+      });
+    }
+  }
+
+  for (const id of F18_PDF_IDS) {
+    for (const lang of ['en', ...TRANSLATED] as const) {
+      const path = routeById(id).paths[lang] ?? '';
+      test(`${path}: a photo refused with the link to Image to PDF`, async ({ page }) => {
+        await openTool(page, path);
+        const root = page.locator('#fo-tool-root');
+        await choosePdfs(page, await jpegBatch(page, 1));
+        await expect(root.locator('.fo-drop[data-state="error"]')).toBeVisible({ timeout: 30_000 });
+        await expect(root.locator('.fo-drop__why a'), `the link to Image to PDF in ${lang}`).toHaveAttribute('href', routeById('image-to-pdf').paths[lang] ?? '');
+        await animationsDone(page);
+        expect(await violationsEverywhere(page), 'a photo refused').toEqual([]);
       });
     }
   }

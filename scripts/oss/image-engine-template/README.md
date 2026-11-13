@@ -1,6 +1,6 @@
 # fileorca-image-engine
 
-The image engine behind [FileOrca](https://fileorca.com), free image and PDF tools that run in your browser. It compresses, resizes, crops, rotates and converts JPG, PNG, WebP, AVIF and HEIC photos, and every file it writes is free of Exif, XMP, IPTC and GPS data. Nothing leaves the device: the engine has no network code of its own, only the `fetch` of its `.wasm` files.
+The image engine behind [FileOrca](https://fileorca.com), free image and PDF tools that run in your browser. It compresses, resizes, crops, rotates and converts JPG, PNG, WebP, AVIF and HEIC photos, and every file it writes is free of Exif, XMP, IPTC and GPS data. It can also take the metadata out of a JPG, PNG or WebP and leave its pixels as they are. Nothing leaves the device: the engine has no network code of its own, only the `fetch` of its `.wasm` files.
 
 > **Status: 0.1.0.** This is the engine of the FileOrca site, cut out as it runs there. It ships TypeScript source (no build step yet), and it is not on npm. Use it from a bundler (Vite, esbuild, webpack 5) or copy the `src/` folder. The API can still change before 1.0.
 
@@ -9,7 +9,7 @@ The image engine behind [FileOrca](https://fileorca.com), free image and PDF too
 - **Format from the bytes.** A file is what its first bytes say, never what its name or declared type says. A PNG called `.jpg` is a PNG.
 - **Decoding.** The browser's own decoder first (`createImageBitmap`), and WebAssembly only where the browser cannot do the job: HEIC (libheif), AVIF, and any picture above 16,777,216 pixels, which never touches a canvas.
 - **Encoding.** MozJPEG, OxiPNG, libwebp and libaom/libavif through [jSquash](https://github.com/jamsinclair/jSquash), single-thread builds only (no `SharedArrayBuffer`, so no COOP/COEP headers are needed).
-- **Metadata.** New files are written from the decoded pixels. A file that gets no gain goes back with its metadata removed without recompressing it (`strip.ts`).
+- **Metadata.** New files are written from the decoded pixels. A file that gets no gain goes back with its metadata removed without recompressing it (`strip.ts`), and the `strip` operation does exactly that to every file.
 - **Damaged files.** Truncated and corrupted files are recognised from their structure before any decoder runs, so every browser gives the same answer.
 - **Batches.** `zipStored` builds a ZIP of outputs without recompressing them.
 
@@ -72,7 +72,7 @@ processImage(file: Blob, op: Operation, accepts: readonly ImageFormat[], onProgr
 
 | `outcome` | Meaning |
 | --- | --- |
-| `new` | A new file was written from the pixels. |
+| `new` | The operation did what it was asked: a new file was written from the pixels or, for `strip`, the file's own image data came back without its metadata. |
 | `no-gain` | The new file would not be smaller. The original goes back with its metadata removed, byte for byte otherwise. |
 | `cannot-encode` | This browser cannot write the format. The original goes back with its metadata removed. |
 | `fits` | The file already met the request (a target size it fits, a resize that changes nothing). It goes back with its metadata removed. |
@@ -98,6 +98,7 @@ processImage(file: Blob, op: Operation, accepts: readonly ImageFormat[], onProgr
 | `rotate` (`turn`, `flip`) | Quarter turns and mirrors. |
 | `convert` (`to: 'jpeg' \| 'png' \| 'webp' \| 'avif' \| 'swap'`, optional `level`) | Re-encodes. `level` only matters for WebP and AVIF. `swap` is PNG to JPG (transparency turns white) and anything else to PNG. |
 | `pdf-page` | Prepares a picture for a PDF page: JPG for photos, PNG when it has transparency. |
+| `strip` | JPG, PNG and WebP only. The same file without its metadata: the image data is copied byte for byte, never decoded nor written again, at any size. A rotated JPG keeps a minimal Exif with only its Orientation, and an animated WebP keeps every frame. The outcome is `new`. |
 
 Also exported: `warm(kinds)` (fetches and compiles codecs ahead of the first file; it never throws), `zipStored(entries)`, `sniff(bytes)`, `EngineError`, and the types. Limits: a picture goes through the canvas up to `CANVAS_MAX_PIXELS` (16,777,216), through WebAssembly above that, and is refused above `WASM_MAX_PIXELS` (50,000,000).
 
@@ -141,9 +142,11 @@ The comments in the code cite numbered decisions of the FileOrca project (a `DEC
 - **65. Pixel limit.** The canvas path is chosen by pixel count alone, the same in every browser: 4096 × 4096 on the canvas, one pixel more off it. Above it: WebAssembly decode, own crop, rotate and mirror code, Lanczos3 resize, then an encoder. A PNG or an animated WebP above the limit has no decoder and is refused as `too-large` (Compress does not need one for PNG).
 - **66. Target size.** Bytes per pixel are measured on four tiles at native resolution, the scale is estimated once, and the MozJPEG quality (40 to 90, at most 6 tries) is searched on the reduced picture. A photo of 12 MP is encoded at full size at most once.
 - **86. Review fixes.** The JPEG stripper copies only up to the image's own `EOI`, walks every scan (progressive JPEG), skips fill bytes and keeps only the ICC `APP2`; whatever follows the `EOI` (the second image of an MPF, an Ultra HDR gain map, a motion-photo video) can carry its own Exif and GPS and is not copied. Above 50,000,000 pixels the WebAssembly path refuses with `too-large` before loading a codec.
-- **100. Allow-list for metadata.** PNG keeps only the chunks the picture needs (`IHDR`, `PLTE`, `IDAT`, `IEND`, `tRNS`, colour chunks, `pHYs` and the APNG chunks), WebP only `VP8X` (without the Exif and XMP bits), `VP8 `, `VP8L`, `ALPH`, `ANIM`, `ANMF` and `ICCP`, and JPEG keeps `APP0` only if it is JFIF and `APP14` only if it is Adobe. Unknown chunks go.
+- **100. Allow-list for metadata.** PNG keeps only the chunks the picture needs (`IHDR`, `PLTE`, `IDAT`, `IEND`, `tRNS`, colour chunks, `pHYs` and the APNG chunks), WebP only `VP8X` (without the Exif and XMP bits), `VP8 `, `VP8L`, `ALPH`, `ANIM`, `ANMF` and `ICCP`, and JPEG keeps `APP0` only if it is JFIF (its 14-byte header, without the thumbnail it can carry) and `APP14` only if it is Adobe. Unknown chunks go.
 - **104. `load` is not the file's fault.** Loading a codec module, its glue or its `.wasm` goes through `loading()`: a failure becomes `EngineError('load')` and never "damaged file". `load` is not final, so the next call tries again.
 - **172. One worker, even when it is evaluated twice.** WebKit evaluates the entry script of a module worker a second time when a chunk the worker loads on demand imports from it, and bundlers put shared helpers in that entry, so the codecs can run against a second copy of the engine. The worker exposes its API only from the first copy (a `Symbol.for` mark on the global scope), so no call runs twice; the `.wasm` URLs given to `configure` are kept on the global scope too, so the second copy knows them; and `EngineError` recognises an error of the other copy's class (`Symbol.hasInstance`), so a failure keeps its reason.
+- **731. The `strip` operation.** Only the metadata goes, through the same `strip.ts` as the no-gain case (33): no decoder runs, there is no gain test and no pixel limit, and the outcome is `new`, because handing the file back clean is what was asked. A damaged file is refused with the reasons the other operations give.
+- **732. What "no Exif" means for `strip`.** No Exif data stays except the Orientation of a rotated JPG, in a minimal block: without it the photo would show sideways, and turning the pixels would mean writing the JPG again. A PNG `eXIf` chunk and a WebP `EXIF` chunk go whole, Orientation included.
 - **Configured `.wasm` URLs.** The engine imports no `.wasm` and uses no bundler syntax (`?url`): the host passes the URLs with `configureWasm`. The FileOrca site and this package run the same code; the site names the files in its own client with Vite's `?url` and sends them to the engine and to its worker.
 
 ## Tests

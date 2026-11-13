@@ -294,7 +294,7 @@ Título (66 caracteres): `I built free image tools that run in your browser, wit
 Corpo (rascunho; reescreva):
 
 ```
-I made FileOrca, a set of image tools that run in the browser: compress, resize, crop, rotate, HEIC to JPG, WebP to JPG, PNG to JPG, AVIF to JPG, JPG and PNG to WebP or AVIF, and image to PDF. No account, and no limit on batch size.
+I made FileOrca, a set of image tools that run in the browser: compress, resize, crop, rotate, flip, remove EXIF data, HEIC to JPG, WebP to JPG, PNG to JPG, AVIF to JPG, JPG and PNG to WebP or AVIF, and image to PDF. No account, and no limit on batch size.
 
 Files are processed on your device and are not uploaded. You can check it in the Network tab of your browser.
 

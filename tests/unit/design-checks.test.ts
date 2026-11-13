@@ -5,7 +5,7 @@ import { tokenNames } from '../../scripts/lib/theme.ts';
 import { F6_ES_CALC_IDS, fileGuideVoicePages, newVoicePages, pageVoiceProblems, pdfVoicePages } from '../../scripts/lib/voice-pages.ts';
 import { LANGS, QR_ID, routeById } from '../../src/i18n/routes.ts';
 import { CALC_PAGE_IDS, GUIDE_IDS, MONEY_HUB_ID } from '../../src/tools/calc/registry.ts';
-import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { PDF_PRESET_IDS, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
 
 const tokens: unknown = JSON.parse(readFileSync('docs/design/tokens.json', 'utf8'));
@@ -449,7 +449,9 @@ describe('voz dos textos (F5a)', () => {
 describe('voz das páginas do gate:design (ajuste de idiomas)', () => {
   it('reads the PDF pages and the file guides in every language, from the registries', () => {
     const pdf = pdfVoicePages();
-    expect(pdf).toHaveLength((PDF_TOOL_IDS.length + 1) * LANGS.length);
+    // F18 (decision 5; DECISOES § 725): the PDF presets are PDF pages, and their voice is read as the tools' is.
+    expect(pdf).toHaveLength((PDF_TOOL_IDS.length + PDF_PRESET_IDS.length + 1) * LANGS.length);
+    for (const id of PDF_PRESET_IDS) for (const lang of LANGS) expect(pdf, `${id} ${lang}`).toContainEqual({ id, lang, path: routeById(id).paths[lang] });
     for (const page of pdf) expect(page.path, `${page.id} ${page.lang}`).toBe(routeById(page.id).paths[page.lang]);
     const guides = fileGuideVoicePages();
     expect(guides).toHaveLength(FILE_GUIDE_IDS.length * LANGS.length);

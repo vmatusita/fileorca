@@ -40,6 +40,7 @@ import {
   isPdfPage,
   normalizeText,
   pathOfFile,
+  pdfComparisonPaths,
   type ContentBlock,
 } from '../../scripts/lib/conteudo.ts';
 import { allPages, fileForPath } from '../../scripts/lib/dist.ts';
@@ -53,7 +54,7 @@ import type { QrPageTexts } from '../../src/tools/qr-code-generator/types.ts';
 import { longDate } from '../../src/i18n/dates.ts';
 import { IMAGE_PAGES, IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 import { CALC_PAGES, CALC_PRESET_IDS, isBrCalc, isLifeCalc } from '../../src/tools/calc/registry.ts';
-import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS, type PdfToolId } from '../../src/tools/pdf/registry.ts';
+import { PDF_HUB_ID, PDF_PAGES, PDF_PRESET_IDS, PDF_TOOL_IDS, type PdfPageId, type PdfToolId } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID, isFileGuide } from '../../src/tools/guides/registry.ts';
 import { HUB_GROUPS, hubGroup, hubGuides } from '../../src/tools/guides/hub.ts';
 import { fmt, groupDigits } from '../../src/i18n/format.ts';
@@ -514,7 +515,7 @@ const pdfFaq = (count: number): string =>
   `<div class="fo-faq">${Array.from({ length: count }, (_, i) => `<details><summary>Question ${i + 1} about the tool?</summary><div><p>${ANSWER} (${i + 1})</p></div></details>`).join('')}</div>`;
 
 /** The mode rows a fake page of this tool carries: one row per mode, headed by the mode (F6: in the language of the page). */
-const modeRows = (id: PdfToolId, lang: Lang = 'en'): [string, string][] => (PDF_RULES[lang].modes[id] ?? []).map(({ mode }) => [mode, `What the ${mode} does to the file.`]);
+const modeRows = (id: PdfPageId, lang: Lang = 'en'): [string, string][] => (PDF_RULES[lang].modes[id] ?? []).map(({ mode }) => [mode, `What the ${mode} does to the file.`]);
 
 const BASE_ROWS: [string, string][] = [
   ['Files it takes', 'PDF files. Oli checks what is inside the file, not its name.'],
@@ -569,7 +570,8 @@ const tableOf = (rows: [string, string][]): string =>
   `<section data-content="specs"><table><thead><tr><th scope="col">Detail</th><th scope="col">What happens</th></tr></thead><tbody>${rows.map(([head, text]) => `<tr><th scope="row">${head}</th><td>${text}</td></tr>`).join('')}</tbody></table></section>`;
 
 interface FakePdf {
-  id?: PdfToolId;
+  // F18: a PDF tool or a PDF preset (the fake site of the gate builds both).
+  id?: PdfPageId;
   lang?: Lang;
   top?: string;
   head?: string;
@@ -605,17 +607,21 @@ function pdfPage(fake: FakePdf = {}): string {
   return `<!doctype html><html><head>${head}</head><body><main>${top}${how}${specs}${faq}${privacy}${related}${fake.extra ?? ''}</main></body></html>`;
 }
 
-const wantOf = (id: PdfToolId, lang: Lang = 'en') => ({ id, name: TEXTS[lang].common.pdf[id].name, seal: TEXTS[lang].common.seal, ...(lang === 'en' ? {} : { lang }) });
-const problemsOf = (html: string, id: PdfToolId = 'merge-pdf', lang: Lang = 'en'): string => checkPdfPage(html, wantOf(id, lang)).join('\n');
+const wantOf = (id: PdfPageId, lang: Lang = 'en') => ({ id, name: TEXTS[lang].common.pdf[id].name, seal: TEXTS[lang].common.seal, ...(lang === 'en' ? {} : { lang }) });
+const problemsOf = (html: string, id: PdfPageId = 'merge-pdf', lang: Lang = 'en'): string => checkPdfPage(html, wantOf(id, lang)).join('\n');
 
 describe('portão de conteúdo: as páginas de PDF (F5a)', () => {
-  it('reads the 12 tools from the PDF registry and tells them from every other route', () => {
-    expect(PDF_TOOL_IDS).toHaveLength(12);
-    for (const id of PDF_TOOL_IDS) expect(isPdfPage(id), id).toBe(true);
-    for (const id of [PDF_HUB_ID, 'home', 'image-to-pdf', 'compress-image', 'privacy', 'constructor', 'toString']) expect(isPdfPage(id), id).toBe(false);
-    // Every tool of the registry is a page of the route map, in the three languages since the F6 (decision 4; English only
-    // before), with the English path of the registry.
-    for (const id of PDF_TOOL_IDS) {
+  // F18 (decision 6; DECISOES § 724): Organize PDF makes 13 tools (12 before), and the two PDF presets (decision 5) are PDF
+  // pages of the gate too, each with the path /<parent>/<name>/ of the registry.
+  it('reads the 13 tools and the 2 presets from the PDF registry and tells them from every other route', () => {
+    expect(PDF_TOOL_IDS).toHaveLength(13);
+    expect(PDF_PRESET_IDS).toEqual(['split-pdf-extract-pages', 'pdf-to-jpg-to-png']);
+    for (const id of [...PDF_TOOL_IDS, ...PDF_PRESET_IDS]) expect(isPdfPage(id), id).toBe(true);
+    for (const id of [PDF_HUB_ID, 'home', 'image-to-pdf', 'compress-image', 'rotate-image-flip', 'privacy', 'constructor', 'toString']) expect(isPdfPage(id), id).toBe(false);
+    for (const id of PDF_PRESET_IDS) expect(PDF_PAGES[id].path, id).toBe(`/${PDF_PAGES[id].parent}/${id.replace(`${PDF_PAGES[id].parent}-`, '')}/`);
+    // Every tool and preset of the registry is a page of the route map, in the three languages since the F6 (decision 4;
+    // English only before), with the English path of the registry.
+    for (const id of [...PDF_TOOL_IDS, ...PDF_PRESET_IDS]) {
       const route = ROUTES.find((candidate) => candidate.id === id);
       expect(route, id).toBeDefined();
       expect(route ? languagesOf(route) : [], id).toEqual([...LANGS]);
@@ -625,8 +631,8 @@ describe('portão de conteúdo: as páginas de PDF (F5a)', () => {
     for (const id of [...Object.keys(PDF_MODES), ...Object.keys(PDF_SECRETS)]) expect(isPdfPage(id), id).toBe(true);
   });
 
-  it('accepts a complete page for each of the 12 tools, with the mode rows and the secret word its tool needs', () => {
-    for (const id of PDF_TOOL_IDS) expect(checkPdfPage(pdfPage({ id }), wantOf(id)), id).toEqual([]);
+  it('accepts a complete page for each of the 13 tools and the 2 presets, with the mode rows and the secret word its tool needs', () => {
+    for (const id of [...PDF_TOOL_IDS, ...PDF_PRESET_IDS]) expect(checkPdfPage(pdfPage({ id }), wantOf(id)), id).toEqual([]);
   });
 
   it('keeps the rules of the five blocks (rule 1 runs first)', () => {
@@ -687,6 +693,11 @@ describe('portão de conteúdo: as páginas de PDF (F5a)', () => {
     const rows = BASE_ROWS.filter(([head]) => head === 'Files it takes' || head === 'How many files');
     expect(checkPdfPage(pdfPage({ id: 'pdf-to-jpg', rows: [...rows, ...modeRows('pdf-to-jpg')] }), wantOf('pdf-to-jpg'))).toEqual([]);
     expect(checkPdfPage(pdfPage({ id: 'merge-pdf', rows }), wantOf('merge-pdf')).join()).toMatch(/formulário/);
+    // F18 (decision 8; DECISOES § 729): PDF to PNG makes images too (IMAGE_RESULT); Extract pages makes a PDF, so it is asked
+    // what stays, as its parent Split is (DECISOES § 728).
+    expect(checkPdfPage(pdfPage({ id: 'pdf-to-jpg-to-png', rows }), wantOf('pdf-to-jpg-to-png'))).toEqual([]);
+    const extract = checkPdfPage(pdfPage({ id: 'split-pdf-extract-pages', rows }), wantOf('split-pdf-extract-pages')).join();
+    for (const word of [/formulário/, /marcadores/, /links/]) expect(extract).toMatch(word);
   });
 
   it('specs: each mode of a tool has a row of its own', () => {
@@ -699,6 +710,12 @@ describe('portão de conteúdo: as páginas de PDF (F5a)', () => {
     // The three Compress modes are the ones of the spec, and a tool without modes is never asked for one.
     expect((PDF_MODES['compress-pdf'] ?? []).map(({ mode }) => mode)).toEqual(['lossless', 'recommended', 'strong']);
     expect(PDF_MODES['merge-pdf']).toBeUndefined();
+    // F18 (decisions 7 and 8): a PDF preset has one way of running, so no mode row is asked of it, in any language (Extract
+    // pages has none of Split's three modes on screen; PDF to PNG has no format to choose).
+    for (const id of PDF_PRESET_IDS) {
+      for (const lang of LANGS) expect(PDF_RULES[lang].modes[id], `${id} ${lang}`).toBeUndefined();
+      expect(problemsOf(pdfPage({ id, rows: BASE_ROWS }), id), id).not.toMatch(/modo/);
+    }
   });
 
   it('faq: four real questions, each with a question mark, an answer and no repeat', () => {
@@ -1010,8 +1027,8 @@ describe('portão de conteúdo: as páginas de PDF em português e espanhol (F6)
     const problems = (html: string, id: PdfToolId = 'merge-pdf'): string => problemsOf(html, id, lang);
     const words = FAKE_PDF_WORDS[lang];
 
-    it(`${lang}: accepts a complete page for each of the 12 tools, in the words of the language (positive control)`, () => {
-      for (const id of PDF_TOOL_IDS) expect(checkPdfPage(pdfPage({ id, lang }), wantOf(id, lang)), `${lang} ${id}`).toEqual([]);
+    it(`${lang}: accepts a complete page for each of the 13 tools and the 2 presets, in the words of the language (positive control)`, () => {
+      for (const id of [...PDF_TOOL_IDS, ...PDF_PRESET_IDS]) expect(checkPdfPage(pdfPage({ id, lang }), wantOf(id, lang)), `${lang} ${id}`).toEqual([]);
     });
 
     it(`${lang}: fails the page left in English, the name, the seal and the words (negative control: an untranslated stub)`, () => {
@@ -1091,16 +1108,17 @@ describe('portão de conteúdo: as páginas de PDF em português e espanhol (F6)
 });
 
 describe('portão de conteúdo: páginas lidas do mapa de rotas', () => {
-  // F17 (DECISOES § 716): AVIF to JPG and Convert to WebP make 13 (10 tools and 3 presets; 11 before).
-  it('knows the 13 pages of the registry and nothing else', () => {
-    expect(IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length).toBe(13);
+  // F18 (decisions 9 and 10; DECISOES § 724): Remove EXIF data and Flip image make 15 (11 tools and 4 presets). F17 (DECISOES
+  // § 716): AVIF to JPG and Convert to WebP made 13 (10 tools and 3 presets; 11 before).
+  it('knows the 15 pages of the registry and nothing else', () => {
+    expect(IMAGE_TOOL_IDS.length + IMAGE_PRESET_IDS.length).toBe(15);
     for (const id of Object.keys(IMAGE_PAGES)) expect(isImagePage(id), id).toBe(true);
-    for (const id of ['home', 'image-tools', 'privacy', 'not-found', 'constructor', 'toString']) expect(isImagePage(id), id).toBe(false);
+    for (const id of ['home', 'image-tools', 'privacy', 'not-found', 'constructor', 'toString', 'split-pdf-extract-pages']) expect(isImagePage(id), id).toBe(false);
   });
 
   it('finds every page of the registry in the route map, each in the three languages (F6; before, only Compress image)', () => {
-    // 13 pages × 3 languages since the F17: the gate reads 39 image pages (33 before; 13 before the F6: 11 in English and
-    // Compress image in pt and es).
+    // 15 pages × 3 languages since the F18: the gate reads 45 image pages (39 since the F17; 33 before; 13 before the F6: 11
+    // in English and Compress image in pt and es).
     const found = allPages().filter((entry) => isImagePage(entry.route.id));
     expect(found).toHaveLength(Object.keys(IMAGE_PAGES).length * LANGS.length);
     for (const id of Object.keys(IMAGE_PAGES)) {
@@ -1123,6 +1141,25 @@ describe('portão de conteúdo: páginas lidas do mapa de rotas', () => {
       expect(paths, id).not.toContain(`/${parent}/${id.replace(`${parent}-`, '')}/`);
     }
     expect(comparisonPaths('compress-image')).toEqual([]);
+  });
+
+  // F18 (decision 5; DECISOES § 725): a PDF preset is compared, in its language, with its parent tool and the presets of the
+  // same parent (none today: each parent has one), never with itself or with the presets of another parent.
+  it('compares a PDF preset with its parent and the sibling presets of its language, never with itself', () => {
+    expect(pdfComparisonPaths('split-pdf-extract-pages')).toEqual(['/split-pdf/']);
+    expect(pdfComparisonPaths('pdf-to-jpg-to-png', 'pt')).toEqual(['/pt/pdf-para-jpg/']);
+    expect(pdfComparisonPaths('pdf-to-jpg-to-png', 'es')).toEqual(['/es/pdf-a-jpg/']);
+    for (const id of PDF_PRESET_IDS) {
+      const parent = PDF_PAGES[id].parent;
+      expect(parent, id).toBeDefined();
+      const siblings = PDF_PRESET_IDS.filter((other) => other !== id && PDF_PAGES[other].parent === parent);
+      for (const lang of LANGS) {
+        const paths = pdfComparisonPaths(id, lang);
+        expect(paths, `${id} ${lang}`).toEqual([parent, ...siblings].map((other) => routeById(other ?? 'split-pdf').paths[lang]));
+        expect(paths, `${id} ${lang}`).not.toContain(routeById(id).paths[lang]);
+      }
+    }
+    for (const id of PDF_TOOL_IDS) expect(pdfComparisonPaths(id), id).toEqual([]);
   });
 
   it('turns dist files into page paths and spots the 404 pages', () => {
@@ -1355,7 +1392,15 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
         continue;
       }
       if (isPdfPage(id)) {
-        write(dir, entry.path, pdfPage({ id, lang: entry.lang }));
+        // F18 (decision 5): a PDF preset has blocks of its own (MIN_OWN_BLOCKS), as the image presets of this site have.
+        const own = PDF_PAGES[id].parent
+          ? {
+              how: `<section data-content="how"><ol><li>Drop for ${id}</li><li>Pick for ${id}</li><li>Download for ${id}</li></ol></section>`,
+              rows: [...FAKE_PDF_WORDS[entry.lang].rows, [id, `What ${id} does to the file.`] as [string, string]],
+              faq: pdfFaqIn(entry.lang, 5),
+            }
+          : {};
+        write(dir, entry.path, pdfPage({ id, lang: entry.lang, ...own }));
         continue;
       }
       if (id === PDF_HUB_ID) {
@@ -1412,9 +1457,10 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     return { status: result.status, output: `${result.stdout}${result.stderr}` };
   }
 
-  // The counts of the summary line, read from the route map (F6): 39 image pages (13 × 3 since the F17; 11 × 3 before), the calculators in
-  // each of their languages (18 in English, 5 in Spanish and the Brazilian ones once their rows are in the map; 18 before)
-  // and the PDF pages (13 × 3; 13 before).
+  // The counts of the summary line, read from the route map (F6): 45 image pages (15 × 3 since the F18; 13 × 3 since the
+  // F17; 11 × 3 before), the calculators in each of their languages (18 in English, 5 in Spanish and the Brazilian ones once
+  // their rows are in the map; 18 before) and the PDF pages (16 × 3 since the F18: the 13 tools, the 2 presets and the hub;
+  // 13 × 3 before; 13 before the F6).
   const imageCount = allPages().filter((entry) => isImagePage(entry.route.id)).length;
   // F7: and the 11 home and health calculators, in English (DECISOES § 259).
   const calcCount = allPages().filter((entry) => isCalcPage(entry.route.id) || isBrCalc(entry.route.id) || isLifeCalc(entry.route.id)).length;
@@ -1424,9 +1470,9 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
   const qrCount = allPages().filter((entry) => entry.route.id === QR_ID).length;
 
   it('passes on a complete site, whose 404 pages repeat a title and hold placeholder wording', () => {
-    expect(imageCount).toBe(13 * 3);
+    expect(imageCount).toBe(15 * 3);
     expect(calcCount).toBeGreaterThanOrEqual(18 + 5);
-    expect(pdfCount).toBe(13 * 3);
+    expect(pdfCount).toBe((13 + 2 + 1) * 3);
     const dir = join(root, 'site');
     build(dir);
     const result = run(dir);
@@ -1466,15 +1512,39 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     expect(result.output).toMatch(/\/mortgage-calculator\/biweekly\/: só \d bloco\(s\) próprio/);
   });
 
-  it('counts the 12 PDF tools and the hub in each of their languages, read from the PDF registry and the route map', () => {
+  // The gate runs twice or more in a subprocess here: the limit of 60 s of the F11 (the guides hub above, and pdf-site.test.ts),
+  // since the 5 s of Vitest were near on this machine with other agents reading the disk (DECISOES § 743).
+  it('counts the 13 PDF tools, the 2 PDF presets and the hub in each of their languages, read from the PDF registry and the route map', () => {
     const dir = join(root, 'pdf-count');
     build(dir);
-    expect(run(dir).output).toMatch(new RegExp(`${calcCount} de calculadora, ${pdfCount} de PDF \\(as ferramentas e o hub\\)`));
-    // A language the map has but the dist lacks is a missing page, by name.
+    expect(run(dir).output).toMatch(new RegExp(`${calcCount} de calculadora, ${pdfCount} de PDF \\(as ferramentas, as presets e o hub\\)`));
+    // A language the map has but the dist lacks is a missing page, by name: a tool, and a preset (F18).
     rmSync(join(dir, fileForPath(routeById('split-pdf').paths.es ?? '')));
+    rmSync(join(dir, fileForPath(routeById('pdf-to-jpg-to-png').paths.pt ?? '')));
     const result = run(dir);
     expect(result.status).toBe(1);
     expect(result.output).toContain(`${routeById('split-pdf').paths.es}: a página não existe no dist`);
+    expect(result.output).toContain(`${routeById('pdf-to-jpg-to-png').paths.pt}: a página não existe no dist`);
+    expect(result.output).toContain(`${pdfCount - 2} página(s) de PDF conferida(s), o mapa de rotas tem ${pdfCount}`);
+  }, 60_000);
+
+  // F18 (decision 5; DECISOES § 725): a PDF preset has, in each language, at least MIN_OWN_BLOCKS blocks that neither its
+  // parent nor a sibling preset has, as an image preset; and the page it is compared with must be in the dist.
+  it('fails when a PDF preset repeats its parent or a sibling, or the page it is compared with is missing', () => {
+    const dir = join(root, 'pdf-presets');
+    build(dir);
+    const extract = routeById('split-pdf-extract-pages').paths.es ?? '';
+    const png = routeById('pdf-to-jpg-to-png').paths.en ?? '';
+    // The Spanish Extract pages written as the Spanish Split PDF (the blocks of its parent), with its own name in the H1.
+    write(dir, extract, pdfPage({ id: 'split-pdf', lang: 'es' }).replace(`<h1>${TEXTS.es.common.pdf['split-pdf'].name}</h1>`, `<h1>${TEXTS.es.common.pdf['split-pdf-extract-pages'].name}</h1>`));
+    // The parent of PDF to PNG gone in English: the preset cannot be compared.
+    rmSync(join(dir, fileForPath('/pdf-to-jpg/')));
+    const result = run(dir);
+    expect(result.status).toBe(1);
+    expect(result.output).toMatch(new RegExp(`${extract.replaceAll('/', '\\/')}: só 0 bloco\\(s\\) próprio\\(s\\)`));
+    expect(result.output).toContain(`${png}: a página /pdf-to-jpg/, usada na comparação, não existe no dist`);
+    // The other languages of both presets still pass.
+    for (const path of [routeById('split-pdf-extract-pages').paths.en, routeById('pdf-to-jpg-to-png').paths.es]) expect(result.output).not.toContain(`${path}: só`);
   });
 
   it('fails when a PDF page loses its seal or breaks a rule, and when a PDF page or the hub is missing', () => {
@@ -1503,11 +1573,13 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     expect(result.output).toContain('/pdf-tools/: faltam os cartões de /unlock-pdf/');
   });
 
+  // The gate runs twice or more in a subprocess here: the limit of 60 s of the F11 (the guides hub above, and pdf-site.test.ts),
+  // since the 5 s of Vitest were near on this machine with other agents reading the disk (DECISOES § 743).
   it('checks the ten file guides of the registry, and fails when one loses its tool or is missing (F5b)', () => {
     expect(guideCount).toBe(FILE_GUIDE_IDS.length * LANGS.length);
     const dir = join(root, 'guides');
     build(dir);
-    expect(run(dir).output).toMatch(new RegExp(`${pdfCount} de PDF \\(as ferramentas e o hub\\), ${guideCount} guia\\(s\\) de arquivo`));
+    expect(run(dir).output).toMatch(new RegExp(`${pdfCount} de PDF \\(as ferramentas, as presets e o hub\\), ${guideCount} guia\\(s\\) de arquivo`));
     write(dir, '/guides/jpg-vs-png/', guidePage({ toolPath: '/png-to-jpg/', tool: '' }));
     rmSync(join(dir, fileForPath('/guides/split-pdf-file-size/')));
     const result = run(dir);
@@ -1515,7 +1587,7 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     expect(result.output).toContain('/guides/jpg-vs-png/: sem a ferramenta embutida (#fo-tool-root)');
     expect(result.output).toContain('/guides/split-pdf-file-size/: a página não existe no dist');
     expect(result.output).toContain(`${guideCount - 1} guia(s) de arquivo conferido(s), o registro tem ${guideCount}`);
-  });
+  }, 60_000);
 
   // F12, Mudança 10 (DECISOES § 418): the default build has no ad box, and the blocks are read on the build with the ads.
   it('fails a file guide with an ad box in the default build, or with no AdSlot in the build with the ads', () => {
@@ -1578,6 +1650,8 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     expect(run(dir).output).toContain(`${pt}: a página não existe no dist`);
   }, 60_000);
 
+  // The gate runs twice or more in a subprocess here: the limit of 60 s of the F11 (the guides hub above, and pdf-site.test.ts),
+  // since the 5 s of Vitest were near on this machine with other agents reading the disk (DECISOES § 743).
   it('checks the QR code generator from the route map, and fails when it loses a block or is missing (F7)', () => {
     expect(qrCount).toBe(3);
     const dir = join(root, 'qr');
@@ -1592,7 +1666,7 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     expect(lost.output).toContain(`${path}: sem o bloco privacy`);
     rmSync(join(dir, fileForPath(path)));
     expect(run(dir).output).toContain(`${path}: a página não existe no dist`);
-  });
+  }, 60_000);
 
   it('checks the QR code generator in Portuguese and Spanish with the phrases of each language (the languages adjustment)', () => {
     const dir = join(root, 'qr-languages');

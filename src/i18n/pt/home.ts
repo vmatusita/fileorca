@@ -14,7 +14,7 @@ export default {
   image: {
     heading: 'Imagem',
     more: 'Cada ferramenta de imagem abre o arquivo nesta aba, faz o trabalho no seu aparelho e entrega uma cópia nova para você salvar.',
-    all: 'Todas as ferramentas de imagem e os tamanhos comuns',
+    all: 'Todas as ferramentas de imagem e os ajustes prontos',
   },
   pdf: {
     heading: 'PDF',

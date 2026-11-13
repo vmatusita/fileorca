@@ -5,7 +5,7 @@ const texts: FileGuideTexts = {
   description: 'O que ocupa espaço dentro de um PDF, medido nos nossos PDFs de teste, e o que cada nível da Comprimir PDF fez com eles, até quando o arquivo voltou igual.',
   h1: 'Por que meu PDF está tão grande?',
   lead: 'Um PDF é um recipiente, e o tamanho depende do que foi colocado nele. Descubra qual parte pesa antes de tentar diminuir o arquivo.',
-  changed: 'Primeira versão deste guia, publicada em {published} com as medidas de {measured}.',
+  changed: 'Primeira versão deste guia, publicada em {published}. Os números foram medidos de novo em {measured}.',
   intro: [
     'Um PDF pesa o que foi colocado nele. Nos {spaceFiles_word} PDFs de teste cujo conteúdo pesamos, os mais pesados devem a maior parte do peso às imagens, e um documento escaneado também é imagem, uma por página. Depois vêm as fontes. O guia da Adobe aponta as mesmas duas causas: diz que a resolução e a profundidade de bits de uma imagem podem afetar diretamente o tamanho do arquivo, e que adicionar uma fonte pode aumentar esse tamanho de forma significativa.',
     'O e-mail é um dos limites em que você pode esbarrar. Uma conta pessoal do Gmail envia anexos de até {gmailLimit}, e o Outlook.com aceita anexos de até {outlookLimit}. Acima disso, o arquivo precisa ficar menor, ser dividido ou ir como link.',

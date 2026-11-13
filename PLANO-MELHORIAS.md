@@ -44,6 +44,7 @@ Seis runs e três paradas suas. A F9 vem primeiro porque é ela que deixa todas 
 | 12 | Oli | Nove poses, lista fechada; "nunca cobra nada" | 10ª pose, `sad`, usada só na parede: fala triste, sem culpa e sem pedir clique. Outra pose nova só se você escolher na F10 |
 | 13 | Textos do café | Tom de transparência | Tom "me ajude com um café" (seção C). Continua sem contagem regressiva, sem culpa, sem bloquear a tela e sem ligar doação a anúncio |
 | 14 | Fonte de verdade | Ficha > PLANO > CLAUDE.md > DECISOES > código | Ficha > PLANO-MELHORIAS (nestes itens) > PLANO > CLAUDE.md e docs/claude/ > DECISOES > código |
+| 15 | Catálogo | "Escopo: 48 ferramentas em quatro áreas"; "o catálogo é o teto"; o "remover metadados" no backlog com gatilho | O teto abre só para as candidatas da seção E do PLANO-UX-QV.md que passarem na regra da seção E. Para o "remover metadados", essa regra substitui o gatilho do backlog. O "Fora do escopo" e os outros itens do backlog não mudam. |
 
 **O que não muda:** 150 px entre anúncio e Baixar, campos, menus, painel e Oli; nada acima da ferramenta no celular; nunca anúncio no painel, no processamento, no cronograma nem nas páginas jurídicas; só âncora e vinheta como formatos automáticos; nenhum refresh de anúncio; amarelo só no Baixar; PR que mexe em .github/workflows/ e major do Dependabot ficam para você; sem conta, sem upload, sem servidor; "sem anúncio para quem doa" continua fora.
 

@@ -7,12 +7,16 @@ import { arriveFrom, inboxGone } from './lib/inbox.ts';
 import compressPdfTexts from '../../src/tools/compress-pdf/i18n/en.ts';
 import mergePdfTexts from '../../src/tools/merge-pdf/i18n/en.ts';
 import imagesPdfTexts from '../../src/tools/pdf-to-jpg/i18n/en.ts';
+import pngPdfTexts from '../../src/tools/pdf-to-jpg/presets/to-png/i18n/en.ts';
+import organizePdfTexts from '../../src/tools/organize-pdf/i18n/en.ts';
 import protectPdfTexts from '../../src/tools/protect-pdf/i18n/en.ts';
+import extractPdfTexts from '../../src/tools/split-pdf/presets/extract-pages/i18n/en.ts';
 
 // The technical claims of the launch texts (docs/lancamento/show-hn.md and, from the F5b, product-hunt.md; DECISOES § 98),
 // proven over the dist/
 // in both browsers, on a JPEG codec, the libheif decoder, the PDF worker and, since F5a, qpdf (Compress PDF,
-// Protect PDF) and PDF.js (PDF to JPG), and since the F17 the AVIF of AVIF to JPG and Convert to WebP:
+// Protect PDF) and PDF.js (PDF to JPG), since the F17 the AVIF of AVIF to JPG and Convert to WebP, and since the F18 the
+// five new pages (Remove EXIF data, Flip image, Organize PDF, Extract pages from PDF and PDF to PNG):
 // 1. no byte of the file leaves the browser: every request the page and its workers make is a GET to the
 //    site's own origin, with no body;
 // 2. once the page and the codec are loaded, the tool keeps working offline: the network goes off and the
@@ -82,6 +86,48 @@ const CASES: Case[] = [
       await page.getByLabel(protectPdfTexts.panel.options.confirmLabel, { exact: true }).fill(PASSWORD);
       await page.getByRole('button', { name: actionOf(protectPdfTexts) }).click();
     },
+  },
+  // F18 (criterion 5 of the run; review E-1): the five new pages. Remove EXIF data hands the file back without its metadata
+  // without decoding it; Flip image mirrors it in the worker of its parent, which the second file, offline, uses again.
+  { path: '/remove-exif-data/', first: 'jpg-02-iphone6-paisagem-gps.jpg', second: 'jpg-03-iphone5-paisagem-orientacao3-gps.jpg', magic: JPEG },
+  { path: '/rotate-image/flip/', first: 'jpg-02-iphone6-paisagem-gps.jpg', second: 'gen-jpg-01-orientacao6.jpg', magic: JPEG },
+  // Organize PDF draws the grid with PDF.js and writes the PDF in the worker: the grid is drawn again offline, a page moves,
+  // and the action saves it.
+  {
+    path: '/organize-pdf/',
+    first: 'gen-paginas-mistas.pdf',
+    second: 'gen-acoes.pdf',
+    magic: PDF,
+    load: (name) => pdfFile(name),
+    act: async (page) => {
+      await expect(page.locator('#fo-tool-root .fo-pages__grid .fo-page__sheet img').first(), 'the grid was drawn').toBeVisible({ timeout: 30_000 });
+      await page.getByRole('button', { name: 'Move page 2 earlier', exact: true }).click();
+      await page.getByRole('button', { name: actionOf(organizePdfTexts) }).click();
+    },
+  },
+  // Extract pages: the pages are picked by number, typed in the page, and go together into one new PDF.
+  {
+    path: '/split-pdf/extract-pages/',
+    first: 'gen-paginas-mistas.pdf',
+    second: 'gen-acoes.pdf',
+    magic: PDF,
+    load: (name) => pdfFile(name),
+    act: async (page) => {
+      const action = page.getByRole('button', { name: actionOf(extractPdfTexts) });
+      await expect(action, 'the file is read').toBeVisible({ timeout: 30_000 });
+      await page.getByLabel('Pick pages by number').fill('2');
+      await page.getByRole('button', { name: 'Pick these' }).click();
+      await action.click();
+    },
+  },
+  // PDF to PNG: PDF.js draws the pages as for PDF to JPG, and the PNG is written without a codec to fetch.
+  {
+    path: '/pdf-to-jpg/to-png/',
+    first: 'gen-paginas-mistas.pdf',
+    second: 'gen-acoes.pdf',
+    magic: ZIP,
+    load: (name) => pdfFile(name),
+    setup: (page) => option(page, pngPdfTexts.panel.options.low),
   },
   // F5b (prompt decision 7): the same claims through a file guide, which embeds the tool with its own island and entry.
   { path: '/guides/heic-to-jpg-on-windows/', first: 'heic-06-iphone7-paisagem-gps.heic', second: 'heic-04-iphone11promax-retrato-livephoto-gps.heic', magic: JPEG },

@@ -5,7 +5,7 @@ import { sitemapIndexXml, sitemapUrls, sitemapXml } from '../../src/seo/sitemap.
 import { QR_ID, ROUTES, routeById, type RouteDef, type RouteId } from '../../src/i18n/routes.ts';
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { BR_CALC_IDS, BR_HUB_ID, CALC_PAGE_IDS, GUIDE_IDS, HEALTH_HUB_ID, HOUSE_HUB_ID, LIFE_CALC_IDS, MONEY_HUB_ID, isBrCalc } from '../../src/tools/calc/registry.ts';
-import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { PDF_HUB_ID, PDF_PRESET_IDS, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDE_IDS, GUIDES_HUB_ID } from '../../src/tools/guides/registry.ts';
 
 const O = 'https://fileorca.com';
@@ -85,7 +85,9 @@ describe('sitemaps', () => {
   // F11 (decision 5): the guides hub, one page in each language (the last 1 of each sum).
   // F17 (DECISOES § 716): AVIF to JPG and Convert to WebP, in the three languages: English 21 pages of the image area and
   // the institutional ones (19 before), and the other 13 pages of the image area in Portuguese and Spanish (11 before).
-  const SIZES = { en: 21 + 24 + 13 + 10 + f7Rows.length + 1, pt: 8 + 13 + 13 + brRows + 1 + 10 + 1, es: 8 + 13 + 13 + 1 + CALC_PAGE_IDS.length + GUIDE_IDS.length + 1 + 10 + 1 } as const;
+  // F18 (DECISOES § 743): Remove EXIF data and Flip image in the image area (23 in English, the other 15 in pt and es), and
+  // Organize PDF and the 2 PDF presets in the PDF area (16: the hub, 13 tools and 2 presets; 13 before), in each language.
+  const SIZES = { en: 23 + 24 + 16 + 10 + f7Rows.length + 1, pt: 8 + 15 + 16 + brRows + 1 + 10 + 1, es: 8 + 15 + 16 + 1 + CALC_PAGE_IDS.length + GUIDE_IDS.length + 1 + 10 + 1 } as const;
 
   it('builds one valid sitemap per language and an index, with the counts of the route map', () => {
     expect([0, 1 + BR_CALC_IDS.length]).toContain(brRows);
@@ -106,9 +108,10 @@ describe('sitemaps', () => {
   });
 
   it('lists every image and PDF page and both hubs in the sitemap of each language (F6; before, only Compress image outside English)', () => {
-    const ids = [...Object.keys(IMAGE_PAGES), 'image-tools', PDF_HUB_ID, ...PDF_TOOL_IDS] as RouteId[];
-    // F17: 13 image pages and the hub (12 before), and the PDF hub and its 12 tools.
-    expect(ids).toHaveLength(14 + 13);
+    const ids = [...Object.keys(IMAGE_PAGES), 'image-tools', PDF_HUB_ID, ...PDF_TOOL_IDS, ...PDF_PRESET_IDS] as RouteId[];
+    // F17: 13 image pages and the hub (12 before), and the PDF hub and its 12 tools. F18 (DECISOES § 743): 15 image pages
+    // and the hub, and the PDF hub, its 13 tools and its 2 presets.
+    expect(ids).toHaveLength(16 + 16);
     for (const lang of ['en', 'pt', 'es'] as const) {
       const listed = new Set(sitemapUrls(lang));
       for (const id of ids) expect(listed.has(`${O}${routeById(id).paths[lang] ?? '-'}`), `${lang} ${id}`).toBe(true);
@@ -122,7 +125,7 @@ describe('sitemaps', () => {
     // F6: the image and PDF pages are translations now, so each one has the reciprocal cluster with the x-default in English
     // (only Compress image had it before). The languages adjustment: the file guides and the QR code generator too. F11: the
     // guides hub.
-    for (const id of [...Object.keys(IMAGE_PAGES), 'image-tools', PDF_HUB_ID, ...PDF_TOOL_IDS, ...FILE_GUIDE_IDS, QR_ID, GUIDES_HUB_ID] as RouteId[]) {
+    for (const id of [...Object.keys(IMAGE_PAGES), 'image-tools', PDF_HUB_ID, ...PDF_TOOL_IDS, ...PDF_PRESET_IDS, ...FILE_GUIDE_IDS, QR_ID, GUIDES_HUB_ID] as RouteId[]) {
       const route = routeById(id);
       expect(alternatesFor(route).map((alt) => alt.hreflang), id).toEqual(['en', 'pt-BR', 'es', 'x-default']);
       expect(alternatesFor(route).map((alt) => alt.href), id).toEqual([`${O}${route.paths.en}`, `${O}${route.paths.pt}`, `${O}${route.paths.es}`, `${O}${route.paths.en}`]);

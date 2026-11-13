@@ -1,10 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
 import { fmt } from '../../src/i18n/format.ts';
 import { routeById, type Lang } from '../../src/i18n/routes.ts';
-import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { PDF_PANEL_TEXTS } from '../../src/tools/pdf/texts.ts';
 import { choosePdfs, openTool, pdfFile } from './lib/pdf-tools.ts';
-import { walkPdfTool } from './lib/pdf-states.ts';
+import { PDF_WALKS, walkPdfTool } from './lib/pdf-states.ts';
 
 // F14 (PLANO-UX-QV.md, items 6 and 7, section A; DECISOES § 625 and § 626). Criterion 6: "View the new PDF" is on every
 // result that is one PDF with no password (Split with one part too), never on Protect, PDF to JPG or a ZIP, in the 12 PDF
@@ -12,6 +11,8 @@ import { walkPdfTool } from './lib/pdf-states.ts';
 // the result opens first in the band, shows the pages of the new PDF and gives the focus back to its button. The Merge
 // list: "View pages of {name}" in the actions of each read row, 48 px, under the card below 480 px, never on a refused
 // row; its view opens first in the band and gives the focus back to the button of its row.
+// F18 (decision 5; DECISOES § 725): and on the two PDF presets (PDF_WALKS): Extract pages gives one PDF, so the button is
+// there; PDF to PNG gives images, so it is not.
 
 const root = (page: Page) => page.locator('#fo-tool-root');
 const view = (page: Page) => root(page).locator('.fo-pview');
@@ -26,7 +27,7 @@ const frames = (page: Page) => page.evaluate(() => new Promise((done) => request
 
 test.describe('criterion 6: "View the new PDF" on every result that is one PDF with no password, with the rectangle of always', () => {
   for (const lang of LANGS) {
-    for (const id of PDF_TOOL_IDS) {
+    for (const { id } of PDF_WALKS) {
       test(`${routeById(id).paths[lang] ?? ''}: the button where the result is one PDF with no password, and the rectangle at 320, 360 and 1280 px`, async ({ page }) => {
         const texts = PDF_PANEL_TEXTS[lang].view;
         const seen: string[] = [];

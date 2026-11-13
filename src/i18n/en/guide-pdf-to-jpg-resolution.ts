@@ -5,7 +5,7 @@ const texts: FileGuideTexts = {
   description: 'What the resolution of a PDF to JPG conversion changes, measured on our test PDFs: the pixels of each page, the size of the file, and when JPG or PNG is the better pick.',
   h1: 'Which resolution to choose for PDF to JPG',
   lead: 'A PDF page has no pixels until something draws it. The resolution you pick decides how many it gets, and how heavy the images will be.',
-  changed: 'First version of this guide, published on {published} with these measurements.',
+  changed: 'First version of this guide, published on {published}. The numbers were measured again on {measured}.',
   intro: [
     'Text and drawings in a PDF are stored as shapes, not as dots. To turn a page into a JPG, a program draws the page onto a grid of pixels, and the resolution, in pixels per inch, sets how fine that grid is. Ask for more and every letter gets more pixels, and the file gets bigger.',
     'PDF to JPG offers {lowPpi} for the screen, {mediumPpi} for general use and {highPpi} for printing. Here is what each one gave on {files_word} of our test PDFs, so you can pick the smallest that does the job.',

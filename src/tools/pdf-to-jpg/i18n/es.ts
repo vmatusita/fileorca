@@ -23,7 +23,7 @@ const texts: PdfToolTexts<ImagesTexts> = {
     rows: [
       ['Qué acepta', 'Archivos PDF, todos los que quieras. Oli revisa lo que hay dentro de cada archivo, no su nombre ni su extensión.'],
       ['Qué sale', 'Una imagen por página, con el nombre del PDF y -pagina-1, -pagina-2 y así sucesivamente, como informe-pagina-1.jpg.'],
-      ['Formatos', 'JPG con calidad 92, o PNG. Los archivos JPG son más pequeños, y el PNG mantiene nítidos el texto y las líneas finas.'],
+      ['Formatos', 'JPG con calidad 92, o PNG. En las páginas con fotos, los archivos JPG son mucho más pequeños; el PNG mantiene nítidos el texto y las líneas finas.'],
       ['Resolución', '72 ppp (píxeles por pulgada) para pantalla, 150 ppp para uso general (la opción predeterminada) o 300 ppp para imprimir.'],
       ['Páginas', 'Todas las páginas, o un rango como 1-3, 5, 8-10. El mismo rango se aplica a cada PDF.'],
       ['Muchas imágenes', 'Varias imágenes se descargan juntas en un ZIP.'],
@@ -45,7 +45,7 @@ const texts: PdfToolTexts<ImagesTexts> = {
     },
     {
       q: '¿Elijo JPG o PNG?',
-      a: 'El JPG, guardado con calidad 92, da archivos más pequeños y va bien con páginas que tienen fotos. El PNG no pierde nada, así que el texto y las líneas finas de la página quedan nítidos, pero los archivos son más grandes. En los dos casos el texto de la página pasa a ser parte de la imagen, así que ya no se puede seleccionar ni buscar.',
+      a: 'El JPG, guardado con calidad 92, va bien con páginas que tienen fotos: en un PDF de fotos, los archivos PNG de todas sus páginas, sumados, tienen varias veces el peso de los archivos JPG. El PNG no pierde nada, así que el texto y las líneas finas de la página quedan nítidos; en un PDF de texto y líneas, los archivos PNG de todas sus páginas, sumados, pesan aproximadamente entre la mitad y el doble que los archivos JPG, y hasta pueden ser los más pequeños. En los dos casos el texto de la página pasa a ser parte de la imagen, así que ya no se puede seleccionar ni buscar.',
     },
     {
       q: '¿Puedo convertir un PDF con restricciones de edición o con contraseña?',
@@ -59,6 +59,12 @@ const texts: PdfToolTexts<ImagesTexts> = {
   privacyHeading: 'Privacidad',
   privacyNote: 'Tus PDF se dibujan en tu dispositivo y nunca se envían a un servidor. Las imágenes salen sin datos Exif ni ubicación GPS.',
   relatedHeading: 'Herramientas relacionadas',
+  // F18 (decision 5; DECISOES § 725): the table of the presets of this tool, with their links.
+  presets: {
+    heading: 'Ajustes predefinidos',
+    caption: 'Ajustes predefinidos de PDF a JPG y qué hace cada uno',
+    head: ['Ajuste predefinido', 'Qué hace'],
+  },
   panel: {
     suffix: 'pagina',
     note: 'Archivos PDF, todos los que quieras',
@@ -70,7 +76,7 @@ const texts: PdfToolTexts<ImagesTexts> = {
       formatLegend: 'Formato de imagen',
       jpg: 'JPG',
       png: 'PNG',
-      formatHelp: 'Los archivos JPG son más pequeños (calidad 92). El PNG no pierde nada, así que el texto y las líneas finas quedan nítidos, pero los archivos son más grandes.',
+      formatHelp: 'En las páginas con fotos, los archivos JPG son mucho más pequeños (calidad 92). El PNG no pierde nada, así que el texto y las líneas finas quedan nítidos.',
       resolutionLegend: 'Resolución',
       low: '72 ppp',
       lowHelp: 'para pantalla',

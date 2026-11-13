@@ -14,7 +14,7 @@ import { fmt, groupDigits } from '../../i18n/format.ts';
 import type { IconName } from '../../icons/svg.ts';
 import { CALC_PAGES, GUIDES, isGuide, type GuideId } from '../calc/registry.ts';
 import { IMAGE_PAGES } from '../image/registry.ts';
-import { PDF_PAGES, type PdfToolId } from '../pdf/registry.ts';
+import { PDF_PAGES, type PdfPageId } from '../pdf/registry.ts';
 import { MEASURED } from './measured.ts';
 import type { MeasuredFile } from './measured-types.ts';
 import { FILE_GUIDES, isFileGuide, type FileGuideId, type FileGuideTool } from './registry.ts';
@@ -64,7 +64,7 @@ export function measuredFiles(id: FileGuideId, file: MeasuredFile = MEASURED): s
   return [...files];
 }
 
-const isPdfTool = (tool: FileGuideTool): tool is PdfToolId => Object.hasOwn(PDF_PAGES, tool);
+const isPdfTool = (tool: FileGuideTool): tool is Extract<FileGuideTool, PdfPageId> => Object.hasOwn(PDF_PAGES, tool);
 
 /** The tool of a file guide: its card name in the language, its icon, and PDF when it is a PDF tool (Image to PDF too). */
 function fileTool(tool: FileGuideTool, lang: Lang): GuideCardTool {

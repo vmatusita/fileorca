@@ -59,7 +59,7 @@ Estimativa das 2 a 3 h: o AlternativeTo leva cerca de 1 h (conta, e-mail verific
 ### Antes de qualquer envio
 
 - [ ] **Busca reversa da imagem da Oli** (Google Lens, TinEye ou busca visual do Bing) e anotar o resultado onde você guarda as pendências da F0. O ícone do app (`docs/design/assets/Logo/app-icon.svg`) e o AlternativeTo mostram o rosto da Oli, e o Show HN leva muita gente ao site.
-- [ ] **Conferir no dia que os números de ferramentas ainda batem com o site**: 10 ferramentas e 3 presets em <https://fileorca.com/image-tools/> e em `src/tools/image/registry.ts`. A 2b entrou na F17, e as listas já foram atualizadas (veja "Linhas que mudam com a 2b").
+- [ ] **Conferir no dia que os números de ferramentas ainda batem com o site**: 11 ferramentas e 4 presets em <https://fileorca.com/image-tools/> e em `src/tools/image/registry.ts`. A 2b entrou na F17, e as listas já foram atualizadas (veja "Linhas que mudam com a 2b").
 - [ ] Ler a seção "Provas do Show HN" de `docs/relatorios/fase-03.md` e confirmar que as três provas passaram.
 - [ ] Conferir se os anúncios continuam desligados. Se ligou antes do post, ajuste a frase "Ads are not on yet" em todos os textos.
 - [ ] O aviso de cookies do site hoje fala em "ads to keep FileOrca free". O comentário do HN diz que os anúncios ainda não estão ligados. Não é contradição, mas alguém pode apontar. Decida se ajusta o aviso ou responde com franqueza.
@@ -106,6 +106,8 @@ Estimativa das 2 a 3 h: o AlternativeTo leva cerca de 1 h (conta, e-mail verific
 Quando a run "2b" entrar (Convert to WebP/AVIF e AVIF to JPG), estas linhas mudam. Cada uma tem um comentário `<!-- muda com a 2b -->` no arquivo.
 
 **A F17 (10/nov/2026) mudou essas linhas:** a 2b entrou, as listas e as contagens dos três arquivos passaram a dizer o que o site faz hoje (o AVIF to JPG e a conversão de JPG e PNG para WebP e AVIF), e os comentários `<!-- muda com a 2b -->` saíram das linhas mudadas. A tabela abaixo fica como registro do que mudou. O `product-hunt.md` também mudou: "8 image tools" virou "10 image tools", com as contagens de caracteres refeitas.
+
+**A F18 (11/nov/2026) mudou de novo:** entraram o Remove EXIF data e o Organize PDF (ferramentas) e o Flip image, o Extract pages from PDF e o PDF to PNG (presets). As contagens passaram a 11 ferramentas de imagem, 4 presets de imagem e 13 de PDF no `product-hunt.md` (o primeiro comentário passou de 1.586 para 1.648 caracteres, com o flip, o Remove EXIF data e as páginas de PDF nas listas), e as listas de ferramentas do `show-hn.md`, do `alternativeto.md` (a descrição longa passou de 748 para 785 caracteres) e do rascunho do Reddit no `diretorios.md` ganharam as novas. O Show HN cita o Remove EXIF data só pelo nome: o que a saída deixa de levar não entra nas três afirmações permitidas dele (DECISOES § 740).
 
 | Arquivo | O que muda |
 | --- | --- |
@@ -218,7 +220,7 @@ A run F5b deixou em `product-hunt.md` o kit do lançamento no Product Hunt, e em
 ### Checklist para o Victor
 
 - [ ] Ler `product-hunt.md` inteiro, começando por "Leia antes de usar".
-- [ ] Conferir no dia as contagens (10 ferramentas de imagem, 3 presets, 12 de PDF, 14 calculadoras, 15 guias) e se os anúncios estão ligados.
+- [ ] Conferir no dia as contagens (11 ferramentas de imagem, 4 presets de imagem, 13 de PDF, 14 calculadoras, 15 guias) e se os anúncios estão ligados.
 - [ ] Criar ou conferir a conta pessoal, com a sua foto (a Oli fica só no produto).
 - [ ] Pôr o link do repositório público do motor só se ele estiver no ar.
 - [ ] Agendar para a primeira terça depois do merge, às 12:01 AM do Pacífico.

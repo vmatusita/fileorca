@@ -5,7 +5,7 @@ const texts: FileGuideTexts = {
   description: 'Por que as partes de um PDF dividido podem somar bem mais que o original, medido nos nossos PDFs de teste, e como dividir para isso não acontecer.',
   h1: 'Como dividir um PDF e por que as partes podem pesar mais que o todo',
   lead: 'Ao dividir um PDF grande, as partes podem somar mais que o arquivo. Veja por que, e quando isso não acontece.',
-  changed: 'Primeira versão deste guia, publicada em {published} com as medidas de {measured}.',
+  changed: 'Primeira versão deste guia, publicada em {published}. Os números foram medidos de novo em {measured}.',
   intro: [
     'Dividir um PDF parece cortar papel: as páginas vão para pilhas separadas e nada é acrescentado. Um PDF não funciona assim. Cada parte precisa ser um PDF completo, que abre em qualquer lugar, então leva tudo de que as páginas dela precisam para aparecer certo, e a Dividir PDF ainda dá a cada parte uma cópia da descrição do documento original.',
     'O quanto isso acrescenta depende do arquivo. Dividimos {files_word} PDFs dos nossos testes, uma parte por página, e somamos as partes. As partes de {bigger_word} deles pesaram mais que o todo: as das notas de aula somaram {bookRatio_times} o original, as do relatório da NASA escaneado ficaram {reportRatio_more} acima dele, e as do PDF de fotos, {photosGrowth_exact} acima.',

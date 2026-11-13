@@ -21,6 +21,7 @@ const texts: PdfToolsTexts = {
     { before: 'Fotos ou digitalizações que deviam virar um PDF:', tool: 'image-to-pdf', after: 'põe uma imagem em cada página, na ordem da lista.' },
     { before: 'Uma digitalização que saiu de lado ou de cabeça para baixo:', tool: 'rotate-pdf', after: 'gira todas as páginas, ou só as que precisam, sem redesenhar nada.' },
     { before: 'Páginas em branco ou que sobram no meio:', tool: 'delete-pdf-pages', after: 'tira essas páginas e deixa todo o resto como estava.' },
+    { before: 'Páginas para mover, girar e tirar do mesmo PDF:', tool: 'organize-pdf', after: 'faz as três coisas numa grade só e salva um PDF novo.' },
     { before: 'Páginas fora de ordem:', tool: 'reorder-pdf-pages', after: 'deixa você arrastar as páginas ou mover cada uma pelos botões ou pelo teclado.' },
     { before: 'Um relatório ou um TCC que precisa de páginas numeradas:', tool: 'add-page-numbers-to-pdf', after: 'escreve os números onde você quiser, num dos quatro formatos.' },
     { before: 'Um documento para marcar como rascunho ou como confidencial:', tool: 'watermark-pdf', after: 'carimba o seu texto no meio de todas as páginas.' },
@@ -34,6 +35,10 @@ const texts: PdfToolsTexts = {
     'Toda ferramenta de PDF daqui lê e grava o arquivo dentro do seu navegador. O PDF é aberto com o PDF.js, o leitor que o Firefox usa, e alterado com o pdf-lib e o qpdf, compilados para rodar na página. Nada é enviado a um servidor, então não há envio para esperar nem cópia do seu arquivo em outro lugar.',
     'A senha que você digita para proteger ou abrir um PDF fica na página enquanto você usa a ferramenta e some quando você fecha a página. A assinatura que você desenha, escolhe em imagem ou digita também não fica guardada. Abra a aba Rede do navegador enquanto uma ferramenta trabalha: nenhuma requisição leva o seu arquivo, a sua senha ou o seu texto.',
   ],
+  // F18 (decision 5; DECISOES § 725 and § 736): the table of the presets of the PDF tools, with their links.
+  presetsHeading: 'Ajustes prontos',
+  presetsCaption: 'Ajustes prontos das ferramentas de PDF e o que cada ajuste entrega',
+  presetsHead: ['Ajuste pronto', 'O que você recebe'],
 };
 
 export default texts;

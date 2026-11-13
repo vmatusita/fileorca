@@ -5,7 +5,7 @@ const texts: FileGuideTexts = {
   description: 'What takes the space inside a PDF, measured on our test PDFs, and what each mode of Compress PDF did to them, including when the file came back the same.',
   h1: 'Why is my PDF so large?',
   lead: 'A PDF is a container, and the size depends on what went into it. Find out which part is heavy before you try to shrink it.',
-  changed: 'First version of this guide, published on {published} with these measurements.',
+  changed: 'First version of this guide, published on {published}. The numbers were measured again on {measured}.',
   intro: [
     'A PDF is as heavy as what went into it. In the {spaceFiles_word} test PDFs whose contents we weighed, the heaviest owe most of their weight to pictures, and a scan is pictures too, one per page. Fonts come next. Adobe’s guide names the same two causes: it says the resolution and the bit depth of an image can directly affect the size of the file, and that adding a single font can sometimes increase it substantially.',
     'Email is one limit you can run into. A personal Gmail account sends attachments up to {gmailLimit}, and Outlook.com takes attachments up to {outlookLimit}. Above that, the file needs to get smaller, be split, or travel as a link.',

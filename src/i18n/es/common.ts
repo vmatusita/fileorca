@@ -131,6 +131,11 @@ export default {
       description: 'Junta tus imágenes en un solo PDF, una imagen por página.',
       synonyms: ['pdf', 'jpg a pdf', 'png a pdf', 'foto a pdf', 'unir imágenes', 'juntar fotos', 'jpg', 'png', 'imagen'],
     },
+    'remove-exif-data': {
+      name: 'Quitar metadatos de la foto',
+      description: 'Quita de una foto la ubicación, la fecha y los datos de la cámara.',
+      synonyms: ['exif', 'metadatos', 'gps', 'ubicación', 'quitar exif', 'quitar metadatos', 'eliminar metadatos', 'borrar ubicación', 'foto', 'imagen', 'jpg', 'jpeg', 'png', 'webp'],
+    },
     'compress-image-to-100kb': {
       name: 'Comprimir imagen a 100 KB',
       description: 'Un JPG de 100 KB o menos, para formularios con límite de tamaño.',
@@ -145,6 +150,11 @@ export default {
       name: 'Miniatura de YouTube',
       description: 'Un JPG de 1280 × 720 de menos de 2 MB, listo para tu video de YouTube.',
       synonyms: ['youtube', 'miniatura', 'thumbnail', 'portada del video', '1280x720', '1280 x 720', '16:9', 'video', 'jpg'],
+    },
+    'rotate-image-flip': {
+      name: 'Reflejar imagen',
+      description: 'Refleja una foto en horizontal o en vertical, sin rotarla.',
+      synonyms: ['reflejar', 'espejo', 'reflejar imagen', 'reflejar foto', 'efecto espejo', 'voltear imagen', 'foto', 'imagen', 'jpg', 'jpeg', 'png', 'webp'],
     },
   },
   pdf: {
@@ -161,7 +171,8 @@ export default {
     'pdf-to-jpg': {
       name: 'PDF a JPG',
       description: 'Convierte cada página de un PDF en una imagen JPG o PNG.',
-      synonyms: ['pdf a jpg', 'pdf a jpeg', 'pdf a png', 'pdf a imagen', 'convertir pdf', 'página a imagen', 'pdf'],
+      // F18 (decision 4; DECISOES § 724): "pdf a png" went to PDF a PNG, whose name it is (§ 180).
+      synonyms: ['pdf a jpg', 'pdf a jpeg', 'pdf a imagen', 'convertir pdf', 'página a imagen', 'pdf'],
     },
     'compress-pdf': {
       name: 'Comprimir PDF',
@@ -198,15 +209,31 @@ export default {
       description: 'Quita la contraseña o las restricciones de un PDF que puedes abrir.',
       synonyms: ['quitar contraseña', 'eliminar contraseña', 'desbloquear pdf', 'descifrar pdf', 'quitar restricciones', 'pdf'],
     },
+    'organize-pdf': {
+      name: 'Organizar PDF',
+      description: 'Mueve, gira y quita las páginas de un PDF en una sola cuadrícula.',
+      synonyms: ['organizar', 'organizar pdf', 'reorganizar', 'administrar páginas', 'girar páginas', 'eliminar páginas', 'pdf'],
+    },
     'reorder-pdf-pages': {
       name: 'Ordenar páginas de PDF',
       description: 'Cambia el orden de las páginas de un PDF.',
-      synonyms: ['ordenar páginas', 'reordenar páginas', 'mover páginas', 'cambiar orden', 'organizar pdf', 'pdf'],
+      // F18 (decision 4; DECISOES § 724): "organizar pdf" went to Organizar PDF, which has the term in its name.
+      synonyms: ['ordenar páginas', 'reordenar páginas', 'mover páginas', 'cambiar orden', 'pdf'],
     },
     'watermark-pdf': {
       name: 'Marca de agua en PDF',
       description: 'Estampa un texto como marca de agua en todas las páginas de un PDF.',
       synonyms: ['marca de agua', 'sello', 'confidencial', 'borrador', 'agregar marca de agua', 'pdf'],
+    },
+    'split-pdf-extract-pages': {
+      name: 'Extraer páginas de PDF',
+      description: 'Guarda en un PDF nuevo solo las páginas que elijas.',
+      synonyms: ['extraer', 'extraer páginas', 'extraer páginas de pdf', 'sacar páginas', 'guardar páginas', 'pdf'],
+    },
+    'pdf-to-jpg-to-png': {
+      name: 'PDF a PNG',
+      description: 'Convierte las páginas de un PDF en imágenes PNG nítidas.',
+      synonyms: ['pdf a png', 'png', 'convertir pdf a png', 'página a png', 'pdf'],
     },
   },
   calcs: {

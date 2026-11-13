@@ -22,7 +22,7 @@ const texts: PdfToolTexts<ImagesTexts> = {
     rows: [
       ['O que aceita', 'Arquivos PDF, quantos quiser. A Oli confere o que há dentro de cada arquivo, não o nome nem a extensão.'],
       ['O que sai', 'Uma imagem para cada página, com o nome do PDF e -pagina-1, -pagina-2 e assim por diante, como relatorio-pagina-1.jpg.'],
-      ['Formatos', 'JPG com qualidade 92, ou PNG. O JPG dá arquivos menores, e o PNG deixa o texto e as linhas finas bem nítidos.'],
+      ['Formatos', 'JPG com qualidade 92, ou PNG. Nas páginas com fotos, os arquivos JPG são bem menores; o PNG deixa o texto e as linhas finas bem nítidos.'],
       ['Resolução', '72 ppi para a tela, 150 ppi para uso geral (o padrão) ou 300 ppi para imprimir.'],
       ['Páginas', 'Todas as páginas, ou um intervalo como 1-3, 5, 8-10. O mesmo intervalo vale para todos os PDFs.'],
       ['Muitas imagens', 'Várias imagens são baixadas juntas num ZIP só.'],
@@ -44,7 +44,7 @@ const texts: PdfToolTexts<ImagesTexts> = {
     },
     {
       q: 'Escolho JPG ou PNG?',
-      a: 'O JPG, salvo com qualidade 92, dá arquivos menores e combina com páginas que têm fotos. O PNG não perde nada, então o texto e as linhas finas da página ficam nítidos, mas os arquivos ficam maiores. Nos dois casos, o texto da página vira parte da imagem e não dá mais para selecionar nem buscar.',
+      a: 'O JPG, salvo com qualidade 92, combina com páginas que têm fotos: num PDF de fotos, os arquivos PNG de todas as páginas, somados, têm várias vezes o tamanho dos arquivos JPG. O PNG não perde nada, então o texto e as linhas finas da página ficam nítidos; num PDF de texto e linhas, os arquivos PNG de todas as páginas, somados, têm aproximadamente entre a metade e o dobro do tamanho dos arquivos JPG, e podem até ser os menores. Nos dois casos, o texto da página vira parte da imagem e não dá mais para selecionar nem buscar.',
     },
     {
       q: 'Dá para converter um PDF com restrições de edição ou com senha?',
@@ -59,6 +59,12 @@ const texts: PdfToolTexts<ImagesTexts> = {
   privacyNote:
     'Seus PDFs são desenhados no seu aparelho e nunca são enviados a um servidor. As imagens saem sem dados Exif e sem localização GPS.',
   relatedHeading: 'Ferramentas relacionadas',
+  // F18 (decision 5; DECISOES § 725): the table of the presets of this tool, with their links.
+  presets: {
+    heading: 'Ajustes prontos',
+    caption: 'Ajustes prontos da PDF para JPG e o que cada um faz',
+    head: ['Ajuste pronto', 'O que faz'],
+  },
   panel: {
     suffix: 'pagina',
     note: 'PDFs, quantos quiser',
@@ -70,7 +76,7 @@ const texts: PdfToolTexts<ImagesTexts> = {
       formatLegend: 'Formato da imagem',
       jpg: 'JPG',
       png: 'PNG',
-      formatHelp: 'O JPG dá arquivos menores (qualidade 92). O PNG não perde nada, então o texto e as linhas finas ficam nítidos, mas os arquivos ficam maiores.',
+      formatHelp: 'Nas páginas com fotos, o JPG dá arquivos bem menores (qualidade 92). O PNG não perde nada, então o texto e as linhas finas ficam nítidos.',
       resolutionLegend: 'Resolução',
       low: '72 ppi',
       lowHelp: 'para a tela',

@@ -144,8 +144,10 @@ describe('the counts of the Product Hunt kit', () => {
   });
 
   it('fail when a registry and the kit disagree (control)', () => {
-    expect(countProblems(kit.replace(/\b12 PDF tools\b/, '13 PDF tools')).join()).toMatch(/"13 PDF tools": os registros dizem 12/);
-    expect(countProblems(kit.replace('pdf-tools=12', 'pdf-tools=11')).join()).toMatch(/pdf-tools=11/);
+    // F18 (DECISOES § 740): the control follows the registry, so a run that adds a PDF tool does not have to rewrite it.
+    const pdf = PDF_TOOL_IDS.length;
+    expect(countProblems(kit.replace(new RegExp(`\\b${pdf} PDF tools\\b`), `${pdf + 1} PDF tools`)).join()).toMatch(new RegExp(`"${pdf + 1} PDF tools": os registros dizem ${pdf}`));
+    expect(countProblems(kit.replace(`pdf-tools=${pdf}`, `pdf-tools=${pdf - 1}`)).join()).toMatch(new RegExp(`pdf-tools=${pdf - 1}`));
   });
 });
 

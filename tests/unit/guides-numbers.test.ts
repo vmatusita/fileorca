@@ -264,7 +264,7 @@ const FEMININE: Record<'pt' | 'es', Partial<Record<FileGuideId, readonly string[
     'guides-social-media-image-sizes': ['exactFrames', 'thumbnailExactChromium', 'photos'],
     'guides-open-webp-save-as-jpg': ['photos'],
     'guides-jpg-vs-png': ['photos'],
-    'guides-remove-location-from-photos': ['withGps', 'withCamera', 'withDate', 'resizeImageIdenticalChromium', 'resizeImageOrientationChromium', 'photos', 'browsersSameSize', 'candidates'],
+    'guides-remove-location-from-photos': ['withGps', 'withCamera', 'withDate', 'removeExifDataIdenticalChromium', 'removeExifDataOrientationChromium', 'photos', 'browsersSameSize', 'candidates'],
     'guides-photos-to-one-pdf': ['photos'],
   },
   es: {
@@ -272,7 +272,7 @@ const FEMININE: Record<'pt' | 'es', Partial<Record<FileGuideId, readonly string[
     'guides-social-media-image-sizes': ['exactFrames', 'thumbnailExactChromium', 'photos'],
     'guides-open-webp-save-as-jpg': ['photos'],
     'guides-jpg-vs-png': ['photos', 'transparentCornersBefore', 'transparentCornersWhiteChromium'],
-    'guides-remove-location-from-photos': ['withGps', 'withCamera', 'withDate', 'resizeImageIdenticalChromium', 'resizeImageOrientationChromium', 'photos', 'browsersSameSize', 'candidates'],
+    'guides-remove-location-from-photos': ['withGps', 'withCamera', 'withDate', 'removeExifDataIdenticalChromium', 'removeExifDataOrientationChromium', 'photos', 'browsersSameSize', 'candidates'],
     'guides-photos-to-one-pdf': ['photos'],
   },
 };

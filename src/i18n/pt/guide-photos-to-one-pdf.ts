@@ -5,7 +5,7 @@ const texts: FileGuideTexts = {
   description: 'Como pôr várias fotos num único PDF, no celular ou no computador, quanto o PDF pesa e o que muda quando você comprime as fotos antes.',
   h1: 'Como transformar fotos em um único PDF',
   lead: 'Recibos, um contrato, fotos para um formulário: um PDF só é mais fácil de mandar e de imprimir. Veja como fazer e quanto ele pesa.',
-  changed: 'Primeira versão deste guia, publicada em {published} com as medidas de {measured}.',
+  changed: 'Primeira versão deste guia, publicada em {published}. Os números foram medidos de novo em {measured}.',
   intro: [
     'Um PDF de fotos mantém a ordem, imprime cada foto na própria página e abre em qualquer computador ou celular. Muitos formulários e escritórios também pedem exatamente isso: um PDF, e não um conjunto de imagens.',
     'O problema é o tamanho. Postas num PDF só, as nossas {photos_wordf} fotos de celular viraram um arquivo com {pdfRatioChromium} do peso das próprias fotos. Medimos o que acontece com o tamanho, com e sem comprimir as fotos antes.',

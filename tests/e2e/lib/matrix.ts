@@ -113,6 +113,12 @@ export interface Expect {
   mostlyRed?: boolean;
   /** The Orientation tag may stay when the original goes back unchanged (a rotated JPEG that did not shrink). */
   tagMayStay?: boolean;
+  /**
+   * F18 (Remove EXIF data, decision 10): the picture is the one that went in. The bytes of the image equal the fixture's
+   * (`imageBytes`, in Node), every decoded pixel equals the fixture's (`pixelHash`, in this browser), and the Orientation
+   * is the fixture's own, alone in its block (a JPG with none has no Exif at all).
+   */
+  sameImage?: boolean;
 }
 
 export type Refusal = 'wrong-tool' | 'unsupported' | 'truncated' | 'decode' | 'empty';
@@ -419,7 +425,10 @@ export async function reference(page: Page, check: PixelCheck): Promise<Referenc
   const tag = oracle(check.from).orientation;
   const stored = tag === 1 ? bytes : withOrientation(bytes, 1);
   const region = check.box ? storedBox(check.box, tag) : undefined;
-  const grid = await thumbnail(page, stored, 'image/jpeg', { size: GRID, ...(region ? { region } : {}) });
+  // F18: the type of what the fixture really is (the mirror of Flip image is checked on the PNG and WebP fixtures too).
+  const real = sniff(stored);
+  const mime = real === 'png' || real === 'webp' ? MIME_OF[real] : 'image/jpeg';
+  const grid = await thumbnail(page, stored, mime, { size: GRID, ...(region ? { region } : {}) });
   if (!grid.ok) throw new Error(`could not decode the stored pixels of ${check.from}: ${grid.error}`);
   const upright = orientGrid(grid.gray, GRID, tag);
   const expected = (check.after ?? 1) > 1 ? orientGrid(upright, GRID, check.after ?? 1) : upright;
@@ -475,6 +484,164 @@ export function orientationOnly(bytes: Uint8Array): boolean {
   const first = view.getUint32(4, little);
   const count = view.getUint16(first, little);
   return count === 1 && tiffOrientation(tiff) !== null;
+}
+
+// ---- the same picture (F18, decision 15: Remove EXIF data hands the picture back as it came) -------------------------
+
+const u16be = (bytes: Uint8Array, at: number): number => ((bytes[at] ?? 0) << 8) | (bytes[at + 1] ?? 0);
+const u32be = (bytes: Uint8Array, at: number): number => u16be(bytes, at) * 0x10000 + u16be(bytes, at + 2);
+const u32le = (bytes: Uint8Array, at: number): number => ((bytes[at] ?? 0) | ((bytes[at + 1] ?? 0) << 8) | ((bytes[at + 2] ?? 0) << 16)) + (bytes[at + 3] ?? 0) * 0x1000000;
+const fourcc = (bytes: Uint8Array, at: number): string => String.fromCharCode(...bytes.subarray(at, at + 4));
+
+/**
+ * JPEG: from the SOI to the EOI of the image itself, every segment but the APPn and COM ones (where the metadata lives):
+ * the tables, the SOF, each SOS with its entropy-coded data, the EOI. Nothing after the EOI. Fill bytes between
+ * segments are left out on both sides.
+ */
+function jpegPicture(bytes: Uint8Array): Uint8Array[] {
+  if (bytes[0] !== 0xff || bytes[1] !== 0xd8) throw new Error('not a JPEG');
+  const parts: Uint8Array[] = [bytes.subarray(0, 2)];
+  let i = 2;
+  for (;;) {
+    if (i + 1 >= bytes.length) throw new Error('the JPEG ends before the EOI of its image');
+    if (bytes[i] !== 0xff) throw new Error(`no JPEG marker at byte ${i}`);
+    const marker = bytes[i + 1] as number;
+    if (marker === 0xff) {
+      i += 1; // a fill byte before a marker
+      continue;
+    }
+    if (marker === 0xd9) {
+      parts.push(bytes.subarray(i, i + 2));
+      return parts;
+    }
+    if (marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) {
+      parts.push(bytes.subarray(i, i + 2));
+      i += 2;
+      continue;
+    }
+    const end = i + 2 + u16be(bytes, i + 2);
+    if (end > bytes.length) throw new Error(`the JPEG segment at byte ${i} runs past the end`);
+    if (!((marker >= 0xe0 && marker <= 0xef) || marker === 0xfe)) parts.push(bytes.subarray(i, end));
+    i = end;
+    if (marker === 0xda) {
+      // The scan runs to the first marker that is neither a stuffed byte (FF00) nor a restart (FFD0 to FFD7).
+      const start = i;
+      while (i + 1 < bytes.length && !(bytes[i] === 0xff && bytes[i + 1] !== 0x00 && !((bytes[i + 1] as number) >= 0xd0 && (bytes[i + 1] as number) <= 0xd7))) i += 1;
+      parts.push(bytes.subarray(start, i));
+    }
+  }
+}
+
+/** PNG: the IHDR, PLTE, tRNS and IDAT chunks, and the acTL, fcTL and fdAT of an APNG, whole (type, data and CRC), in order. */
+const PNG_PICTURE = new Set(['IHDR', 'PLTE', 'tRNS', 'IDAT', 'acTL', 'fcTL', 'fdAT']);
+function pngPicture(bytes: Uint8Array): Uint8Array[] {
+  const parts: Uint8Array[] = [];
+  let at = 8;
+  while (at + 12 <= bytes.length) {
+    const length = u32be(bytes, at);
+    const type = fourcc(bytes, at + 4);
+    if (PNG_PICTURE.has(type)) parts.push(bytes.subarray(at, at + 12 + length));
+    at += 12 + length;
+    if (type === 'IEND') break;
+  }
+  return parts;
+}
+
+/**
+ * WebP: the VP8, VP8L, ALPH, ANIM and ANMF chunks (each frame with its own image data), whole, in order, and the VP8X
+ * header with its EXIF and XMP flags read as zero (its canvas size and its alpha and animation flags count).
+ */
+const WEBP_PICTURE = new Set(['VP8 ', 'VP8L', 'ALPH', 'ANIM', 'ANMF']);
+function webpPicture(bytes: Uint8Array): Uint8Array[] {
+  const parts: Uint8Array[] = [];
+  let at = 12;
+  while (at + 8 <= bytes.length) {
+    const type = fourcc(bytes, at);
+    const size = u32le(bytes, at + 4);
+    const chunk = bytes.subarray(at, at + 8 + size);
+    if (type === 'VP8X') {
+      const header = chunk.slice();
+      header[8] = (header[8] ?? 0) & ~0x0c;
+      parts.push(header);
+    }
+    if (WEBP_PICTURE.has(type)) parts.push(chunk);
+    at += 8 + size + (size % 2);
+  }
+  return parts;
+}
+
+/**
+ * The bytes that make the picture of a JPG, PNG or WebP, whatever metadata the file carries, read here and never by the
+ * engine: two files with the same `imageBytes` hold the same picture, byte for byte (the proof of "the same pixels" of
+ * Remove EXIF data, stronger than decoding them).
+ */
+export function imageBytes(bytes: Uint8Array): Uint8Array {
+  const format = sniff(bytes);
+  const parts = format === 'jpeg' ? jpegPicture(bytes) : format === 'png' ? pngPicture(bytes) : format === 'webp' ? webpPicture(bytes) : null;
+  if (!parts) throw new Error(`no picture bytes for a ${format} file`);
+  const out = new Uint8Array(parts.reduce((sum, part) => sum + part.length, 0));
+  let offset = 0;
+  for (const part of parts) {
+    out.set(part, offset);
+    offset += part.length;
+  }
+  return out;
+}
+
+/** True when the two files hold the same picture, byte for byte (see `imageBytes`). */
+export function sameImageBytes(a: Uint8Array, b: Uint8Array): boolean {
+  return Buffer.from(imageBytes(a)).equals(Buffer.from(imageBytes(b)));
+}
+
+export interface PixelHash {
+  ok: boolean;
+  error: string;
+  width: number;
+  height: number;
+  /** SHA-256 of the SHA-256 of each band of rows: every RGBA value of the decoded picture counts. */
+  sha256: string;
+}
+
+/**
+ * Runs in the page (pass it to page.evaluate, or use `pixelHash`): decodes the bytes as the browser shows them (its own
+ * orientation applied) and hashes every RGBA value, in bands of 256 rows, so a 16.8 MP picture never needs one canvas of
+ * its whole size. Self-contained: Playwright sends its source.
+ */
+async function browserPixelHash(request: { base64: string; mime: string }): Promise<PixelHash> {
+  try {
+    const binary = atob(request.base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+    const bitmap = await createImageBitmap(new Blob([bytes], { type: request.mime }));
+    const { width, height } = bitmap;
+    const band = 256;
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = Math.min(band, height);
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    if (!context) throw new Error('no 2d context');
+    context.imageSmoothingEnabled = false;
+    const digests: Uint8Array[] = [];
+    for (let y = 0; y < height; y += band) {
+      const rows = Math.min(band, height - y);
+      context.clearRect(0, 0, width, canvas.height);
+      context.drawImage(bitmap, 0, y, width, rows, 0, 0, width, rows);
+      const data = context.getImageData(0, 0, width, rows).data;
+      digests.push(new Uint8Array(await crypto.subtle.digest('SHA-256', data)));
+    }
+    bitmap.close();
+    const all = new Uint8Array(digests.length * 32);
+    digests.forEach((digest, index) => all.set(digest, index * 32));
+    const sha = new Uint8Array(await crypto.subtle.digest('SHA-256', all));
+    return { ok: true, error: '', width, height, sha256: Array.from(sha, (byte) => byte.toString(16).padStart(2, '0')).join('') };
+  } catch (error) {
+    return { ok: false, error: String(error), width: 0, height: 0, sha256: '' };
+  }
+}
+
+/** Every decoded pixel of the bytes, hashed in the page (see `browserPixelHash`). */
+export async function pixelHash(page: Page, bytes: Uint8Array, mime: string): Promise<PixelHash> {
+  return page.evaluate(browserPixelHash, { base64: Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength).toString('base64'), mime });
 }
 
 /** No place, no author: no Exif, XMP, IPTC, PNG text or GPS in this output (PDF: inside its images too). */
@@ -646,6 +813,18 @@ async function checkOutput(context: CheckContext, fixture: string, want: Expect,
       expect(red / cells, `${out.name} shows the first (red) frame: red ${Math.round(red / cells)}, blue ${Math.round(blue / cells)}`).toBeGreaterThan(blue / cells + 60);
       notes.push('first frame is red');
     }
+  }
+  if (want.sameImage) {
+    const input = new Uint8Array(fixtureBytes(fixture));
+    expect(sameImageBytes(out.bytes, input), `${out.name}: the bytes of the picture are the ones of ${fixture}`).toBe(true);
+    notes.push('same picture bytes');
+    const [before, after] = [await pixelHash(page, input, MIME_OF[want.format]), await pixelHash(page, out.bytes, MIME_OF[want.format])];
+    expect(before.ok && after.ok, `${out.name} and ${fixture} decode for the pixel hash: ${before.error} ${after.error}`).toBe(true);
+    expect(after, `${out.name}: every decoded pixel is the one of ${fixture}`).toEqual(before);
+    notes.push('same decoded pixels');
+    const tag = oracle(fixture).orientation;
+    expect(metadataReport(out.bytes).orientation ?? 1, `${out.name}: the Orientation of ${fixture}`).toBe(tag);
+    if (tag > 1) notes.push('Orientation tag only');
   }
   if (want.pixels && opens === 'yes') {
     const verdict = await comparePixels(page, out, want.format, want.pixels, context.references);

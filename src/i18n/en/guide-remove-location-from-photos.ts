@@ -5,13 +5,13 @@ const texts: FileGuideTexts = {
   description: 'Where a photo keeps the place it was taken, how to stop or hide it on iPhone and Android, and the way to strip it from the file without changing a pixel.',
   h1: 'How to remove location data from photos before you share them',
   lead: 'A phone photo can carry the exact place it was taken. Here is how to keep it out of the photos you share.',
-  changed: 'First version of this guide, published on {published} with these measurements.',
+  changed: 'First version of this guide, published on {published}. The numbers were measured again on {measured}, and the tool in the guide went from Resize image to Remove EXIF data.',
   intro: [
     'Phones write facts about each photo into the file itself: the camera, the date and time, and, when location is on, the GPS coordinates of where you stood. Apple puts it plainly: the coordinates are embedded into each photo and video. Anyone who gets the original file can read them, and a few clicks put them on a map.',
     'Some apps strip this data when you post, and some do not. Email, file transfers, cloud folders and many chat apps send the file as it is. If a photo shows your home, your child’s school or anywhere you would rather not pin, remove the location before the file leaves your hands.',
   ],
   toolHeading: 'Strip the metadata',
-  toolIntro: 'This is Resize image, set to {winnerOption}: each photo keeps every pixel and comes back without its location, camera and date. It runs in this browser tab, so the photos are never uploaded.',
+  toolIntro: 'This is Remove EXIF data, with nothing to set: each photo keeps every pixel and comes back without its location, camera and date. It runs in this browser tab, so the photos are never uploaded.',
   sections: [
     {
       heading: 'What our photos carried',
@@ -37,8 +37,8 @@ const texts: FileGuideTexts = {
     {
       heading: 'Strip it from the file without changing the photo',
       paragraphs: [
-        'Any tool on this site that writes an image writes it from the pixels, which leaves the metadata behind. Most of them also change the picture: they compress it, crop it, turn it or change its format. So we measured which one changes the photo least, by a rule fixed before the measurement: the same frame, the same format, and the pixels closest to the original.',
-        'Resize image at {winnerOption} won. A photo that already has the size you ask for is not decoded or encoded again: the tool copies the picture data as it is and leaves the metadata out. Our photos came back with identical pixels, {resizeImageIdenticalChromium_word} of them, and only {resizeImageRatioChromium_off} lighter, the weight of the metadata.',
+        'Every image tool on this site leaves the metadata out of the files it gives back. Most of them also change the picture: they compress it, crop it, turn it or change its format. So we measured which one changes the photo least, by a rule fixed before the measurement: the same frame, the same format, and the pixels closest to the original.',
+        'Remove EXIF data won. It does not decode or encode the photo again: it copies the picture data as it is and leaves the metadata out. Our photos came back with identical pixels, {removeExifDataIdenticalChromium_word} of them, and only {removeExifDataRatioChromium_off} lighter, the weight of the metadata. Resize image, set to keep the full size, gave back the very same files, so the rule picked the tool with nothing to set.',
       ],
     },
     {
@@ -51,14 +51,14 @@ const texts: FileGuideTexts = {
     {
       heading: 'What stays, and what a photo still shows',
       paragraphs: [
-        'Two things stay on purpose. A photo stored upside down keeps a tiny tag that says which way is up, so it does not show turned: {resizeImageOrientationChromium_word} of our photos kept one. The color profile stays too, so the colors do not shift.',
+        'Two things stay on purpose. A photo stored upside down keeps a tiny tag that says which way is up, so it does not show turned: {removeExifDataOrientationChromium_word} of our photos kept one. The color profile stays too, so the colors do not shift.',
         'Removing the data does not hide what is in the picture. Google’s help warns that people may still work out where a photo was taken from what it shows, such as a landmark. Look at the photo itself before you share it.',
       ],
     },
     {
       heading: 'For HEIC photos',
       paragraphs: [
-        'Resize image takes JPG, PNG and WebP. For HEIC photos from an iPhone, use HEIC to JPG instead: it writes each JPG from the pixels too, and none of our HEIC test photos kept any GPS data after the conversion. Our HEIC to JPG guide has those measurements.',
+        'Remove EXIF data takes JPG, PNG and WebP. For HEIC photos from an iPhone, use HEIC to JPG instead: it writes each JPG from the pixels, and none of our HEIC test photos kept any GPS data after the conversion. Our HEIC to JPG guide has those measurements.',
       ],
     },
   ],
@@ -66,14 +66,14 @@ const texts: FileGuideTexts = {
   measuredHeading: 'What we measured',
   sheet: {
     stats: [
-      { label: 'Photos with GPS left', value: '{resizeImageGpsChromium} of {photos}' },
-      { label: 'Photos with the same pixels', value: '{resizeImageIdenticalChromium} of {photos}', sub: '{resizeImageRatioChromium_off} lighter' },
+      { label: 'Photos with GPS left', value: '{removeExifDataGpsChromium} of {photos}' },
+      { label: 'Photos with the same pixels', value: '{removeExifDataIdenticalChromium} of {photos}', sub: '{removeExifDataRatioChromium_off} lighter' },
     ],
-    sample: '{photos} phone photos, through the Resize image above.',
+    sample: '{photos} phone photos, through the Remove EXIF data above.',
     link: 'See the table',
   },
   tableHeading: 'Tool by tool',
-  measuredIntro: 'Our {photos_word} real phone photos through each image tool that takes a JPG, each with the option that changes the photo least. The share is the size after against the originals, and pixels compares each copy with the original on the worst of the photos.',
+  measuredIntro: 'Our {photos_word} real phone photos through each image tool that takes a JPG, each set to change the photo as little as it can. The share is the size after against the originals, and pixels compares each copy with the original on the worst of the photos.',
   measuredNote: 'Measured on {date} through the tool pages of this site in Chromium {chromiumVersion} and in WebKit {webkitVersion} on {system}. The two browsers wrote files of the same size with {browsersSameSize_word} of the {candidates_word} tools; with {browsersDiffer}, the sizes differed. The metadata and the pixels were read in Node, with the same decoder for the original and the copy. The table shows Chromium.',
   tables: [
     {

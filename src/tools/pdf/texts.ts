@@ -2,7 +2,7 @@
 // tests/unit/pdf-texts.test.ts checks this map against the registry, the route map and the voice of docs/design/README.
 import type { Lang } from '../../i18n/routes.ts';
 import type { PdfPanelTexts, PdfToolTexts } from '../../i18n/types.ts';
-import type { PdfToolId } from './registry.ts';
+import type { PdfPageId } from './registry.ts';
 import enPanel from './i18n/en.ts';
 import ptPanel from './i18n/pt.ts';
 import esPanel from './i18n/es.ts';
@@ -42,13 +42,23 @@ import esReorder from '../reorder-pdf-pages/i18n/es.ts';
 import enWatermark from '../watermark-pdf/i18n/en.ts';
 import ptWatermark from '../watermark-pdf/i18n/pt.ts';
 import esWatermark from '../watermark-pdf/i18n/es.ts';
+// F18 (decisions 5 and 6): Organize PDF and the two PDF presets, whose texts live in the folder of their parent.
+import enOrganize from '../organize-pdf/i18n/en.ts';
+import ptOrganize from '../organize-pdf/i18n/pt.ts';
+import esOrganize from '../organize-pdf/i18n/es.ts';
+import enExtract from '../split-pdf/presets/extract-pages/i18n/en.ts';
+import ptExtract from '../split-pdf/presets/extract-pages/i18n/pt.ts';
+import esExtract from '../split-pdf/presets/extract-pages/i18n/es.ts';
+import enToPng from '../pdf-to-jpg/presets/to-png/i18n/en.ts';
+import ptToPng from '../pdf-to-jpg/presets/to-png/i18n/pt.ts';
+import esToPng from '../pdf-to-jpg/presets/to-png/i18n/es.ts';
 
 /** Page blocks and panel bits of any PDF tool: the option texts are each tool's own shape. */
 export type AnyPdfTexts = PdfToolTexts<object>;
 
-const all = (texts: Record<PdfToolId, unknown>): Record<PdfToolId, AnyPdfTexts> => texts as Record<PdfToolId, AnyPdfTexts>;
+const all = (texts: Record<PdfPageId, unknown>): Record<PdfPageId, AnyPdfTexts> => texts as Record<PdfPageId, AnyPdfTexts>;
 
-export const PDF_TOOL_TEXTS: Record<Lang, Record<PdfToolId, AnyPdfTexts>> = {
+export const PDF_TOOL_TEXTS: Record<Lang, Record<PdfPageId, AnyPdfTexts>> = {
   en: all({
     'merge-pdf': enMerge,
     'split-pdf': enSplit,
@@ -60,8 +70,11 @@ export const PDF_TOOL_TEXTS: Record<Lang, Record<PdfToolId, AnyPdfTexts>> = {
     'sign-pdf': enSign,
     'protect-pdf': enProtect,
     'unlock-pdf': enUnlock,
+    'organize-pdf': enOrganize,
     'reorder-pdf-pages': enReorder,
     'watermark-pdf': enWatermark,
+    'split-pdf-extract-pages': enExtract,
+    'pdf-to-jpg-to-png': enToPng,
   }),
   pt: all({
     'merge-pdf': ptMerge,
@@ -74,8 +87,11 @@ export const PDF_TOOL_TEXTS: Record<Lang, Record<PdfToolId, AnyPdfTexts>> = {
     'sign-pdf': ptSign,
     'protect-pdf': ptProtect,
     'unlock-pdf': ptUnlock,
+    'organize-pdf': ptOrganize,
     'reorder-pdf-pages': ptReorder,
     'watermark-pdf': ptWatermark,
+    'split-pdf-extract-pages': ptExtract,
+    'pdf-to-jpg-to-png': ptToPng,
   }),
   es: all({
     'merge-pdf': esMerge,
@@ -88,8 +104,11 @@ export const PDF_TOOL_TEXTS: Record<Lang, Record<PdfToolId, AnyPdfTexts>> = {
     'sign-pdf': esSign,
     'protect-pdf': esProtect,
     'unlock-pdf': esUnlock,
+    'organize-pdf': esOrganize,
     'reorder-pdf-pages': esReorder,
     'watermark-pdf': esWatermark,
+    'split-pdf-extract-pages': esExtract,
+    'pdf-to-jpg-to-png': esToPng,
   }),
 };
 

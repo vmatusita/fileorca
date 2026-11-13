@@ -20,8 +20,12 @@ import { VIEW_FIT_CAP, VIEW_ZOOM_CAP, askWidth, sheetRatio } from './grid-math.t
 import type { PdfIcons, Thumbnails } from './types.ts';
 import checkIcon from '../../../docs/design/assets/Icons/check.svg?raw';
 
-/** The action of each grid tool in the view: Delete, Split and Sign (pick), Rotate (page by page). Reorder has none. */
+/**
+ * The action of each grid tool in the view: Delete, Split and Sign (pick), Rotate (page by page). Reorder has none.
+ * F18: Organize PDF has two, "Turn 90°" and "Take this page out" ('organize').
+ */
 export type ViewAction = 'remove' | 'mark' | 'sign' | 'turn';
+export type ViewActions = ViewAction | 'organize';
 
 /** A picture asked of a thumbnail cache and held until it is let go, with the same width (DECISOES § 180). */
 export interface Held {
@@ -47,9 +51,10 @@ export interface PageViewProps {
   order?: boolean | undefined;
   /** Quarter turns the person gave each page (Rotate): the large picture shows them. */
   turns?: Readonly<Record<number, number>> | undefined;
-  action?: ViewAction | undefined;
+  action?: ViewActions | undefined;
+  /** The state of the pressed action (in Organize, "Take this page out"); "Turn 90°" has none. */
   pressed?: boolean | undefined;
-  onAct?: (() => void) | undefined;
+  onAct?: ((action: ViewAction) => void) | undefined;
   /** What the page is now (", picked", ", comes out", ", turned 90°"), said after its heading when the page changes. */
   state?: ((index: number) => string) | undefined;
   /** The view opens again in a grid drawn in another place: the focus lost on the way goes to its action. */
@@ -219,7 +224,8 @@ export default function PageView(props: PageViewProps) {
   const style = `--view-ratio:${sheetRatio(boxes[index], turn).toFixed(4)}`;
   const picture = (url: string | null | undefined, kind: string, own: string) =>
     url ? <img key={kind} class={kind} src={url} alt="" draggable={false} data-key={own} data-turn={turn || undefined} style={turn ? `rotate:${turn * 90}deg` : undefined} onLoad={kind === 'fo-pview__img' ? () => setLoaded(own) : undefined} /> : null;
-  const actionIcon = action === 'remove' ? <Icon inner={icons.trash} /> : action === 'turn' ? <Icon inner={icons.rotate} /> : <Icon raw={checkIcon} />;
+  const acts: ViewAction[] = action === 'organize' ? ['turn', 'remove'] : action ? [action] : [];
+  const iconOf = (act: ViewAction) => (act === 'remove' ? <Icon inner={icons.trash} /> : act === 'turn' ? <Icon inner={icons.rotate} /> : <Icon raw={checkIcon} />);
   return (
     <div ref={root} class="fo-pview" onKeyDown={key}>
       <div class="fo-pview__top">
@@ -241,17 +247,17 @@ export default function PageView(props: PageViewProps) {
           {picture(bigUrl, 'fo-pview__img', bigKey)}
         </div>
       </div>
-      <div class={action ? 'fo-pview__bar' : 'fo-pview__bar fo-pview__bar--two'}>
+      <div class={acts.length === 0 ? 'fo-pview__bar fo-pview__bar--two' : acts.length > 1 ? 'fo-pview__bar fo-pview__bar--acts' : 'fo-pview__bar'}>
         <button type="button" class="fo-btn fo-pview__prev" aria-disabled={position === 0 ? 'true' : undefined} onClick={() => go(position - 1)}>
           <Icon inner={icons.chevron} class="fo-icon--sm" />
           {texts.previous}
         </button>
-        {action && (
-          <button type="button" class="fo-btn fo-pview__act" aria-pressed={action === 'turn' ? undefined : Boolean(props.pressed)} onClick={props.onAct}>
-            {actionIcon}
-            {texts[action]}
+        {acts.map((act) => (
+          <button key={act} type="button" class="fo-btn fo-pview__act" aria-pressed={act === 'turn' ? undefined : Boolean(props.pressed)} onClick={() => props.onAct?.(act)}>
+            {iconOf(act)}
+            {texts[act]}
           </button>
-        )}
+        ))}
         <button type="button" class="fo-btn fo-pview__next" aria-disabled={position === total - 1 ? 'true' : undefined} onClick={() => go(position + 1)}>
           {texts.next}
           <Icon inner={icons.chevron} class="fo-icon--sm" />

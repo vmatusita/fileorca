@@ -19,6 +19,7 @@ const texts: PdfToolsTexts = {
     { before: 'Photos or scans that should become a PDF:', tool: 'image-to-pdf', after: 'puts one image on each page, in the order of the list.' },
     { before: 'A scan that came out sideways or upside down:', tool: 'rotate-pdf', after: 'turns every page, or only the ones that need it, without redrawing them.' },
     { before: 'Blank or unwanted pages in the middle:', tool: 'delete-pdf-pages', after: 'takes them out and keeps everything else as it was.' },
+    { before: 'Pages to move, turn and take out of the same PDF:', tool: 'organize-pdf', after: 'does all three in one grid and saves one new PDF.' },
     { before: 'Pages in the wrong order:', tool: 'reorder-pdf-pages', after: 'lets you drag them, or move them with buttons or the keyboard.' },
     { before: 'A report or a thesis that needs numbered pages:', tool: 'add-page-numbers-to-pdf', after: 'writes the numbers where you want them, in one of four formats.' },
     { before: 'A document to mark as a draft or as confidential:', tool: 'watermark-pdf', after: 'stamps your text across the middle of every page.' },
@@ -32,6 +33,9 @@ const texts: PdfToolsTexts = {
     'Every PDF tool here reads and writes the file inside your browser. The PDF is opened with PDF.js, the reader Firefox uses, and changed with pdf-lib and qpdf, compiled to run in the page. Nothing is sent to a server, so there is no upload to wait for and no copy of your file anywhere else.',
     'A password you type to protect or open a PDF stays in the page while you use it and is gone when you close it. A signature you draw, upload or type is not kept either. Open the Network tab of your browser while a tool runs: no request carries your file, your password or your text.',
   ],
+  presetsHeading: 'Ready-made settings',
+  presetsCaption: 'Ready-made settings of the PDF tools and what each one gives',
+  presetsHead: ['Preset', 'What you get'],
 };
 
 export default texts;

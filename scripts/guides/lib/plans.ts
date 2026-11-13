@@ -507,8 +507,12 @@ interface Candidate {
 /** The name a tool card gives a tool, for the facts the text reads. */
 const toolName = (tool: string): string => (enCommon.tools as Record<string, { name: string }>)[tool]?.name ?? (enCommon.pdf as Record<string, { name: string }>)[tool]?.name ?? tool;
 
+// F18 (DECISOES § 733): Remove EXIF data takes JPG and has no option, so it is a candidate of the rule as it is. It gives
+// back the same bytes as Resize image at 100 % (both through strip.ts), which the rule of § 186 leaves tied; the tie goes to
+// the tool with no option to set (the `steps` of the ranking), and the list keeps it before Resize image as well.
 const CANDIDATES: Candidate[] = [
   { tool: 'compress-image', path: '/compress-image/', option: 'Recommended, the lighter of its two levels' },
+  { tool: 'remove-exif-data', path: '/remove-exif-data/', option: 'none: it has no option to set' },
   { tool: 'resize-image', path: '/resize-image/', option: 'By percentage, 100', setup: async (page) => {
     await option(page, 'By percentage');
     await typeField(page, '#rz-percent', '100');
@@ -540,7 +544,7 @@ async function removeLocation(ctx: Context): Promise<GuideMeasure> {
   const rows: Cell[][] = [];
   const methods: Method[] = [meta, pixels];
   /** For the rule: per browser, the tools whose copies are JPGs of the same size as shown, with their worst PSNR and total size. */
-  const ranking: Record<BrowserName, { tool: string; worst: number; bytes: number }[]> = { chromium: [], webkit: [] };
+  const ranking: Record<BrowserName, { tool: string; worst: number; bytes: number; steps: number }[]> = { chromium: [], webkit: [] };
   for (const browser of BROWSERS) {
     for (const candidate of CANDIDATES) {
       ctx.log(`  ${candidate.tool} (${candidate.option}) in ${browser}`);
@@ -579,12 +583,13 @@ async function removeLocation(ctx: Context): Promise<GuideMeasure> {
       g.n(`${key}Orientation${B[browser]}`, after.filter((fact) => fact.orientation !== null && fact.orientation > 1).length, 'count', photos, run.how);
       rows.push([candidate.tool, browser, total, bytes, jpeg ? 'jpg' : 'png', sameSize === PHOTOS.length, identical === PHOTOS.length ? 'same pixels' : finite.length ? decibels(Math.min(...finite)) : null, after.filter((fact) => fact.gps !== 'none').length, after.filter((fact) => fact.camera !== null).length]);
       if (jpeg && sameSize === PHOTOS.length && scores.every((score) => score !== null)) {
-        ranking[browser].push({ tool: candidate.tool, worst: Math.min(...scores.map((score) => score as number)), bytes });
+        ranking[browser].push({ tool: candidate.tool, worst: Math.min(...scores.map((score) => score as number)), bytes, steps: candidate.setup ? 1 : 0 });
       }
     }
   }
-  // The rule fixed before the first measurement (DECISOES § 186): the most faithful worst PSNR, then the smallest file.
-  const pick = (browser: BrowserName): string => must([...ranking[browser]].sort((a, b) => b.worst - a.worst || a.bytes - b.bytes)[0], `a winner in ${browser}`).tool;
+  // The rule fixed before the first measurement (DECISOES § 186): the most faithful worst PSNR, then the smallest file; a
+  // tie that is left goes to the tool with no option to set (§ 733).
+  const pick = (browser: BrowserName): string => must([...ranking[browser]].sort((a, b) => b.worst - a.worst || a.bytes - b.bytes || a.steps - b.steps)[0], `a winner in ${browser}`).tool;
   const winner = pick('chromium');
   if (pick('webkit') !== winner) throw new Error(`the browsers disagree on the tool that changes the photo least: ${winner} and ${pick('webkit')}`);
   g.fact('winner', winner);

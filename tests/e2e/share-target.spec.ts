@@ -44,12 +44,13 @@ test('an image and a PDF shared: the files, the tools that take them, and Compre
   await expect(files.nth(1)).toContainText('gen-paginas-mistas.pdf');
   await expect(files.nth(1)).toContainText('PDF');
   // Only tools, from the registries: the image tools that take a JPG and the twelve PDF tools. F17 (DECISOES § 716):
-  // Convert to WebP takes a JPG too, in the order of the registry.
+  // Convert to WebP takes a JPG too, in the order of the registry. F18 (DECISOES § 743): Remove EXIF data takes a JPG (last of
+  // the image tools) and Organize PDF a PDF (before Reorder PDF pages); the presets are no tools, as the image presets.
   const shown = await page.locator('[data-tool]:visible').evaluateAll((items) => items.map((item) => item.getAttribute('data-tool')));
   expect(shown).toEqual([
-    'compress-image', 'resize-image', 'crop-image', 'rotate-image', 'png-to-jpg', 'convert-to-webp', 'image-to-pdf',
+    'compress-image', 'resize-image', 'crop-image', 'rotate-image', 'png-to-jpg', 'convert-to-webp', 'image-to-pdf', 'remove-exif-data',
     'merge-pdf', 'split-pdf', 'pdf-to-jpg', 'compress-pdf', 'rotate-pdf', 'delete-pdf-pages', 'add-page-numbers-to-pdf', 'sign-pdf',
-    'protect-pdf', 'unlock-pdf', 'reorder-pdf-pages', 'watermark-pdf',
+    'protect-pdf', 'unlock-pdf', 'organize-pdf', 'reorder-pdf-pages', 'watermark-pdf',
   ]);
   await expect(page.locator('[data-tool="compress-image"] [data-takes]')).toHaveText(fmt(openWith.takesSome, { count: 1, total: 2 }));
   await expect(page.locator('[data-tool="split-pdf"] [data-takes]')).toHaveText(fmt(openWith.takesSome, { count: 1, total: 2 }));

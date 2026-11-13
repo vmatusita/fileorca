@@ -5,10 +5,11 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, type Page } from '@playwright/test';
 import { ROUTES } from '../../../src/i18n/routes.ts';
-import { PDF_PAGES, type PdfToolId } from '../../../src/tools/pdf/registry.ts';
+import { PDF_PAGES, type PdfPageId } from '../../../src/tools/pdf/registry.ts';
 import { jpegBatch, type TestFile } from './page.ts';
 
-export const isPdfTool = (id: string): id is PdfToolId => Object.hasOwn(PDF_PAGES, id);
+/** A PDF tool or, since the F18, a PDF preset (the same island and the same targets). */
+export const isPdfTool = (id: string): id is PdfPageId => Object.hasOwn(PDF_PAGES, id);
 
 // 150px between every AdSlot and the Download button, each field, the panel and the Oli
 // (PLANO "Molde da página de ferramenta"). Oli selector: [data-oli] (DECISOES § 19).

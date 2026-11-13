@@ -3,7 +3,9 @@ import { resolve } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 import { CODECS, ERROR_REASONS, EVENT_PARAMS, OUTCOMES } from '../../src/analytics/events.ts';
 import { CALC_EVENT_TOOLS, EVENT_TOOLS, IMAGE_EVENT_TOOLS, PDF_EVENT_TOOLS } from '../../src/analytics/tool-ids.ts';
-import { PDF_PAGES } from '../../src/tools/pdf/registry.ts';
+import { PDF_PAGES, PDF_PRESET_IDS, PDF_TOOL_IDS, type PdfPageId } from '../../src/tools/pdf/registry.ts';
+import { IMAGE_PAGES, type ImagePageId } from '../../src/tools/image/registry.ts';
+import { routeById } from '../../src/i18n/routes.ts';
 import { LIFE_CALC_PAGES } from '../../src/tools/calc/registry.ts';
 import unlockTexts from '../../src/tools/unlock-pdf/i18n/en.ts';
 import watermarkTexts from '../../src/tools/watermark-pdf/i18n/en.ts';
@@ -129,6 +131,69 @@ test.describe('the AVIF to JPG and Convert to WebP events', () => {
       expect(OUTCOMES as readonly string[]).toContain('converted');
       const everything = JSON.stringify(await dataLayer(page));
       expect(everything, 'the name of the file in the dataLayer').not.toMatch(/Sentinel|6283|\.avif|\.jpe?g/i);
+    });
+  }
+});
+
+// F18 (criterion 5 and decision 14 of the prompt; DECISOES § 737): the five pages of the run send the events of their
+// island, in the mould of the F17 block above, with `tool` equal to their id (the five ids entered IMAGE_EVENT_TOOLS and
+// PDF_EVENT_TOOLS, the closed lists of `tool` and `target`) and no parameter the event did not have: tool_start,
+// tool_complete with the page's outcome (`cleaned` and `organized` are the values the run added to OUTCOMES; a preset says
+// its parent's: `rotated`, `split`, `converted`), download and next_step_click, in that order, every value from its closed
+// list, and nothing of the file in the dataLayer. Two pages go through the image island, three through the PDF island.
+test.describe('the events of the five pages of the F18', () => {
+  const NAME = 'Sentinel-Photo-6283';
+  const CASES = [
+    { id: 'remove-exif-data', outcome: 'cleaned', file: 'gen-jpg-02-orientacao8.jpg' },
+    { id: 'rotate-image-flip', outcome: 'rotated', file: 'gen-jpg-01-orientacao6.jpg' },
+    { id: 'organize-pdf', outcome: 'organized', file: 'gen-paginas-mistas.pdf' },
+    { id: 'split-pdf-extract-pages', outcome: 'split', file: 'gen-paginas-mistas.pdf' },
+    { id: 'pdf-to-jpg-to-png', outcome: 'converted', file: 'pdf-escaneado-01-pagina-livro-cor.pdf' },
+  ] as const;
+  for (const { id, outcome, file } of CASES) {
+    test(`${id}: tool_start, tool_complete "${outcome}", download and next_step_click name the page by its id, with no new parameter`, async ({ page }) => {
+      const image = (IMAGE_EVENT_TOOLS as readonly string[]).includes(id);
+      await openTool(page, routeById(id).paths.en ?? `(${id} sem página em en)`);
+      const root = page.locator('#fo-tool-root');
+      if (image) {
+        await page.setInputFiles('#fo-tool-root input[type="file"]', { name: `${NAME}.jpg`, mimeType: 'image/jpeg', buffer: readFileSync(resolve('fixtures/images', file)) });
+      } else {
+        await choosePdfs(page, [pdfFile(file, `${NAME}.pdf`)]);
+        if (id !== 'pdf-to-jpg-to-png') {
+          // Organize PDF and Extract pages wait for the action: a page turned in one, two pages picked in the other.
+          const cells = root.locator('.fo-pages__grid .fo-page');
+          await expect(cells).toHaveCount(8, { timeout: 30_000 });
+          await cells.nth(1).locator('.fo-page__main').click();
+          if (id === 'organize-pdf') await root.locator('.fo-pages__act--right').click();
+          else await cells.nth(2).locator('.fo-page__main').click();
+          await root.locator('.fo-ready:not(.fo-ready--reading) .fo-btn--brand').click();
+        }
+      }
+      const download = root.locator('.fo-btn--download');
+      await expect(download).toBeVisible({ timeout: 60_000 });
+      await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault(), { capture: false }));
+      await download.click();
+      const chip = page.locator('nav.fo-next a.fo-chip').first();
+      const target = ((await chip.getAttribute('href')) ?? '').replaceAll('/', '');
+      await chip.click();
+
+      const events = (await dataLayer(page)).filter((entry) => entry[0] === 'event').map((entry) => [entry[1], entry[2]]);
+      expect(events).toEqual([
+        ['tool_start', { tool: id, lang: 'en' }],
+        ['tool_complete', { tool: id, lang: 'en', outcome }],
+        ['download', { tool: id, lang: 'en' }],
+        ['next_step_click', { tool: id, lang: 'en', target }],
+      ]);
+      expect((image ? IMAGE_EVENT_TOOLS : PDF_EVENT_TOOLS) as readonly string[], `${id} is in the closed list of tool`).toContain(id);
+      expect(EVENT_TOOLS as readonly string[], `${target} is in the closed list of target`).toContain(target);
+      expect((image ? IMAGE_PAGES[id as ImagePageId].next : PDF_PAGES[id as PdfPageId].next) as readonly string[], 'the chip leads to a page of the registry').toContain(target);
+      expect(OUTCOMES as readonly string[], `${outcome} is in the closed list of outcome`).toContain(outcome);
+      for (const [name, params] of events as [string, Record<string, unknown>][]) {
+        const allowed = (EVENT_PARAMS as Record<string, readonly string[]>)[name] ?? [];
+        for (const key of Object.keys(params)) expect(allowed, `${name}.${key} is a parameter of the event`).toContain(key);
+      }
+      const everything = JSON.stringify(await dataLayer(page));
+      expect(everything, 'the name of the file in the dataLayer').not.toMatch(/Sentinel|6283|mistas|escaneado|\.jpe?g|\.pdf/i);
     });
   }
 });
@@ -494,16 +559,28 @@ test.describe('the PDF tool events', () => {
     await expectNoTrace(page);
   });
 
-  test('the hub lists exactly the PDF tools the events name', async ({ page }) => {
-    await page.goto('/pdf-tools/');
+  // F18 (DECISOES § 725 and § 743): PDF_EVENT_TOOLS names the two PDF presets too, after the tools, and a PDF preset is a
+  // link of the table of the presets of the hub, never a card of its grid. The registry tells the two apart (PDF_TOOL_IDS):
+  // the grid is exactly the tools of the event list, and every other name of the list is a PDF preset, linked from the
+  // table, so no name of the event list is left without its place on the hub.
+  test('the hub lists exactly the PDF tools the events name, and its table of presets the PDF presets they name', async ({ page }) => {
+    expect((await page.goto('/pdf-tools/'))?.status()).toBe(200);
+    const tools: readonly string[] = PDF_EVENT_TOOLS.filter((id) => (PDF_TOOL_IDS as readonly string[]).includes(id));
+    const presets: readonly string[] = PDF_EVENT_TOOLS.filter((id) => !tools.includes(id));
     const hrefs = await page.locator('ul.fo-grid a[href]').evaluateAll((links) => links.map((link) => link.getAttribute('href') ?? ''));
-    const ids = hrefs.map((href) => href.replaceAll('/', '')).filter((id) => (PDF_EVENT_TOOLS as readonly string[]).includes(id));
-    expect(ids).toEqual([...PDF_EVENT_TOOLS].filter((id) => ids.includes(id)));
-    expect(new Set(ids)).toEqual(new Set(PDF_EVENT_TOOLS));
-    // The one card that is not a PDF tool is the Image to PDF page, which has an event name of its own.
-    const others = hrefs.map((href) => href.replaceAll('/', '')).filter((id) => !(PDF_EVENT_TOOLS as readonly string[]).includes(id));
+    const ids = hrefs.map((href) => href.replaceAll('/', '')).filter((id) => tools.includes(id));
+    expect(ids).toEqual(tools.filter((id) => ids.includes(id)));
+    expect(new Set(ids)).toEqual(new Set(tools));
+    expect(new Set(tools), 'every PDF tool of the registry is in the event list').toEqual(new Set(PDF_TOOL_IDS));
+    // The one card that is not a PDF tool is the Image to PDF page, which has an event name of its own (a card of a
+    // preset would be here too).
+    const others = hrefs.map((href) => href.replaceAll('/', '')).filter((id) => !tools.includes(id));
     expect(others).toEqual(['image-to-pdf']);
     expect(EVENT_TOOLS).toContain('image-to-pdf');
+    // The rest of the event list: the PDF presets of the registry, in its order, each a link of the table of the hub.
+    expect(presets, 'the names of the event list that are not tools are the PDF presets').toEqual([...PDF_PRESET_IDS]);
+    const table = await page.locator('section[aria-labelledby="presets"] table tbody a').evaluateAll((links) => links.map((link) => link.getAttribute('href') ?? ''));
+    expect(table).toEqual(presets.map((id) => PDF_PAGES[id as PdfPageId].path));
   });
 });
 

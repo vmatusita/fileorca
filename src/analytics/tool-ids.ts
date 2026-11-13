@@ -14,9 +14,11 @@ export const IMAGE_EVENT_TOOLS = [
   'avif-to-jpg',
   'convert-to-webp',
   'image-to-pdf',
+  'remove-exif-data',
   'compress-image-to-100kb',
   'compress-image-to-1mb',
   'resize-image-youtube-thumbnail',
+  'rotate-image-flip',
 ] as const;
 
 export const CALC_EVENT_TOOLS = [
@@ -75,8 +77,12 @@ export const PDF_EVENT_TOOLS = [
   'sign-pdf',
   'protect-pdf',
   'unlock-pdf',
+  'organize-pdf',
   'reorder-pdf-pages',
   'watermark-pdf',
+  // F18 (decision 5): the PDF presets, after the tools, in the key order of PDF_PAGES.
+  'split-pdf-extract-pages',
+  'pdf-to-jpg-to-png',
 ] as const;
 
 export const EVENT_TOOLS: readonly string[] = [...IMAGE_EVENT_TOOLS, ...CALC_EVENT_TOOLS, ...PDF_EVENT_TOOLS, ...UTILITY_EVENT_TOOLS];

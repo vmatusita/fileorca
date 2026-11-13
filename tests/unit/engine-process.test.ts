@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { processImage } from '../../src/engine/image/process.ts';
 import type { EngineResult, ImageFormat, Operation } from '../../src/engine/image/types.ts';
 import { exifBlock, hasGps, segments } from '../e2e/lib/jpeg.ts';
-import { cat, jpegShell, riff, riffChunk, simpleHeif, text, tinyPng, pngChunk, u16 } from './lib/bytes.ts';
+import { app1Exif, cat, jpegShell, riff, riffChunk, simpleHeif, text, tinyPng, pngChunk, u16 } from './lib/bytes.ts';
 import { fixture, names } from './lib/oracle.ts';
 
 const GENERAL: readonly ImageFormat[] = ['jpeg', 'png', 'webp'];
@@ -140,6 +140,34 @@ describe('process: answers that need no decoder (the original goes back clean)',
     expect(outWebp).not.toContain('EXIF');
     expect(outWebp).not.toContain('secret');
     expect(result).toMatchObject({ format: 'webp', outcome: 'fits' });
+  });
+
+  it('strip (Remove EXIF data) hands back every file it takes without its metadata, as its own result, with no decoder and no pixel limit', async () => {
+    const STRIP: Operation = { kind: 'strip' };
+    // A rotated JPEG with Exif: only the Orientation stays, in a block of its own; the scan is the same, byte for byte.
+    const jpeg = jpegShell(8, 4, { segments: [app1Exif(6)] });
+    const fromJpeg = ok(await run(jpeg, STRIP));
+    expect(fromJpeg).toMatchObject({ outcome: 'new', format: 'jpeg', width: 4, height: 8, notes: [] });
+    const outJpeg = new Uint8Array(await fromJpeg.blob.arrayBuffer());
+    expect(segments(outJpeg).filter((segment) => segment.marker === 0xe1)).toHaveLength(1);
+    const frame = jpegShell(8, 4).subarray(2); // from the SOF to the EOI
+    expect(Buffer.from(outJpeg.subarray(outJpeg.length - frame.length)).equals(Buffer.from(frame))).toBe(true);
+    // 9000 × 6000 = 54 MP, above what any decoder takes: strip needs none.
+    expect(ok(await run(jpegShell(9000, 6000), STRIP))).toMatchObject({ outcome: 'new', width: 9000, height: 6000 });
+    // A PNG loses its text and eXIf; a WebP its EXIF; an animated WebP keeps its frames and gets no first-frame note.
+    const png = tinyPng(4, 4, [1, 2, 3, 255], [pngChunk('tEXt', text('GPS\0-25.4,-49.2')), pngChunk('eXIf', [0x4d, 0x4d, 0, 0x2a])]);
+    const outPng = Buffer.from(await ok(await run(png, STRIP)).blob.arrayBuffer()).toString('latin1');
+    expect([outPng.includes('tEXt'), outPng.includes('eXIf'), outPng.includes('IDAT')]).toEqual([false, false, true]);
+    const vp8x = riffChunk('VP8X', [0x0a, 0, 0, 0, 7, 0, 0, 7, 0, 0]); // animation + EXIF flags
+    const animated = riff([vp8x, riffChunk('ANIM', [0, 0, 0, 0, 0, 0]), riffChunk('ANMF', new Array(20).fill(1)), riffChunk('EXIF', text('Exif\0\0MM'))]);
+    const fromWebp = ok(await run(animated, STRIP));
+    expect(fromWebp).toMatchObject({ outcome: 'new', format: 'webp', notes: [] });
+    const outWebp = new Uint8Array(await fromWebp.blob.arrayBuffer());
+    expect([Buffer.from(outWebp).toString('latin1').includes('ANMF'), Buffer.from(outWebp).toString('latin1').includes('EXIF')]).toEqual([true, false]);
+    expect(outWebp[20]! & 0x0a).toBe(0x02); // still animated, no EXIF flag
+    // What it does not take, it refuses as every operation does.
+    expect(await run(jpegShell(8, 8, { eoi: false }), STRIP)).toEqual({ ok: false, reason: 'truncated', source: 'jpeg' });
+    expect(await run(simpleHeif({ width: 8, height: 8 }), STRIP)).toEqual({ ok: false, reason: 'wrong-tool', source: 'heic' });
   });
 
   it('an animated WebP in Compress goes back clean and still animated, instead of losing its frames', async () => {

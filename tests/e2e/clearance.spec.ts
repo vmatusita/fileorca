@@ -188,8 +188,8 @@ const GUIDE_ON_SCREEN: Partial<Record<FileGuideId, string[]>> = {
   'guides-heic-to-jpg-on-windows': ['.fo-ba'],
   'guides-open-webp-save-as-jpg': ['.fo-ba'],
   'guides-social-media-image-sizes': ['#rz-width', '#rz-height', '.fo-input'],
-  // The location guide starts Resize image at By percentage, 100 (DECISOES § 186).
-  'guides-remove-location-from-photos': ['#rz-percent', '.fo-input'],
+  // The location guide embeds Remove EXIF data since the F18 (DECISOES § 733): no field, and its note stays in sight.
+  'guides-remove-location-from-photos': ['.fo-field__help'],
 };
 
 async function guideSpots(page: Page, label: string, adCount: number, selector: string): Promise<number> {

@@ -22,7 +22,7 @@ const texts: PdfToolTexts<ImagesTexts> = {
     rows: [
       ['What it takes', 'PDF files, as many as you like. Oli checks what is inside each file, not its name or its ending.'],
       ['What comes out', 'One image for each page, named after the PDF with -page-1, -page-2 and so on, like report-page-1.jpg.'],
-      ['Formats', 'JPG at quality 92, or PNG. JPG files are smaller, and PNG keeps text and sharp lines crisp.'],
+      ['Formats', 'JPG at quality 92, or PNG. On pages with photos the JPG files are much smaller; PNG keeps text and sharp lines crisp.'],
       ['Resolution', '72 ppi for the screen, 150 ppi for general use (the default) or 300 ppi for printing.'],
       ['Pages', 'All the pages, or a range such as 1-3, 5, 8-10. The same range applies to every PDF.'],
       ['Many images', 'Several images download together as one ZIP.'],
@@ -44,7 +44,7 @@ const texts: PdfToolTexts<ImagesTexts> = {
     },
     {
       q: 'Should I pick JPG or PNG?',
-      a: 'JPG, saved at quality 92, gives smaller files and suits pages with photos. PNG loses nothing, so the text and thin lines of a page stay crisp, but the files are larger. In both cases the text of the page becomes part of the picture, so it can no longer be selected or searched.',
+      a: 'JPG, saved at quality 92, suits pages with photos: for a PDF of photos, the PNG files of all its pages add up to several times the size of the JPG files. PNG loses nothing, so the text and thin lines of a page stay crisp; for a PDF of text and lines, the PNG files of all its pages add up to between about half and about twice the size of the JPG files, and can even be the smaller ones. In both cases the text of the page becomes part of the picture, so it can no longer be selected or searched.',
     },
     {
       q: 'Can I convert a PDF that has editing restrictions or a password?',
@@ -59,6 +59,12 @@ const texts: PdfToolTexts<ImagesTexts> = {
   privacyNote:
     'Your PDFs are drawn on your device and are never sent to a server. The images come out without Exif data or GPS location.',
   relatedHeading: 'Related tools',
+  // F18 (decision 5; DECISOES § 725): the table of the presets of this tool, with their links.
+  presets: {
+    heading: 'Ready-made settings',
+    caption: 'Presets of PDF to JPG and what each one does',
+    head: ['Preset', 'What it does'],
+  },
   panel: {
     suffix: 'page',
     note: 'PDF files, as many as you like',
@@ -70,7 +76,7 @@ const texts: PdfToolTexts<ImagesTexts> = {
       formatLegend: 'Image format',
       jpg: 'JPG',
       png: 'PNG',
-      formatHelp: 'JPG files are smaller (quality 92). PNG loses nothing, so text and thin lines stay crisp, but the files are larger.',
+      formatHelp: 'JPG files are much smaller on pages with photos (quality 92). PNG loses nothing, so text and thin lines stay crisp.',
       resolutionLegend: 'Resolution',
       low: '72 ppi',
       lowHelp: 'for the screen',

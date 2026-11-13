@@ -2,7 +2,7 @@
 
 Glossário fixo do FileOrca em português (F6, decisão 3 do prompt; PLANO "Idiomas"). Todo texto do site em português segue este arquivo: as páginas, os painéis, os PDFs e CSVs que o site gera, os nomes de arquivo baixado e os textos escondidos para leitor de tela. O `tests/unit/glossary.test.ts` lê a seção "Nunca" e reprova o termo nos arquivos de texto em português e no HTML das páginas `/pt/` do `dist/`.
 
-Escrito em 1º/nov/2026, antes de qualquer tradução da F6. Mudança neste arquivo pede um § no DECISOES.md. Ampliado no ajuste "idiomas" (3/nov/2026, DECISOES § 317): o QR code e os guias de arquivo.
+Escrito em 1º/nov/2026, antes de qualquer tradução da F6. Mudança neste arquivo pede um § no DECISOES.md. Ampliado no ajuste "idiomas" (3/nov/2026, DECISOES § 317): o QR code e os guias de arquivo. Ampliado na F18 (11/nov/2026, DECISOES § 724 e § 736): as cinco páginas novas, os sufixos delas e a barra da Gerenciar páginas do PDF.
 
 ## Registro
 
@@ -77,19 +77,24 @@ As datas de "Revisado em" e "Última atualização" são o dia em Brasília.
 | YouTube thumbnail | Miniatura do YouTube | /pt/redimensionar-imagem/miniatura-youtube/ |
 | Crop image | Cortar imagem | /pt/cortar-imagem/ |
 | Rotate image | Girar imagem | /pt/girar-imagem/ |
+| Flip image | Espelhar imagem | /pt/girar-imagem/espelhar/ |
 | HEIC to JPG | HEIC para JPG | /pt/heic-para-jpg/ |
 | WebP to JPG | WebP para JPG | /pt/webp-para-jpg/ |
 | PNG to JPG | PNG para JPG | /pt/png-para-jpg/ |
 | AVIF to JPG | AVIF para JPG | /pt/avif-para-jpg/ |
 | Convert to WebP | Converter para WebP | /pt/converter-para-webp/ |
 | Image to PDF | Imagem para PDF | /pt/imagem-para-pdf/ |
+| Remove EXIF data | Remover metadados da foto | /pt/remover-metadados-foto/ |
 | PDF tools (hub) | Ferramentas de PDF | /pt/ferramentas-pdf/ |
 | Merge PDF | Juntar PDF | /pt/juntar-pdf/ |
 | Split PDF | Dividir PDF | /pt/dividir-pdf/ |
+| Extract pages from PDF | Extrair páginas do PDF | /pt/dividir-pdf/extrair-paginas/ |
 | Rotate PDF | Girar PDF | /pt/girar-pdf/ |
 | Delete pages | Excluir páginas do PDF | /pt/excluir-paginas-pdf/ |
 | Reorder pages | Organizar páginas do PDF | /pt/organizar-paginas-pdf/ |
+| Organize PDF | Gerenciar páginas do PDF | /pt/gerenciar-paginas-pdf/ |
 | PDF to JPG | PDF para JPG | /pt/pdf-para-jpg/ |
+| PDF to PNG | PDF para PNG | /pt/pdf-para-jpg/para-png/ |
 | Page numbers | Numerar páginas do PDF | /pt/numerar-paginas-pdf/ |
 | Watermark | Marca d'água no PDF | /pt/marca-dagua-pdf/ |
 | Sign PDF | Assinar PDF | /pt/assinar-pdf/ |
@@ -99,6 +104,8 @@ As datas de "Revisado em" e "Última atualização" são o dia em Brasília.
 | QR code generator | Gerador de QR code | /pt/gerador-de-qr-code/ |
 
 Os formatos ficam como estão: JPG, PNG, HEIC, WebP, AVIF, GIF, PDF, ZIP. O artigo do formato é masculino ("um JPG", "o PDF").
+
+F18 (DECISOES § 724): o Organize PDF em português é "Gerenciar páginas do PDF", porque "Organizar páginas do PDF" já é o nome do Reorder pages, e as duas páginas brigariam pelo mesmo nome no hub e na busca. O Remover metadados da foto fica depois da Imagem para PDF, na ordem do registro e do hub: nenhuma irmã faz o mesmo trabalho (as outras tiram os metadados porque gravam a imagem de novo).
 
 | Opção (inglês) | Português |
 | --- | --- |
@@ -120,6 +127,8 @@ Os formatos ficam como estão: JPG, PNG, HEIC, WebP, AVIF, GIF, PDF, ZIP. O arti
 | Signature · Draw · Upload · Type · Clear | Assinatura · Desenhar · Imagem · Digitar · Limpar |
 | Password · Confirm password · Remove password | Senha · Confirme a senha · Tirar a senha |
 | Reverse order | Inverter a ordem |
+| Extract pages (o botão da Extrair páginas do PDF) | Extrair páginas |
+| Save changes (o botão da Gerenciar páginas do PDF) | Salvar as mudanças |
 | Add more PDFs | Adicionar mais PDFs |
 
 ## Nome do arquivo baixado
@@ -134,6 +143,8 @@ Sem acento, em minúsculas, com hífen (o mesmo nome em todo sistema de arquivos
 | `-rotated` | `-girado` |
 | `-edited` | `-editado` |
 | `-reordered` | `-organizado` |
+| `-organized` | `-gerenciado` (F18: `-organizado` já é do Reorder pages, DECISOES § 724) |
+| `-extracted` | `-extraido` |
 | `-numbered` | `-numerado` |
 | `-watermarked` | `-marca-dagua` |
 | `-signed` | `-assinado` |
@@ -320,6 +331,10 @@ Da seção B do PLANO-UX-QV.md (F14, DECISOES § 623): os textos de pt são os d
 | View the new PDF · View pages of {name} | Ver o PDF novo · Ver páginas de {name} |
 | Page {n} of {total} · Page {n} · position {p} of {total} | Página {n} de {total} · Página {n} · posição {p} de {total} |
 | Take this page out · Pick this page · Sign this page · Turn 90° | Tirar esta página · Marcar esta página · Assinar esta página · Girar 90° |
+| (Gerenciar páginas do PDF, a barra) Rotate right · Rotate left · Remove · Put back | Girar à direita · Girar à esquerda · Tirar · Devolver (F18, os rótulos do prompt) |
+| (Gerenciar páginas do PDF, a contagem) {count} picked · 1 picked | {count} marcadas · 1 marcada |
+| (Gerenciar páginas do PDF, a ajuda da barra) Pick pages first: these buttons turn the picked pages or take them out. | Marque páginas primeiro: estes botões giram as páginas marcadas ou as tiram. |
+| (Gerenciar páginas do PDF, a fala do giro) {count} pages turned right / left. | {count} páginas giradas para a direita / para a esquerda. |
 | (Excluir) {count} of {total} come out · the new PDF keeps {left} pages | {count} de {total} saem · o PDF novo fica com {left} páginas ("1 de 12 sai", "fica com 1 página") |
 | (Excluir, o nome da página) …, comes out | …, sai |
 | Pages {from} to {to} picked · unpicked | Páginas {from} a {to} marcadas · desmarcadas |

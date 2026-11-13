@@ -207,3 +207,9 @@ Pegadinhas que a F16 achou nos specs da leitura do campo, da fala do card, do fo
 - **Três execuções do Playwright em sequência na mesma árvore limpam o `test-results` uma da outra:** o trace de uma falha some na execução seguinte; copie-o antes. O `test-results/matriz/` também: copie os registros da matriz antes de rodar outro spec, se a tabela ainda não foi gerada.
 - **A duração de cada teste na máquina** sai do relatório JSON (`--reporter=json` com `PLAYWRIGHT_JSON_OUTPUT_NAME`); a razão CI/local medida por spec na F17 foi de 1,0 (o `budgets` no Chromium) a 2,5 (o `tool-i18n` no WebKit), e 2,05 na matriz do WebKit.
 - **O `handoff.spec.ts`, o `share-target.spec.ts` e o `footer-phone.spec.ts` no `dist-base`:** os dois primeiros sobem o servidor do `dist/` da árvore, e o terceiro usa o do `FO_PORT`, que o Playwright sobe de novo sobre o `dist/` da árvore. Trocar o `dist/` (`mv dist .cache/…`, copiar o `dist-base` para `dist`, rodar, devolver) serve para os três; confira o `dist/build.txt` depois de devolver.
+
+## F18: ferramentas novas que passaram na regra
+
+- **Um botão com `aria-disabled` não se prova com `click()`:** o Playwright espera o botão ficar habilitado e estoura o tempo. Para provar que ele não faz nada, foque e aperte Enter e Espaço pelo teclado (a barra de ações do Organizar sem página marcada, `island-pdf-organize.spec.ts`).
+- **Duas execuções do Playwright ao mesmo tempo dividem o servidor:** um grupo que rodou junto com o do build de teste reaproveitou o servidor dele, que fechou quando aquele acabou, e todos os testes caíram por `ECONNREFUSED`. Rode cada grupo sozinho, ou cada um com o próprio `FO_PORT`.
+- **O JSON-LD da página é um `@graph`:** o `BreadcrumbList` está dentro dele, não na raiz do `script` (o `pdf-presets.spec.ts` lê a trilha de quatro passos assim).

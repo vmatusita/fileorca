@@ -4,7 +4,7 @@
 // The money calculators and presets of the F4 (ids of src/tools/calc/registry.ts) carry how (3 steps or more),
 // faq (4 questions or more), privacy ("Your numbers stay on your device") and related, and a calculator preset
 // has three blocks of its own too (DECISOES § 121).
-// The 12 PDF tools and the PDF hub of the F5a come from the PDF registry (src/tools/pdf/registry.ts): each tool page has
+// The PDF tools (13 since the F18) and the PDF hub of the F5a come from the PDF registry (src/tools/pdf/registry.ts): each tool page has
 // the five blocks, an H1 and a title that start with the tool name, the PrivacySeal, specs that say what it takes, a limit,
 // what stays and what each mode does, four real questions, a privacy note, at most six related cards and no unmeasured
 // claim; the hub has a card and a guide link for each tool (DECISOES § 162).
@@ -38,6 +38,7 @@ import {
   checkSite,
   checkToolPage,
   comparisonPaths,
+  pdfComparisonPaths,
   isCalcPage,
   isImagePage,
   isNotFoundPath,
@@ -47,7 +48,7 @@ import { LANGS, QR_ID, languagesOf, routeById } from '../../src/i18n/routes.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { BR_CALC_IDS, CALC_PAGES, CALC_PAGE_IDS, LIFE_CALC_IDS, isBrCalc, isLifeCalc, moneyPage } from '../../src/tools/calc/registry.ts';
-import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { PDF_HUB_ID, PDF_PAGES, PDF_PRESET_IDS, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID } from '../../src/tools/guides/registry.ts';
 import { hubGuides } from '../../src/tools/guides/hub.ts';
 import { checkFileGuide, guideWords } from '../lib/file-guides.ts';
@@ -59,7 +60,7 @@ const problems = new Problems();
 const read = (path: string): string => readFileSync(fileForPath(path), 'utf8');
 
 const pages = allPages();
-for (const id of [...Object.keys(IMAGE_PAGES), ...Object.keys(CALC_PAGES), ...PDF_TOOL_IDS, PDF_HUB_ID]) {
+for (const id of [...Object.keys(IMAGE_PAGES), ...Object.keys(CALC_PAGES), ...Object.keys(PDF_PAGES), PDF_HUB_ID]) {
   if (!pages.some((page) => page.route.id === id)) problems.add(`${id}: a página do registro não está no mapa de rotas`);
 }
 
@@ -113,11 +114,13 @@ const calcWanted = [...CALC_PAGE_IDS, ...brInMap, ...LIFE_CALC_IDS].reduce((sum,
 if (calcPages !== calcWanted) problems.add(`${calcPages} página(s) de calculadora conferida(s), os registros têm ${calcWanted} (cada calculadora em cada idioma dela)`);
 
 // The PDF tools, read from the PDF registry (never a hand list), in every language of their route (F6): the route map must
-// have each one, and the page must pass the PDF rules in its language; the hub lists the 12 and the Image to PDF card of its
+// have each one, and the page must pass the PDF rules in its language; the hub lists the 13 and the Image to PDF card of its
 // language, and the guide links to each of them.
+// F18 (decision 5; DECISOES § 725): the PDF presets too, with the rules of a PDF page and, as an image preset, at least
+// MIN_OWN_BLOCKS blocks that neither the parent nor a sibling preset has, in each language.
 let pdfPages = 0;
 let pdfWanted = 0;
-for (const id of PDF_TOOL_IDS) {
+for (const id of [...PDF_TOOL_IDS, ...PDF_PRESET_IDS]) {
   const route = pages.find((page) => page.route.id === id)?.route;
   for (const lang of route ? languagesOf(route) : []) {
     const path = route?.paths[lang] ?? '';
@@ -128,7 +131,15 @@ for (const id of PDF_TOOL_IDS) {
     }
     pdfPages += 1;
     const common = TEXTS[lang].common;
-    for (const problem of checkPdfPage(read(path), { id, name: common.pdf[id].name, seal: common.seal, lang })) problems.add(`${path}: ${problem}`);
+    const html = read(path);
+    for (const problem of checkPdfPage(html, { id, name: common.pdf[id].name, seal: common.seal, lang })) problems.add(`${path}: ${problem}`);
+    if (!PDF_PAGES[id].parent) continue;
+    const others: Record<string, string> = {};
+    for (const other of pdfComparisonPaths(id, lang)) {
+      if (existsSync(fileForPath(other))) others[other] = read(other);
+      else problems.add(`${path}: a página ${other}, usada na comparação, não existe no dist`);
+    }
+    for (const problem of checkPresetPage(html, others)) problems.add(`${path}: ${problem}`);
   }
 }
 const hub = routeById(PDF_HUB_ID);
@@ -144,7 +155,7 @@ for (const lang of languagesOf(hub)) {
   for (const problem of checkPdfHub(read(hubPath), { name: TEXTS[lang].common.pdfTools, paths, lang })) problems.add(`${hubPath}: ${problem}`);
 }
 if (pdfPages !== pdfWanted || pdfWanted < PDF_TOOL_IDS.length + 1) {
-  problems.add(`${pdfPages} página(s) de PDF conferida(s), o mapa de rotas tem ${pdfWanted} (as ${PDF_TOOL_IDS.length} ferramentas e o hub, em cada idioma)`);
+  problems.add(`${pdfPages} página(s) de PDF conferida(s), o mapa de rotas tem ${pdfWanted} (as ${PDF_TOOL_IDS.length} ferramentas, as ${PDF_PRESET_IDS.length} presets e o hub, em cada idioma)`);
 }
 
 // The QR code generator (F7), in every language of its route (English, and Portuguese and Spanish since the languages
@@ -224,4 +235,4 @@ const sitePages = listFiles(DIST)
   .filter((page) => !isNotFoundPath(page.path));
 for (const problem of checkSite(sitePages)) problems.add(problem);
 
-problems.finish('conteúdo', `${toolPages} página(s) de ferramenta e de preset, ${calcPages} de calculadora, ${pdfPages} de PDF (as ferramentas e o hub), ${guidePages} guia(s) de arquivo, ${qrPages} do gerador de QR code e ${sitePages.length} página(s) do site conferida(s); ${guidesHubPages} do hub de guias`);
+problems.finish('conteúdo', `${toolPages} página(s) de ferramenta e de preset, ${calcPages} de calculadora, ${pdfPages} de PDF (as ferramentas, as presets e o hub), ${guidePages} guia(s) de arquivo, ${qrPages} do gerador de QR code e ${sitePages.length} página(s) do site conferida(s); ${guidesHubPages} do hub de guias`);

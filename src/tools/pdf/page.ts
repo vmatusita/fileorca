@@ -11,7 +11,7 @@ import { IMAGE_PAGES, type ImagePageId } from '../image/registry.ts';
 import { IMAGE_PANEL_TEXTS } from '../image/texts.ts';
 import type { ChipCarry } from '../image/types.ts';
 import type { ImagePanelTexts, PdfPanelTexts } from '../../i18n/types.ts';
-import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS, type ImageNeighbour, type PdfToolId } from './registry.ts';
+import { PDF_HUB_ID, PDF_PAGES, presetsOf, toolOf, type ImageNeighbour, type PdfPageId, type PdfToolId } from './registry.ts';
 import { PDF_PANEL_TEXTS, PDF_TOOL_TEXTS } from './texts.ts';
 import type { PdfChip, PdfPanelData } from './types.ts';
 import tokens from '../../../docs/design/tokens.json';
@@ -19,10 +19,10 @@ import tokens from '../../../docs/design/tokens.json';
 const MAX_CHIPS = 4;
 const MAX_RELATED = 6;
 
-type Target = PdfToolId | ImageNeighbour;
-const isPdf = (id: Target): id is PdfToolId => id in PDF_PAGES;
+type Target = PdfPageId | ImageNeighbour;
+const isPdf = (id: Target): id is PdfPageId => id in PDF_PAGES;
 
-/** Name, one line and synonyms of a PDF tool or of the image page it points at, in the language. */
+/** Name, one line and synonyms of a PDF tool or preset, or of the image page it points at, in the language. */
 export function blurbOf(id: Target, lang: Lang = 'en'): { name: string; description: string } {
   const common = TEXTS[lang].common;
   return isPdf(id) ? common.pdf[id] : common.tools[id];
@@ -36,7 +36,12 @@ const categoryOf = (id: Target): 'pdf' | 'image' => (isPdf(id) || id === 'image-
  * Protect PDF makes a PDF that needs a password, which no tool it points at opens (it would be refused there), so its chips
  * only link; the others make PDFs.
  */
-const MAKES: Partial<Record<PdfToolId, 'images' | 'locked'>> = { 'pdf-to-jpg': 'images', 'protect-pdf': 'locked' };
+const MAKES: Partial<Record<PdfPageId, 'images' | 'locked'>> = {
+  'pdf-to-jpg': 'images',
+  // F18 (decision 8): PDF to PNG makes images, as its parent; without this its chips would take a PDF along.
+  'pdf-to-jpg-to-png': 'images',
+  'protect-pdf': 'locked',
+};
 type CarryPdf = keyof PdfPanelTexts['carry']['chips'];
 type CarryImage = keyof ImagePanelTexts['carry']['chips'];
 
@@ -48,7 +53,7 @@ type CarryImage = keyof ImagePanelTexts['carry']['chips'];
  * arrive and wait, § 655); a target with no label in the language only links. Protect PDF still takes nothing along: its
  * PDF needs a password, which every tool it points at would refuse.
  */
-export function carryOf(source: PdfToolId, target: Target, lang: Lang = 'en'): ChipCarry | undefined {
+export function carryOf(source: PdfPageId, target: Target, lang: Lang = 'en'): ChipCarry | undefined {
   const makes = MAKES[source];
   if (makes === 'locked') return undefined;
   if (isPdf(target)) {
@@ -65,13 +70,13 @@ export function carryOf(source: PdfToolId, target: Target, lang: Lang = 'en'): C
  * this PDF"). The rule of carryOf, with the labels of the other island. It lives here, not in image/page.ts, because
  * pdfOriginsOf needs it too, and image/page.ts already imports this file: the other way round would be an import cycle.
  */
-export function carryOfImage(source: ImagePageId, target: PdfToolId, lang: Lang = 'en'): ChipCarry | undefined {
+export function carryOfImage(source: ImagePageId, target: PdfPageId, lang: Lang = 'en'): ChipCarry | undefined {
   const labels = IMAGE_PANEL_TEXTS[lang].carry.chips;
   if (!IMAGE_PAGES[source].pdf || !(target in labels)) return undefined;
   return { accepts: ['pdf'], single: PDF_PAGES[target].files === 'single', ...labels[target as CarryImage] };
 }
 
-export function chipsFor(id: PdfToolId, lang: Lang = 'en'): PdfChip[] {
+export function chipsFor(id: PdfPageId, lang: Lang = 'en'): PdfChip[] {
   return PDF_PAGES[id].next.slice(0, MAX_CHIPS).map((target) => {
     const carry = carryOf(id, target, lang);
     return { href: pathFor(target, lang), name: blurbOf(target, lang).name, target, icon: ICONS[iconOf(target)], category: categoryOf(target), ...(carry ? { carry } : {}) };
@@ -82,14 +87,15 @@ export function chipsFor(id: PdfToolId, lang: Lang = 'en'): PdfChip[] {
  * F13a · UX-14 (DECISOES § 498): the PDF tools whose chip takes their result to `target`, with their name. F15 (DECISOES
  * § 653): and, for a PDF tool, the image pages whose chip takes their PDF to it (Image to PDF, to Compress PDF, Merge PDF and
  * Add page numbers), by the same next-step list and the same rule as the chips of the image pages (carryOfImage).
+ * F18 (decision 5): every PDF page is a source, the presets too, as every image page is in originsOf of the image side.
  */
 export function pdfOriginsOf(target: string, lang: Lang = 'en'): Record<string, string> {
   const origins: Record<string, string> = {};
-  for (const source of PDF_TOOL_IDS) if (chipsFor(source, lang).some((chip) => chip.target === target && chip.carry)) origins[source] = blurbOf(source, lang).name;
+  for (const source of Object.keys(PDF_PAGES) as PdfPageId[]) if (chipsFor(source, lang).some((chip) => chip.target === target && chip.carry)) origins[source] = blurbOf(source, lang).name;
   if (target in PDF_PAGES) {
     for (const source of Object.keys(IMAGE_PAGES) as ImagePageId[]) {
       const leads = (IMAGE_PAGES[source].next as readonly string[]).slice(0, MAX_CHIPS).includes(target);
-      if (leads && carryOfImage(source, target as PdfToolId, lang)) origins[source] = TEXTS[lang].common.tools[source].name;
+      if (leads && carryOfImage(source, target as PdfPageId, lang)) origins[source] = TEXTS[lang].common.tools[source].name;
     }
   }
   return origins;
@@ -103,21 +109,41 @@ export interface PdfRelatedCard {
   category: 'image' | 'pdf';
 }
 
-export function relatedFor(id: PdfToolId, lang: Lang = 'en'): PdfRelatedCard[] {
+export function relatedFor(id: PdfPageId, lang: Lang = 'en'): PdfRelatedCard[] {
   return PDF_PAGES[id].related.slice(0, MAX_RELATED).map((target) => {
     const blurb = blurbOf(target, lang);
     return { href: pathFor(target, lang), name: blurb.name, description: blurb.description, icon: iconOf(target), category: categoryOf(target) };
   });
 }
 
-/** Home › PDF tools › tool. */
-export function crumbsFor(id: PdfToolId, lang: Lang = 'en'): Crumb[] {
+/**
+ * Home › PDF tools › tool. F18 (decision 5; DECISOES § 725): Home › PDF tools › parent › preset for a preset, the four
+ * steps of an image preset (crumbsFor of the image side), which PdfToolPage shows without the hub below 360 px (§ 582).
+ */
+export function crumbsFor(id: PdfPageId, lang: Lang = 'en'): Crumb[] {
   const common = TEXTS[lang].common;
+  const parent = PDF_PAGES[id].parent;
   return [
     { name: common.breadcrumb.home, path: homePath(lang) },
     { name: common.pdfTools, path: pathFor(PDF_HUB_ID, lang) },
+    ...(parent ? [{ name: PDF_TOOL_TEXTS[lang][parent].h1, path: pathFor(parent, lang) }] : []),
     { name: PDF_TOOL_TEXTS[lang][id].h1, path: pathFor(id, lang) },
   ];
+}
+
+export interface PdfPresetRow {
+  href: string;
+  name: string;
+  description: string;
+}
+
+/** F18 (decision 5): the presets of a parent tool, for the table on its page (presetRows of the image side); none on a preset. */
+export function presetRows(id: PdfPageId, lang: Lang = 'en'): PdfPresetRow[] {
+  if (PDF_PAGES[id].parent) return [];
+  return presetsOf(id as PdfToolId).map((preset) => {
+    const blurb = blurbOf(preset, lang);
+    return { href: pathFor(preset, lang), name: blurb.name, description: blurb.description };
+  });
 }
 
 /** The light value of the "ink" token: the signature lands on a white page whatever the theme on screen. */
@@ -132,12 +158,13 @@ export function coffeeHrefFor(lang: Lang): string {
   return lang === 'pt' ? `${pathFor('support', 'pt')}#pix` : KOFI_URL;
 }
 
-export function panelData(id: PdfToolId, lang: Lang = 'en'): PdfPanelData {
+export function panelData(id: PdfPageId, lang: Lang = 'en'): PdfPanelData {
   const def = PDF_PAGES[id];
   const texts = PDF_TOOL_TEXTS[lang][id];
   return {
     lang,
     page: id,
+    base: toolOf(id),
     t: PDF_PANEL_TEXTS[lang],
     texts: texts.panel,
     files: def.files,

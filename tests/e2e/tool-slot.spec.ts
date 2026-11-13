@@ -38,6 +38,9 @@ const INPUT: Partial<Record<ImagePageId, () => TestFile>> = {
   'avif-to-jpg': () => fixture('gen-avif.avif', 'photo.avif', 'image/avif'),
   // 1600 × 1200: cut to 16:9, not enlarged. A photo smaller than 1280 × 720 adds a second note (DECISOES § 464).
   'resize-image-youtube-thumbnail': () => fixture('gen-jpg-02-orientacao8.jpg', 'photo.jpg'),
+  // F18 (decision 19; DECISOES § 742): Remove EXIF data on what it is for, a photo with its GPS and its Orientation in the
+  // Exif (the JPEG drawn in the page has no metadata to take out). Flip image takes the JPEG drawn in the page, as Rotate image.
+  'remove-exif-data': () => fixture('gen-jpg-02-orientacao8.jpg', 'photo.jpg'),
 };
 async function inputFor(page: Page, id: ImagePageId): Promise<TestFile> {
   const own = INPUT[id];

@@ -7,7 +7,7 @@
 import { expect, type Page } from '@playwright/test';
 import { fmt } from '../../../src/i18n/format.ts';
 import { routeById, type Lang } from '../../../src/i18n/routes.ts';
-import { PDF_PAGES, PDF_TOOL_IDS, type PdfToolId } from '../../../src/tools/pdf/registry.ts';
+import { PDF_PAGES, PDF_PRESET_IDS, PDF_TOOL_IDS, type PdfPageId } from '../../../src/tools/pdf/registry.ts';
 import { PDF_PANEL_TEXTS, PDF_TOOL_TEXTS } from '../../../src/tools/pdf/texts.ts';
 import { animationsDone, slowEngine } from './page.ts';
 import { PDF_ORACLE, choosePdfs, openTool, pdfFile } from './pdf-tools.ts';
@@ -29,8 +29,12 @@ export type PdfState = 'rest' | 'processing' | 'ready' | 'list' | 'removed' | 'g
 /** Called on each state with a short note of what was done to reach it (it shows in the failure messages). */
 export type VisitPdf = (state: PdfState, note: string) => Promise<void>;
 
-/** The PDF tools to walk, read from the registry: id and path, in the order of the hub. */
-export const PDF_WALKS: readonly { id: PdfToolId; path: string }[] = PDF_TOOL_IDS.map((id) => ({ id, path: PDF_PAGES[id].path }));
+/**
+ * The PDF pages to walk, read from the registry: id and path, the tools in the order of the hub and then the presets. F18
+ * (decision 5; DECISOES § 725): a PDF preset is walked wherever a PDF tool is (the axe of its states, the distance of the
+ * AdSlots, the view of the result, the 48 px of its buttons), as an image preset is measured wherever an image tool is.
+ */
+export const PDF_WALKS: readonly { id: PdfPageId; path: string }[] = [...PDF_TOOL_IDS, ...PDF_PRESET_IDS].map((id) => ({ id, path: PDF_PAGES[id].path }));
 
 /** The 8-page file of mixed sizes and turns: small, and every grid and preview has cells to show. */
 const MIXED = 'gen-paginas-mistas.pdf';
@@ -46,7 +50,7 @@ const SENTINEL = 'Orca-Sentinel-7391-Kq';
 const option = (page: Page, label: string) => page.locator('#fo-tool-root .fo-seg__opt').filter({ hasText: label }).first().click();
 
 /** The option labels of a PDF tool in a language (each tool has its own shape; the walk reads only strings). */
-const optionsOf = (id: PdfToolId, lang: Lang): Record<string, string> => (PDF_TOOL_TEXTS[lang][id].panel as unknown as { options: Record<string, string> }).options;
+const optionsOf = (id: PdfPageId, lang: Lang): Record<string, string> => (PDF_TOOL_TEXTS[lang][id].panel as unknown as { options: Record<string, string> }).options;
 const escaped = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 /**
@@ -54,7 +58,7 @@ const escaped = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\
  * have ended. With `hold`, the engine's worker is held back until the file is chosen, so the WaterLevel state exists and
  * `visit('processing')` is called; without it that state is skipped (the worker may answer before anyone looks).
  */
-export async function walkPdfTool(page: Page, id: PdfToolId, visit: VisitPdf, options: { hold: boolean; path?: string; lang?: Lang }): Promise<void> {
+export async function walkPdfTool(page: Page, id: PdfPageId, visit: VisitPdf, options: { hold: boolean; path?: string; lang?: Lang }): Promise<void> {
   const lang = options.lang ?? 'en';
   const labels = optionsOf(id, lang);
   const grid = PDF_PANEL_TEXTS[lang].grid;
@@ -218,6 +222,28 @@ export async function walkPdfTool(page: Page, id: PdfToolId, visit: VisitPdf, op
       await result('unlocked');
       break;
     }
+    case 'organize-pdf': {
+      // F18 (decision 6): the grid with its bar, first with no page picked (the buttons aria-disabled, the help), then with
+      // two pages picked and turned, one taken out (faded, with the trash) and one moved; the result is one PDF.
+      await enter([MIXED]);
+      await waitReady();
+      await expect(cells).toHaveCount(MIXED_PAGES);
+      await expect(root.locator('.fo-pages__act[aria-disabled="true"]')).toHaveCount(3);
+      await seen('grid', 'nothing picked: the bar waits for a pick');
+      await cells.nth(1).locator('.fo-page__main').click();
+      await cells.nth(3).locator('.fo-page__main').click();
+      await root.locator('.fo-pages__act--right').click();
+      await root.getByRole('button', { name: grid.selectNone, exact: true }).click();
+      await cells.nth(5).locator('.fo-page__main').click();
+      await root.locator('.fo-pages__act--out').click();
+      await root.getByRole('button', { name: fmt(grid.moveLater, { n: 1 }) }).click();
+      await expect(root.locator('.fo-page[data-leaving="true"]')).toHaveCount(1);
+      await expect(root.locator('.fo-pages__act--out')).toHaveText(grid.putBack);
+      await seen('grid', 'two pages turned, one out, page 1 moved');
+      await action.click();
+      await result('organized');
+      break;
+    }
     case 'reorder-pdf-pages': {
       await enter([MIXED]);
       await waitReady();
@@ -235,6 +261,27 @@ export async function walkPdfTool(page: Page, id: PdfToolId, visit: VisitPdf, op
       await seen('ready', 'the options with the default text');
       await action.click();
       await result('watermarked');
+      break;
+    }
+    // F18 (decisions 7 and 8; DECISOES § 728 and § 729): the presets through the states of their parent that they keep.
+    // Extract pages opens on the grid (Split's Pick mode, with no segment of the modes before it).
+    case 'split-pdf-extract-pages': {
+      await enter([MIXED]);
+      await waitReady();
+      await expect(cells).toHaveCount(MIXED_PAGES);
+      await seen('ready', 'the grid at once, nothing picked');
+      await cells.nth(0).locator('.fo-page__main').click();
+      await cells.nth(2).locator('.fo-page__main').click();
+      await expect(root.locator('.fo-page[data-selected="true"]')).toHaveCount(2);
+      await seen('grid', 'two pages picked');
+      await action.click();
+      await result('the picked pages in one PDF');
+      break;
+    }
+    case 'pdf-to-jpg-to-png': {
+      await option(page, labels['low'] ?? '');
+      await enter([SCAN]);
+      await result('one page as a PNG at 72 ppi');
       break;
     }
   }

@@ -131,6 +131,11 @@ export default {
       description: 'Junte suas imagens num PDF só, uma imagem por página.',
       synonyms: ['pdf', 'jpg para pdf', 'png para pdf', 'foto para pdf', 'juntar imagens', 'juntar fotos', 'jpg', 'png', 'imagem'],
     },
+    'remove-exif-data': {
+      name: 'Remover metadados da foto',
+      description: 'Tire de uma foto a localização, a data e os dados da câmera.',
+      synonyms: ['exif', 'metadados', 'gps', 'localização', 'remover exif', 'remover metadados', 'tirar metadados', 'tirar localização', 'foto', 'imagem', 'jpg', 'jpeg', 'png', 'webp'],
+    },
     'compress-image-to-100kb': {
       name: 'Comprimir imagem para 100 KB',
       description: 'Um JPG de até 100 KB, para formulários com limite de tamanho.',
@@ -145,6 +150,11 @@ export default {
       name: 'Miniatura do YouTube',
       description: 'Um JPG de 1280 × 720 com menos de 2 MB, pronto para o vídeo do YouTube.',
       synonyms: ['youtube', 'miniatura', 'thumbnail', 'capa do vídeo', '1280x720', '1280 x 720', '16:9', 'vídeo', 'jpg'],
+    },
+    'rotate-image-flip': {
+      name: 'Espelhar imagem',
+      description: 'Espelhe uma foto na horizontal ou na vertical, sem girar.',
+      synonyms: ['espelhar', 'espelho', 'espelhar imagem', 'espelhar foto', 'espelhar na horizontal', 'espelhar na vertical', 'foto', 'imagem', 'jpg', 'jpeg', 'png', 'webp'],
     },
   },
   pdf: {
@@ -161,7 +171,8 @@ export default {
     'pdf-to-jpg': {
       name: 'PDF para JPG',
       description: 'Transforme cada página de um PDF numa imagem JPG ou PNG.',
-      synonyms: ['pdf para jpg', 'pdf para jpeg', 'pdf para png', 'pdf para imagem', 'converter pdf', 'página para imagem', 'pdf'],
+      // F18 (decision 4; DECISOES § 724): "pdf para png" went to PDF para PNG, whose name it is (§ 180).
+      synonyms: ['pdf para jpg', 'pdf para jpeg', 'pdf para imagem', 'converter pdf', 'página para imagem', 'pdf'],
     },
     'compress-pdf': {
       name: 'Comprimir PDF',
@@ -198,6 +209,11 @@ export default {
       description: 'Tire a senha ou as restrições de um PDF que você consegue abrir.',
       synonyms: ['tirar senha', 'remover senha', 'desbloquear pdf', 'descriptografar pdf', 'tirar restrições', 'pdf'],
     },
+    'organize-pdf': {
+      name: 'Gerenciar páginas do PDF',
+      description: 'Mova, gire e tire páginas de um PDF numa grade só.',
+      synonyms: ['gerenciar páginas', 'gerenciar pdf', 'organizar pdf', 'reorganizar', 'girar páginas', 'excluir páginas', 'pdf'],
+    },
     'reorder-pdf-pages': {
       name: 'Organizar páginas do PDF',
       description: 'Mude a ordem das páginas de um PDF.',
@@ -207,6 +223,16 @@ export default {
       name: "Marca d'água no PDF",
       description: "Carimbe um texto de marca d'água em todas as páginas de um PDF.",
       synonyms: ["marca d'água", 'marca dagua', 'carimbo', 'confidencial', 'rascunho', 'pdf'],
+    },
+    'split-pdf-extract-pages': {
+      name: 'Extrair páginas do PDF',
+      description: 'Guarde num PDF novo só as páginas que você escolher.',
+      synonyms: ['extrair', 'extrair páginas', 'extrair páginas do pdf', 'salvar páginas', 'copiar páginas', 'pdf'],
+    },
+    'pdf-to-jpg-to-png': {
+      name: 'PDF para PNG',
+      description: 'Transforme as páginas de um PDF em imagens PNG nítidas.',
+      synonyms: ['pdf para png', 'png', 'converter pdf em png', 'página para png', 'pdf'],
     },
   },
   calcs: {

@@ -7,7 +7,8 @@
 //  4. a deterministic part, measured again here in Node with the same code, gives exactly the file's values.
 import { readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDE_PUBLISHED_ON, GUIDE_REVIEWED_ON } from '../../src/tools/guides/registry.ts';
+import { LANGS } from '../../src/i18n/routes.ts';
 import type { MeasuredFile, MeasuredNumber, MeasuredTable, Method, OfficialSize, Sample } from '../../src/tools/guides/measured-types.ts';
 import { scriptFiles, scriptHash } from '../../scripts/guides/lib/record.ts';
 import { breakdown, compress, merge, pdfFixture, splitEach } from '../../scripts/guides/lib/node-pdf.ts';
@@ -150,16 +151,37 @@ describe('the measurements of the file guides', () => {
     expect(problems.some((problem) => problem.includes('typed: value'))).toBe(true);
   });
 
-  // DECISOES § 207: the "Reviewed" line and the Article schema never date the review or the publication before the
-  // day the numbers they show were measured (the script stamps the UTC day).
-  it('are never newer than the review and publication dates the guides show', () => {
+  // DECISOES § 207: the "Reviewed" line and the dateModified of the Article schema never date the review before the day
+  // the numbers they show were measured (the script stamps the UTC day), in any language. F18 (DECISOES § 733): the first
+  // publication is the day of the first version, which a later measurement does not move, so it may come before the
+  // measurement (the history line then says when the numbers were measured again: guide-page.test.ts reads it on each
+  // page); it never comes after the review.
+  it('are never newer than the review dates the guides show, and the first publication never comes after the review', () => {
     expect(GUIDE_REVIEWED >= measured.measuredOn, `reviewed ${GUIDE_REVIEWED}, measured ${measured.measuredOn}`).toBe(true);
-    expect(GUIDE_PUBLISHED >= measured.measuredOn, `published ${GUIDE_PUBLISHED}, measured ${measured.measuredOn}`).toBe(true);
-    expect(GUIDE_REVIEWED >= GUIDE_PUBLISHED).toBe(true);
+    expect(GUIDE_PUBLISHED <= GUIDE_REVIEWED, `published ${GUIDE_PUBLISHED}, reviewed ${GUIDE_REVIEWED}`).toBe(true);
+    expect([GUIDE_REVIEWED_ON.en, GUIDE_PUBLISHED_ON.en]).toEqual([GUIDE_REVIEWED, GUIDE_PUBLISHED]);
+    for (const lang of LANGS) {
+      expect(GUIDE_REVIEWED_ON[lang] >= measured.measuredOn, `${lang}: reviewed ${GUIDE_REVIEWED_ON[lang]}, measured ${measured.measuredOn}`).toBe(true);
+      expect(GUIDE_PUBLISHED_ON[lang] <= GUIDE_REVIEWED_ON[lang], `${lang}: published ${GUIDE_PUBLISHED_ON[lang]}, reviewed ${GUIDE_REVIEWED_ON[lang]}`).toBe(true);
+    }
   });
 
   it('settle the tool of guide 6, and the registry embeds that tool (DECISOES § 186)', () => {
     expect(measured.guides['guides-remove-location-from-photos'].facts['winner']).toBe(FILE_GUIDES['guides-remove-location-from-photos'].tool);
+  });
+
+  // F18 (DECISOES § 733): the guide says that Resize image at the full size gave back the very same files as Remove EXIF
+  // data, and that the tie went to the tool with nothing to set. Both halves come from the measurement: equal bytes in
+  // each browser and every photo with identical pixels, for both tools; a new measurement that parts them fails here.
+  it('say, in guide 6, that Resize image tied with Remove EXIF data only while the measurement shows the same files', () => {
+    const numbers = measured.guides['guides-remove-location-from-photos'].numbers;
+    const value = (name: string): number | undefined => numbers[name]?.value;
+    for (const browser of ['Chromium', 'Webkit']) {
+      expect(value(`removeExifDataBytes${browser}`), browser).toBe(value(`resizeImageBytes${browser}`));
+      expect(value(`removeExifDataIdentical${browser}`), browser).toBe(value('photos'));
+      expect(value(`resizeImageIdentical${browser}`), browser).toBe(value('photos'));
+    }
+    expect(JSON.stringify(removeLocation)).toContain('Resize image, set to keep the full size, gave back the very same files');
   });
 
   it('take an official size only from the words of its page, and fail a size the page does not give (DECISOES § 198)', () => {

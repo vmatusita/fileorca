@@ -9,7 +9,7 @@ import { fileSize, fmt, groupDigits, percent } from '../../src/i18n/format.ts';
 import { filterEntries, normalize } from '../../src/search/search.ts';
 import { searchIndex } from '../../src/pages/search-index.json.ts';
 import { BR_CALC_IDS, BR_HUB_ID, CALC_PAGES, CALC_PAGE_IDS, GUIDES, GUIDE_IDS, HEALTH_HUB_ID, HOUSE_HUB_ID, LIFE_CALC_IDS, LIFE_CALC_PAGES, MONEY_HUB_ID, isBrCalc, isLifeCalc, type LifeCalcId } from '../../src/tools/calc/registry.ts';
-import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { PDF_HUB_ID, PDF_PRESET_IDS, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { PDF_PANEL_TEXTS, PDF_TOOL_TEXTS } from '../../src/tools/pdf/texts.ts';
 import enCommon from '../../src/i18n/en/common.ts';
 import { FILE_GUIDE_IDS, GUIDES_HUB_ID, isFileGuide } from '../../src/tools/guides/registry.ts';
@@ -56,9 +56,12 @@ describe('mapa de rotas', () => {
     expect(ROUTES.map((route) => route.id).filter((id) => !isBrPage(id))).toEqual([
       'home', 'compress-image', 'image-tools', 'resize-image', 'crop-image', 'rotate-image', 'heic-to-jpg', 'webp-to-jpg', 'png-to-jpg',
       // F17 (decision 3; DECISOES § 716): AVIF to JPG and Convert to WebP back where the F2 had them, before Image to PDF.
-      'avif-to-jpg', 'convert-to-webp', 'image-to-pdf', 'compress-image-to-100kb', 'compress-image-to-1mb', 'resize-image-youtube-thumbnail',
+      'avif-to-jpg', 'convert-to-webp', 'image-to-pdf',
+      // F18 (decision 4; DECISOES § 724 and § 743): Remove EXIF data after the ten tools, Flip image after the three presets.
+      'remove-exif-data', 'compress-image-to-100kb', 'compress-image-to-1mb', 'resize-image-youtube-thumbnail', 'rotate-image-flip',
       MONEY_HUB_ID, ...CALC_PAGE_IDS, ...GUIDE_IDS,
-      PDF_HUB_ID, ...PDF_TOOL_IDS,
+      // F18 (decision 5; DECISOES § 725): the PDF presets after the PDF tools, as the image presets after the image tools.
+      PDF_HUB_ID, ...PDF_TOOL_IDS, ...PDF_PRESET_IDS,
       // F11 (decision 5): the guides hub, right before the file guides, as each hub comes before its pages.
       GUIDES_HUB_ID, ...FILE_GUIDE_IDS,
       // F7 (decision 1; DECISOES § 259): the two hubs, the 11 home and health calculators in hub order and the QR code
@@ -77,7 +80,7 @@ describe('mapa de rotas', () => {
     // three languages (before the F6 only Compress image was, DECISOES § 58). The languages adjustment: the 10 file guides
     // too (English only in the F5b, DECISOES § 190), and the QR code generator.
     const everyLanguage = ROUTES.filter((route) => route.adArea === 'arquivos').map((route) => route.id);
-    expect(everyLanguage).toHaveLength(Object.keys(IMAGE_PAGES).length + 1 + PDF_TOOL_IDS.length + 1 + FILE_GUIDE_IDS.length);
+    expect(everyLanguage).toHaveLength(Object.keys(IMAGE_PAGES).length + 1 + PDF_TOOL_IDS.length + PDF_PRESET_IDS.length + 1 + FILE_GUIDE_IDS.length);
     for (const id of [...everyLanguage, QR_ID] as RouteId[]) expect(languagesOf(routeById(id)), id).toEqual([...LANGS]);
     // What stays English only: the 13 pages of home and health (F7, decision 1; their trigger is DECISOES § 273).
     const englishOnly = ROUTES.filter((route) => languagesFor(route.id).length === 1 && languagesFor(route.id)[0] === 'en').map((route) => route.id);
@@ -245,9 +248,10 @@ describe('tool search', () => {
     // F7 (decision 9; DECISOES § 259): the 11 home and health calculators in hub order, then the QR code generator, come
     // last, after the file guides (the hubs are not searchable pages, as the money hub is not).
     const br = BR_CALC_IDS.filter((id) => brRoutes().some((route) => route.id === id));
-    expect(ids(index)).toEqual([...Object.keys(IMAGE_PAGES), ...PDF_TOOL_IDS, ...CALC_PAGE_IDS, ...br, ...GUIDE_IDS, ...FILE_GUIDE_IDS, ...LIFE_CALC_IDS, QR_ID]);
-    // F17: 13 image pages (10 tools and 3 presets; 11 before).
-    expect(index).toHaveLength(13 + PDF_TOOL_IDS.length + 18 + br.length + 5 + FILE_GUIDE_IDS.length + 11 + 1);
+    // F18 (decision 5; DECISOES § 725): the 2 PDF presets right after the PDF tools, as the image presets after the image tools.
+    expect(ids(index)).toEqual([...Object.keys(IMAGE_PAGES), ...PDF_TOOL_IDS, ...PDF_PRESET_IDS, ...CALC_PAGE_IDS, ...br, ...GUIDE_IDS, ...FILE_GUIDE_IDS, ...LIFE_CALC_IDS, QR_ID]);
+    // F17: 13 image pages (10 tools and 3 presets; 11 before). F18 (DECISOES § 743): 15 (11 tools and 4 presets).
+    expect(index).toHaveLength(15 + PDF_TOOL_IDS.length + PDF_PRESET_IDS.length + 18 + br.length + 5 + FILE_GUIDE_IDS.length + 11 + 1);
     expect(index[0]?.href).toEqual({ en: '/compress-image/', pt: '/pt/comprimir-imagem/', es: '/es/comprimir-imagen/' });
     for (const entry of index) {
       const route = routeById(entry.id as ImagePageId);
@@ -277,11 +281,13 @@ describe('tool search', () => {
     expect(index.some((entry) => [HOUSE_HUB_ID, HEALTH_HUB_ID].includes(entry.id))).toBe(false);
   });
 
-  it('indexes the 12 PDF tools from their registry: the PDF category, the hub order, the route paths and the blurb terms (F5a)', () => {
-    const entries = searchIndex().filter((entry) => (PDF_TOOL_IDS as readonly string[]).includes(entry.id));
-    expect(ids(entries)).toEqual([...PDF_TOOL_IDS]);
+  // F18 (decision 5; DECISOES § 725): and the 2 PDF presets after the 13 tools, with the same category and blurbs.
+  it('indexes the 13 PDF tools and the 2 PDF presets from their registry: the PDF category, the hub order, the route paths and the blurb terms (F5a)', () => {
+    const pages = [...PDF_TOOL_IDS, ...PDF_PRESET_IDS];
+    const entries = searchIndex().filter((entry) => (pages as readonly string[]).includes(entry.id));
+    expect(ids(entries)).toEqual(pages);
     for (const entry of entries) {
-      const id = entry.id as (typeof PDF_TOOL_IDS)[number];
+      const id = entry.id as (typeof pages)[number];
       expect(entry.cat, id).toBe('pdf');
       // F6 (decision 4): the category, the name and the link of each of the three languages (English only before).
       expect(entry.category, id).toEqual(Object.fromEntries(LANGS.map((lang) => [lang, TEXTS[lang].common.search.pdfCategory])));
@@ -342,13 +348,43 @@ describe('tool search', () => {
       ['jpg to pdf', ['image-to-pdf', 'pdf-to-jpg', 'guides-pdf-to-jpg-resolution']],
       ['100kb', ['compress-image-to-100kb']],
       ['1280x720', ['resize-image-youtube-thumbnail']],
-      ['mirror', ['rotate-image']],
+      // F18 (decision 9; DECISOES § 743): Flip image says "mirror" too, and comes after its parent, as a preset after its
+      // tool ("compress"); "flip image", its name, finds it first.
+      ['mirror', ['rotate-image', 'rotate-image-flip']],
+      ['flip image', ['rotate-image-flip', 'rotate-image']],
+      // F18 (decision 10): Remove EXIF data by the words of its synonyms; Organize PDF before Reorder pages (DECISOES § 724).
+      // The file guide on the location of photos says EXIF and GPS too, and comes after the tool, as guides do (§ 190).
+      ['exif', ['remove-exif-data', 'guides-remove-location-from-photos']],
+      ['organize pdf', ['organize-pdf']],
+      // PDF to PNG by its name, then the two pages that share its words (Image to PDF first, in the order of the index, and
+      // PDF to JPG, which makes PNG too); Extract pages by its name, and "extract pages" Split PDF first, as a tool before its preset.
+      ['pdf to png', ['pdf-to-jpg-to-png', 'image-to-pdf', 'pdf-to-jpg']],
+      ['extract pages from pdf', ['split-pdf-extract-pages']],
+      ['extract pages', ['split-pdf', 'split-pdf-extract-pages']],
+      // F18 (decision 4; DECISOES § 737): Organize PDF says "delete" and "rotate" (the prompt asks it), words of the names of
+      // Delete PDF pages and Rotate PDF; each of those says its word too, so the tie goes to the order of the index and the
+      // page whose name has the word comes before Organize PDF (Rotate image, an image page, before both, as before the F18).
+      ['delete', ['delete-pdf-pages', 'organize-pdf']],
+      ['rotate', ['rotate-image', 'rotate-pdf', 'organize-pdf']],
       // F17 (decision 9; DECISOES § 716): the AVIF pages of the F2 are back. "avif" finds AVIF to JPG (its name) and then
       // Convert to WebP (a synonym: it makes AVIF too), as before the 3812f49; it found nothing from the F2 to the F16.
       ['avif', ['avif-to-jpg', 'convert-to-webp']],
       ['convert to avif', ['convert-to-webp', 'avif-to-jpg']],
     ];
     for (const [query, found] of expected) expect(ids(filterEntries(index, query)), query).toEqual(found);
+    // F18 (DECISOES § 737): the verb of the name of Delete PDF pages and of Rotate PDF finds that page before Organize PDF,
+    // whatever the language of the page and of the word (the search joins the terms of the three languages).
+    const before: [string, string][] = [
+      ['delete', 'delete-pdf-pages'], ['excluir', 'delete-pdf-pages'], ['eliminar', 'delete-pdf-pages'],
+      ['rotate', 'rotate-pdf'], ['girar', 'rotate-pdf'], ['rotar', 'rotate-pdf'],
+    ];
+    for (const lang of LANGS) {
+      for (const [query, page] of before) {
+        const found = ids(filterEntries(index, query, lang));
+        expect(found, `${query} ${lang}`).toContain(page);
+        if (found.includes('organize-pdf')) expect(found.indexOf(page), `${query} ${lang}: ${found.join(', ')}`).toBeLessThan(found.indexOf('organize-pdf'));
+      }
+    }
     // In each language, "avif" finds the two, each at the page of that language.
     for (const lang of LANGS) {
       const avif = filterEntries(index, 'avif', lang);
@@ -361,7 +397,7 @@ describe('tool search', () => {
 
   it('puts first the tool whose name is the query, where Enter goes, before the neighbours that only share its words (DECISOES § 180)', () => {
     const index = searchIndex();
-    const first = (query: string) => ids(filterEntries(index, query, 'en'))[0];
+    const first = (query: string, lang = 'en') => ids(filterEntries(index, query, lang))[0];
     // The names of the PDF tools: Image to PDF has "pdf", "to" and "jpg" in its terms, and used to say "merge" and
     // "combine" (F2, before Merge PDF existed), so it came first and Enter opened the opposite tool.
     for (const query of ['merge pdf', 'Merge PDF', 'merge', 'combine', 'combine pdf']) expect(first(query), query).toBe('merge-pdf');
@@ -383,7 +419,13 @@ describe('tool search', () => {
     // Inside one step the index order holds: every PDF tool says "pdf", and the image pages come first.
     // F5b: then the file guides whose names say PDF, in registry order (DECISOES § 190).
     const pdfGuides = FILE_GUIDE_IDS.filter((id) => /\bpdf/i.test(enCommon.fileGuides[id].name));
-    expect(ids(filterEntries(index, 'pdf'))).toEqual(['image-to-pdf', ...PDF_TOOL_IDS, ...pdfGuides]);
+    // F18 (decision 5; DECISOES § 743): and the PDF presets after the tools, in the same step.
+    expect(ids(filterEntries(index, 'pdf'))).toEqual(['image-to-pdf', ...PDF_TOOL_IDS, ...PDF_PRESET_IDS, ...pdfGuides]);
+    // F18 (decision 4; DECISOES § 724): each of the five pages of the run is the first by its name, in each language.
+    for (const lang of LANGS) {
+      for (const id of ['remove-exif-data', 'rotate-image-flip'] as const) expect(first(TEXTS[lang].common.tools[id].name, lang), `${id} ${lang}`).toBe(id);
+      for (const id of ['organize-pdf', 'split-pdf-extract-pages', 'pdf-to-jpg-to-png'] as const) expect(first(TEXTS[lang].common.pdf[id].name, lang), `${id} ${lang}`).toBe(id);
+    }
   });
 
   it('shows in each language only the entries that exist in it, and never falls back to English', () => {
@@ -395,9 +437,10 @@ describe('tool search', () => {
     // The languages adjustment: Spanish has the 18 calculator pages and the 5 money guides; Portuguese and Spanish have the
     // 10 file guides and the QR code generator; the home and health pages stay out of both.
     const br = BR_CALC_IDS.filter((id) => brRoutes().some((route) => route.id === id));
-    expect(ids(filterEntries(index, '', 'en'))).toEqual([...Object.keys(IMAGE_PAGES), ...PDF_TOOL_IDS, ...CALC_PAGE_IDS, ...GUIDE_IDS, ...FILE_GUIDE_IDS, ...LIFE_CALC_IDS, QR_ID]);
-    expect(ids(filterEntries(index, '', 'pt'))).toEqual([...Object.keys(IMAGE_PAGES), ...PDF_TOOL_IDS, ...br, ...FILE_GUIDE_IDS, QR_ID]);
-    expect(ids(filterEntries(index, '', 'es'))).toEqual([...Object.keys(IMAGE_PAGES), ...PDF_TOOL_IDS, ...CALC_PAGE_IDS, ...GUIDE_IDS, ...FILE_GUIDE_IDS, QR_ID]);
+    // F18 (DECISOES § 743): the 2 PDF presets after the PDF tools, in the three languages.
+    expect(ids(filterEntries(index, '', 'en'))).toEqual([...Object.keys(IMAGE_PAGES), ...PDF_TOOL_IDS, ...PDF_PRESET_IDS, ...CALC_PAGE_IDS, ...GUIDE_IDS, ...FILE_GUIDE_IDS, ...LIFE_CALC_IDS, QR_ID]);
+    expect(ids(filterEntries(index, '', 'pt'))).toEqual([...Object.keys(IMAGE_PAGES), ...PDF_TOOL_IDS, ...PDF_PRESET_IDS, ...br, ...FILE_GUIDE_IDS, QR_ID]);
+    expect(ids(filterEntries(index, '', 'es'))).toEqual([...Object.keys(IMAGE_PAGES), ...PDF_TOOL_IDS, ...PDF_PRESET_IDS, ...CALC_PAGE_IDS, ...GUIDE_IDS, ...FILE_GUIDE_IDS, QR_ID]);
     // F7 (decision 9): the synonyms of the home and health categories find their page in English, and nothing in
     // Portuguese or Spanish, which never fall back to an English page.
     const F7_QUERIES: [string, string][] = [

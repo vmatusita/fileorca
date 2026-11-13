@@ -6,10 +6,10 @@ import { ICON_FILE_ROOT, ICON_NAMES, iconInner, iconMarkup } from '../../src/ico
 const DIR = 'docs/design/assets/Icons';
 
 describe('ícones inline (DECISOES § 46)', () => {
-  it('lists exactly the 74 icons of docs/design/assets/Icons (35 of the design system, 4 drawn in the F5a, DECISOES § 149, 5 of the header drawn in the F10 and moved in the F11, DECISOES § 384, 27 drawn in the F10 for the tools and the DropZone and moved in the F13a, DECISOES § 490, the zoom of the F14, DECISOES § 621, and the image-stack and image-fast of AVIF to JPG and Convert to WebP, drawn in the F17, DECISOES § 706)', () => {
+  it('lists exactly the 76 icons of docs/design/assets/Icons (35 of the design system, 4 drawn in the F5a, DECISOES § 149, 5 of the header drawn in the F10 and moved in the F11, DECISOES § 384, 27 drawn in the F10 for the tools and the DropZone and moved in the F13a, DECISOES § 490, the zoom of the F14, DECISOES § 621, the image-stack and image-fast of AVIF to JPG and Convert to WebP, drawn in the F17, DECISOES § 706, and the page-grid and pin-x of Organize PDF and Remove EXIF data, drawn in the F18, DECISOES § 735)', () => {
     const files = readdirSync(DIR).filter((file) => file.endsWith('.svg')).map((file) => file.replace(/\.svg$/, '')).sort();
     expect([...ICON_NAMES].sort()).toEqual(files);
-    expect(files).toHaveLength(74);
+    expect(files).toHaveLength(76);
   });
 
   it('keeps ICON_NAMES in alphabetical order (DECISOES § 490)', () => {

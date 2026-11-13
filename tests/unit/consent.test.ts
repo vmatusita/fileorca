@@ -6,8 +6,10 @@ import { CALC_EVENT_TOOLS, EVENT_TOOLS, IMAGE_EVENT_TOOLS, PDF_EVENT_TOOLS, UTIL
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { BR_CALC_IDS, CALC_PAGE_IDS, LIFE_CALC_IDS } from '../../src/tools/calc/registry.ts';
 import { QR_ID } from '../../src/i18n/routes.ts';
-import { PDF_PAGES, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { PDF_PAGES, PDF_PRESET_IDS, PDF_TOOL_IDS, toolOf, type PdfPageId } from '../../src/tools/pdf/registry.ts';
 import { PDF_TOOLS } from '../../src/tools/pdf/tools.tsx';
+import { TOOL as removeExif } from '../../src/tools/remove-exif-data/Panel.tsx';
+import { TOOL as flip } from '../../src/tools/rotate-image/presets/flip/Panel.tsx';
 import { PDF_REASONS } from '../../src/engine/pdf/types.ts';
 import { CALC_IDS } from '../../src/calc/index.ts';
 
@@ -260,6 +262,7 @@ describe('the events of the PDF tools (F5a)', () => {
     'sign-pdf': 'signed',
     'protect-pdf': 'protected',
     'unlock-pdf': 'unlocked',
+    'organize-pdf': 'organized',
     'reorder-pdf-pages': 'reordered',
     'watermark-pdf': 'watermarked',
   } as const;
@@ -267,9 +270,11 @@ describe('the events of the PDF tools (F5a)', () => {
   const SMUGGLED = { pages: 300, count: 12, range: '1-3, 5', password: 'Orca-Sentinel-7391-Kq', text: 'CONFIDENTIAL', start: 7, fileName: 'contract.pdf', size: 123_456, ppi: 300, position: 'bottom-center' };
 
   it('lists exactly the pages of the PDF registry as event tools, apart from the other two lists', () => {
-    expect([...PDF_EVENT_TOOLS]).toEqual([...PDF_TOOL_IDS]);
+    // F18 (decision 14; DECISOES § 737): the pages of the PDF registry are its tools and, after them, its presets, as the
+    // image list has the image presets after the image tools.
+    expect([...PDF_EVENT_TOOLS]).toEqual([...PDF_TOOL_IDS, ...PDF_PRESET_IDS]);
     expect([...PDF_EVENT_TOOLS]).toEqual(Object.keys(PDF_PAGES));
-    for (const id of PDF_TOOL_IDS) expect(PDF_PAGES[id].id).toBe(id);
+    for (const id of Object.keys(PDF_PAGES) as PdfPageId[]) expect(PDF_PAGES[id].id).toBe(id);
     // F7 (decision 8; DECISOES § 259 and § 263): the list of the utilities (the QR code generator) comes last.
     expect([...EVENT_TOOLS]).toEqual([...IMAGE_EVENT_TOOLS, ...CALC_EVENT_TOOLS, ...PDF_EVENT_TOOLS, ...UTILITY_EVENT_TOOLS]);
     expect(new Set(EVENT_TOOLS).size, 'no page name is in two lists').toBe(EVENT_TOOLS.length);
@@ -281,9 +286,18 @@ describe('the events of the PDF tools (F5a)', () => {
       expect(PDF_TOOLS[id].success, id).toBe(SUCCESS[id]);
       expect(OUTCOMES as readonly string[], id).toContain(SUCCESS[id]);
     }
-    // Pinned: a new outcome comes with a change here. 'unchanged' and 'failed' are the two that belong to no tool.
+    // F18 (decision 5; DECISOES § 737): a PDF preset ends with the word of its tool (Extract pages "split", PDF to PNG
+    // "converted"), so the presets bring no value of their own.
+    for (const id of PDF_PRESET_IDS) expect(PDF_TOOLS[id].success, id).toBe(SUCCESS[toolOf(id)]);
+    // The image pages of the F18: Remove EXIF data with the new "cleaned", Flip image with the "rotated" of its parent.
+    expect(removeExif.success).toBe('cleaned');
+    expect(flip.success).toBe('rotated');
+    for (const tool of [removeExif, flip]) expect(OUTCOMES as readonly string[]).toContain(tool.success);
+    // Pinned: a new outcome comes with a change here. 'unchanged' and 'failed' are the two that belong to no tool. F18
+    // (DECISOES § 737): 'organized' (Organize PDF) and 'cleaned' (Remove EXIF data), two values of the outcome parameter
+    // that exists, not a new parameter; the Privacy page names the events, never these values.
     expect([...OUTCOMES].sort()).toEqual(
-      ['smaller', 'unchanged', 'converted', 'resized', 'cropped', 'rotated', 'pdf', 'failed', 'merged', 'split', 'deleted', 'numbered', 'reordered', 'watermarked', 'signed', 'protected', 'unlocked'].sort(),
+      ['smaller', 'unchanged', 'converted', 'resized', 'cropped', 'rotated', 'pdf', 'failed', 'merged', 'split', 'deleted', 'numbered', 'reordered', 'watermarked', 'signed', 'protected', 'unlocked', 'organized', 'cleaned'].sort(),
     );
     for (const outcome of OUTCOMES) expect(cleanParams('tool_complete', { tool: 'merge-pdf', lang: 'en', outcome }), outcome).toEqual({ tool: 'merge-pdf', lang: 'en', outcome });
     for (const outcome of ['merged-3', '300 pages', 'IMG_1.pdf', 'Merged', '']) {

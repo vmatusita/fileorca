@@ -22,6 +22,9 @@ import deleteTexts from '../../src/tools/delete-pdf-pages/i18n/en.ts';
 import numbersTexts from '../../src/tools/add-page-numbers-to-pdf/i18n/en.ts';
 import signTexts from '../../src/tools/sign-pdf/i18n/en.ts';
 import reorderTexts from '../../src/tools/reorder-pdf-pages/i18n/en.ts';
+import organizeTexts from '../../src/tools/organize-pdf/i18n/en.ts';
+import extractTexts from '../../src/tools/split-pdf/presets/extract-pages/i18n/en.ts';
+import pngTexts from '../../src/tools/pdf-to-jpg/presets/to-png/i18n/en.ts';
 import watermarkTexts from '../../src/tools/watermark-pdf/i18n/en.ts';
 import { PDF_PANEL_TEXTS } from '../../src/tools/pdf/texts.ts';
 import enCommon from '../../src/i18n/en/common.ts';
@@ -30,9 +33,9 @@ import { arriveFrom, inboxGone } from './lib/inbox.ts';
 
 // Privacy and security of the PDF tools in the browser (F5a, decision 8, criteria 6 and 7; DECISOES § 166).
 //
-// 1. On each of the 12 pages, in both browsers: a file whose name and text hold sentinels is dropped, the options are
-//    changed with more sentinels (the password, the watermark, the first number, the ranges, the signed name), the tool
-//    runs, the result is downloaded and a chip is clicked. Then everything the page and its workers did and kept is
+// 1. On each of the 13 tool pages and, since the F18, the 2 preset pages, in both browsers: a file whose name and text
+//    hold sentinels is dropped, the options are changed with more sentinels (the password, the watermark, the first
+//    number, the ranges, the signed name), the tool runs, the result is downloaded and a chip is clicked. Then everything the page and its workers did and kept is
 //    searched, with the rules of tests/e2e/lib/sentinels.ts, for every sentinel (not only the ones this tool takes):
 //    each request of any origin with its method, address, headers and body, the dataLayer, the title and the address of
 //    the page, the stores of the browser, the console, and the names of what was downloaded. Only a GET of the own origin
@@ -137,10 +140,12 @@ function recordPrivacy(name: string, record: object): void {
   writeFileSync(resolve(dir, `${name}.json`), `${JSON.stringify(record, null, 2)}\n`);
 }
 
-// ---- the 12 pages ---------------------------------------------------------------------------------------------------
+// ---- the 13 tools and the 2 presets ---------------------------------------------------------------------------------
 
 interface Tool {
   slug: string;
+  /** The address of a preset, which has a path of two parts; a tool is at /<slug>/. */
+  path?: string;
   files: () => Promise<TestFile[]>;
   /** Options changed before the file arrives: the tools that run by themselves when it does. */
   before?: (page: Page) => Promise<void>;
@@ -324,6 +329,63 @@ const TOOLS: Tool[] = [
     },
   },
   {
+    slug: 'organize-pdf',
+    files: one,
+    after: async (page) => {
+      // F18 (decision 6): page 1 one place later, page 3 turned right with the bar, page 12 taken out.
+      await page.getByRole('button', { name: 'Move page 1 later', exact: true }).click();
+      await page.locator('#fo-tool-root .fo-pages__grid > li[data-page="2"] .fo-page__main').click();
+      await page.locator('#fo-tool-root .fo-pages__act--right').click();
+      await page.getByRole('button', { name: 'Pick none', exact: true }).click();
+      await page.locator(`#fo-tool-root .fo-pages__grid > li[data-page="${PAGES - 1}"] .fo-page__main`).click();
+      await page.locator('#fo-tool-root .fo-pages__act--out').click();
+      await page.getByRole('button', { name: actionOf(organizeTexts) }).click();
+    },
+    proves: async (outs) => {
+      expect(outs.map((out) => out.name)).toEqual([`${STEM}-organized.pdf`]);
+      const read = await readWithPdfjs(outs[0]?.bytes as Uint8Array);
+      expect(read.pages.map((p) => p.marker)).toEqual(['Page 2', 'Page 1', ...markers(PAGES - 1).slice(2)]);
+      expect(read.pages.map((p) => p.rotate)).toEqual(read.pages.map((_, i) => (i === 2 ? 90 : 0)));
+      return `page 1 moved, page 3 turned, page ${PAGES} out: ${PAGES - 1} pages`;
+    },
+  },
+  // F18 (criterion 5 of the run; review E-1): the two PDF presets, each in the mould of its parent. Extract pages takes the
+  // ranges of Split, typed in the field of its grid; PDF to PNG the range and the resolution of PDF to JPG.
+  {
+    slug: 'split-pdf-extract-pages',
+    path: '/split-pdf/extract-pages/',
+    files: one,
+    after: async (page) => {
+      const action = page.getByRole('button', { name: actionOf(extractTexts) });
+      // The file is read and the grid is there before the pages are typed (a range typed earlier is lost; pdf-matrix.spec.ts).
+      await expect(action).toBeVisible({ timeout: 30_000 });
+      await page.getByLabel('Pick pages by number').fill(SENTINELS.rangeSplit);
+      await page.getByRole('button', { name: 'Pick these' }).click();
+      await action.click();
+    },
+    proves: async (outs) => {
+      expect(outs.map((out) => out.name), 'named by the tool, never by the typed range').toEqual([`${STEM}-extracted.pdf`]);
+      expect((await readWithPdfjs(outs[0]?.bytes as Uint8Array)).pages.map((p) => p.marker)).toEqual(markers(PAGES, [3, 5, 8, 10]));
+      return '8 pages of the 12 for the typed ranges, in one PDF';
+    },
+  },
+  {
+    slug: 'pdf-to-jpg-to-png',
+    path: '/pdf-to-jpg/to-png/',
+    files: one,
+    before: async (page) => {
+      await option(page, pngTexts.panel.options.low);
+      await option(page, pngTexts.panel.options.range);
+      await page.getByLabel(pngTexts.panel.options.rangeLabel).fill(SENTINELS.rangeImages);
+      await page.getByLabel(pngTexts.panel.options.rangeLabel).blur();
+    },
+    proves: async (outs) => {
+      expect(outs.map((out) => out.name)).toEqual([3, 4, 6, 8, 9, 12].map((n) => `${STEM}-page-${n}.png`));
+      for (const out of outs) expect(imageSize(out.bytes).format, out.name).toBe('png');
+      return '6 PNG for the 6 typed pages';
+    },
+  },
+  {
     slug: 'reorder-pdf-pages',
     files: one,
     after: async (page) => {
@@ -358,9 +420,10 @@ const TOOLS: Tool[] = [
 
 test.describe('typed values, names and files stay in the browser', () => {
   for (const tool of TOOLS) {
-    test(`/${tool.slug}/: drop, options, run, download and chip leave nothing of the sentinels anywhere`, async ({ page, context, browserName }) => {
+    const path = tool.path ?? `/${tool.slug}/`;
+    test(`${path}: drop, options, run, download and chip leave nothing of the sentinels anywhere`, async ({ page, context, browserName }) => {
       const seen = watch(context, page);
-      await openTool(page, `/${tool.slug}/`);
+      await openTool(page, path);
       const origin = new URL(page.url()).origin;
 
       await tool.before?.(page);
@@ -380,7 +443,7 @@ test.describe('typed values, names and files stay in the browser', () => {
       await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault(), { once: true }));
       await chip.click();
       const here = new URL(page.url());
-      expect(here.pathname, 'the first click only counted the event').toBe(`/${tool.slug}/`);
+      expect(here.pathname, 'the first click only counted the event').toBe(path);
       const surfaces: Surface[] = await holdings(page, context, 'the tool page');
       const events = (await dataLayer(page)).filter((entry) => entry[0] === 'event').map((entry) => entry[1]);
       expect(events, 'the page sent its four events').toEqual(expect.arrayContaining(['tool_start', 'tool_complete', 'download', 'next_step_click']));
@@ -493,12 +556,15 @@ test('the collectors see a leak planted in the page and in a worker, on every su
 interface Draws {
   title: string;
   slug: string;
+  /** The address of a preset, which has a path of two parts; a tool is at /<slug>/. */
+  path?: string;
   before?: (page: Page) => Promise<void>;
   after?: (page: Page) => Promise<void>;
   /** The images the page draws are on screen before the run goes on. */
   drawn: string;
-  /** What the run gives back. */
+  /** What the run gives back: a PDF, or the pages as JPG images (as PNG with `png`). */
   gives: 'pdf' | 'images';
+  png?: boolean;
 }
 
 const GRID = '.fo-pages__grid .fo-page__sheet img';
@@ -571,6 +637,39 @@ const DRAWS: Draws[] = [
     },
   },
   {
+    title: 'the grid of Organize PDF',
+    slug: 'organize-pdf',
+    drawn: 'grid',
+    gives: 'pdf',
+    after: async (page) => {
+      await gridDrawn(page);
+      await page.getByRole('button', { name: 'Move page 2 earlier', exact: true }).click();
+      await page.getByRole('button', { name: actionOf(organizeTexts) }).click();
+    },
+  },
+  // F18 (criterion 5 of the run; review E-1): the two PDF presets, in the mould of their parents.
+  {
+    title: 'the grid of Extract pages from PDF',
+    slug: 'split-pdf-extract-pages',
+    path: '/split-pdf/extract-pages/',
+    drawn: 'grid',
+    gives: 'pdf',
+    after: async (page) => {
+      await gridDrawn(page);
+      await page.getByRole('button', { name: gridPage(2) }).click();
+      await page.getByRole('button', { name: actionOf(extractTexts) }).click();
+    },
+  },
+  {
+    title: 'PDF to PNG',
+    slug: 'pdf-to-jpg-to-png',
+    path: '/pdf-to-jpg/to-png/',
+    before: (page) => option(page, pngTexts.panel.options.low),
+    drawn: 'the pages become images',
+    gives: 'images',
+    png: true,
+  },
+  {
     title: 'the Strong mode of Compress PDF',
     slug: 'compress-pdf',
     drawn: 'the pages become pictures',
@@ -583,7 +682,7 @@ test.describe('gen-acoes.pdf: nothing in the file runs', () => {
   for (const draws of DRAWS) {
     test(`${draws.title}: no dialog, popup, navigation or request, and the output adds no action of its own`, async ({ page, context, browserName }) => {
       const seen = watch(context, page);
-      await openTool(page, `/${draws.slug}/`);
+      await openTool(page, draws.path ?? `/${draws.slug}/`);
       watchNavigation(page, seen);
       const address = page.url();
       const before = seen.requests.length;
@@ -610,8 +709,9 @@ test.describe('gen-acoes.pdf: nothing in the file runs', () => {
       const had = await activeContent(pdfBytes('gen-acoes.pdf'));
       const kept: Record<string, Awaited<ReturnType<typeof activeContent>>> = {};
       if (draws.gives === 'images') {
-        expect(outs.map((out) => out.name)).toEqual(['gen-acoes-page-1.jpg', 'gen-acoes-page-2.jpg']);
-        for (const out of outs) expect(imageSize(out.bytes).format, out.name).toBe('jpeg');
+        const [extension, format] = draws.png ? ['png', 'png'] : ['jpg', 'jpeg'];
+        expect(outs.map((out) => out.name)).toEqual([`gen-acoes-page-1.${extension}`, `gen-acoes-page-2.${extension}`]);
+        for (const out of outs) expect(imageSize(out.bytes).format, out.name).toBe(format);
       } else {
         expect(outs, 'one PDF').toHaveLength(1);
         const bytes = outs[0]?.bytes as Uint8Array;

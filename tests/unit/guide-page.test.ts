@@ -69,7 +69,7 @@ describe('the tables of a guide as the page draws them (pageTable)', () => {
     // What the two columns held is what the measurement says: no JPG and no photo kept any GPS data.
     expect(MEASURED.guides['guides-heic-to-jpg-on-windows'].numbers['gpsAfterChromium']?.value).toBe(0);
     const location = MEASURED.guides['guides-remove-location-from-photos'].numbers;
-    for (const tool of ['compressImage', 'resizeImage', 'cropImage', 'rotateImage', 'pngToJpg', 'imageToPdf']) expect(location[`${tool}GpsChromium`]?.value, tool).toBe(0);
+    for (const tool of ['compressImage', 'removeExifData', 'resizeImage', 'cropImage', 'rotateImage', 'pngToJpg', 'imageToPdf']) expect(location[`${tool}GpsChromium`]?.value, tool).toBe(0);
   });
 
   it('groups the HEIC photos by camera, the PDF pages by file and the social sizes by network', () => {
@@ -252,7 +252,7 @@ describe('the 30 file guides in dist/', () => {
       expect(problems).toEqual([]);
     });
 
-    it(`sign the guide in one line with one short date, and keep the first publication in the history line (${lang})`, () => {
+    it(`sign the guide in one line with one short date, and keep the first publication in the history line, with the day of a later measurement (${lang})`, () => {
       const problems: string[] = [];
       for (const { path } of pages) {
         const root = page(path);
@@ -261,7 +261,11 @@ describe('the 30 file guides in dist/', () => {
         const history = root.querySelector('[data-content="measured"] .fo-guide__history');
         const published = history?.querySelector(`time[datetime="${GUIDE_PUBLISHED_ON[lang]}"]`);
         if (!published || text(published) !== mediumDate(GUIDE_PUBLISHED_ON[lang], lang)) problems.push(`${path}: o histórico "${text(history)}"`);
-        if (lang !== 'en' && !history?.querySelector(`time[datetime="${MEASURED.measuredOn}"]`)) problems.push(`${path}: o histórico sem a data da medida`);
+        // The pages of pt and es were first published after the first measurement, and a page whose numbers were measured
+        // after its first version says so (F18, DECISOES § 733): the history line holds the day of the measurement.
+        const measuredLater = MEASURED.measuredOn > GUIDE_PUBLISHED_ON[lang];
+        const measuredTime = history?.querySelector(`time[datetime="${MEASURED.measuredOn}"]`);
+        if ((lang !== 'en' || measuredLater) && (!measuredTime || text(measuredTime) !== mediumDate(MEASURED.measuredOn, lang))) problems.push(`${path}: o histórico sem a data da medida, "${text(history)}"`);
       }
       expect(problems).toEqual([]);
     });

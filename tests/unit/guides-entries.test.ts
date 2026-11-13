@@ -130,9 +130,10 @@ describe('the GuideCard on the page of each tool and calculator a guide embeds',
         expect(card.querySelector('.fo-guidecard__proof')?.text.trim(), page.path).toBe(data.proof);
       }
     }
-    // 9 tools in three languages, Resize image with two guides (30 cards), and the six calculators of the five money guides
-    // in English and Spanish (12): read from the registries above, checked here against the counts of the specification.
-    expect([pages, cards]).toEqual([27 + 12, 30 + 12]);
+    // 10 tools in three languages, one guide each (30 cards: since the F18 the location guide embeds Remove EXIF data, so
+    // Resize image keeps only the social sizes guide; DECISOES § 733), and the six calculators of the five money guides in
+    // English and Spanish (12): read from the registries above, checked here against the counts of the specification.
+    expect([pages, cards]).toEqual([30 + 12, 30 + 12]);
   }, 60_000);
 });
 

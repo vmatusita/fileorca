@@ -1,12 +1,14 @@
 ---
 // The PDF hub /pdf-tools/ (F5a, decision 7; the model of the image hub, DECISOES § 77 and § 96): eyebrow, H1 and one
-// line in the PDF band (coral), the grid of the 12 PDF tools in order of search volume with the Image to PDF card at the
+// line in the PDF band (coral), the grid of the PDF tools in order of search volume with the Image to PDF card at the
 // end of its band (its page stays in the image hub, DECISOES § 148), one content AdSlot, the guide of which tool does
 // which job, how the files stay on the device, and the rail AdSlot, in the language of the page. Each hub lists the file
 // guides of its language (F5b note; in pt and es since the languages adjustment).
 // F12 · o mapa de anúncios (decision 3; DECISOES § 419): the first content ad after the grid of tools, the next ones only
 // at the marks of the text (between its paragraphs and lists) and between its sections; the layout puts each box and the
 // rails (src/ads/map.ts).
+// F18 (decision 5; DECISOES § 725): the table of the PDF presets after the grid, with links, as the image hub has it; never
+// cards, because the grid is the tools of the registry (checkPdfHub), and never against an ad (the image hub's place).
 import BaseLayout from '../layouts/BaseLayout.astro';
 // F13b (decision 7; UX-15 A; DECISOES § 575): the sea at the foot of the band.
 import HubSea from '../components/HubSea.astro';
@@ -18,7 +20,7 @@ import { TEXTS } from '../i18n/texts.ts';
 import { guidesOfHub } from '../tools/guides/registry.ts';
 import { GUIDE_SHARED, guideLinks } from '../tools/guides/page.ts';
 import { breadcrumbLd, collectionPageLd, homePath } from '../seo/meta.ts';
-import { PDF_HUB_ID, PDF_PAGES, PDF_TOOL_IDS } from '../tools/pdf/registry.ts';
+import { PDF_HUB_ID, PDF_PAGES, PDF_PRESET_IDS, PDF_TOOL_IDS } from '../tools/pdf/registry.ts';
 import { IMAGE_PAGES } from '../tools/image/registry.ts';
 
 interface Props {
@@ -39,6 +41,7 @@ const imageToPdf = { href: routeById('image-to-pdf').paths[lang] ?? '/image-to-p
 // Image to PDF has the volume of the first band (100K-1M), so it closes that band, after the four PDF tools of it.
 const cards = [...pdfCards.slice(0, 4), imageToPdf, ...pdfCards.slice(4)];
 const list = cards.map((card) => ({ name: card.name, path: card.href }));
+const presets = PDF_PRESET_IDS.map((id) => ({ href: routeById(id).paths[lang] ?? PDF_PAGES[id].path, blurb: common.pdf[id] }));
 const nameOf = (id: (typeof t.guide)[number]['tool']) => (id === 'image-to-pdf' ? common.tools['image-to-pdf'].name : common.pdf[id].name);
 const hrefOf = (id: (typeof t.guide)[number]['tool']) => routeById(id).paths[lang];
 // The file guides of this hub (F5b, decision 6): a heading and one line each, like the guides of the money hub; plain
@@ -72,6 +75,16 @@ const shared = GUIDE_SHARED[lang];
     </ul>
   </section>
   <AdBreak first />
+  <section class="fo-section fo-prose" aria-labelledby="presets">
+    <h2 id="presets">{t.presetsHeading}</h2>
+    <table class="fo-table">
+      <caption class="fo-sr">{t.presetsCaption}</caption>
+      <thead><tr><th scope="col">{t.presetsHead[0]}</th><th scope="col">{t.presetsHead[1]}</th></tr></thead>
+      <tbody>
+        {presets.map((preset) => <tr><th scope="row"><a href={preset.href}>{preset.blurb.name}</a></th><td>{preset.blurb.description}</td></tr>)}
+      </tbody>
+    </table>
+  </section>
   <section class="fo-section fo-prose" aria-labelledby="guide">
     <h2 id="guide">{t.guideHeading}</h2>
     <p>{t.guideIntro}</p>

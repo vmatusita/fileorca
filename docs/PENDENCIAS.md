@@ -34,7 +34,7 @@ Conferido em 2 de novembro de 2026 sobre a `main` em `29afbce` (a F7), na F8 (DE
 | 15. Tarefas do Victor | 12 | Victor faz |
 | 16. Revisão das F4 a F7 (F8) | 16 | Runs de ajuste de cada tipo |
 | 17. O que a F8 deixou | 22 | Runs de ajuste e Victor |
-| 18. O que a F9 deixou | 14 | Victor, a run F9b e runs de ajuste |
+| 18. O que a F9 deixou | 13 | Victor, a run F9b e runs de ajuste |
 | 19. O que a F10 deixou | 2 | A run F13 e o Victor |
 | 20. O que a F11 deixou | 9 | O Victor e runs de ajuste |
 | 21. O que a F12 deixou | 6 | O Victor, a run F13 e runs de ajuste |
@@ -43,9 +43,10 @@ Conferido em 2 de novembro de 2026 sobre a `main` em `29afbce` (a F7), na F8 (DE
 | 24. O que a F14 deixou | 6 | O Victor e runs de ajuste |
 | 25. O que a F15 deixou | 3 | O Victor e runs de ajuste |
 | 26. O que a F16 deixou | 5 | O Victor e runs de ajuste |
-| 27. O que a F17 deixou | 2 | O Victor e runs de ajuste |
+| 27. O que a F17 deixou | 1 | O Victor e runs de ajuste |
+| 28. O que a F18 deixou | 1 | Runs de ajuste |
 
-Total: 190 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 2 (oráculo antes), 7, 8, 9, 10, 12 (os grupos 5 e 6 a F13b fechou, o 3 a F16 e o 13 a F17).
+Total: 189 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 2 (oráculo antes), 7, 8, 9, 10, 12 (os grupos 5 e 6 a F13b fechou, o 3 a F16 e o 13 a F17).
 
 ## 1. Saúde e fontes (YMYL)
 
@@ -303,7 +304,6 @@ O que a run da F9 achou e não é dela resolver: a decisão sobre a auditoria, a
 | F9 ci-ok duplicado | § 327; REVISAO-F9.md A-1, B-1 e F-1; `docs/OPERACAO.md`, "Repositório público" | médio | O `ci-ok` roda sempre (`if: always()`, a ficha da F9 manda), então o de uma execução cancelada sai vermelho e fica no commit ao lado do verde da execução nova: a API mostrou os dois check runs no commit `8727853`, e o `statusCheckRollup` dele ficou `FAILURE`. Não se sabe se o ruleset (que exige só o `ci-ok`) recusa o merge por causa do vermelho velho; não foi testado, porque não há ruleset. | Com o ruleset ativo, testar numa PR descartável: um push que gera uma execução leve e o `gh pr ready` logo em seguida, e ver se o merge passa. Se bloquear, decidir entre manter o `always()` (com o fim de run da nota à regra 1 do `CLAUDE.md` e a saída do `docs/OPERACAO.md`) e trocar por `!cancelled()` numa run curta (o `ci-ok` de uma execução cancelada sairia `cancelled`), e registrar a resposta. | Victor faz |
 | F9 auditoria testes | REVISAO-F9.md B-3; § 332 | baixo | O `pnpm publico:auditar` põe em "falso positivo" todo achado que só aparece em `tests/`, `fixtures/`, `scripts/oracle/` ou `scripts/fixtures/`, sem olhar o valor (`scripts/publico/lib/classify.ts`). Um token, um CPF válido ou o e-mail de uma pessoa colado num teste cairia ali, e o terminal diria "segredo real: 0". Hoje os achados dessas pastas são sentinelas de teste. A correção muda a contagem da auditoria, por isso não entrou na revisão da F9. | Nessas pastas, só chamar de falso positivo o valor que casa um padrão sintético conhecido (o prefixo das sentinelas, os domínios de exemplo, os CPFs fabricados pelo dígito, a faixa 555-01xx); o resto vai a uma categoria "a conferir", com a nota do caminho. Rodar a auditoria de novo e dizer a contagem nova. | Run de ajuste |
 | F9 npx integridade | REVISAO-F9.md B-5; § 325 | baixo | O preparo das partes do Playwright e do Lighthouse roda `npx --yes playwright@<versão do lockfile>` antes do `pnpm install`, e o pacote vem do registro sem a conferência de integridade do `pnpm-lock.yaml` (antes da F9, o navegador vinha do pacote que o `pnpm install --frozen-lockfile` conferia). O npm confere o hash que o registro publica, e uma versão publicada não muda. | Conferir o `dist.integrity` de `npm view playwright@<versão>` contra a linha do `pnpm-lock.yaml` antes do `npx`, ou instalar o navegador só depois do `pnpm install`, medindo o que isso custa no preparo. | Run F9b |
-| F9 comentário guias | REVISAO-F9.md D-5 | baixo | O comentário de `scripts/guides/lib/browser.ts` sobre os domínios do Google aponta para o `CLAUDE.md` (F3), e a regra foi para o arquivo de anúncios de `docs/claude/` na F9. O arquivo não mudou porque o `tests/unit/guides-measured.test.ts` confere o SHA-256 dos scripts de medida, e mudar um byte pede medir os guias de novo. | Na próxima run que medir os guias de novo (`pnpm guias:medir`), trocar o ponteiro por `docs/claude/anuncios.md` e procurar outros "CLAUDE.md, F" em `scripts/` e `src/`. | Run de ajuste |
 
 ## 19. O que a F10 deixou
 
@@ -419,8 +419,15 @@ O que a F17 (o AVIF to JPG e o Convert to WebP em en, pt e es, a recusa do AVIF 
 
 | Id | Fonte | Sev. | Defeito | Correção proposta | Quem resolve |
 | --- | --- | --- | --- | --- | --- |
-| F17 m-1 | DECISOES § 712, § 718 e § 720 | baixo | A medida do codificador AVIF numa foto de 12 MP tem as três rodadas da máquina (§ 712) e, desde a PR das partes, o número do runner (§ 720: `[avif 12 MP] chromium 2.0`, `webkit 4.9`); o WebP da mesma foto não foi medido no runner, e a frase "AVIF takes longer to save than WebP" segue provada só na máquina. | Medir o WebP de 12 MP no runner (um teste irmão do `image-avif-speed.spec.ts`, com a mesma linha de log) e dizer num § se a frase segue certa lá. | Run F18 |
 | F17 m-2 | DECISOES § 703 | baixo | A linha "best balance · smallest" do glossário de pt (`docs/i18n/pt.md`) diz "melhor equilíbrio · menor arquivo", e o Comprimir imagem e o Converter para WebP dizem "menor tamanho" (desde antes da F17); o glossário e o site discordam numa palavra. | Escolher uma das duas formas e alinhar o glossário ou os textos (o Comprimir, o Converter para WebP e o preset), com o `glossary.test.ts` lendo a linha. | Run de ajuste de texto e voz |
+
+## 28. O que a F18 deixou
+
+O que a F18 (o Organizar PDF e o Remover dados EXIF, as presets Extrair páginas do PDF, PDF para PNG e Espelhar imagem, em en, pt e es, e o guia de localização com o Remover dados EXIF) deixou para depois: as linhas vêm do agente principal e das notas das seis frentes (`m-`), e as da revisão adversarial levam o `R-` (`docs/relatorios/REVISAO-F18.md`).
+
+| Id | Fonte | Sev. | Defeito | Correção proposta | Quem resolve |
+| --- | --- | --- | --- | --- | --- |
+| F18 m-1 | DECISOES § 732 | baixo | Um PNG com `eXIf` girado perde a Orientation no `stripPng` (e uma WebP com `EXIF` girado, no `stripWebp`), e o Chromium, que aplica a Orientation do `eXIf` de um PNG, mostra a saída como guardada: deitada onde a entrada aparecia em pé. O WebKit não aplica a do PNG, e nenhum dos dois aplica a da WebP, então neles nada muda na tela. Vale para toda ferramenta que passa pelo strip (o Remover dados EXIF, o Comprimir de PNG, o Redimensionar a 100 %, o Cortar da imagem inteira, o "sem ganho"), desde a § 33 e a § 100. Nenhuma fixture tem esse PNG, e a página promete a Orientation só no JPG. Fica a medir, na mesma correção: se o caminho com decodificação das outras ferramentas, no Chromium, também diverge para esse PNG. | Um `eXIf` mínimo só com a Orientation no `stripPng`, com o CRC, como o bloco mínimo do JPG e sem dependência nova, e o `tagMayStay` do `expectNoMetadata` também no PNG, com um Vitest que reprova sem a correção. Mexe no motor de todas as ferramentas de imagem, então pede as cinco lentes. | Run de ajuste do motor de imagem |
 
 ## Registrados (escolhas, não defeitos)
 
@@ -527,3 +534,6 @@ O que a F17 (o AVIF to JPG e o Convert to WebP em en, pt e es, a recusa do AVIF 
 | F13b R-b-3: duas falas para uma digitação ("99" na taxa) | F16, § 685: a região do card espera enquanto um campo tem um rascunho que não lê; `tests/e2e/money-input.spec.ts` (o critério 3, em en, pt e es, nos dois navegadores) |
 | F15 R-b-1: o foco caía no `body` depois do Tab para fora do campo de número de imagem num lote | F16, § 692: a captura do `blur` na ilha guarda o controle para onde o foco ia, e um efeito de layout o leva a ele, ou à linha enquanto ela espera; `tests/e2e/image-focus.spec.ts` e `tests/unit/image-landing.test.ts` |
 | F2 2b: Convert to WebP/AVIF e AVIF to JPG fora do site desde a F2 (§ 85) | F17, § 701 a § 718: as duas ferramentas em en, pt e es (`src/tools/avif-to-jpg/`, `src/tools/convert-to-webp/`), no registro, nas rotas, no hub, na home, no rodapé, no menu, na busca, na "Abrir com" e no `share_target`; o AVIF recusado leva ao AVIF to JPG (§ 708); a matriz com o AVIF na saída nos dois navegadores (§ 711); a medida do codificador AVIF (§ 712); o kit e as linhas `<!-- muda com a 2b -->` (§ 713) |
+| F9 comentário guias: o comentário de `scripts/guides/lib/browser.ts` sobre os domínios do Google apontava para o `CLAUDE.md` (F3), e a regra foi para o `docs/claude/anuncios.md` na F9 | F18, § 733: o comentário aponta para `docs/claude/anuncios.md` (`c19cef2`), na run que mediu os guias de novo para o guia de localização com o Remover dados EXIF (o hash dos scripts de medida mudava de qualquer jeito); não há outro "CLAUDE.md, F" em `scripts/` nem em `src/` |
+| F17 m-1: o `[avif 12 MP]` do runner fora de um §, e a frase "AVIF takes longer to save than WebP" sem prova no runner | F18, § 739: o `tests/e2e/image-webp-speed.spec.ts` mede o `[webp 12 MP]` ao lado do `[avif 12 MP]`; nas três rodadas da máquina o WebKit salvou a WebP de 12 MP mais devagar que o AVIF (de 1,8 a 2,0 s contra 1,5 a 1,7 s), e a frase saiu do Converter para WebP nos três idiomas: a linha "Speed" e o FAQ dizem o que vale nos dois motores (`src/tools/convert-to-webp/i18n/`). O `[avif 12 MP]` do runner da F17 está no § 720 (PR 34), e os dois números do runner da execução final da F18 vão na descrição da PR como registro |
+| F18 m-2: a parte WebKit 4/14 acima de 900 s com os testes da F18 | F18, § 747 e § 750: a PR 34 dividiu o WebKit em 15 partes, e na execução completa `43452279495` as 26 partes ficaram abaixo de 700 s (a maior, a Chromium 4/8, com 630,5 s; a do `clearance`, 578,9 s) |

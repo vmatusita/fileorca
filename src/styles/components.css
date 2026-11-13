@@ -1881,6 +1881,31 @@ html:has(.fo-wall[open]) [data-oli]:not(.fo-wall__oli) { visibility: hidden; }
   .fo-pview__act { grid-column: 1 / -1; grid-row: 1; }
   .fo-pview__prev, .fo-pview__next { justify-self: stretch; }
 }
+/* ---------- F18 · Organizar PDF (decisão 6 do prompt; DECISOES § 727 e § 744) ----------
+   The grid of Organize picks (the check before the number) and moves (the arrows under the sheet, as in Reorder). A page
+   that comes out has Delete's look, the picture at 40 %, and the trash in a brand circle on the sheet, where Rotate has its
+   badge, so the check keeps saying the pick. The bar of actions over the picked pages is a row of buttons with an icon and
+   a word, then its help; under 480 px the two turns go side by side and Remove takes the row under them, each button
+   wrapping its words. The view has two actions on the line of Previous and Next from 768 px; under 768 px the four do
+   not fit on one line (583 px in en, 620 in es), so the two actions go side by side above Previous and Next; under 480 px
+   each action takes a whole row and Previous and Next go under them, side by side. */
+/* The ring is ink, not brand-edge: in the dark theme brand-edge is the brand itself, 1.76:1 on a white page at 40 %. */
+.fo-page__badge--out { background: var(--brand); border-color: var(--ink); color: var(--on-brand); }
+.fo-pages__acts .fo-field__help { flex-basis: 100%; margin: 0; }
+.fo-pages__act--left .fo-icon { scale: -1 1; }
+.fo-pview__bar--acts { grid-template-columns: 1fr auto auto 1fr; }
+@media (max-width: 767px) {
+  .fo-pview__bar--acts { grid-template-columns: 1fr 1fr; }
+  .fo-pview__bar--acts .fo-pview__act { grid-row: 1; }
+  .fo-pview__bar--acts :is(.fo-pview__prev, .fo-pview__next) { grid-row: 2; justify-self: stretch; }
+}
+@media (max-width: 479px) {
+  .fo-pages__acts { display: grid; grid-template-columns: 1fr 1fr; }
+  .fo-pages__act { min-width: 0; padding-inline: var(--space-3); white-space: normal; }
+  .fo-pages__act--out, .fo-pages__acts .fo-field__help { grid-column: 1 / -1; }
+  .fo-pview__bar--acts .fo-pview__act ~ .fo-pview__act { grid-row: 2; }
+  .fo-pview__bar--acts :is(.fo-pview__prev, .fo-pview__next) { grid-row: 3; }
+}
 /* F14 (§ 626): "View pages of {name}" is the last action of a row of the Merge list, 48 px, after the arrows and the remove
    button (its place is kept, empty, while the file is read). The row lays its actions in a line of columns, so the list
    with no remove button (under "Order", after the result) has no empty one; under 480 px it goes to the row of 48 px under

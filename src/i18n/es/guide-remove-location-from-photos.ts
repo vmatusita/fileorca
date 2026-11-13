@@ -5,13 +5,13 @@ const texts: FileGuideTexts = {
   description: 'Dónde guarda una foto el lugar en que se tomó, cómo evitarlo u ocultarlo en iPhone y Android, y cómo quitarlo del archivo sin cambiar un solo píxel.',
   h1: 'Cómo quitar la ubicación de las fotos antes de compartirlas',
   lead: 'Una foto del celular puede llevar el lugar exacto donde se tomó. Aquí ves cómo quitar ese dato antes de compartirla.',
-  changed: 'Primera versión de esta guía, publicada el {published} con las mediciones del {measured}.',
+  changed: 'Primera versión de esta guía, publicada el {published}. Los números se midieron de nuevo el {measured}, y la herramienta en la guía pasó de Redimensionar imagen a Quitar metadatos de la foto.',
   intro: [
     'Los teléfonos escriben datos de cada foto dentro del propio archivo: la cámara, la fecha y la hora y, si la ubicación está activada, las coordenadas GPS del lugar donde estabas. Apple lo dice con claridad: las coordenadas se incrustan en cada foto y video. Cualquiera que reciba el archivo original puede leerlas, y con unos pocos clics las pone en un mapa.',
     'Algunas apps quitan estos datos cuando publicas, y otras no. El correo, las transferencias de archivos, las carpetas en la nube y muchas apps de chat envían el archivo tal como está. Si una foto muestra tu casa, la escuela de tus hijos o cualquier lugar que prefieras no marcar en un mapa, quita la ubicación antes de que el archivo salga de tus manos.',
   ],
   toolHeading: 'Quita los metadatos',
-  toolIntro: 'Es Redimensionar imagen con la opción {winnerOption}: cada foto conserva todos sus píxeles y vuelve sin su ubicación, su cámara ni su fecha. Funciona en esta pestaña del navegador, así que las fotos nunca se suben.',
+  toolIntro: 'Es Quitar metadatos de la foto, sin nada que ajustar: cada foto conserva todos sus píxeles y vuelve sin su ubicación, su cámara ni su fecha. Funciona en esta pestaña del navegador, así que las fotos nunca se suben.',
   sections: [
     {
       heading: 'Lo que llevaban nuestras fotos',
@@ -37,8 +37,8 @@ const texts: FileGuideTexts = {
     {
       heading: 'Quita la ubicación del archivo sin cambiar la foto',
       paragraphs: [
-        'Todas las herramientas de este sitio que escriben una imagen la escriben a partir de los píxeles, y eso deja atrás los metadatos. Pero casi todas cambian también la imagen: la comprimen, la recortan, la giran o cambian su formato. Así que medimos cuál cambia menos la foto, con una regla fijada antes de la medición: el mismo encuadre, el mismo formato y los píxeles más parecidos al original.',
-        'Ganó Redimensionar imagen, con la opción {winnerOption}. Una foto que ya tiene el tamaño que pides no se decodifica ni se codifica de nuevo: la herramienta copia los datos de la imagen tal como están y deja fuera los metadatos. Nuestras fotos volvieron con píxeles idénticos, las {resizeImageIdenticalChromium_wordf}, y solo un {resizeImageRatioChromium_off} más ligeras, que es lo que pesaban los metadatos.',
+        'Todas las herramientas de imagen de este sitio dejan fuera los metadatos de los archivos que devuelven. Pero casi todas cambian también la imagen: la comprimen, la recortan, la giran o cambian su formato. Así que medimos cuál cambia menos la foto, con una regla fijada antes de la medición: el mismo encuadre, el mismo formato y los píxeles más parecidos al original.',
+        'Ganó Quitar metadatos de la foto. No decodifica ni codifica la foto de nuevo: copia los datos de la imagen tal como están y deja fuera los metadatos. Nuestras fotos volvieron con píxeles idénticos, las {removeExifDataIdenticalChromium_wordf}, y solo un {removeExifDataRatioChromium_off} más ligeras, que es lo que pesaban los metadatos. Redimensionar imagen, con la opción que conserva el tamaño completo, devolvió exactamente los mismos archivos, así que la regla se quedó con la herramienta que no tiene nada que ajustar.',
       ],
     },
     {
@@ -51,14 +51,14 @@ const texts: FileGuideTexts = {
     {
       heading: 'Lo que queda, y lo que la foto todavía muestra',
       paragraphs: [
-        'Dos cosas se quedan a propósito. Una foto guardada al revés conserva una pequeña etiqueta que indica dónde está arriba, para que no se vea girada, y {resizeImageOrientationChromium_wordf} de nuestras fotos la conservó. El perfil de color también se queda, para que los colores no cambien.',
+        'Dos cosas se quedan a propósito. Una foto guardada al revés conserva una pequeña etiqueta que indica dónde está arriba, para que no se vea girada, y {removeExifDataOrientationChromium_wordf} de nuestras fotos la conservó. El perfil de color también se queda, para que los colores no cambien.',
         'Quitar los datos no oculta lo que hay en la imagen. La ayuda de Google advierte que otras personas pueden adivinar dónde se tomó una foto a partir de lo que muestra, como un punto de referencia. Mira la foto antes de compartirla.',
       ],
     },
     {
       heading: 'Para fotos HEIC',
       paragraphs: [
-        'Redimensionar imagen acepta JPG, PNG y WebP. Para las fotos HEIC de un iPhone, usa HEIC a JPG: también escribe cada JPG a partir de los píxeles, y ninguna de nuestras fotos HEIC de prueba conservó datos GPS después de la conversión. Nuestra guía para convertir HEIC a JPG tiene esas mediciones.',
+        'Quitar metadatos de la foto acepta JPG, PNG y WebP. Para las fotos HEIC de un iPhone, usa HEIC a JPG: escribe cada JPG a partir de los píxeles, y ninguna de nuestras fotos HEIC de prueba conservó datos GPS después de la conversión. Nuestra guía para convertir HEIC a JPG tiene esas mediciones.',
       ],
     },
   ],
@@ -66,14 +66,14 @@ const texts: FileGuideTexts = {
   measuredHeading: 'Lo que medimos',
   sheet: {
     stats: [
-      { label: 'Fotos que aún tienen GPS', value: '{resizeImageGpsChromium} de {photos}' },
-      { label: 'Fotos con los mismos píxeles', value: '{resizeImageIdenticalChromium} de {photos}', sub: '{resizeImageRatioChromium_off} más ligeras' },
+      { label: 'Fotos que aún tienen GPS', value: '{removeExifDataGpsChromium} de {photos}' },
+      { label: 'Fotos con los mismos píxeles', value: '{removeExifDataIdenticalChromium} de {photos}', sub: '{removeExifDataRatioChromium_off} más ligeras' },
     ],
-    sample: '{photos} fotos de celular, con el Redimensionar imagen de arriba.',
+    sample: '{photos} fotos de celular, con el Quitar metadatos de la foto de arriba.',
     link: 'Mira la tabla',
   },
   tableHeading: 'Herramienta por herramienta',
-  measuredIntro: 'Nuestras {photos_wordf} fotos reales de celular, pasadas por cada herramienta de imagen que acepta JPG, cada una con la opción que menos cambia la foto. El porcentaje es el tamaño después frente a los originales, y la columna de píxeles compara cada copia con el original en la peor de las fotos.',
+  measuredIntro: 'Nuestras {photos_wordf} fotos reales de celular, pasadas por cada herramienta de imagen que acepta JPG, cada una ajustada para cambiar la foto lo menos posible. El porcentaje es el tamaño después frente a los originales, y la columna de píxeles compara cada copia con el original en la peor de las fotos.',
   measuredNote: 'Medido el {date} con las herramientas de este sitio en Chromium {chromiumVersion} y en WebKit {webkitVersion} en {system}. Los dos navegadores escribieron archivos del mismo tamaño con {browsersSameSize_wordf} de las {candidates_wordf} herramientas; con {browsersDiffer}, los tamaños fueron distintos. Los metadatos y los píxeles se leyeron en Node, con el mismo decodificador para el original y la copia. La tabla muestra Chromium.',
   tables: [
     {

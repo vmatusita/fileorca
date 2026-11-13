@@ -5,8 +5,8 @@ import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { acceptedFixtures, buildTable, coverageGaps, readOracle, readRecords, readTable, testOf, type MatrixRecord } from '../../scripts/fixtures/pdf-matrix-table.ts';
-import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { MATRIX_TABLES, acceptedFixtures, argsOf, buildTable, coverageGaps, readOracle, readRecords, readTable, tableFor, testOf, type MatrixRecord, type MatrixTableId } from '../../scripts/fixtures/pdf-matrix-table.ts';
+import { PDF_PRESET_IDS, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 
 const row = (test: string, tool: string, fixture: string, browser: string, result: string): MatrixRecord => ({ test, tool, fixture, browser, result });
 
@@ -89,11 +89,16 @@ describe('the coverage of the matrix (DECISOES § 175)', () => {
   const accepts = acceptedFixtures(readOracle());
   const READABLE = ['gen-acoes.pdf', 'gen-fotos.pdf', 'gen-ja-otimizado.pdf', 'gen-paginas-300.pdf', 'gen-paginas-mistas.pdf', 'gen-xref-estragada.pdf', 'pdf-escaneado-01-pagina-livro-cor.pdf', 'pdf-escaneado-02-relatorio-nasa-150p.pdf', 'pdf-formulario-irs-1040-2019.pdf', 'pdf-grande-fontes-embutidas-117p.pdf'];
 
-  it('takes from the oracle what each way of running a tool accepts', () => {
-    expect(Object.keys(accepts).sort()).toEqual([...PDF_TOOL_IDS, 'compress-pdf (lossless)', 'compress-pdf (strong)'].sort());
-    for (const tool of [...PDF_TOOL_IDS.filter((id) => id !== 'unlock-pdf' && id !== 'pdf-to-jpg'), 'compress-pdf (lossless)', 'compress-pdf (strong)']) expect(accepts[tool], tool).toEqual(READABLE);
+  // F18 (decision 15; DECISOES § 738): the presets of PDF too, each taking what its parent takes.
+  it('takes from the oracle what each way of running a tool or a preset accepts', () => {
+    expect(Object.keys(accepts).sort()).toEqual([...PDF_TOOL_IDS, ...PDF_PRESET_IDS, 'compress-pdf (lossless)', 'compress-pdf (strong)'].sort());
+    for (const tool of [...PDF_TOOL_IDS.filter((id) => id !== 'unlock-pdf' && id !== 'pdf-to-jpg'), 'split-pdf-extract-pages', 'compress-pdf (lossless)', 'compress-pdf (strong)']) expect(accepts[tool], tool).toEqual(READABLE);
     expect(accepts['pdf-to-jpg']).toEqual([...READABLE, 'gen-cifrado-dono.pdf'].sort());
+    expect(accepts['pdf-to-jpg-to-png']).toEqual(accepts['pdf-to-jpg']);
     expect(accepts['unlock-pdf']).toEqual(['gen-cifrado-aes256.pdf', 'gen-cifrado-dono.pdf', 'gen-cifrado-rc4-128.pdf']);
+    // Narrowed to the pages of one table: the modes of Compress only with Compress.
+    expect(Object.keys(acceptedFixtures(readOracle(), ['organize-pdf', 'pdf-to-jpg-to-png']))).toEqual(['organize-pdf', 'pdf-to-jpg-to-png']);
+    expect(Object.keys(acceptedFixtures(readOracle(), ['compress-pdf'])).sort()).toEqual(['compress-pdf', 'compress-pdf (lossless)', 'compress-pdf (strong)']);
   });
 
   it('reads back the rows the table shows, by tool, fixture, test and browser', () => {
@@ -114,20 +119,62 @@ describe('the coverage of the matrix (DECISOES § 175)', () => {
     expect(buildTable([ok('gen-acoes.pdf', 'chromium'), failed], tiny)).toContain('| `sign-small` | `sign-pdf` | 1 ok · 0 recusadas | 0 ok · 0 recusadas · 1 falharam |');
   });
 
-  it('holds on the committed table: every tool, every fixture it takes, both browsers, nothing failed', () => {
-    const committed = readTable(readFileSync('docs/relatorios/fase-05a-matriz.md', 'utf8'));
-    expect(committed.length).toBeGreaterThan(0);
-    expect(coverageGaps(committed, accepts)).toEqual([]);
+  // F18 (decision 15; DECISOES § 738): the F5a table is history (its 12 tools, never built again), and the F18 table holds
+  // Organize PDF and the two presets. Every tool and preset of the registry is in exactly one table, and each committed
+  // table covers its own pages: a page with no table, or a table that lacks a fixture, is a gap.
+  it('gives every tool and preset of the registry exactly one table', () => {
+    const tabled = Object.values(MATRIX_TABLES).flatMap((table) => [...table.tools]);
+    expect([...tabled].sort()).toEqual([...PDF_TOOL_IDS, ...PDF_PRESET_IDS].sort());
+    expect(new Set(tabled).size).toBe(tabled.length);
+  });
+
+  for (const id of Object.keys(MATRIX_TABLES) as MatrixTableId[]) {
+    it(`holds on the committed table ${MATRIX_TABLES[id].file}: every page of it, every fixture it takes, both browsers, nothing failed`, () => {
+      const committed = readTable(readFileSync(MATRIX_TABLES[id].file, 'utf8'));
+      expect(committed.length).toBeGreaterThan(0);
+      expect(coverageGaps(committed, acceptedFixtures(readOracle(), MATRIX_TABLES[id].tools))).toEqual([]);
+    });
+  }
+});
+
+// F18 (DECISOES § 738): the table of a run, from the records of its pages only, with its own title, written where asked.
+describe('the table of a run', () => {
+  const mixed: MatrixRecord[] = [
+    ...records,
+    row('extract-small', 'split-pdf-extract-pages', 'gen-acoes.pdf', 'chromium', 'ok: "2" typed, pages 2 out in the order of the file'),
+    row('extract-small', 'split-pdf-extract-pages', 'gen-acoes.pdf', 'webkit', 'ok: "2" typed, pages 2 out in the order of the file'),
+    row('png-small', 'pdf-to-jpg-to-png', 'gen-cortado.pdf', 'chromium', 'refused: This file stops before its end.'),
+  ];
+
+  it('leaves out the rows of the pages of other tables, and says what its own pages still owe', () => {
+    const { markdown, gaps } = tableFor('fase-18', mixed);
+    expect(markdown.split('\n')[0]).toBe('# F18 · Matriz de fixtures dos PDFs: Organizar PDF e as presets de PDF');
+    expect([...markdown.matchAll(/^## `([^`]+)`$/gm)].map((match) => match[1])).toEqual(['split-pdf-extract-pages', 'pdf-to-jpg-to-png']);
+    expect(markdown).not.toContain('merge-pdf');
+    expect(markdown).toContain('Ao todo, 3 linhas: 2 conferidas e 1 recusas (Chromium 2, WebKit 1).');
+    expect(markdown).toContain('| `split-pdf-extract-pages` | 10 | 1 |');
+    expect(gaps.some((gap) => gap.startsWith('organize-pdf: '))).toBe(true);
+    expect(gaps.some((gap) => gap.startsWith('split-pdf-extract-pages: gen-acoes.pdf'))).toBe(false);
+    expect(gaps.some((gap) => gap.startsWith('merge-pdf'))).toBe(false);
+  });
+
+  it('builds the F5a table as before when no table is named', () => {
+    expect(tableFor('fase-05a', records).markdown).toBe(table);
+    expect(argsOf([])).toEqual({ table: 'fase-05a', out: null });
+    expect(argsOf(['--table', 'fase-18', '--out', 'docs/relatorios/fase-18-matriz-pdf.md'])).toEqual({ table: 'fase-18', out: 'docs/relatorios/fase-18-matriz-pdf.md' });
+    expect(() => argsOf(['--table', 'fase-99'])).toThrow(/não existe/);
+    expect(() => argsOf(['--out'])).toThrow(/pede o caminho/);
   });
 });
 
 describe('the spec and the script agree', () => {
-  it('every tool the matrix spec records is a tool of the registry, so no section lands after the others', () => {
+  it('every page the matrix spec records is a tool or a preset of the registry, so no section lands after the others', () => {
     const spec = readFileSync('tests/e2e/pdf-matrix.spec.ts', 'utf8');
     const recorded = new Set([...spec.matchAll(/tool: '([^']+)'/g)].map((match) => match[1] as string));
     const first = (tool: string) => tool.replace(/ \(.*\)$/, '');
-    for (const tool of recorded) expect(PDF_TOOL_IDS as readonly string[], tool).toContain(first(tool));
-    // The spec records all twelve tools.
-    expect([...new Set([...recorded].map(first))].sort()).toEqual([...PDF_TOOL_IDS].sort());
+    const pages: readonly string[] = [...PDF_TOOL_IDS, ...PDF_PRESET_IDS];
+    for (const tool of recorded) expect(pages, tool).toContain(first(tool));
+    // The spec records all thirteen tools and the two presets (F18; twelve tools before).
+    expect([...new Set([...recorded].map(first))].sort()).toEqual([...pages].sort());
   });
 });

@@ -7,6 +7,7 @@ import { imageSize, sniff } from './lib/images.ts';
 import { expectNoMetadata, fixtureFile, takeDownload, watchRequests } from './lib/matrix.ts';
 import { dismissCookies, hydrated, jpegBatch, openAdjust } from './lib/page.ts';
 import { thumbnail } from './lib/pixels.ts';
+import { SENTINELS, holds } from './lib/sentinels.ts';
 
 // Privacy and isolation of the image phase (criteria 8, 9 and 10): no page is cross-origin isolated and
 // none sends COOP or COEP; the build has no multi-thread codec, no SharedArrayBuffer and nothing
@@ -325,3 +326,40 @@ test('Convert to WebP writes an AVIF and AVIF to JPG reads it: the single-thread
   expect(requests.writes, 'every request is a GET').toEqual([]);
   expect(requests.urls.filter((url) => /^https?:/.test(url) && new URL(url).search !== ''), 'no request has a query string').toEqual([]);
 });
+
+// F18 (criterion 5 of the run's prompt; second pass of the review, E2-1): Remove EXIF data and Flip image in the path of this
+// spec, in the mould of the F17 case above. Each page gets a JPG with GPS handed in under a sentinel name (the name of the
+// person's own file, SENTINELS.file of lib/sentinels.ts). The page is not cross-origin isolated and has no shared memory;
+// the JPG comes back with no metadata, under the same name, the one place that name may go; no request leaves the page
+// origin, none writes and none has a query string; and the name is in no request, nor in the address, the title, the
+// storage, the cookies or the dataLayer.
+const F18_PHOTO = 'jpg-02-iphone6-paisagem-gps.jpg'; // 3264 × 2448, orientation 1, with GPS
+for (const path of ['/remove-exif-data/', '/rotate-image/flip/']) {
+  test(`${path}: a JPG with GPS under a sentinel name, and nothing of it leaves the browser`, async ({ page }) => {
+    test.setTimeout(120_000);
+    const requests = watchRequests(page);
+    const response = await page.goto(path);
+    expect(response?.status(), `${path} exists`).toBe(200);
+    expect(response?.headers()['cross-origin-opener-policy']).toBeUndefined();
+    expect(response?.headers()['cross-origin-embedder-policy']).toBeUndefined();
+    await hydrated(page);
+    await dismissCookies(page);
+    const name = `${SENTINELS.file}.jpg`;
+    await page.setInputFiles('input[type="file"]', { ...fixtureFile(F18_PHOTO), name });
+    await expect(page.locator('.fo-result')).toBeVisible({ timeout: 50_000 });
+    const jpg = await takeDownload(page);
+    expect(jpg.name, 'the name of the person’s own file comes back in the download').toBe(name);
+    expect(imageSize(jpg.bytes)).toMatchObject({ format: 'jpeg', displayWidth: 3264, displayHeight: 2448 });
+    expectNoMetadata({ name: jpg.name, bytes: jpg.bytes });
+    expect(await page.evaluate(() => crossOriginIsolated)).toBe(false);
+    expect(await page.evaluate(() => typeof SharedArrayBuffer)).toBe('undefined');
+
+    expect(requests.outside(), 'no request leaves the page origin').toEqual([]);
+    expect(requests.writes, 'every request is a GET').toEqual([]);
+    expect(requests.urls.filter((url) => /^https?:/.test(url) && new URL(url).search !== ''), 'no request has a query string').toEqual([]);
+    expect(requests.urls.filter((url) => holds(url, SENTINELS.file)), 'no request has the name of the file').toEqual([]);
+    expect(holds(page.url(), SENTINELS.file), 'the address never has the name of the file').toBe(false);
+    const kept = await page.evaluate(() => JSON.stringify([document.title, { ...localStorage }, { ...sessionStorage }, document.cookie, (window as unknown as { dataLayer?: unknown[] }).dataLayer ?? []]));
+    expect(holds(kept, SENTINELS.file), 'the title, the storage, the cookies and the dataLayer never have the name of the file').toBe(false);
+  });
+}

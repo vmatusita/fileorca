@@ -8,7 +8,7 @@ export default {
   howHeading: 'Cómo rotar una imagen',
   howSteps: [
     'Suelta tus imágenes en el cuadro, elígelas o pégalas con Ctrl V.',
-    'Elige 90° a la derecha, 90° a la izquierda o 180°, y agrega un reflejo si quieres.',
+    'Elige 90° a la derecha, 90° a la izquierda o 180°, y agrega un reflejo si quieres. Para solo reflejar, sin rotar, usa Reflejar imagen.',
     'Descarga la imagen rotada, o el ZIP si rotaste varias.',
   ],
   specsHeading: 'Especificaciones',
@@ -18,7 +18,7 @@ export default {
     rows: [
       ['Acepta', 'JPG, PNG y WebP, reconocidos por el contenido del archivo y no por el nombre. Las fotos HEIC pasan antes por HEIC a JPG, y los archivos AVIF, por AVIF a JPG.'],
       ['Rotar', '90° a la derecha, que es la opción predeterminada, 90° a la izquierda o 180°.'],
-      ['Reflejar', 'Ninguno, que es la opción predeterminada, Horizontal o Vertical. El reflejo se combina con la rotación.'],
+      ['Reflejar', 'Ninguno, que es la opción predeterminada, Horizontal o Vertical. Aquí el reflejo se combina con un giro; para solo reflejar, sin rotar, usa Reflejar imagen.'],
       ['Lote', 'La rotación y el reflejo que elijas se aplican a todas las imágenes del lote. Sin límite de imágenes.'],
       ['Punto de partida', 'Primero se aplica la orientación de la foto, así que rotas la imagen tal como la muestra un visor normal y no sus píxeles en bruto.'],
       ['Resultado', 'El mismo formato del archivo que soltaste, con los mismos píxeles girados. Un giro de 90° intercambia el ancho y el alto. PNG y WebP conservan su transparencia.'],
@@ -42,7 +42,7 @@ export default {
     },
     {
       q: '¿Cuál es la diferencia entre rotar y reflejar?',
-      a: 'Rotar gira la imagen alrededor de su centro, como girar una foto impresa sobre una mesa. Reflejar la voltea como si la vieras en un espejo: Horizontal intercambia la izquierda y la derecha, y Vertical intercambia arriba y abajo. El texto de una imagen reflejada se lee al revés.',
+      a: 'Rotar gira la imagen alrededor de su centro, como girar una foto impresa sobre una mesa. Reflejar la voltea como si la vieras en un espejo: Horizontal intercambia la izquierda y la derecha, y Vertical intercambia arriba y abajo. El texto de una imagen reflejada se lee al revés. Para reflejar una imagen sin rotarla, usa Reflejar imagen.',
     },
     {
       q: '¿Puedo rotar una imagen 45° o en otro ángulo?',
@@ -53,6 +53,12 @@ export default {
   privacyNote:
     'Tus imágenes se rotan en tu navegador, y tus archivos nunca salen de tu dispositivo ni llegan a un servidor. Las copias guardadas omiten los metadatos de la foto, incluida la ubicación GPS.',
   relatedHeading: 'Más herramientas de imagen',
+  // F18 (decision 5; DECISOES § 725): the table of the presets of this tool, with their links.
+  presets: {
+    heading: 'Ajustes predefinidos',
+    caption: 'Ajustes predefinidos de Rotar imagen y qué hace cada uno',
+    head: ['Ajuste predefinido', 'Qué hace'],
+  },
   panel: {
     formats: 'JPG, PNG o WebP',
     progressLabel: 'Rotando las imágenes',

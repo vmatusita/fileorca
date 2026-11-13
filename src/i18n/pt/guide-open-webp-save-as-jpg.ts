@@ -5,7 +5,7 @@ const texts: FileGuideTexts = {
   description: 'O que é um arquivo WebP, onde ele abre sem programa extra e o que muda no tamanho, na animação e na localização quando você o salva como JPG.',
   h1: 'Como abrir imagens WebP e salvar como JPG',
   lead: 'Você salvou uma imagem como .webp, e seus outros apps não aceitam. Veja como convertê-lo em JPG.',
-  changed: 'Primeira versão deste guia, publicada em {published} com as medidas de {measured}.',
+  changed: 'Primeira versão deste guia, publicada em {published}. Os números foram medidos de novo em {measured}.',
   intro: [
     'WebP é um formato de imagem criado pelo Google para a web. Os sites usam esse formato porque ele é leve, e as páginas carregam mais rápido. É por isso que uma imagem salva do navegador pode chegar como um arquivo .webp, e não como JPG ou PNG.',
     'O navegador de onde você salvou mostra a imagem sem problema. O problema começa quando o arquivo sai do navegador: um editor de fotos mais antigo, um formulário que pede JPG ou uma gráfica podem recusar o arquivo. Salvar como JPG faz a imagem abrir em quase qualquer lugar, mas não a deixa melhor nem menor.',

@@ -3,7 +3,7 @@
 // from the registry the pages themselves are built from, so a new tool is covered the day it is declared.
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { BR_CALC_IDS, BR_HUB_ID, CALC_PAGES, GUIDES, HEALTH_HUB_ID, HOUSE_HUB_ID, LIFE_CALC_IDS, MONEY_HUB_ID, isBrCalc, isLifeCalc } from '../../src/tools/calc/registry.ts';
-import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
+import { PDF_HUB_ID, PDF_PAGES } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID, isFileGuide, type FileGuideId } from '../../src/tools/guides/registry.ts';
 import { QR_ID, routeById, type Lang } from '../../src/i18n/routes.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
@@ -52,12 +52,12 @@ function isAnyCalcPage(routeId: string): boolean {
 /** Route ids of the home and health pages of the F7: the two hubs and the 11 calculators, in English only. */
 export const LIFE_PAGE_IDS: readonly string[] = [HOUSE_HUB_ID, HEALTH_HUB_ID, ...LIFE_CALC_IDS];
 
-/** Route ids of every page of the F5a: the PDF hub and the 12 PDF tools (src/tools/pdf/registry.ts). */
-export const PDF_PAGE_IDS: readonly string[] = [PDF_HUB_ID, ...PDF_TOOL_IDS];
+/** Route ids of every PDF page: the hub, the PDF tools and, since the F18, the PDF presets (src/tools/pdf/registry.ts). */
+export const PDF_PAGE_IDS: readonly string[] = [PDF_HUB_ID, ...Object.keys(PDF_PAGES)];
 
-/** One of the 12 PDF tools (the hub is not a tool). */
+/** A PDF tool or, since the F18, a PDF preset (the hub is neither), as isImagePage counts the image presets. */
 export function isPdfPage(routeId: string): boolean {
-  return (PDF_TOOL_IDS as readonly string[]).includes(routeId);
+  return Object.hasOwn(PDF_PAGES, routeId);
 }
 
 /** Route ids of every image tool and preset (src/tools/image/registry.ts). */
