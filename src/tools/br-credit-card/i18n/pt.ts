@@ -72,16 +72,16 @@ export default {
   faqHeading: 'Perguntas sobre rotativo e parcelamento',
   faq: [
     {
-      q: 'Quanto tempo a dívida pode ficar no rotativo?',
+      q: 'O que acontece depois do vencimento da fatura seguinte?',
       a: 'Depois do vencimento da fatura seguinte, o banco tem de oferecer um parcelamento com condições melhores que as do rotativo, e o que foi parcelado não volta para o rotativo.',
     },
     {
-      q: 'O que é o teto de juros do cartão?',
-      a: 'Desde janeiro de 2024, uma dívida de R$ 1.000 paga no máximo R$ 1.000 de juros e encargos, somando o rotativo e o parcelamento da fatura.',
+      q: 'Desde quando vale o teto e como fica numa dívida de R$ 1.000?',
+      a: 'Vale desde janeiro de 2024. Numa dívida de R$ 1.000, os juros e encargos do rotativo e do parcelamento da fatura, somados, chegam a no máximo R$ 1.000.',
     },
     {
-      q: 'O IOF conta no teto?',
-      a: 'Não. A regra fala em juros remuneratórios e encargos, como multa e juros de mora, e o IOF é um imposto. A calculadora mostra o valor dele junto do parcelamento.',
+      q: 'Por que o IOF fica fora do teto?',
+      a: 'Porque a regra fala em juros remuneratórios e encargos, como multa e juros de mora, e o IOF é um imposto, não é juro nem encargo.',
     },
     {
       q: 'Onde eu acho as taxas do rotativo e do parcelamento?',
