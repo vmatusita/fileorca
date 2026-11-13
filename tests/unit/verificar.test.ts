@@ -148,8 +148,9 @@ describe('verificar com o build uma vez (F9)', () => {
     expect(ciParts(CI).filter((part) => !kept.has(JSON.stringify(part)))).toEqual([{ job: 'leve', args: ['--leve'] }]);
     // The parts of the Playwright and of the gates are the ones of the languages adjustment (§ 320): the F9 changes none.
     // F14 (DECISOES § 648): the Chromium in 8 parts and the WebKit in 14, after the full CI of the F14.
+    // F17 (DECISOES § 720): the WebKit in 15, after the full CI of the F17 (two WebKit parts above 700 s).
     const shards = (project: string, total: number) => Array.from({ length: total }, (_, i) => [`--playwright=${project}`, `--shard=${i + 1}/${total}`, '--dist-pronto']);
-    expect(parts.map((part) => part.args)).toEqual([['--build'], ['--sem-playwright', '--sem-lighthouse', '--dist-pronto'], ['--lighthouse', '--dist-pronto'], ...shards('chromium', 8), ...shards('webkit', 14)]);
+    expect(parts.map((part) => part.args)).toEqual([['--build'], ['--sem-playwright', '--sem-lighthouse', '--dist-pronto'], ['--lighthouse', '--dist-pronto'], ...shards('chromium', 8), ...shards('webkit', 15)]);
   });
 
   it('covers the whole of pnpm verificar between the parts of ci.yml, with the build once and every gate once', () => {
@@ -158,7 +159,7 @@ describe('verificar com o build uma vez (F9)', () => {
     expect(commands.filter((entry) => entry === 'pnpm run build')).toHaveLength(1);
     const once = commands.filter((entry) => entry !== 'pnpm run e2e');
     expect(once).toHaveLength(new Set(once).size);
-    expect(commands.filter((entry) => entry === 'pnpm run e2e')).toHaveLength(22);
+    expect(commands.filter((entry) => entry === 'pnpm run e2e')).toHaveLength(23);
     // The light job is not part of the whole: it is the class of a draft, and runs alone.
     expect(plan(['--leve']).steps.every((step) => STEPS.includes(step))).toBe(true);
   });

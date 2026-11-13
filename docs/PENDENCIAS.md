@@ -419,7 +419,7 @@ O que a F17 (o AVIF to JPG e o Convert to WebP em en, pt e es, a recusa do AVIF 
 
 | Id | Fonte | Sev. | Defeito | Correção proposta | Quem resolve |
 | --- | --- | --- | --- | --- | --- |
-| F17 m-1 | DECISOES § 712 e § 718 | baixo | A medida do codificador AVIF numa foto de 12 MP (`[avif 12 MP]`) tem as três rodadas da máquina num §, mas o número do runner, sem a conferência do meio da run (o rótulo `ci` não existe), ficou só na descrição da PR da F17, lido no log da execução completa final. | Copiar para um § o `[avif 12 MP]` do runner, da descrição da PR da F17, nos dois navegadores, e dizer se a frase "AVIF takes longer to save than WebP" segue certa no runner. | Run F18 |
+| F17 m-1 | DECISOES § 712, § 718 e § 720 | baixo | A medida do codificador AVIF numa foto de 12 MP tem as três rodadas da máquina (§ 712) e, desde a PR das partes, o número do runner (§ 720: `[avif 12 MP] chromium 2.0`, `webkit 4.9`); o WebP da mesma foto não foi medido no runner, e a frase "AVIF takes longer to save than WebP" segue provada só na máquina. | Medir o WebP de 12 MP no runner (um teste irmão do `image-avif-speed.spec.ts`, com a mesma linha de log) e dizer num § se a frase segue certa lá. | Run F18 |
 | F17 m-2 | DECISOES § 703 | baixo | A linha "best balance · smallest" do glossário de pt (`docs/i18n/pt.md`) diz "melhor equilíbrio · menor arquivo", e o Comprimir imagem e o Converter para WebP dizem "menor tamanho" (desde antes da F17); o glossário e o site discordam numa palavra. | Escolher uma das duas formas e alinhar o glossário ou os textos (o Comprimir, o Converter para WebP e o preset), com o `glossary.test.ts` lendo a linha. | Run de ajuste de texto e voz |
 
 ## Registrados (escolhas, não defeitos)
