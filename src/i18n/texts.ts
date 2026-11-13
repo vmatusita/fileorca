@@ -11,6 +11,7 @@ import type {
   EsMoneyHubTexts,
   GuidesHubTexts,
   HomeTexts,
+  HowItWorksTexts,
   ImageToolsTexts,
   LegalTexts,
   LicensesTexts,
@@ -22,6 +23,7 @@ import type {
   PtCommonTexts,
   SupportTexts,
   TranslatedHomeTexts,
+  WhatsNewTexts,
 } from './types.ts';
 import enCommon from './en/common.ts';
 import ptCommon from './pt/common.ts';
@@ -66,6 +68,12 @@ import enMoney from './en/money-calculators.ts';
 import ptMoney from './pt/money-calculators.ts';
 import esMoney from './es/money-calculators.ts';
 import enGuides from './en/guides.ts';
+import enWhatsNew from './en/whats-new.ts';
+import ptWhatsNew from './pt/whats-new.ts';
+import esWhatsNew from './es/whats-new.ts';
+import enHowItWorks from './en/how-it-works.ts';
+import ptHowItWorks from './pt/how-it-works.ts';
+import esHowItWorks from './es/how-it-works.ts';
 import ptGuides from './pt/guides.ts';
 import esGuides from './es/guides.ts';
 
@@ -84,6 +92,8 @@ export interface LangTexts {
   contact: ContactTexts;
   licenses: LicensesTexts;
   support: SupportTexts;
+  'whats-new': WhatsNewTexts;
+  'how-it-works': HowItWorksTexts;
   'not-found': NotFoundTexts;
   offline: OfflineTexts;
   'open-with': OpenWithTexts;
@@ -92,15 +102,15 @@ export interface LangTexts {
 export const TEXTS: Record<Lang, LangTexts> = {
   en: {
     common: enCommon satisfies EnCommonTexts, 'image-tools': enImageTools, 'pdf-tools': enPdfTools, 'money-calculators': enMoney, guides: enGuides, home: enHome, privacy: enPrivacy, terms: enTerms, about: enAbout, contact: enContact,
-    licenses: enLicenses, support: enSupport, 'not-found': enNotFound, offline: enOffline, 'open-with': enOpenWith,
+    licenses: enLicenses, support: enSupport, 'whats-new': enWhatsNew, 'how-it-works': enHowItWorks, 'not-found': enNotFound, offline: enOffline, 'open-with': enOpenWith,
   },
   pt: {
     common: ptCommon satisfies PtCommonTexts, 'image-tools': ptImageTools, 'pdf-tools': ptPdfTools, 'money-calculators': ptMoney, guides: ptGuides, home: ptHome satisfies TranslatedHomeTexts, privacy: ptPrivacy, terms: ptTerms, about: ptAbout, contact: ptContact,
-    licenses: ptLicenses, support: ptSupport, 'not-found': ptNotFound, offline: ptOffline, 'open-with': ptOpenWith,
+    licenses: ptLicenses, support: ptSupport, 'whats-new': ptWhatsNew, 'how-it-works': ptHowItWorks, 'not-found': ptNotFound, offline: ptOffline, 'open-with': ptOpenWith,
   },
   es: {
     common: esCommon satisfies EsCommonTexts, 'image-tools': esImageTools, 'pdf-tools': esPdfTools, 'money-calculators': esMoney satisfies EsMoneyHubTexts, guides: esGuides, home: esHome satisfies TranslatedHomeTexts, privacy: esPrivacy, terms: esTerms, about: esAbout, contact: esContact,
-    licenses: esLicenses, support: esSupport, 'not-found': esNotFound, offline: esOffline, 'open-with': esOpenWith,
+    licenses: esLicenses, support: esSupport, 'whats-new': esWhatsNew, 'how-it-works': esHowItWorks, 'not-found': esNotFound, offline: esOffline, 'open-with': esOpenWith,
   },
 };
 

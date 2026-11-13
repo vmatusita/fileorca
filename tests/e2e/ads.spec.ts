@@ -283,11 +283,12 @@ for (const viewport of VIEWPORTS) {
 // F11 (decision 5; DECISOES § 393 and § 400): the guides hub of each language was born with no AdSlot and no ad area.
 // F12 (decision 3; DECISOES § 423): the home and the guides hub have ads now, in the area "geral" (the map checks them,
 // fo-ad-map.spec.ts); the free pages are the 27 of the map, with the offline page and "Open with" too, read from the route
-// map (every route with no ad area), and none has a box, a unit, the loader or the push script.
-test('the 27 free pages (legal, institutional, support, 404, offline and "Open with") have no AdSlot and no ad code', async ({ page }) => {
+// map (every route with no ad area), and none has a box, a unit, the loader or the push script. F19a (decisions 2 and 7;
+// DECISOES § 752): What's new and How it works join them, in the three languages (33).
+test('the 33 free pages (legal, institutional, support, What\'s new, How it works, 404, offline and "Open with") have no AdSlot and no ad code', async ({ page }) => {
   const paths = ROUTES.filter((route) => !route.adArea).flatMap((route) => LANGS.flatMap((lang) => route.paths[lang] ?? []));
-  expect(paths).toHaveLength(27);
-  for (const free of ['/privacy/', '/pt/termos/', '/es/acerca-de/', '/contact/', '/pt/licencas/', '/es/apoyo/', '/404.html', '/pt/offline/', '/es/abrir-con/']) expect(paths).toContain(free);
+  expect(paths).toHaveLength(33);
+  for (const free of ['/privacy/', '/pt/termos/', '/es/acerca-de/', '/contact/', '/pt/licencas/', '/es/apoyo/', '/whats-new/', '/pt/novidades/', '/es/novedades/', '/how-it-works/', '/pt/como-funciona/', '/es/como-funciona/', '/404.html', '/pt/offline/', '/es/abrir-con/']) expect(paths).toContain(free);
   for (const withAds of ['/', '/pt/', '/es/', ...LANGS.map((lang) => routeById(GUIDES_HUB_ID).paths[lang] ?? '/guides/')]) expect(paths).not.toContain(withAds);
   for (const path of paths) {
     const response = await page.goto(path);

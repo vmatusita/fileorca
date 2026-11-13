@@ -2,6 +2,11 @@
 // the post-deploy check reads it with `git show <sha>:src/platform/site.ts`.
 export const LAUNCHED = true;
 
+// F19a (decision 5; DECISOES § 751): the day the site went live, the merge of the F2 (DECISOES § 75) in Brasília. It is
+// the date of the first entry of src/platform/changelog.ts, and tests/unit/changelog.test.ts proves both against the merge
+// of that pull request in the history of main. The About says it in the long form of each language (src/i18n/dates.ts).
+export const LAUNCH_DATE = '2026-10-31';
+
 // Kill switch of the service worker (F8, decision 7; DECISOES § 288). With false, the build writes a /sw.js that
 // deletes every cache of the site and unregisters itself, and the pages stop registering it. A short adjustment run
 // turns it off or back on (docs/OPERACAO.md).

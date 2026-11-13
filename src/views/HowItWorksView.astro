@@ -1,0 +1,35 @@
+---
+// How it works (F19a, decision 7; DECISOES § 759): what happens to a file, what runs as WebAssembly, what goes over the
+// network and what never does, how to check it in the browser and what the check does not prove. An Article by the
+// author, indexable, with no ad. Slice 1 of the run: the head of the page; front C writes the five parts.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import { routeById, type Lang } from '../i18n/routes.ts';
+import { TEXTS } from '../i18n/texts.ts';
+import { lastmodOf } from '../platform/changelog.ts';
+import { articleLd, breadcrumbLd, homePath, personLd } from '../seo/meta.ts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const route = routeById('how-it-works');
+const t = TEXTS[lang]['how-it-works'];
+const common = TEXTS[lang].common;
+const path = route.paths[lang] ?? '/';
+const crumbs = [
+  { name: common.breadcrumb.home, path: homePath(lang) },
+  { name: t.h1, path },
+];
+// The dates of the Article are those of the changelog: the birth of the page and its newest change.
+const modified = lastmodOf('how-it-works', lang);
+---
+<BaseLayout lang={lang} route={route} title={t.title} description={t.description} schema={[breadcrumbLd(crumbs), articleLd(t.h1, t.description, path, lang, modified, modified, 'how-it-works'), personLd()]} wide>
+  <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
+  <article class="fo-view fo-view--stack fo-view--how">
+    <div class="fo-prose">
+      <h1 class="fo-h1">{t.h1}</h1>
+      <p>{t.intro}</p>
+    </div>
+  </article>
+</BaseLayout>

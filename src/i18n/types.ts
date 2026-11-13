@@ -6,6 +6,7 @@ import type { ImagePageId, ImageToolId } from '../tools/image/registry.ts';
 import type { AnyCalcId, BrCalcId, CalcPageId, EsCalcId, GuideId, LifeCalcId } from '../tools/calc/registry.ts';
 import type { PdfPageId, PdfToolId } from '../tools/pdf/registry.ts';
 import type { FileGuideId } from '../tools/guides/registry.ts';
+import type { ChangeId } from '../platform/changelog.ts';
 
 export type LangNames = Record<Lang, string>;
 
@@ -61,6 +62,9 @@ export interface CommonTexts {
     terms: string;
     licenses: string;
     contact: string;
+    /** F19a (decisions 2 and 7; DECISOES § 752): the links of the FileOrca column to What's new and How it works. */
+    whatsNew: string;
+    howItWorks: string;
     /**
      * The Guides block under the Utilities column (F11, decision 7): "All guides", the link to the guides hub. Its title is
      * common.guidesHub and the links of the groups are the headings of the hub's groups (TEXTS[lang].guides.groups).
@@ -93,6 +97,16 @@ export interface CommonTexts {
     coffee: string;
     /** "Made by {name} in {city}" */
     signature: string;
+  };
+  /**
+   * F19a (decisions 4 and 7; DECISOES § 754 and § 759). `updated` ("Updated {date}") is the line at the end of the image, PDF
+   * and QR code pages, before the link to What's new, and the date of the newest entry at the base of the footer; {date}
+   * is the long date of src/i18n/dates.ts. `howToCheck` is the link to How it works at the end of the privacy block of every
+   * tool and calculator.
+   */
+  trust: {
+    updated: string;
+    howToCheck: string;
   };
   cookie: {
     title: string;
@@ -268,6 +282,25 @@ export interface AboutTexts extends PageMeta {
     /** The label of the "0" (no file is ever uploaded), shown with the PrivacySeal. */
     zero: string;
   };
+}
+
+/**
+ * F19a (decision 2; DECISOES § 752): the What's new page. The changes themselves are in src/platform/changelog.ts; here are
+ * the texts of each entry the language shows (a short title and one to three sentences, in the voice of the site, saying
+ * what changed for the person), under the id of the entry.
+ */
+export interface WhatsNewTexts extends PageMeta {
+  h1: string;
+  intro: string;
+  /** After the first six links of an entry: "and {n} more". */
+  more: string;
+  entries: Partial<Record<ChangeId, { title: string; body: string }>>;
+}
+
+/** F19a (decision 7; DECISOES § 759): the How it works page. */
+export interface HowItWorksTexts extends PageMeta {
+  h1: string;
+  intro: string;
 }
 
 export interface ContactTexts extends PageMeta {

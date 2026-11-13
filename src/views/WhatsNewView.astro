@@ -1,0 +1,46 @@
+---
+// What's new (F19a, decision 2; DECISOES § 752): the changes a person sees, newest first, from src/platform/changelog.ts,
+// each with its date in a <time datetime>, its title and text, and the links to the pages it touched in this language.
+// Indexable, with no ad: the page has no ad area. Slice 1 of the run: the list of entries; front N finishes the page.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import { routeById, type Lang } from '../i18n/routes.ts';
+import { TEXTS } from '../i18n/texts.ts';
+import { longDate } from '../i18n/dates.ts';
+import { entriesIn } from '../platform/changelog.ts';
+import { breadcrumbLd, homePath } from '../seo/meta.ts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const route = routeById('whats-new');
+const t = TEXTS[lang]['whats-new'];
+const common = TEXTS[lang].common;
+const crumbs = [
+  { name: common.breadcrumb.home, path: homePath(lang) },
+  { name: t.h1, path: route.paths[lang] ?? '/' },
+];
+const entries = entriesIn(lang);
+---
+<BaseLayout lang={lang} route={route} title={t.title} description={t.description} schema={[breadcrumbLd(crumbs)]} wide>
+  <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
+  <div class="fo-view fo-view--stack fo-view--whats-new">
+    <div class="fo-prose">
+      <h1 class="fo-h1">{t.h1}</h1>
+      <p>{t.intro}</p>
+    </div>
+    <ol class="fo-changes">
+      {entries.map((entry) => {
+        const text = t.entries[entry.id];
+        return (
+          <li id={entry.id} class="fo-change">
+            <time datetime={entry.date}>{longDate(entry.date, lang)}</time>
+            {text && <h2 class="fo-h3">{text.title}</h2>}
+            {text && <p>{text.body}</p>}
+          </li>
+        );
+      })}
+    </ol>
+  </div>
+</BaseLayout>

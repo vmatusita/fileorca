@@ -69,6 +69,8 @@ export type RouteId =
   | 'contact'
   | 'licenses'
   | 'support'
+  | 'whats-new'
+  | 'how-it-works'
   | 'offline'
   | 'open-with'
   | 'not-found';
@@ -234,6 +236,23 @@ export const ROUTES: readonly RouteDef[] = [
     indexable: true,
     view: 'src/views/SupportView.astro',
     texts: ['src/i18n/{lang}/support.ts'],
+  },
+  // F19a (decisions 2 and 7; DECISOES § 752): the page of the changes a person sees, from src/platform/changelog.ts, and
+  // the page that shows what happens to a file and how to check it in the browser. Indexable, in the sitemaps and in
+  // hreflang, with no ad area and no ad.
+  {
+    id: 'whats-new',
+    paths: { en: '/whats-new/', pt: '/pt/novidades/', es: '/es/novedades/' },
+    indexable: true,
+    view: 'src/views/WhatsNewView.astro',
+    texts: ['src/i18n/{lang}/whats-new.ts'],
+  },
+  {
+    id: 'how-it-works',
+    paths: { en: '/how-it-works/', pt: '/pt/como-funciona/', es: '/es/como-funciona/' },
+    indexable: true,
+    view: 'src/views/HowItWorksView.astro',
+    texts: ['src/i18n/{lang}/how-it-works.ts'],
   },
   // F8: the page the service worker shows offline for a page it did not keep, and the page the share target of the
   // manifests opens (Android). Out of the sitemaps and of hreflang, noindex in _headers, with no ads and reached
