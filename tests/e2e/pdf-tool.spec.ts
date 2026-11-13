@@ -641,6 +641,10 @@ test('Reorder PDF pages: the same new order by drag, by the buttons and by the k
 
   await choosePdfs(page, [pdfFile(fixture)]);
   await expect(page.locator('.fo-pages__grid > li')).toHaveCount(all.length, { timeout: 30_000 });
+  // As in again(): the panel says the file is ready and moves the focus to the action a frame after the grid shows
+  // (DECISOES § 240 and § 321). Without this wait the "1 PDF ready" came after the drag and covered its sentence, once,
+  // on the Chromium of the CI runner (F18, DECISOES § 750).
+  await focused(page.getByRole('button', { name: must(reorderTexts.panel.action) }));
   await page.evaluate(() => ((window as unknown as { __status: string[] }).__status.length = 0));
 
   // 1. Pointer: page 4 is dragged onto the first place. One move, said once.
