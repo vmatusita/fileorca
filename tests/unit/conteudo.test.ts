@@ -110,6 +110,7 @@ function guidePage(options: { words?: number; tool?: string; toolPath?: string; 
     <section data-content="measured"><h2 id="measured">Photo by photo</h2><div class="fo-table-wrap"><table><tbody><tr><th>Photo</th><td>1 MB</td></tr></tbody></table></div>
     <p class="fo-reviewed">${MEASURED_NOTE[options.lang ?? 'en']}</p><p class="fo-reviewed fo-guide__history">First version, published on <time datetime="2026-11-01">Nov 1, 2026</time>.</p></section>
     <section data-content="sources"><h2>Sources</h2><ul><li><a href="https://support.apple.com/en-us/116944">Apple</a>. Read on <time datetime="2026-11-01">November 1, 2026</time>.</li></ul></section>
+    <section data-content="author"><h2>About the author</h2><p><a href="${routeById('about').paths[options.lang ?? 'en']}" rel="author">Victor Yuki Matusita</a> makes FileOrca.</p></section>
     <section data-content="related"><h2>Related</h2><ul class="fo-grid"><li><a class="fo-tool" href="/compress-image/">Compress image</a></li></ul></section>
     <div class="fo-ad fo-ad--multiplex"><span class="fo-ad__label">Advertisements</span></div>
   </main></body></html>`;
