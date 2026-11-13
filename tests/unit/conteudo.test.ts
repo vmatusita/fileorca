@@ -511,8 +511,37 @@ describe('portão de conteúdo: o gerador de QR code em português e espanhol', 
 // ---- F5a: the PDF tool pages and the PDF hub (prompt F5a, decision 9) -------------------------------------------------
 
 const ANSWER = 'This answer says what the tool does in a few plain words, so a visitor can go on.';
+/**
+ * F19a (decision 8; DECISOES § 765): the answers of a fake FAQ differ from each other, as on a real page. Before, the four
+ * answers were the same sentence with "(1)" to "(4)" after it, which the repetition rule of the gate now fails (a sentence
+ * copied into two blocks). Each one is still a real answer of 40 characters or more that says no fact of the specs.
+ */
+const ANSWERS: Record<Lang, readonly string[]> = {
+  en: [
+    'The pages keep the order of the list, and each file gets a row of its own.',
+    'A damaged file is refused on its own row, and the other files carry on.',
+    'The result opens in any PDF reader, on a phone or on a computer.',
+    'Undo brings back the last change, and Start over clears the whole list.',
+    'A long list of big files takes more memory and more time on a phone.',
+  ],
+  pt: [
+    'As páginas seguem a ordem da lista, e cada arquivo ganha uma linha própria.',
+    'Um arquivo danificado é recusado na própria linha, e os outros seguem.',
+    'O resultado abre em qualquer leitor de PDF, no celular ou no computador.',
+    'Desfazer traz de volta a última mudança, e Recomeçar limpa a lista inteira.',
+    'Uma lista longa de arquivos grandes pede mais memória e mais tempo no celular.',
+  ],
+  es: [
+    'Las páginas siguen el orden de la lista, y cada archivo tiene su propia fila.',
+    'Un archivo dañado se rechaza en su propia fila, y los demás siguen.',
+    'El resultado se abre en cualquier lector de PDF, en el teléfono o en la computadora.',
+    'Deshacer recupera el último cambio, y Empezar de nuevo vacía toda la lista.',
+    'Una lista larga de archivos grandes pide más memoria y más tiempo en el teléfono.',
+  ],
+};
+const answerOf = (lang: Lang, index: number): string => ANSWERS[lang][index % ANSWERS[lang].length] ?? ANSWER;
 const pdfFaq = (count: number): string =>
-  `<div class="fo-faq">${Array.from({ length: count }, (_, i) => `<details><summary>Question ${i + 1} about the tool?</summary><div><p>${ANSWER} (${i + 1})</p></div></details>`).join('')}</div>`;
+  `<div class="fo-faq">${Array.from({ length: count }, (_, i) => `<details><summary>Question ${i + 1} about the tool?</summary><div><p>${answerOf('en', i)}</p></div></details>`).join('')}</div>`;
 
 /** The mode rows a fake page of this tool carries: one row per mode, headed by the mode (F6: in the language of the page). */
 const modeRows = (id: PdfPageId, lang: Lang = 'en'): [string, string][] => (PDF_RULES[lang].modes[id] ?? []).map(({ mode }) => [mode, `What the ${mode} does to the file.`]);
@@ -527,13 +556,12 @@ const BASE_ROWS: [string, string][] = [
  * The same rows in Portuguese and Spanish (F6), in the words of docs/i18n/pt.md and es.md, and what a translated page says in
  * its privacy note, its questions, its title and its H1. English is the fake of the F5a, unchanged.
  */
-const FAKE_PDF_WORDS: Record<Lang, { rows: [string, string][]; privacy: string; secret: (word: string) => string; question: string; answer: string; title: string; description: string }> = {
+const FAKE_PDF_WORDS: Record<Lang, { rows: [string, string][]; privacy: string; secret: (word: string) => string; question: string; title: string; description: string }> = {
   en: {
     rows: BASE_ROWS,
     privacy: 'Your PDF is handled on your device, in your browser, and is never sent to a server.',
     secret: (word) => ` Your ${word} is not kept.`,
     question: 'Question {n} about the tool?',
-    answer: ANSWER,
     title: 'do the job in your browser',
     description: 'in your browser, with nothing uploaded.',
   },
@@ -547,7 +575,6 @@ const FAKE_PDF_WORDS: Record<Lang, { rows: [string, string][]; privacy: string; 
     privacy: 'Seu PDF é tratado no seu aparelho, no navegador, e nunca é enviado a um servidor.',
     secret: (word) => ` Sua ${word} não fica guardada.`,
     question: 'Pergunta {n} sobre a ferramenta?',
-    answer: 'Esta resposta diz o que a ferramenta faz em poucas palavras, para a pessoa seguir em frente.',
     title: 'faça no seu navegador',
     description: 'no seu navegador, sem enviar nada.',
   },
@@ -561,7 +588,6 @@ const FAKE_PDF_WORDS: Record<Lang, { rows: [string, string][]; privacy: string; 
     privacy: 'Tu PDF se procesa en tu dispositivo, en tu navegador, y nunca se envía a un servidor.',
     secret: (word) => ` Tu ${word} no se guarda.`,
     question: '¿Pregunta {n} sobre la herramienta?',
-    answer: 'Esta respuesta dice lo que hace la herramienta en pocas palabras, para que la persona siga adelante.',
     title: 'hazlo en tu navegador',
     description: 'en tu navegador, sin subir nada.',
   },
@@ -586,7 +612,7 @@ interface FakePdf {
 const pdfFaqIn = (lang: Lang, count = 4): string =>
   lang === 'en'
     ? pdfFaq(count)
-    : `<div class="fo-faq">${Array.from({ length: count }, (_, i) => `<details><summary>${FAKE_PDF_WORDS[lang].question.replace('{n}', String(i + 1))}</summary><div><p>${FAKE_PDF_WORDS[lang].answer} (${i + 1})</p></div></details>`).join('')}</div>`;
+    : `<div class="fo-faq">${Array.from({ length: count }, (_, i) => `<details><summary>${FAKE_PDF_WORDS[lang].question.replace('{n}', String(i + 1))}</summary><div><p>${answerOf(lang, i)}</p></div></details>`).join('')}</div>`;
 
 /** A PDF tool page that passes every rule (F6: in the language asked, English by default); each test changes one thing. */
 function pdfPage(fake: FakePdf = {}): string {
@@ -1379,6 +1405,8 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     faq: `<section data-content="faq">${faq(4, tag)}</section>`,
   });
   const headOf = (tag: string): string => `<title>${tag} | FileOrca</title><meta name="description" content="Description of ${tag}">`;
+  /** The tag of a fake calculator page: its place in the route map and its language (F19a, see build). */
+  const calcTag = (id: string, lang: Lang): string => `calc ${ROUTES.findIndex((route) => route.id === id)} ${lang}`;
 
   /**
    * A site where every tool page has its own text, so that the only repeats are the shared blocks. F6: each page in the
@@ -1388,7 +1416,10 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     for (const entry of allPages()) {
       const id = entry.route.id;
       if (isCalcPage(id) || isBrCalc(id) || isLifeCalc(id)) {
-        write(dir, entry.path, calcPage(`${id} ${entry.lang}`, undefined, entry.lang));
+        // F19a (decision 8; DECISOES § 765): a short tag of its own (the place of the route in the map), not the id: with the
+        // longest ids ("loan-amortization-calculator-balloon-payment es"), the fake steps and answers, the same sentence around
+        // the tag, reached 8 words, and the repetition rule of the gate failed them as copied sentences.
+        write(dir, entry.path, calcPage(calcTag(id, entry.lang), undefined, entry.lang));
         continue;
       }
       if (isPdfPage(id)) {
@@ -1505,7 +1536,8 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     const dir = join(root, 'calc');
     build(dir);
     write(dir, '/auto-loan-calculator/', calcPage('auto-loan-calculator en', (html) => html.replace('Your numbers stay on your device.', 'Private.')));
-    write(dir, '/mortgage-calculator/biweekly/', calcPage('mortgage-calculator en'));
+    // The parent's own page, with the tag the fake site gives it (F19a): the preset repeats every block of it.
+    write(dir, '/mortgage-calculator/biweekly/', calcPage(calcTag('mortgage-calculator', 'en')));
     const result = run(dir);
     expect(result.status).toBe(1);
     expect(result.output).toContain('/auto-loan-calculator/: o bloco privacy não diz');

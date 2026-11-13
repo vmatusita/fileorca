@@ -9,7 +9,7 @@ export default {
   howSteps: [
     'Drop your JPG or PNG images on the box, choose them, or paste them with Ctrl V.',
     'Keep WebP or pick AVIF, then Recommended or Strong.',
-    'Download the converted image, or the ZIP when you converted several.',
+    'Download the converted image.',
   ],
   specsHeading: 'Specifications',
   specs: {
@@ -21,7 +21,6 @@ export default {
       ['Compression', 'Recommended balances size and looks, and Strong makes the smallest file.'],
       ['Transparency', 'Kept, in both WebP and AVIF.'],
       ['Speed', 'A bigger photo takes longer to save, in both formats. Which of the two saves faster depends on the browser.'],
-      ['Support', 'WebP opens in every current browser. AVIF opens in current versions of Chrome, Edge, Firefox and Safari, but some older apps and editors cannot read it.'],
       ['Batch', 'No limit on the number of images. One image downloads directly, and several come in one ZIP.'],
       ['Metadata', 'Exif, XMP, IPTC and GPS are removed, and the photo orientation is applied.'],
     ],
@@ -34,11 +33,7 @@ export default {
     },
     {
       q: 'Should I choose WebP or AVIF?',
-      a: 'WebP is the safe choice: every current browser opens it. AVIF gives smaller files, but some older apps cannot open it.',
-    },
-    {
-      q: 'Does WebP keep the transparency of a PNG?',
-      a: 'Yes, and so does AVIF. A PNG with a transparent background keeps it when you convert it to either format.',
+      a: 'WebP is the safe choice: it opens in every current browser. AVIF opens in current versions of Chrome, Edge, Firefox and Safari, but some older apps and editors cannot read it.',
     },
     {
       q: 'Will every website accept a WebP file?',
@@ -51,7 +46,7 @@ export default {
   ],
   privacyHeading: 'Privacy',
   privacyNote:
-    'Your images are converted on your device and never sent to a server. The new files leave out the photo metadata, including the GPS location.',
+    'Your images are converted on your device and never sent to a server.',
   relatedHeading: 'More image tools',
   panel: {
     formats: 'JPG or PNG',

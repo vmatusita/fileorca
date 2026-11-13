@@ -8,20 +8,20 @@ export default {
   howHeading: 'Cómo dejar una imagen en menos de 1 MB',
   howSteps: [
     'Suelta en el cuadro las fotos que pesan demasiado, elígelas o pégalas con Ctrl V.',
-    'Oli guarda cada una como un JPG de 1 MB o menos, con todo el detalle que quepa.',
-    'Descarga la imagen, o el ZIP si comprimiste varias.',
+    'Oli deja cada una por debajo del límite, y no hay nada que ajustar.',
+    'Descarga la imagen comprimida.',
   ],
   specsHeading: 'El objetivo de 1 MB',
   specs: {
     caption: 'Lo que garantiza el ajuste de 1 MB y lo que cambia',
     head: ['Detalle', 'Qué hace Oli'],
     rows: [
-      ['Objetivo', 'Cada archivo pesa 1,000,000 bytes o menos.'],
-      ['Qué MB', 'El MB se cuenta como 1,000,000 bytes, la lectura menor, así que también se cumple un límite de 1 MiB (1,048,576 bytes).'],
+      ['Objetivo', 'Cada archivo pesa 1 MB o menos.'],
       ['Formato de salida', 'Siempre un JPG. Entran JPG, PNG y WebP.'],
       ['Transparencia', 'Las zonas transparentes quedan blancas, porque el JPG no tiene transparencia.'],
       ['Imagen que ya pesa menos de 1 MB', 'Vuelve sin cambios, salvo los metadatos, en su propio formato.'],
       ['Foto con demasiado detalle', 'Si la calidad sola no alcanza el objetivo, Oli también reduce las dimensiones y te dice el nuevo ancho y el nuevo alto.'],
+      ['Lote', 'Varias imágenes se descargan juntas en un solo ZIP.'],
       ['Metadatos', 'Exif, XMP, IPTC y GPS no se conservan en los archivos nuevos.'],
     ],
   },
@@ -33,11 +33,11 @@ export default {
     },
     {
       q: '¿1 MB es lo mismo que 1,024 KB?',
-      a: 'No exactamente. Según el estándar, 1 MB son 1,000,000 bytes, mientras que 1,024 KB son 1,048,576 bytes, alrededor de un 5 % más. Oli apunta a 1,000,000 bytes, así que el archivo cabe con las dos cuentas.',
+      a: 'No exactamente. Según el estándar, 1 MB son 1,000,000 bytes, mientras que 1,024 KB son 1,048,576 bytes, alrededor de un 5 % más. Oli apunta a 1,000,000 bytes, así que el archivo cabe con las dos cuentas.',
     },
     {
       q: '¿Puedo mantener el formato original, como PNG?',
-      a: 'El resultado es un JPG, porque una foto PNG no se puede reducir a un tamaño fijo sin cambiar sus píxeles, y el JPG se acepta casi en todas partes. Un archivo que ya cumple el límite se queda con su formato original.',
+      a: 'No cuando el archivo tiene que achicarse: una foto PNG no se puede reducir a un tamaño fijo sin cambiar sus píxeles, y el JPG se acepta casi en todas partes.',
     },
     {
       q: '¿Cuánta calidad pierdo a 1 MB?',
@@ -45,16 +45,12 @@ export default {
     },
     {
       q: '¿Por qué mi imagen también quedó más pequeña en píxeles?',
-      a: 'Cuando una imagen tiene demasiado detalle para caber incluso con una calidad baja, bajar todavía más la calidad la haría verse cuadriculada. En su lugar, Oli reduce un poco las dimensiones y te muestra el nuevo ancho y el nuevo alto.',
-    },
-    {
-      q: '¿Puedo comprimir muchas fotos a 1 MB a la vez?',
-      a: 'Sí. Suelta el conjunto completo. Cada archivo queda en 1 MB o menos, y el lote se descarga como un solo ZIP.',
+      a: 'Bajar todavía más la calidad haría que una imagen con mucho detalle se viera cuadriculada, y menos píxeles con buena calidad se ven mejor.',
     },
   ],
   privacyHeading: 'Privacidad',
   privacyNote:
-    'Oli reduce tus fotos a 1 MB en tu navegador, y tus archivos nunca salen de tu dispositivo ni llegan a un servidor. Los archivos nuevos omiten los metadatos de la foto, incluida la ubicación GPS.',
+    'Oli reduce tus fotos a 1 MB en tu navegador, y tus archivos nunca salen de tu dispositivo ni llegan a un servidor.',
   relatedHeading: 'Más herramientas de imagen',
   panel: {
     formats: 'JPG, PNG o WebP',

@@ -23,6 +23,9 @@
 // words of its language (the privacy phrases, the date of the measurement, the filler phrases, the claims).
 // F11 (decision 5; DECISOES § 394): the guides hub in each of its languages, with a GuideCard for every guide of the language in
 // the registries (src/tools/guides/hub.ts), the introduction of its own and 60 to 120 words of its own text.
+// F19a (decision 8; DECISOES § 764 and § 765): one fact, one place. On every tool, preset, calculator and QR code page, in
+// each language, a recurring fact is said in one block only and no sentence is copied into a second block
+// (scripts/lib/repeticao.ts, tested in tests/unit/repeticao.test.ts).
 // The checks are pure functions in scripts/lib/conteudo.ts, tested in tests/unit/conteudo.test.ts.
 import { existsSync, readFileSync } from 'node:fs';
 import { DIST, Problems, allPages, fileForPath, listFiles, requireDist } from '../lib/dist.ts';
@@ -54,10 +57,18 @@ import { hubGuides } from '../../src/tools/guides/hub.ts';
 import { checkFileGuide, guideWords } from '../lib/file-guides.ts';
 import { fileIn } from '../lib/prontidao.ts';
 import { buildVariant } from '../lib/test-build.ts';
+import { checkRepetition, pageKind } from '../lib/repeticao.ts';
+import type { Lang } from '../../src/i18n/routes.ts';
 
 requireDist();
 const problems = new Problems();
 const read = (path: string): string => readFileSync(fileForPath(path), 'utf8');
+// F19a (decision 8): the repetition rule, on each page of the four molds the loops below read.
+let repetitionPages = 0;
+const repetition = (path: string, html: string, lang: Lang, id: string): void => {
+  repetitionPages += 1;
+  for (const problem of checkRepetition(html, lang, id)) problems.add(`${path}: repetição: ${problem}`);
+};
 
 const pages = allPages();
 for (const id of [...Object.keys(IMAGE_PAGES), ...Object.keys(CALC_PAGES), ...Object.keys(PDF_PAGES), PDF_HUB_ID]) {
@@ -75,6 +86,7 @@ for (const page of pages) {
   }
   const html = read(page.path);
   for (const problem of checkToolPage(html)) problems.add(`${page.path}: ${problem}`);
+  repetition(page.path, html, page.lang, id);
   if (!IMAGE_PAGES[id].parent) continue;
   const others: Record<string, string> = {};
   for (const path of comparisonPaths(id, page.lang)) {
@@ -98,6 +110,7 @@ for (const page of pages) {
   }
   const html = read(page.path);
   for (const problem of checkCalcPage(html, page.lang)) problems.add(`${page.path}: ${problem}`);
+  repetition(page.path, html, page.lang, id);
   if (!isCalcPage(id) || !CALC_PAGES[id].parent) continue;
   const others: Record<string, string> = {};
   for (const path of calcComparisonPaths(id, page.lang)) {
@@ -133,6 +146,7 @@ for (const id of [...PDF_TOOL_IDS, ...PDF_PRESET_IDS]) {
     const common = TEXTS[lang].common;
     const html = read(path);
     for (const problem of checkPdfPage(html, { id, name: common.pdf[id].name, seal: common.seal, lang })) problems.add(`${path}: ${problem}`);
+    repetition(path, html, lang, id);
     if (!PDF_PAGES[id].parent) continue;
     const others: Record<string, string> = {};
     for (const other of pdfComparisonPaths(id, lang)) {
@@ -170,8 +184,14 @@ for (const lang of qrRoute ? languagesOf(qrRoute) : []) {
     continue;
   }
   qrPages += 1;
-  for (const problem of checkQrPage(read(path), lang)) problems.add(`${path}: ${problem}`);
+  const html = read(path);
+  for (const problem of checkQrPage(html, lang)) problems.add(`${path}: ${problem}`);
+  repetition(path, html, lang, QR_ID);
 }
+// Every page of the rule was read: each page of the route map whose kind (pageKind, from the registries) is a tool, a
+// preset, a calculator or the QR code generator, in each of its languages.
+const repetitionWanted = pages.filter((page) => pageKind(page.route.id) !== null && existsSync(fileForPath(page.path))).length;
+if (repetitionPages !== repetitionWanted) problems.add(`${repetitionPages} página(s) conferida(s) pela regra da repetição, o mapa de rotas tem ${repetitionWanted}`);
 
 // The file guides, read from their registry, in each of their languages (the three since the languages adjustment): the
 // route map must have each one at the path of the registry, and the page must pass the guide rules of its language, with
@@ -235,4 +255,4 @@ const sitePages = listFiles(DIST)
   .filter((page) => !isNotFoundPath(page.path));
 for (const problem of checkSite(sitePages)) problems.add(problem);
 
-problems.finish('conteúdo', `${toolPages} página(s) de ferramenta e de preset, ${calcPages} de calculadora, ${pdfPages} de PDF (as ferramentas, as presets e o hub), ${guidePages} guia(s) de arquivo, ${qrPages} do gerador de QR code e ${sitePages.length} página(s) do site conferida(s); ${guidesHubPages} do hub de guias`);
+problems.finish('conteúdo', `${toolPages} página(s) de ferramenta e de preset, ${calcPages} de calculadora, ${pdfPages} de PDF (as ferramentas, as presets e o hub), ${guidePages} guia(s) de arquivo, ${qrPages} do gerador de QR code e ${sitePages.length} página(s) do site conferida(s); ${guidesHubPages} do hub de guias; ${repetitionPages} sem repetição (um fato, um lugar)`);

@@ -10,8 +10,8 @@ export default {
   howHeading: 'How to flip an image',
   howSteps: [
     'Drop your images on the box, choose them, or paste them with Ctrl V.',
-    'Keep Horizontal to swap left and right, or pick Vertical to swap top and bottom.',
-    'Download the flipped image, or the ZIP when you flipped several.',
+    'Keep Horizontal, or pick Vertical.',
+    'Download the flipped image.',
   ],
   specsHeading: 'What the flip does',
   specs: {
@@ -23,7 +23,7 @@ export default {
       ['Vertical', 'Top and bottom swap places, as in the reflection of the picture in still water.'],
       ['No rotation', 'The picture is only mirrored, never turned. To turn it as well, Rotate image combines a turn with a mirror.'],
       ['Starting point', 'The photo orientation is applied first, so the mirror flips the picture as you see it and not its raw pixels.'],
-      ['Batch', 'The mirror you pick applies to every image in the batch, with no limit on the number of images.'],
+      ['Batch', 'The mirror you pick applies to every image in the batch, with no limit on the number of images, and several come in one ZIP.'],
       ['Output', 'The same format and the same width and height as the picture you see. PNG and WebP keep their transparency.'],
       ['Quality', 'JPG and WebP are saved again after the flip. PNG is saved without loss.'],
       ['Metadata', 'Exif, XMP, IPTC and GPS are removed, and no orientation tag is left to be read twice.'],
@@ -33,11 +33,11 @@ export default {
   faq: [
     {
       q: 'What is the difference between flipping and rotating an image?',
-      a: 'Rotating turns the picture around its center. Flipping mirrors it: Horizontal swaps left and right, and Vertical swaps top and bottom. Text in a flipped image reads backward.',
+      a: 'Rotating turns the picture around its center, and flipping mirrors it, so text in a flipped image reads backward.',
     },
     {
       q: 'How do I fix a selfie that came out mirrored?',
-      a: 'Keep Horizontal. Left and right swap places, so text that read backward in the photo reads the right way again.',
+      a: 'Keep Horizontal: text that read backward in the photo reads the right way again.',
     },
     {
       q: 'Is a vertical flip the same as turning the image upside down?',
@@ -45,16 +45,12 @@ export default {
     },
     {
       q: 'Does flipping a JPG lower its quality?',
-      a: 'A JPG or a WebP is saved again after the flip, so it goes through lossy compression once more. PNG is saved without loss. Flip once from your original rather than several times.',
-    },
-    {
-      q: 'Can I flip several images at once?',
-      a: 'Yes. Drop them together. The mirror you pick applies to the whole batch, and the download is one ZIP.',
+      a: 'A little, and the loss adds up with every save, so flip once from your original rather than several times.',
     },
   ],
   privacyHeading: 'Privacy',
   privacyNote:
-    'Your images are flipped on your device and never sent to a server. The flipped copies leave out the photo metadata, including the GPS location.',
+    'Your images are flipped on your device and never sent to a server.',
   relatedHeading: 'More image tools',
   panel: {
     formats: 'JPG, PNG or WebP',

@@ -11,8 +11,8 @@ export default {
   howHeading: 'Como espelhar uma imagem',
   howSteps: [
     'Solte as imagens na caixa, escolha os arquivos ou cole com Ctrl V.',
-    'Deixe a opção Horizontal para trocar a esquerda pela direita, ou escolha a Vertical para trocar o alto pelo baixo.',
-    'Baixe a imagem espelhada, ou o ZIP quando tiver espelhado várias.',
+    'Deixe a opção Horizontal, ou escolha a Vertical.',
+    'Baixe a imagem espelhada.',
   ],
   specsHeading: 'O que o espelhamento faz',
   specs: {
@@ -24,7 +24,7 @@ export default {
       ['Vertical', 'O alto e o baixo trocam de lugar, como no reflexo da imagem na água parada.'],
       ['Sem giro', 'A imagem só é espelhada, nunca girada. Para girar também, a Girar imagem combina um giro com um espelhamento.'],
       ['Ponto de partida', 'A orientação da foto é aplicada primeiro, então o espelho inverte a imagem como você a vê, e não os pixels crus.'],
-      ['Lote', 'O espelho escolhido vale para todas as imagens do lote, sem limite de imagens.'],
+      ['Lote', 'O espelho escolhido vale para todas as imagens do lote, sem limite de imagens, e várias vêm num só ZIP.'],
       ['Saída', 'O mesmo formato e a mesma largura e altura da imagem que você vê. PNG e WebP mantêm a transparência.'],
       ['Qualidade', 'JPG e WebP são salvos de novo depois do espelhamento. O PNG é salvo sem perda.'],
       ['Metadados', 'Exif, XMP, IPTC e GPS são removidos, e nenhuma marcação de orientação fica para ser lida duas vezes.'],
@@ -34,11 +34,11 @@ export default {
   faq: [
     {
       q: 'Qual é a diferença entre espelhar e girar uma imagem?',
-      a: 'Girar roda a imagem em torno do centro. Espelhar inverte a imagem como num espelho: a opção Horizontal troca a esquerda pela direita, e a Vertical troca o alto pelo baixo. Um texto numa imagem espelhada fica ao contrário.',
+      a: 'Girar roda a imagem em torno do centro, e espelhar inverte a imagem como num espelho, então um texto numa imagem espelhada fica ao contrário.',
     },
     {
       q: 'Como corrijo uma selfie que saiu espelhada?',
-      a: 'Deixe a opção Horizontal. A esquerda e a direita trocam de lugar, então um texto que aparecia ao contrário na foto volta a ser lido do jeito certo.',
+      a: 'Deixe a opção Horizontal: um texto que aparecia ao contrário na foto volta a ser lido do jeito certo.',
     },
     {
       q: 'Espelhar na vertical é o mesmo que deixar a imagem de cabeça para baixo?',
@@ -46,16 +46,12 @@ export default {
     },
     {
       q: 'Espelhar um JPG diminui a qualidade?',
-      a: 'Um JPG ou um WebP é salvo de novo depois do espelhamento, então passa mais uma vez por uma compressão com perda. O PNG é salvo sem perda. Espelhe uma vez só, a partir do original, em vez de espelhar várias vezes.',
-    },
-    {
-      q: 'Dá para espelhar várias imagens de uma vez?',
-      a: 'Sim. Solte todas juntas. O espelho escolhido vale para o lote inteiro, e você baixa tudo num ZIP só.',
+      a: 'Um pouco, e a perda se soma a cada vez que o arquivo é salvo, então espelhe uma vez só, a partir do original, em vez de espelhar várias vezes.',
     },
   ],
   privacyHeading: 'Privacidade',
   privacyNote:
-    'Suas imagens são espelhadas no seu aparelho e nunca são enviadas a um servidor. As cópias espelhadas deixam de fora os metadados da foto, inclusive a localização GPS.',
+    'Suas imagens são espelhadas no seu aparelho e nunca são enviadas a um servidor.',
   relatedHeading: 'Mais ferramentas de imagem',
   panel: {
     formats: 'JPG, PNG ou WebP',
