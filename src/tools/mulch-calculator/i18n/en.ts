@@ -71,7 +71,7 @@ export default {
   formulaHeading: 'The formula',
   formula: [
     'Area = length × width, in feet, or the area you type. Cubic feet = area × depth in inches ÷ 12, and cubic yards = cubic feet ÷ 27.',
-    'Bags = cubic feet ÷ the size of one bag, rounded up. For gravel, short tons = cubic yards × the weight of one cubic yard. The EPA lists loose gravel at 2,565 lb a cubic yard, which is 1.28 short tons of 2,000 lb.',
+    'Bags = cubic feet ÷ the size of one bag, rounded up. For gravel, short tons = cubic yards × the weight of one cubic yard.',
   ],
   premisesHeading: 'Assumptions',
   exampleHeading: 'Worked example',
@@ -88,11 +88,11 @@ export default {
   faq: [
     {
       q: 'How many bags of mulch make a cubic yard?',
-      a: 'A cubic yard is 27 cubic feet, so it takes 13.5 bags of 2 cu ft, which means buying 14. With bags of 3 cu ft it takes 9.',
+      a: 'It takes 13.5 bags of 2 cu ft, or 9 bags of 3 cu ft.',
     },
     {
       q: 'How much does a cubic yard of gravel weigh?',
-      a: 'It changes with the stone and how wet it is. The EPA conversion table lists loose gravel at 2,565 lb a cubic yard, the 1.28 short tons the calculator starts with; ask the supplier for the weight of the gravel you buy.',
+      a: 'It changes with the stone and how wet it is. For loose gravel, the EPA conversion table lists 2,565 lb a cubic yard.',
     },
     {
       q: 'What is a short ton?',
@@ -104,7 +104,7 @@ export default {
     },
     {
       q: 'Why are the bags rounded up and the cubic yards not?',
-      a: 'A store sells whole bags, so 25.2 bags become 26. The cubic yards stay at two decimals, the amount to ask for when you order bulk material.',
+      a: 'A store sells whole bags, so 25.2 bags become 26. The cubic yards are the amount to ask for when you order bulk material.',
     },
   ],
   privacyHeading: 'Privacy',

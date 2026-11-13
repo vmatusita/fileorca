@@ -69,7 +69,7 @@ export default {
   formulaHeading: 'The formula',
   formula: [
     'Wall area = perimeter × wall height, in feet, or the area you type. Area to paint = wall area − doors × area of a door − windows × area of a window.',
-    'Gallons = area to paint × coats ÷ coverage in square feet per gallon, and the gallons to buy are that number rounded up. The coverage comes from the can: the EPA Wall Paint Exposure Model takes 400 sq ft per gallon as its default, from the labels on paint cans, and the calculator starts at 350 as an example.',
+    'Gallons = area to paint × coats ÷ coverage in square feet per gallon, and the gallons to buy are that number rounded up.',
   ],
   premisesHeading: 'Assumptions',
   exampleHeading: 'Worked example',
@@ -89,19 +89,19 @@ export default {
     },
     {
       q: 'How much does a gallon of paint cover?',
-      a: 'The can says, and it changes with the paint and the wall. The EPA Wall Paint Exposure Model uses 400 sq ft per gallon as its default, taken from the labels on paint cans. The calculator starts at 350 as an example: type the number on your can.',
+      a: 'The can says, and it changes with the paint and the wall. The EPA Wall Paint Exposure Model uses 400 sq ft per gallon as its default, taken from the labels on paint cans.',
     },
     {
       q: 'Does the calculator subtract doors and windows?',
-      a: 'Yes, at the areas you give: in the example, 21 sq ft for a door of 3 by 7 ft and 15 sq ft for a window of 3 by 5 ft. Set both counts to 0 to paint the whole wall.',
+      a: 'Yes. The example takes 21 sq ft for a door of 3 by 7 ft and 15 sq ft for a window of 3 by 5 ft; set both counts to 0 to paint the whole wall.',
     },
     {
       q: 'How do the coats change the result?',
-      a: 'Each coat covers the whole area again, so two coats take twice the paint of one. The calculator takes from 1 to 3 coats; the can may say how many it needs.',
+      a: 'Each coat covers the whole area again, so two coats take twice the paint of one. The can may say how many it needs.',
     },
     {
       q: 'Can I work out a ceiling?',
-      a: 'Yes. Choose Total area, type the ceiling area (the length × the width of the room) and set the doors and windows to 0. Ceiling paint can have its own coverage, so check that can.',
+      a: 'Yes, on its own: choose Total area, type the ceiling area (the length × the width of the room) and set the doors and windows to 0.',
     },
   ],
   privacyHeading: 'Privacy',

@@ -50,7 +50,7 @@ export default {
   },
   howHeading: 'How to use the square footage calculator',
   howSteps: [
-    'Split the space into rectangles, triangles and circles, and measure each one in feet.',
+    'Measure each part of the space in feet.',
     'Choose the shape of each area and enter its sides or its diameter. Add up to 10 areas.',
     'Read the total in square feet and square yards, and save the table as a PDF or a CSV.',
   ],
@@ -74,23 +74,23 @@ export default {
   faq: [
     {
       q: 'How do I measure a room that is not a rectangle?',
-      a: 'Split it into rectangles, triangles and circles, the way Energy Star suggests, and enter each one as an area. The calculator adds them up.',
+      a: 'Split it into rectangles, triangles and circles, the way Energy Star suggests, and enter each one as an area. An L-shaped room of 12 by 10 ft with a nook of 6 by 4 ft is two rectangles: 120 + 24 = 144 sq ft.',
     },
     {
       q: 'How do I enter feet and inches?',
-      a: 'Divide the inches by 12 and add them to the feet: 6 inches make 0.5 ft, so 12 ft 6 in is 12.5 ft. Three inches make 0.25 ft, and 9 inches make 0.75 ft.',
+      a: 'Divide the inches by 12 and add them to the feet: 3 inches make 0.25 ft, and 9 inches make 0.75 ft.',
     },
     {
       q: 'How many square feet are in a square yard?',
-      a: 'Nine. A yard is 3 feet, so a square yard is 3 × 3 = 9 square feet. The calculator shows the total in both units.',
+      a: 'Nine, because a yard is 3 feet and a square yard is 3 × 3 feet.',
     },
     {
       q: 'How do I leave out a part I won’t cover, like a kitchen island?',
-      a: 'The calculator only adds. Split the floor around the island into rectangles and enter those, or work out the area of the island and take it from the total yourself.',
+      a: 'Split the floor around the island into rectangles and enter those, or work out the area of the island and take it from the total yourself.',
     },
     {
       q: 'Why can the total differ by 0.01 from the sum of the rows?',
-      a: 'Each row is rounded to two decimals, and the total is worked out from the exact areas before it is rounded. Adding the rounded rows can land a hundredth away.',
+      a: 'Three rectangles of 1.5 by 1.67 ft measure 2.505 sq ft each. Each row shows 2.51, and the total shows 7.52, a hundredth less than the three rows added up.',
     },
   ],
   privacyHeading: 'Privacy',

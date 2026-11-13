@@ -52,8 +52,8 @@ export default {
   worksHeading: 'How the calories are worked out',
   formulaHeading: 'The formula',
   formula: [
-    'Resting energy expenditure (the calories the body uses at rest) by Mifflin and St Jeor, 1990: 10 × weight in kg + 6.25 × height in cm − 5 × age in years + 5 for the male formula, or − 161 for the female one.',
-    'Calories a day = resting energy × physical activity level. The NIH Body Weight Planner, built on the same equation for the resting part, describes activity levels from about 1.4 for a sedentary day to 2.5 for a very active one.',
+    'Resting energy expenditure by Mifflin and St Jeor, 1990: 10 × weight in kg + 6.25 × height in cm − 5 × age in years + 5 for the male formula, or − 161 for the female one.',
+    'Calories a day = resting energy × physical activity level. The NIH Body Weight Planner is built on the same equation for the resting part.',
   ],
   premisesHeading: 'Assumptions',
   exampleHeading: 'Worked example',
@@ -65,24 +65,24 @@ export default {
     { label: 'NIDDK, Hall KD et al., web appendix of the Body Weight Planner model (resting energy by Mifflin-St Jeor)', href: 'https://www.niddk.nih.gov/-/media/Files/BWP/Hall_Lancet_Web_Appendix.pdf' },
   ],
   disclaimer:
-    'This calculator is an educational tool for adults 18 and older, not medical or nutrition advice. It takes ages from 19 to 78, the ages of the people the equation was built on. Your body can use more or fewer calories than any equation says: talk with a doctor or a registered dietitian about your own needs.',
+    'This calculator is an educational tool for adults 18 and older, not medical or nutrition advice. Your body can use more or fewer calories than any equation says: talk with a doctor or a registered dietitian about your own needs.',
   faqHeading: 'Questions about daily calories',
   faq: [
     {
       q: 'What is the difference between the two numbers?',
-      a: 'The first is the energy your body uses at rest, for breathing, circulation and the rest. The second adds the activity of a whole day, by multiplying the first by your activity level.',
+      a: 'The first is the energy your body uses at rest, for breathing, circulation and the rest. The second adds the activity of a whole day.',
     },
     {
       q: 'Which activity level should I enter?',
-      a: 'The NIH Body Weight Planner describes 1.4 as sedentary, 1.6 as very light activity at work or school with moderate exercise about once a week, and 2.5 as very active. Pick the number that sounds closest to your usual day.',
+      a: 'Pick the number closest to your usual day. Between the two ends of the scale, the NIH Body Weight Planner describes 1.6 as very light activity at work or school with moderate exercise about once a week.',
     },
     {
       q: 'Why does the formula ask for sex?',
-      a: 'Mifflin and St Jeor fitted one equation for men and one for women: they differ only in the constant at the end, plus 5 or minus 161. The field is the formula you want the calculator to use.',
+      a: 'Mifflin and St Jeor fitted one equation for men and one for women, which differ only in the constant at the end. The field is the formula you want the calculator to use.',
     },
     {
       q: 'Why only from 19 to 78?',
-      a: 'Those were the ages of the 498 healthy adults the equation was built on. Outside them the calculator would be guessing.',
+      a: 'The study behind the equation measured 498 healthy adults of those ages, so outside them the calculator would be guessing.',
     },
     {
       q: 'Is this the same as BMR?',
