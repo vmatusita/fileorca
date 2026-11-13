@@ -26,6 +26,8 @@ import type { CommonTexts } from '../i18n/types.ts';
 import { fmt, groupDigits } from '../i18n/format.ts';
 import { toolCounts } from './tool-count.ts';
 import { AUTHOR } from '../platform/site.ts';
+import { newestIn } from '../platform/changelog.ts';
+import { shortDate } from '../i18n/dates.ts';
 import { IMAGE_TOOL_IDS } from '../tools/image/registry.ts';
 import { HOME_MONEY_IDS, LIFE_HUB_IDS, LIFE_HUB_ROUTE, type LifeHub } from '../tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_TOOL_IDS } from '../tools/pdf/registry.ts';
@@ -135,8 +137,18 @@ const guidesBlock = guides
       return hub ? { title: guides.title, hub, groups, shown: fmt(t.footer.guidesTopics, { n: groupDigits(groups.length, lang) }), rest: t.footer.guidesTopicsRest } : null;
     })()
   : null;
+/**
+ * F19a (decision 4; DECISOES § 754): the date of the newest entry of What's new in this language, at the base, linked to that
+ * entry (#id): a destination of its own, so the base never repeats the link of the FileOrca column to the page. It follows
+ * the signature in the same line, in the short date, so the base keeps its height on the phone (footer-phone.spec.ts).
+ */
+const newest = newestIn(lang);
+const [updatedBefore = '', updatedAfter = ''] = t.trust.updated.split('{date}');
+// F19a (decisions 2 and 7; DECISOES § 752): What's new and How it works right after About.
 const site = [
   { label: t.footer.about, href: pathFor('about', lang) },
+  { label: t.footer.whatsNew, href: pathFor('whats-new', lang) },
+  { label: t.footer.howItWorks, href: pathFor('how-it-works', lang) },
   { label: t.footer.privacy, href: pathFor('privacy', lang) },
   { label: t.footer.terms, href: pathFor('terms', lang) },
   { label: t.footer.licenses, href: pathFor('licenses', lang) },
@@ -186,6 +198,6 @@ const site = [
     </div>
   </div>
   <div class="fo-footer__base">
-    <span>{fmt(t.footer.signature, { name: AUTHOR.name, city: AUTHOR.city })} · © {year}</span>
+    <span>{fmt(t.footer.signature, { name: AUTHOR.name, city: AUTHOR.city })} · © {year} · <a class="fo-footer__updated" href={`${pathFor('whats-new', lang)}#${newest.id}`}>{updatedBefore}<time datetime={newest.date}>{shortDate(newest.date, lang)}</time>{updatedAfter}</a></span>
   </div>
 </footer>

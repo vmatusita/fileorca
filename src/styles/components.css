@@ -1004,6 +1004,8 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
 .fo-footer a { color: var(--on-deep); text-decoration: none; font-size: 15px; line-height: 32px; }
 .fo-footer a:hover { text-decoration: underline; text-underline-offset: 3px; }
+/* F19a (DECISOES § 754): the date of the newest change at the base, in the muted ink of the signature beside it. */
+.fo-footer .fo-footer__updated { color: var(--on-deep-muted); font-size: 14px; white-space: nowrap; text-decoration: underline; text-underline-offset: 3px; }
 .fo-footer__base { max-width: var(--page-max); margin: var(--space-8) auto 0; padding-top: var(--space-4); border-top: var(--stroke-hair) solid color-mix(in srgb, var(--on-deep-muted) 30%, transparent); display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); justify-content: space-between; align-items: center; font-size: 14px; color: var(--on-deep-muted); }
 /* F12 · o café (DECISOES § 437): the coffee line opens the footer, on the edges of the columns, with a hairline under
    it and a 48 px target (it was the 32 px line of the links, at the base, 24 to 46 px from the AdSense anchor). */
@@ -1034,7 +1036,11 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
   .fo-footer__col > h2, .fo-footer__more > h2 { margin-bottom: var(--space-1); }
   .fo-footer .fo-footer__hub, .fo-footer .fo-footer__solo a, .fo-footer .fo-footer__col--site a { display: flex; align-items: center; min-height: var(--tap-min); margin-bottom: 0; line-height: 20px; }
   .fo-footer__col--site { grid-column: 1 / -1; }
-  .fo-footer__col--site ul { display: flex; flex-wrap: wrap; column-gap: var(--space-5); }
+  /* F19a (DECISOES § 754): 16 px between the FileOrca links (20 px before), so the seven of them keep two rows at 360 px. */
+  .fo-footer__col--site ul { display: flex; flex-wrap: wrap; column-gap: var(--space-4); }
+  /* F19a (DECISOES § 754): the date of the newest change, in the line of the signature, is a 48 px target too: 14 px of
+     padding above and below its 20 px line, taken back by a -14 px margin, so the line box of the signature stays as it was. */
+  .fo-footer .fo-footer__updated { display: inline-block; padding-block: 14px; margin-block: -14px; line-height: 20px; }
 }
 @supports selector(::details-content) {
   @media (min-width: 768px) {

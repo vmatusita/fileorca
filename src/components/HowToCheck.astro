@@ -1,0 +1,13 @@
+---
+// The link "How to check" at the end of the privacy note of every tool and calculator, to the How it works page, where the
+// browser steps are (F19a, decisions 7 and 8; DECISOES § 759 and § 766). Inside the paragraph of the note, so the link
+// takes its purpose from that sentence (WCAG 2.4.4).
+import { pathFor, type Lang } from '../i18n/routes.ts';
+import { TEXTS } from '../i18n/texts.ts';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+---
+{' '}<a class="fo-howtocheck" href={pathFor('how-it-works', lang)}>{TEXTS[lang].common.trust.howToCheck}</a>
