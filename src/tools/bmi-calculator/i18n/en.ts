@@ -72,7 +72,7 @@ export default {
   faq: [
     {
       q: 'What does BMI measure?',
-      a: 'It compares your weight with your height. The CDC adds that it does not tell fat from muscle and bone.',
+      a: 'It compares your weight with your height. As the CDC notes, it does not tell fat from muscle and bone.',
     },
     {
       q: 'Why does the calculator start at age 20?',
