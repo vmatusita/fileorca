@@ -6,7 +6,7 @@
 // limit of 800 to 1,500 words is the same in the three languages.
 import { parse, type HTMLElement } from 'node-html-parser';
 import { longDate } from '../../src/i18n/dates.ts';
-import { DEFAULT_LANG, LANGS, type Lang } from '../../src/i18n/routes.ts';
+import { DEFAULT_LANG, LANGS, routeById, type Lang } from '../../src/i18n/routes.ts';
 
 export const MIN_GUIDE_WORDS = 800;
 export const MAX_GUIDE_WORDS = 1500;
@@ -131,6 +131,8 @@ export function checkFileGuide(html: string, want: GuideWant): string[] {
     ['.fo-ad--content', 'o AdSlot de conteúdo'],
     ['[data-content="measured"]', 'a seção das medidas'],
     ['[data-content="sources"]', 'as fontes'],
+    // F19a (decision 6; DECISOES § 763): the author box, before the related pages, out of the word count (no data-guide-text).
+    ['[data-content="author"]', 'o quadro do autor'],
     ['[data-content="related"]', 'as relacionadas'],
   ];
   let last = -1;
@@ -176,6 +178,14 @@ export function checkFileGuide(html: string, want: GuideWant): string[] {
       if (!/^https:\/\//.test(link)) problems.push(`fonte sem link https (${item.text.trim().slice(0, 40)})`);
       if (!item.querySelector('time[datetime]')) problems.push(`fonte sem a data da leitura (${item.text.trim().slice(0, 40)})`);
     }
+  }
+  // F19a (decision 6; DECISOES § 763): the author box names the author with a link to the About of the language, and none of
+  // it is text of the guide (the 800 to 1,500 words are counted without it).
+  const author = main.querySelector('[data-content="author"]');
+  if (author) {
+    const about = routeById('about').paths[lang];
+    if (!author.querySelectorAll('a[href]').some((link) => link.getAttribute('href') === about)) problems.push(`o quadro do autor sem o link para o Sobre (${about ?? '?'})`);
+    if (author.hasAttribute('data-guide-text') || author.querySelector('[data-guide-text]')) problems.push('o quadro do autor entra na contagem de palavras do guia (data-guide-text)');
   }
   const related = main.querySelector('[data-content="related"]');
   if (related) {

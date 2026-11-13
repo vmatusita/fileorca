@@ -7,6 +7,7 @@ import type { AnyCalcId, BrCalcId, CalcPageId, EsCalcId, GuideId, LifeCalcId } f
 import type { PdfPageId, PdfToolId } from '../tools/pdf/registry.ts';
 import type { FileGuideId } from '../tools/guides/registry.ts';
 import type { ChangeId } from '../platform/changelog.ts';
+import type { EngineId } from '../platform/engines.ts';
 
 export type LangNames = Record<Lang, string>;
 
@@ -267,6 +268,23 @@ export interface AboutTexts extends PageMeta {
   websiteLabel: string;
   linkedinLabel: string;
   /**
+   * F19a (decision 5; DECISOES § 758): the paragraph after the counts. `{date}` is LAUNCH_DATE (src/platform/site.ts) in the
+   * long form of the language, never typed here; `{whatsNew}` and `{howItWorks}` are the links to those pages, named by their
+   * names in the footer.
+   */
+  since: string;
+  /**
+   * F19a (decision 6; DECISOES § 763): the author box at the end of every guide, before the related pages. `{name}` is the
+   * author's name, a link to this page; `who` is one sentence of who he is; `fileGuide` and `moneyGuide` say how the
+   * numbers of that kind of guide were obtained (`{date}` is the long date of the measurement of the file guides).
+   */
+  author: {
+    heading: string;
+    who: string;
+    fileGuide: string;
+    moneyGuide: string;
+  };
+  /**
    * The card "FileOrca in numbers" (F13b, UX-17 A; DECISOES § 586), on the About page and, from 1280 px, on the Contact
    * page: four counts and the zero. These are the labels; the numbers come from src/components/tool-count.ts and LANGS,
    * never typed here. The fourth count is the home and health calculators where the language has them (`life`, English),
@@ -297,10 +315,75 @@ export interface WhatsNewTexts extends PageMeta {
   entries: Partial<Record<ChangeId, { title: string; body: string }>>;
 }
 
-/** F19a (decision 7; DECISOES § 759): the How it works page. */
+/**
+ * F19a (decision 7; DECISOES § 759): one paragraph (or one list of steps) of the How it works page, its sentences in order,
+ * each under the key that tests/unit/how-it-works.test.ts ties to what proves it: a test (file and title), or, for a step
+ * in a browser, the official documentation read on the day of § 760. A sentence with no proof leaves the page. `{privacy}`
+ * and `{licenses}` are links to those pages of the language, named by their names in the footer.
+ */
+export type HowItWorksSentences = Readonly<Record<string, string>>;
+
+/** The steps of one browser, or of the phone, in part 4: a heading and the steps in order. */
+export interface HowItWorksSteps<K extends string> {
+  heading: string;
+  steps: Readonly<Record<K, string>>;
+}
+
+/**
+ * F19a (decision 7; DECISOES § 759 to § 761): the How it works page, five parts in this order, each a section with its id:
+ * `file` (what happens to your file), `wasm` (what runs as WebAssembly, with the table of src/platform/engines.ts),
+ * `network` (what goes over the network and what never does, as the Privacy page says it), `check` (how to check it in the
+ * browser) and `limits` (what the check does not prove). The keys of the sentences are the same in every language.
+ */
 export interface HowItWorksTexts extends PageMeta {
   h1: string;
   intro: string;
+  file: {
+    heading: string;
+    paragraphs: readonly [
+      { open: string; read: string; work: string; result: string; nothing: string },
+      { numbers: string; address: string; hash: string },
+      { qr: string },
+    ];
+  };
+  wasm: {
+    heading: string;
+    /** Before the table. */
+    paragraphs: readonly [{ what: string; table: string; same: string }];
+    /** The table of the libraries: its caption, the heads of its columns and the words of its cells. */
+    table: {
+      caption: string;
+      library: string;
+      does: string;
+      tools: string;
+      wasm: string;
+      js: string;
+      /** "Files: {files}" and "License: {pkg}", the lines under the name of a library. */
+      files: string;
+      license: string;
+    };
+    /** What each library does, one short sentence each. */
+    does: Readonly<Record<EngineId, string>>;
+    /** After the table. */
+    after: readonly [{ native: string; js: string; threads: string; licenses: string }];
+  };
+  network: {
+    heading: string;
+    paragraphs: readonly [{ page: string; analytics: string; consent: string; ads: string }, { never: string; privacy: string }];
+  };
+  check: {
+    heading: string;
+    paragraphs: readonly [{ intro: string }];
+    chrome: HowItWorksSteps<'open' | 'before' | 'domain'>;
+    firefox: HowItWorksSteps<'open' | 'before' | 'domain'>;
+    safari: HowItWorksSteps<'settings' | 'open' | 'before'>;
+    watch: HowItWorksSteps<'use' | 'rows' | 'none'>;
+    phone: HowItWorksSteps<'load' | 'airplane'>;
+  };
+  limits: {
+    heading: string;
+    paragraphs: readonly [{ extension: string; again: string }];
+  };
 }
 
 export interface ContactTexts extends PageMeta {

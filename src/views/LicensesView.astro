@@ -10,7 +10,7 @@ import PageIndex from '../components/PageIndex.astro';
 import { pageIndex } from '../components/page-index.ts';
 import { routeById, type Lang } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
-import { bundledPackages, browserPackages, isSeparateFileOnly, lgplSources, type PackageLicense } from '../platform/licenses.ts';
+import { bundledPackages, browserPackages, isSeparateFileOnly, licenseAnchor, lgplSources, type PackageLicense } from '../platform/licenses.ts';
 import { breadcrumbLd, homePath } from '../seo/meta.ts';
 
 interface Props {
@@ -32,7 +32,8 @@ const crumbs = [
   { name: common.breadcrumb.home, path: homePath(lang) },
   { name: t.h1, path: route.paths[lang] ?? '/' },
 ];
-const anchor = (item: PackageLicense) => `pkg-${item.name.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '')}`;
+// The id of each row (F19a, DECISOES § 761: the function is shared with the table of How it works, which links to it).
+const anchor = (item: PackageLicense) => licenseAnchor(item.name);
 /** The H2 of the page in order (the LGPL notice first, where there is one), and their ids, unique among the ids of the page. */
 const headings = [...(lgpl ? [t.lgplHeading] : []), ...groups.map((group) => group.heading)];
 const index = pageIndex(headings, ['main', 'toc-title', 'lgpl', ...direct.map(anchor), ...bundledPackages().map(anchor)]);

@@ -1,6 +1,7 @@
 // Technical SEO helpers (PLANO "SEO agressivo › Técnico"): canonical, hreflang and JSON-LD.
 import { AUTHOR, CONTACT_EMAIL, SITE_NAME, SITE_ORIGIN } from '../platform/site.ts';
 import { DEFAULT_LANG, LANG_TAG, languagesOf, routeById, type Lang, type RouteDef, type RouteId } from '../i18n/routes.ts';
+import { aboutPhoto } from '../platform/about-photo.ts';
 
 export function absolute(path: string): string {
   return new URL(path, SITE_ORIGIN).href;
@@ -46,7 +47,9 @@ export function organizationLd(): JsonLd {
   };
 }
 
+// F19a (decision 5; DECISOES § 762): the Person has an image only when the files of pnpm sobre:foto are in public/about/.
 export function personLd(): JsonLd {
+  const photo = aboutPhoto();
   return {
     '@type': 'Person',
     '@id': `${SITE_ORIGIN}/#victor`,
@@ -54,6 +57,7 @@ export function personLd(): JsonLd {
     url: AUTHOR.website,
     sameAs: [AUTHOR.website, AUTHOR.linkedin],
     address: { '@type': 'PostalAddress', addressLocality: AUTHOR.city, addressRegion: AUTHOR.region, addressCountry: 'BR' },
+    ...(photo ? { image: absolute(photo.about.jpg) } : {}),
   };
 }
 

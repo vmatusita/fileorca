@@ -26,7 +26,7 @@ export default {
         'El generador de códigos QR funciona igual. El código se arma en tu navegador a partir del texto o la dirección que escribes, y ese texto se queda en tu dispositivo: no se agrega a la dirección de la página, ningún evento de analítica lo lleva, no se guarda en tu navegador ni en una cookie y no aparece en el nombre de los archivos que descargas, codigo-qr.png y codigo-qr.svg. FileOrca nunca abre la dirección que escribes ni le hace ninguna solicitud.',
         'Las herramientas de PDF funcionan igual. Tu PDF se lee y se escribe en tu dispositivo, con PDF.js y qpdf, dos bibliotecas de código abierto que funcionan en tu navegador. Lo que escribes ahí, como un rango de páginas o el texto de una marca de agua, se queda en tu navegador. La contraseña que escribes al proteger o desbloquear un PDF no sale de tu dispositivo y no se guarda, ni en un servidor ni en tu navegador. La firma que dibujas, tomas de una imagen o escribes al firmar un PDF tampoco se guarda en ningún lugar.',
         'Las herramientas de imagen, por ejemplo, guardan una copia nueva de tu foto que deja fuera sus metadatos, incluida la ubicación GPS.',
-        'Puedes comprobarlo por tu cuenta. Abre la pestaña Red de tu navegador mientras usas una herramienta: ninguna solicitud lleva tu archivo.',
+        'Puedes comprobarlo por tu cuenta. Abre la pestaña Red de tu navegador mientras usas una herramienta: ninguna solicitud lleva tu archivo. Los pasos de cada navegador están en https://fileorca.com/es/como-funciona/.',
       ],
     },
     {
