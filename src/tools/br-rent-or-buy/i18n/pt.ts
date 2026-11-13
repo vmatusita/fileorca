@@ -84,7 +84,7 @@ export default {
   faq: [
     {
       q: 'Por que comprar pode demorar a valer a pena?',
-      a: 'No começo, quem compra paga o ITBI, o cartório e juros altos, enquanto quem aluga investe a entrada. Comprar só passa à frente quando a valorização e a dívida menor superam o que esse dinheiro investido rendeu.',
+      a: 'Porque os custos da compra e os juros altos do começo pesam contra o que quem aluga ganha investindo. Comprar só passa à frente quando a valorização e a dívida menor superam esse rendimento.',
     },
     {
       q: 'Que rendimento eu uso para o dinheiro investido?',
