@@ -21,6 +21,7 @@ export default {
       ['Transparency', 'Transparent areas turn white, because JPG has no transparency.'],
       ['Image that already fits', 'It comes back as it was, in its own format, without the photo metadata.'],
       ['Very detailed image', 'When the quality alone cannot reach the target, Oli also reduces the dimensions and shows you the new width and height.'],
+      ['Batch', 'Several images download together as one ZIP.'],
       ['Privacy of the file', 'Exif, XMP, IPTC and GPS are left out of every new file.'],
     ],
   },

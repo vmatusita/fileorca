@@ -21,6 +21,7 @@ export default {
       ['Transparency', 'Transparent areas turn white, because JPG has no transparency.'],
       ['Image already under 1 MB', 'It comes back unchanged except for the metadata, in its own format.'],
       ['Photo that is too detailed', 'If the quality alone cannot reach the target, Oli also reduces the dimensions and tells you the new width and height.'],
+      ['Batch', 'Several images download together as one ZIP.'],
       ['Metadata', 'Exif, XMP, IPTC and GPS are not kept in the new files.'],
     ],
   },

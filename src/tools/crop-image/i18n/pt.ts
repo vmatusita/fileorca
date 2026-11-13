@@ -20,7 +20,7 @@ export default {
       ['Proporções', 'Quadrado, 4:5, 16:9 ou Livre.'],
       ['Mover a área', 'Arraste a área do corte ou os cantos dela, ou dê foco nela e use as setas do teclado. Shift com as setas muda o tamanho.'],
       ['Valores exatos', 'Digite x, y, largura e altura da área do corte em pixels da imagem, que é o jeito de cortar sem arrastar nada.'],
-      ['Lote', 'Cada imagem recebe o corte centralizado na proporção escolhida. Escolha uma imagem na lista para ajustar a área dela, e as outras mantêm as suas.'],
+      ['Lote', 'Cada imagem recebe o corte centralizado na proporção escolhida. Escolha uma imagem na lista para ajustar a área dela, e as outras mantêm as suas. Várias imagens vêm num só ZIP.'],
       ['Saída', 'O mesmo formato do arquivo que você soltou, com os pixels da área do corte e sem mudar a escala. PNG e WebP mantêm a transparência.'],
       ['Qualidade', 'JPG e WebP são salvos de novo depois do corte. O PNG é salvo sem perda.'],
       ['Metadados', 'Exif, XMP, IPTC e GPS são removidos, e a orientação da foto é aplicada antes do corte.'],

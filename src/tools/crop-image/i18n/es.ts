@@ -20,7 +20,7 @@ export default {
       ['Formas', 'Cuadrado, 4:5, 16:9 o Libre.'],
       ['Mover el recuadro', 'Arrastra el recuadro o sus esquinas, o selecciónalo y usa las flechas del teclado. Mayús con las flechas cambia su tamaño.'],
       ['Valores exactos', 'Escribe la x, la y, el ancho y el alto del recuadro en píxeles de la imagen: así puedes recortar sin un puntero.'],
-      ['Lote', 'Cada imagen recibe el recorte centrado en la forma que elegiste. Elige una imagen en la lista para ajustar su propio recuadro, y las demás conservan el suyo.'],
+      ['Lote', 'Cada imagen recibe el recorte centrado en la forma que elegiste. Elige una imagen en la lista para ajustar su propio recuadro, y las demás conservan el suyo. Varias imágenes llegan en un solo ZIP.'],
       ['Resultado', 'El mismo formato del archivo que soltaste, con los píxeles del recuadro y sin escalar. PNG y WebP conservan su transparencia.'],
       ['Calidad', 'JPG y WebP se guardan de nuevo después del recorte. El PNG se guarda sin pérdida.'],
       ['Metadatos', 'Se eliminan Exif, XMP, IPTC y GPS, y la orientación de la foto se aplica antes de recortar.'],

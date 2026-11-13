@@ -21,6 +21,7 @@ export default {
       ['Imagem que não é 16:9', 'É cortada a partir do centro para preencher o quadro, e uma linha no resultado avisa. A imagem nunca fica deformada.'],
       ['Outra parte da imagem', 'Corte a imagem antes na ferramenta Cortar imagem para escolher a parte que fica, e depois traga para cá.'],
       ['Transparência', 'As áreas transparentes ficam brancas, porque o JPG não tem transparência.'],
+      ['Lote', 'Várias miniaturas são baixadas juntas num só ZIP.'],
       ['Dados da foto', 'Exif, XMP, IPTC e GPS ficam fora de toda miniatura.'],
     ],
   },

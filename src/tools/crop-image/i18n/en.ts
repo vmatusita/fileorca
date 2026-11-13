@@ -20,7 +20,7 @@ export default {
       ['Shapes', 'Square, 4:5, 16:9 or Free.'],
       ['Moving the box', 'Drag the box or its corners, or focus it and use the arrow keys. Shift with the arrow keys changes its size.'],
       ['Exact values', 'Type the x, y, width and height of the box in pixels of the image, which is the way to crop without a pointer.'],
-      ['Batch', 'Each image gets the centered crop in the shape you picked. Pick an image in the list to adjust its own box, and the others keep theirs.'],
+      ['Batch', 'Each image gets the centered crop in the shape you picked. Pick an image in the list to adjust its own box, and the others keep theirs. Several images come in one ZIP.'],
       ['Output', 'The same format as the file you dropped, with the pixels of the box and no scaling. PNG and WebP keep their transparency.'],
       ['Quality', 'JPG and WebP are saved again after the cut. PNG is saved without loss.'],
       ['Metadata', 'Exif, XMP, IPTC and GPS are removed, and the photo orientation is applied before you crop.'],

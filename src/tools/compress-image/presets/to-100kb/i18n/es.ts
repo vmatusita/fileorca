@@ -21,6 +21,7 @@ export default {
       ['Transparencia', 'Las zonas transparentes quedan blancas, porque el JPG no tiene transparencia.'],
       ['Imagen que ya cabe', 'Vuelve tal como estaba, en su propio formato, sin los metadatos de la foto.'],
       ['Imagen con mucho detalle', 'Cuando la calidad sola no alcanza el objetivo, Oli también reduce las dimensiones y te muestra el nuevo ancho y el nuevo alto.'],
+      ['Lote', 'Varias imágenes se descargan juntas en un solo ZIP.'],
       ['Privacidad del archivo', 'Exif, XMP, IPTC y GPS quedan fuera de cada archivo nuevo.'],
     ],
   },

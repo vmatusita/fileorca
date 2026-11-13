@@ -21,6 +21,7 @@ export default {
       ['Picture that is not 16:9', 'It is cropped from the center to fill the frame, and a line on the result says so. The shape of the picture is never distorted.'],
       ['A different part of the picture', 'Crop the image first with Crop image to choose the part that stays, then bring it here.'],
       ['Transparency', 'Transparent areas turn white, because JPG has no transparency.'],
+      ['Batch', 'Several thumbnails download together as one ZIP.'],
       ['Photo data', 'Exif, XMP, IPTC and GPS are left out of every thumbnail.'],
     ],
   },

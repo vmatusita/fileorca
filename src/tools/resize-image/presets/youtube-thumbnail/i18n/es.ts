@@ -21,6 +21,7 @@ export default {
       ['Imagen que no es 16:9', 'Se recorta desde el centro para llenar el encuadre, y una línea del resultado te lo dice. La forma de la imagen nunca se deforma.'],
       ['Otra parte de la imagen', 'Recorta antes la imagen con Recortar imagen para elegir la parte que se queda, y después tráela aquí.'],
       ['Transparencia', 'Las zonas transparentes quedan blancas, porque el JPG no tiene transparencia.'],
+      ['Lote', 'Varias miniaturas se descargan juntas en un solo ZIP.'],
       ['Datos de la foto', 'Exif, XMP, IPTC y GPS quedan fuera de cada miniatura.'],
     ],
   },
