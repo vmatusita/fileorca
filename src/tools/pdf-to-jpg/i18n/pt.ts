@@ -10,10 +10,10 @@ const texts: PdfToolTexts<ImagesTexts> = {
   h1: 'PDF para JPG',
   howHeading: 'Como funciona',
   howSteps: [
-    'Escolha JPG ou PNG, uma resolução e todas as páginas ou um intervalo como 1-3, 5, 8-10.',
-    'Solte seus PDFs na caixa, escolha os arquivos ou cole, quantos quiser.',
-    'A Oli desenha cada página como imagem no seu navegador, um PDF depois do outro.',
-    'Baixe uma imagem ou todas juntas num ZIP.',
+    'Escolha JPG ou PNG, uma resolução e quais páginas converter.',
+    'Solte seus PDFs na caixa, escolha os arquivos ou cole.',
+    'A Oli desenha cada página como imagem, um PDF depois do outro.',
+    'Baixe as imagens.',
   ],
   specsHeading: 'O que entra e o que sai',
   specs: {
@@ -22,7 +22,7 @@ const texts: PdfToolTexts<ImagesTexts> = {
     rows: [
       ['O que aceita', 'Arquivos PDF, quantos quiser. A Oli confere o que há dentro de cada arquivo, não o nome nem a extensão.'],
       ['O que sai', 'Uma imagem para cada página, com o nome do PDF e -pagina-1, -pagina-2 e assim por diante, como relatorio-pagina-1.jpg.'],
-      ['Formatos', 'JPG com qualidade 92, ou PNG. Nas páginas com fotos, os arquivos JPG são bem menores; o PNG deixa o texto e as linhas finas bem nítidos.'],
+      ['Formatos', 'JPG, salvo com qualidade 92, ou PNG, salvo sem perda.'],
       ['Resolução', '72 ppi para a tela, 150 ppi para uso geral (o padrão) ou 300 ppi para imprimir.'],
       ['Páginas', 'Todas as páginas, ou um intervalo como 1-3, 5, 8-10. O mesmo intervalo vale para todos os PDFs.'],
       ['Muitas imagens', 'Várias imagens são baixadas juntas num ZIP só.'],
@@ -36,28 +36,24 @@ const texts: PdfToolTexts<ImagesTexts> = {
   faq: [
     {
       q: 'Qual resolução devo escolher?',
-      a: 'Use 72 ppi para ver as páginas na tela, 150 ppi para uso geral e 300 ppi quando for imprimir. Uma resolução maior dá imagens mais nítidas, mas arquivos maiores, que demoram mais para sair. Uma página muito grande, acima de 16,7 megapixels, é desenhada numa resolução menor, porque o navegador não consegue desenhá-la maior, e o resultado avisa.',
+      a: 'A que combina com o destino das imagens: a menor para a tela, a maior para imprimir. Cada passo acima dá imagens mais nítidas, mas arquivos maiores, que demoram mais para sair: uma página Carta, o papel americano, sai com 612 × 792 pixels na menor resolução, 1275 × 1650 na padrão e 2550 × 3300 na maior.',
     },
     {
-      q: 'Dá para converter só algumas páginas?',
-      a: 'Dá. Escolha Intervalo de páginas e digite as páginas, como 1-3, 5, 8-10. A Oli faz imagens só dessas páginas. Quando você põe vários PDFs, o mesmo intervalo vale para cada um deles.',
+      q: 'E se um dos PDFs tiver menos páginas que o intervalo?',
+      a: 'A Oli faz imagens das páginas do intervalo que esse PDF tem. Um PDF sem nenhuma página no intervalo fica de fora, e a linha dele avisa.',
     },
     {
       q: 'Escolho JPG ou PNG?',
-      a: 'O JPG, salvo com qualidade 92, combina com páginas que têm fotos: num PDF de fotos, os arquivos PNG de todas as páginas, somados, têm várias vezes o tamanho dos arquivos JPG. O PNG não perde nada, então o texto e as linhas finas da página ficam nítidos; num PDF de texto e linhas, os arquivos PNG de todas as páginas, somados, têm aproximadamente entre a metade e o dobro do tamanho dos arquivos JPG, e podem até ser os menores. Nos dois casos, o texto da página vira parte da imagem e não dá mais para selecionar nem buscar.',
+      a: 'Para um PDF de fotos, o JPG: os arquivos PNG de todas as páginas, somados, têm várias vezes o tamanho dos arquivos JPG. Para um PDF de texto e linhas, o PNG deixa as linhas finas nítidas, e os arquivos dele, somados, têm aproximadamente entre a metade e o dobro do tamanho dos arquivos JPG, e podem até ser os menores. Nos dois formatos, o texto da página vira parte da imagem e não dá mais para selecionar nem buscar.',
     },
     {
-      q: 'Dá para converter um PDF com restrições de edição ou com senha?',
-      a: 'Um PDF que só tem restrições de edição é desenhado como aparece na tela. Um PDF que pede senha para abrir é recusado, com um link para Desbloquear PDF: lá você tira a senha primeiro e depois traz o resultado de volta para cá.',
-    },
-    {
-      q: 'Meu PDF é enviado para algum lugar?',
-      a: 'Não. O PDF.js desenha as páginas no seu aparelho, dentro do navegador, e as imagens também são feitas ali. Nada vai para um servidor. Abra a aba Rede do navegador enquanto converte: nenhuma requisição leva os seus arquivos.',
+      q: 'Dá para converter um PDF que pede senha para abrir?',
+      a: 'Do jeito que ele está, não. Tire a senha na Desbloquear PDF primeiro e depois traga a cópia desbloqueada de volta para cá.',
     },
   ],
   privacyHeading: 'Privacidade',
   privacyNote:
-    'Seus PDFs são desenhados no seu aparelho e nunca são enviados a um servidor. As imagens saem sem dados Exif e sem localização GPS.',
+    'Seus PDFs são desenhados no seu aparelho e nunca são enviados a um servidor. As imagens também são feitas ali.',
   relatedHeading: 'Ferramentas relacionadas',
   // F18 (decision 5; DECISOES § 725): the table of the presets of this tool, with their links.
   presets: {

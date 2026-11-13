@@ -10,10 +10,10 @@ const texts: PdfToolTexts<ImagesTexts> = {
   h1: 'PDF to JPG',
   howHeading: 'How it works',
   howSteps: [
-    'Pick JPG or PNG, a resolution, and all the pages or a range such as 1-3, 5, 8-10.',
-    'Drop your PDFs on the box, choose them, or paste them. Add as many as you like.',
-    'Oli draws each page as an image in your browser, one PDF after another.',
-    'Download one image, or all of them together in a ZIP.',
+    'Pick JPG or PNG, a resolution, and which pages to convert.',
+    'Drop your PDFs on the box, choose them, or paste them.',
+    'Oli draws each page as an image, one PDF after another.',
+    'Download the images.',
   ],
   specsHeading: 'What goes in and what comes out',
   specs: {
@@ -22,7 +22,7 @@ const texts: PdfToolTexts<ImagesTexts> = {
     rows: [
       ['What it takes', 'PDF files, as many as you like. Oli checks what is inside each file, not its name or its ending.'],
       ['What comes out', 'One image for each page, named after the PDF with -page-1, -page-2 and so on, like report-page-1.jpg.'],
-      ['Formats', 'JPG at quality 92, or PNG. On pages with photos the JPG files are much smaller; PNG keeps text and sharp lines crisp.'],
+      ['Formats', 'JPG, saved at quality 92, or PNG, saved without loss.'],
       ['Resolution', '72 ppi for the screen, 150 ppi for general use (the default) or 300 ppi for printing.'],
       ['Pages', 'All the pages, or a range such as 1-3, 5, 8-10. The same range applies to every PDF.'],
       ['Many images', 'Several images download together as one ZIP.'],
@@ -36,28 +36,24 @@ const texts: PdfToolTexts<ImagesTexts> = {
   faq: [
     {
       q: 'Which resolution should I choose?',
-      a: 'Use 72 ppi to look at the pages on a screen, 150 ppi for general use, and 300 ppi when you plan to print them. A higher resolution makes sharper images, but larger files that take longer to make. A very large page, over 16.7 megapixels, is drawn at a lower resolution because the browser cannot draw it bigger, and the result says so.',
+      a: 'Match it to where the images go: the lowest for a screen, the highest for print. Each step up makes sharper images, but bigger files that take longer to make: a US Letter page comes out at 612 × 792 pixels at the lowest resolution, 1275 × 1650 at the default and 2550 × 3300 at the highest.',
     },
     {
-      q: 'Can I convert only some pages?',
-      a: 'Yes. Choose Page range and type the pages, like 1-3, 5, 8-10. Oli makes images only for those pages. When you add several PDFs, the same range applies to each of them.',
+      q: 'What if one of my PDFs has fewer pages than the range?',
+      a: 'Oli makes images of the pages in the range that this PDF has. A PDF with no page in the range at all is left out, and its row tells you.',
     },
     {
       q: 'Should I pick JPG or PNG?',
-      a: 'JPG, saved at quality 92, suits pages with photos: for a PDF of photos, the PNG files of all its pages add up to several times the size of the JPG files. PNG loses nothing, so the text and thin lines of a page stay crisp; for a PDF of text and lines, the PNG files of all its pages add up to between about half and about twice the size of the JPG files, and can even be the smaller ones. In both cases the text of the page becomes part of the picture, so it can no longer be selected or searched.',
+      a: 'For a PDF of photos, JPG: the PNG files of all its pages add up to several times the size of the JPG files. For a PDF of text and lines, PNG keeps thin lines crisp, and its files add up to between about half and about twice the size of the JPG files, so they can even be the smaller ones. Either way, the text of the page becomes part of the picture and can no longer be selected or searched.',
     },
     {
-      q: 'Can I convert a PDF that has editing restrictions or a password?',
-      a: 'A PDF that has only editing restrictions is drawn as it appears on screen. A PDF that needs a password to open is turned away with a link to Unlock PDF, where you can remove the password first and then bring the result back here.',
-    },
-    {
-      q: 'Is my PDF uploaded?',
-      a: 'No. PDF.js draws the pages on your device, inside your browser, and the images are made there too. Nothing is sent to a server. Open the Network tab of your browser while you convert: no request carries your files.',
+      q: 'Can I convert a PDF that needs a password to open?',
+      a: 'Not as it is. Take the password off in Unlock PDF first, then bring the unlocked copy back here.',
     },
   ],
   privacyHeading: 'Privacy',
   privacyNote:
-    'Your PDFs are drawn on your device and are never sent to a server. The images come out without Exif data or GPS location.',
+    'Your PDFs are drawn on your device and are never sent to a server. The images are made there too.',
   relatedHeading: 'Related tools',
   // F18 (decision 5; DECISOES § 725): the table of the presets of this tool, with their links.
   presets: {

@@ -13,9 +13,9 @@ const texts: PdfToolTexts<PngTexts> = {
   h1: 'PDF para PNG',
   howHeading: 'Como converter um PDF em PNG',
   howSteps: [
-    'Escolha uma resolução e todas as páginas ou um intervalo como 2-4, 7.',
+    'Escolha uma resolução e quais páginas converter.',
     'Solte seus PDFs na caixa, escolha os arquivos ou cole. A Oli transforma cada página num PNG assim que o arquivo é lido.',
-    'Baixe o PNG, ou todas as imagens juntas num ZIP.',
+    'Baixe os arquivos PNG.',
   ],
   specsHeading: 'Como são os arquivos PNG',
   specs: {
@@ -28,7 +28,6 @@ const texts: PdfToolTexts<PngTexts> = {
       ['Páginas', 'Todas as páginas, ou um intervalo como 2-4, 7, que vale para cada PDF que você puser.'],
       ['O que sai', 'Um PNG para cada página, com o nome do PDF e -pagina-1, -pagina-2 e assim por diante, como relatorio-pagina-1.png. Várias imagens são baixadas juntas num ZIP só.'],
       ['Fundo', 'Cada página é desenhada sobre branco, como um leitor de PDF mostra, então o PNG não tem áreas transparentes.'],
-      ['Tamanho do arquivo', 'Num PDF de fotos, os arquivos PNG de todas as páginas, somados, têm várias vezes o tamanho dos arquivos JPG. Num PDF de texto e linhas, os dois têm tamanhos parecidos: os arquivos PNG de todas as páginas, somados, têm aproximadamente entre a metade e o dobro do tamanho dos arquivos JPG, e podem até ser os menores.'],
       ['Páginas muito grandes', 'Uma página acima de 16,7 megapixels na resolução escolhida é grande demais para o navegador desenhar, então sai menor, e o resultado avisa.'],
       ['Metadados', 'Os arquivos PNG saem sem metadados: sem dados Exif e sem localização GPS.'],
       ['PDFs com restrições', 'Um PDF que só tem restrições de edição é desenhado do mesmo jeito. Um PDF com senha para abrir é recusado, com um link para Desbloquear PDF.'],
@@ -38,27 +37,23 @@ const texts: PdfToolTexts<PngTexts> = {
   faq: [
     {
       q: 'Quando o PNG é melhor que o JPG para uma página de PDF?',
-      a: 'Para páginas de texto, tabelas, gráficos e desenhos de linhas. O PNG é salvo sem perda, então as letras, as linhas finas e as bordas continuam bem definidas, sem o borrão que o JPG pode deixar em volta delas. Para páginas que são quase só fotos, a PDF para JPG dá um arquivo menor com a mesma aparência.',
+      a: 'Para páginas de texto, tabelas, gráficos e desenhos de linhas: as letras, as linhas finas e as bordas continuam bem definidas, sem o borrão que o JPG pode deixar em volta delas. Para páginas que são quase só fotos, a PDF para JPG dá arquivos menores com a mesma aparência.',
     },
     {
       q: 'Os arquivos PNG são maiores que os JPG?',
-      a: 'Num PDF de fotos, sim: os arquivos PNG de todas as páginas, somados, têm várias vezes o tamanho dos arquivos JPG, porque o PNG guarda cada detalhe da imagem, e o JPG descarta detalhes que o olho quase não vê para ocupar menos espaço. Num PDF de texto e linhas, nem sempre: os arquivos PNG de todas as páginas, somados, têm aproximadamente entre a metade e o dobro do tamanho dos arquivos JPG, e podem até ser os menores. Se as páginas são fotos e um arquivo pequeno importa mais do que um texto nítido, use a PDF para JPG.',
+      a: 'Num PDF de fotos, sim: os arquivos PNG de todas as páginas, somados, têm várias vezes o tamanho dos arquivos JPG, porque o PNG guarda cada detalhe da imagem, e o JPG descarta detalhes que o olho quase não vê para ocupar menos espaço. Num PDF de texto e linhas, nem sempre: os arquivos PNG de todas as páginas, somados, têm aproximadamente entre a metade e o dobro do tamanho dos arquivos JPG, e podem até ser os menores.',
     },
     {
       q: 'Qual resolução escolher para as imagens PNG?',
-      a: 'Use 72 ppi para mostrar as páginas numa tela, 150 ppi para uso geral e 300 ppi quando for imprimir. O dobro de ppi dá quatro vezes mais pixels, então os arquivos crescem rápido a 300 ppi.',
+      a: 'A menor que fique nítida para o destino das imagens, porque o dobro de ppi dá quatro vezes mais pixels: uma tela precisa de bem menos pixels que uma página impressa, e os arquivos crescem rápido na resolução mais alta.',
     },
     {
       q: 'Ainda dá para selecionar o texto no PNG?',
       a: 'Não. O texto da página vira parte da imagem, então não dá mais para selecionar, buscar nem copiar. Guarde o PDF quando você precisar do texto em si.',
     },
-    {
-      q: 'Meu PDF é enviado para fazer os arquivos PNG?',
-      a: 'Não. O PDF.js desenha cada página no seu aparelho, dentro do navegador, e os arquivos PNG também são feitos ali. Nada vai para um servidor, como a aba Rede do navegador mostra.',
-    },
   ],
   privacyHeading: 'Privacidade',
-  privacyNote: 'Seus PDFs viram arquivos PNG no seu aparelho e nunca são enviados a um servidor. As imagens saem sem dados Exif e sem localização GPS.',
+  privacyNote: 'Seus PDFs viram arquivos PNG no seu aparelho e nunca são enviados a um servidor.',
   relatedHeading: 'Ferramentas relacionadas',
   panel: {
     suffix: 'pagina',
