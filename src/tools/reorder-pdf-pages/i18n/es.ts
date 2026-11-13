@@ -34,7 +34,7 @@ const texts: PdfToolTexts<ReorderTexts> = {
   faq: [
     {
       q: '¿También puedo girar o quitar páginas aquí?',
-      a: 'Aquí no: esta herramienta solo cambia el orden. Organizar PDF mueve, gira y quita páginas en una sola cuadrícula.',
+      a: 'Aquí no: esta herramienta solo cambia el orden. Organizar PDF mueve, gira y quita las páginas en una sola cuadrícula.',
     },
     {
       q: '¿Puedo mover páginas con el teclado?',
