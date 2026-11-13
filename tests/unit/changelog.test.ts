@@ -13,7 +13,10 @@
 //   does not; no digit (no count of tools, no phase name, no number from outside a registry) and no exclamation.
 // The CI clones the whole history (fetch-depth: 0, DECISOES § 75). On a branch or a pull request the pages of the run are
 // born in a commit with no "(#N)": the entry of the run has pr null. Once that run is merged, the next run gives the entry
-// its pr (the test then finds the squash commit of the run as the birth).
+// its pr (the test then finds the squash commit of the run as the birth). In between, on main and on every pull request
+// opened before the next run, the open entry (pr null) is the one of the run whose commit brought it into
+// src/platform/changelog.ts: once that commit is the squash commit "(#N)" of the run, the pages born there are its births,
+// its date is that day give or take a day, and no other entry may claim #N (F19a review, E-1; DECISOES § 776).
 import { execFileSync } from 'node:child_process';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { CHANGELOG, PAGE_GROUPS, birthOf, entriesIn, lastmodOf, newestIn, pagesIn, type ChangeEntry, type PageGroup } from '../../src/platform/changelog.ts';
@@ -95,6 +98,9 @@ describe('the changelog against the history of git', () => {
   /** The first-parent history of HEAD, oldest first: the squash commits of main, then those of the branch. */
   let log: { sha: string; date: string; subject: string; pr: number | null }[] = [];
   let launch = -1;
+  /** The open entry (pr null, the newest) and the first-parent commit that brought it into the changelog. */
+  const open = entries.at(-1)?.pr === null ? entries.at(-1) : undefined;
+  let openAt = -1;
   // stderr aside: the first commits have no src/platform/site.ts, and git says so.
   const git = (...args: string[]) => execFileSync('git', args, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] });
 
@@ -114,7 +120,16 @@ describe('the changelog against the history of git', () => {
         return false;
       }
     });
+    if (open) {
+      // The oldest first-parent commit whose changelog has the id of the open entry: a commit of the branch before the
+      // merge, the squash commit of the run after it. An entry not committed yet is in none of them (openAt stays -1).
+      const added = git('log', '--first-parent', '--reverse', '--format=%H', '-S', `id: '${open.id}'`, 'HEAD', '--', 'src/platform/changelog.ts').trim().split('\n')[0] ?? '';
+      openAt = log.findIndex((commit) => commit.sha === added);
+    }
   }, 60_000);
+
+  /** The pull request of the open entry once its run is merged: the "(#N)" of the commit that brought it; else null. */
+  const openPr = () => (openAt >= 0 ? (log[openAt]?.pr ?? null) : null);
 
   it('has the launch in the history, and LAUNCH_DATE is its day and the date of the first entry', () => {
     expect(launch, 'a commit with LAUNCHED = true').toBeGreaterThanOrEqual(0);
@@ -133,15 +148,24 @@ describe('the changelog against the history of git', () => {
       const day = brasiliaDay(commits[0]?.date ?? '');
       expect(daysBetween(entry.date, day), `${entry.id}: ${entry.date}, #${entry.pr} on ${day}`).toBeLessThanOrEqual(1);
     }
+    // The open entry of a merged run: the day of its squash commit, give or take a day, and a pull request no entry claims.
+    const pr = openPr();
+    if (open && pr !== null) {
+      expect(entries.filter((entry) => entry.pr === pr), `#${pr}, the squash commit of ${open.id}`).toEqual([]);
+      const day = brasiliaDay(log[openAt]?.date ?? '');
+      expect(daysBetween(open.date, day), `${open.id}: ${open.date}, #${pr} on ${day}`).toBeLessThanOrEqual(1);
+    }
   });
 
   it('leaves no pr only on the newest entry, never after today in Brasília', () => {
-    const open = entries.filter((entry) => entry.pr === null);
-    for (const entry of open) expect(entry, entry.id).toBe(entries.at(-1));
-    for (const entry of open) expect(entry.date <= brasiliaDay(Date.now()), entry.id).toBe(true);
-    // The newest entry with no pr is not older than the last squash commit of the history it sits on.
-    const lastPr = log.filter((commit) => commit.pr !== null).at(-1);
-    for (const entry of open) expect(entry.date >= brasiliaDay(lastPr?.date ?? '1970-01-01'), entry.id).toBe(true);
+    const unnumbered = entries.filter((entry) => entry.pr === null);
+    for (const entry of unnumbered) expect(entry, entry.id).toBe(entries.at(-1));
+    for (const entry of unnumbered) expect(entry.date <= brasiliaDay(Date.now()), entry.id).toBe(true);
+    // The newest entry with no pr is not older than the last squash commit before the commit that brought it (all of the
+    // history while that commit is of the branch, or not committed yet).
+    const before = openAt >= 0 ? log.slice(0, openAt) : log;
+    const lastPr = before.filter((commit) => commit.pr !== null).at(-1);
+    for (const entry of unnumbered) expect(entry.date >= brasiliaDay(lastPr?.date ?? '1970-01-01'), entry.id).toBe(true);
   });
 
   it('gives every page the birth git gives it: the pull request that brought its file to the history', () => {
@@ -157,8 +181,10 @@ describe('the changelog against the history of git', () => {
         expect(first, `${file} in the history`).toBeGreaterThanOrEqual(0);
         const want = first <= launch ? log[launch]?.pr : log[first]?.pr;
         const born = entries[birthOf(route.id, lang) ?? -1];
+        // The open entry stands for the pull request of its merged run (openPr), and for no number before the merge.
+        const says = born !== undefined && born === open ? openPr() : born?.pr;
         checked++;
-        if (born?.pr !== want) wrong.push(`${route.id} ${lang}: the changelog says #${born?.pr}, git says #${want} (${log[first]?.subject})`);
+        if (says !== want) wrong.push(`${route.id} ${lang}: the changelog says #${says}, git says #${want} (${log[first]?.subject})`);
       }
     }
     expect(wrong).toEqual([]);
