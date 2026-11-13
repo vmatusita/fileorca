@@ -9017,3 +9017,36 @@ Nenhum teste foi pulado, desligado ou afrouxado: cada limite que existia continu
 - **O texto** (`src/i18n/{en,pt,es}/whats-new.ts`): en "This page lists every change you can see, and How it works shows what happens to your file and how to check it in your browser. The tool and calculator pages now say each thing in one place, and About says when the site went live." (pt e es no mesmo sentido, § 755).
 - **Depois do merge:** a F19b põe o número da PR desta run e o dia do merge na `trust-and-content` antes de acrescentar a entrada dela (pendência F19a N-2): o `changelog.test.ts` acusa até lá.
 - **Teste:** `tests/unit/changelog.test.ts` (o nascimento das duas páginas, o `pr: null` só na mais nova, nunca depois de hoje), `updated-dates.test.ts` e `declared-dates.test.ts` sobre o `dist/`; `pnpm gate:seo` (o `lastmod` de cada URL igual ao do changelog).
+
+## § 774 · As frentes da F19a e a junção (F19a, "Como trabalhar", passo 4; regra 6 de toda run)
+
+- **A fatia 1** (o agente principal, no checkout principal, na `fase-19a`): o `changelog.ts` com a API, o `LAUNCH_DATE`, as duas rotas, o `<lastmod>` e o portão, as chaves novas do `common.ts`, a linha "Atualizado em", o link "How to check" nos moldes e o rodapé (§ 751 a § 754), com os testes antigos que mudaram por causa dela (§ 772, itens 1 a 7).
+- **As frentes**, cada uma num agente Opus numa worktree própria (um workflow), a partir do `af056d6`, com o `git merge --ff-only fase-19a` como primeiro passo: N (a Novidades, o histórico e os testes das datas), C (a Como funciona, o Sobre, a foto e a autoria) e R0 (o `repeticao.ts` e o gancho no `gate:conteudo`) em paralelo; depois de R0, quatro agentes de texto a partir da branch dela, cada um com as próprias páginas: R-image (as 45 de imagem), R-pdf (as 45 de PDF), R-qr-life (o QR code e as 11 de casa e saúde) e R-money (as 44 de dinheiro). Cada frente escreveu os § dela em rascunho nas notas (`.cache/f19a/fronts/<frente>/notes.md`, fora do Git), e o agente principal os pôs aqui na ordem (§ 755 a § 770).
+- **A junção:** as branches na ordem N, C, R-image (que traz R0), R-pdf, R-qr-life e R-money, cada uma com `git merge --no-ff -F <arquivo>` e o trailer `Co-Authored-By`; nenhum conflito. Depois:
+  - o guia falso do `conteudo.test.ts` ganhou o quadro do autor (o patch que a frente C deixou, porque o arquivo era de R; § 772, item 12);
+  - o `docs/OPERACAO.md` citava o `changelog.ts` sem a pasta, e o `operacao.test.ts` pede o caminho do repositório (corrigido antes do commit);
+  - o `layout-shift.spec.ts` da frente N (escrito com a view mínima) achou um CLS de 0,007 em pt e de 0,001 em es na Como funciona final da frente C, a 360 px com a Figtree atrasada (os parágrafos mudavam de largura quando a Figtree chegava); a view passou à Figtree Steady, como a Novidades (§ 756), e ficou com 0,000 nos três idiomas.
+- **O que passou na junção:** `pnpm tipos` (0 erro), `pnpm lint`, o Vitest inteiro (150 arquivos, 2.372 testes, depois da correção do `OPERACAO.md`), os portões `conteudo` ("148 sem repetição"), `seo`, `links`, `dinheiro-saude`, `licencas`, `prontidao` (22 itens), `cabecalhos` e `worker`, o `lint:texto` contra a `origin/main` (159 arquivos, 10.445 textos, 0 erro de gramática, 1.846 avisos) e os specs das frentes nos dois navegadores (`footer-phone`, `layout-shift`, `budgets`, `i18n-budgets`, `a11y`, `axe-calc-states`, `launch-claims`, `institutional`, `tool-guides`, `guide-page`, `design`, `tool-i18n`, `image-presets`, `pdf-presets`, `tool-slot`, `qr-code`, `qr-layout`, `money-home`, `money-health`, `money-life-privacy` e `money-card`: 2.668 passaram, 3 pulados de antes, só no Chromium, e 1 reprovado, o CLS acima, que passou depois da correção).
+- **O que as frentes acharam umas das outras e se resolveu na junção:** o erro de `lint:texto` da introdução da Novidades em inglês (fatia 1) a frente N corrigiu; o `link-in-text-block` do "How to check" no tema escuro, que a frente R-qr-life viu na branch dela, a frente C já tinha corrigido (§ 769); os 6 testes do `conteudo.test.ts` que a R0 deixou vermelhos (o QR real repetia fatos) passaram com o corte da R-qr-life, sem mudança no teste; o `gate:prontidao` da Como funciona mínima (42 palavras) passou com o texto da frente C (1.187, 1.260 e 1.228 palavras no `<main>`).
+- **O JS:** os mesmos 70 arquivos de `dist/_astro/` do `dist-base`, com os mesmos nomes e os mesmos 1.644.437 bytes em gzip: a run não mudou nenhum JS, e as duas páginas novas carregam só o inline (como o Sobre).
+
+## § 775 · O orçamento, os anúncios, o CLS, o axe e o Lighthouse (F19a, critério 9)
+
+- **O orçamento:** nenhum JS novo nem mudado (os 70 arquivos de `dist/_astro/` iguais aos do `dist-base`, § 774). A Novidades e a Como funciona carregam só o inline, como o Sobre: no `budgets.spec.ts`, 4,8 KB e 5,0 KB em gzip com 4 requisições (en), e no `i18n-budgets.spec.ts` os mesmos arquivos de JS do Sobre do idioma (pt e es). O HTML da Como funciona tem uns 61 KB (a tabela e as cinco partes), nenhuma imagem.
+- **Os anúncios:** as duas páginas novas não têm `adArea` e entram na lista das 33 páginas livres (`ads.spec.ts`, § 772, item 6). No build de teste com os IDs de anúncio, o `ads.spec.ts` e o `fo-ad-map.spec.ts` inteiros passaram nos dois navegadores na junção (com o `navigation`, o `home-sea`, os três de privacidade, o `events` e o `sw-offline`: 726 testes, todos verdes): a distância de 150 px e a densidade das páginas cortadas passam como antes. As páginas de imagem e PDF que ficaram abaixo de 600 palavras no `<main>` perdem a lateral 2 pelo próprio mapa (`RAIL2_WORDS`) e ficam com 3 caixas a 1280; a menor folga do `gate:prontidao` é a de `/es/rotar-pdf/` (8 palavras, § 770). Nenhum texto entrou para ganhar palavras.
+- **O CLS:** 0,000 nas seis páginas novas a 360 px com a Figtree atrasada no Chromium (`layout-shift.spec.ts`, bloco F19a), e a trilha, o H1 e o aviso parados nos dois navegadores; as páginas de ferramenta com a linha "Atualizado em" seguem nos blocos de antes do mesmo spec.
+- **O axe:** o `a11y.spec.ts` e o `axe-calc-states.spec.ts` inteiros, nos dois navegadores, sem violação (com o sublinhado do "How to check", § 769).
+- **O Lighthouse** (celular, três execuções por página, a representativa; a configuração temporária `.cache/f19a/lhci/lighthouserc.json`, com o `lighthouserc.json` do projeto sem mudança; o `dist/` da junção com a correção da § 774):
+
+  | Página | Desempenho | Acessibilidade | Boas práticas | SEO | LCP | CLS | TBT |
+  | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+  | `/whats-new/` | 100 | 100 | 100 | 100 | 1,74 s | 0 | 0 ms |
+  | `/pt/novidades/` | 99 | 100 | 100 | 100 | 1,89 s | 0 | 0 ms |
+  | `/es/novedades/` | 100 | 100 | 100 | 100 | 1,74 s | 0 | 0 ms |
+  | `/how-it-works/` | 100 | 100 | 100 | 100 | 1,74 s | 0 | 0 ms |
+  | `/pt/como-funciona/` | 99 | 100 | 100 | 100 | 1,89 s | 0 | 0 ms |
+  | `/es/como-funciona/` | 99 | 100 | 100 | 100 | 1,89 s | 0 | 0 ms |
+  | `/about/` | 100 | 100 | 100 | 100 | 1,59 s | 0 | 0 ms |
+  | `/compress-image/` | 99 | 100 | 100 | 100 | 1,97 s | 0 | 0 ms |
+
+  Todas acima de 90 nas quatro categorias (critério 9); o `lhci assert` passou nas 24 execuções.
