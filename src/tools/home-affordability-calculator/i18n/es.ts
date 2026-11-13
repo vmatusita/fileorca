@@ -82,8 +82,8 @@ export default {
   faqHeading: 'Preguntas sobre cuánta casa puedes pagar',
   faq: [
     {
-      q: '¿De dónde salen el 28 % y el 36 %?',
-      a: 'Son reglas generales comunes para la parte del ingreso mensual bruto que va a la vivienda y la que va a todas las deudas. La CFPB explica que cada tipo de préstamo y cada prestamista fija límites distintos, así que cambia los dos campos para que coincidan con los tuyos.',
+      q: '¿Por qué una tasa más alta baja el precio?',
+      a: 'Una parte mayor de cada pago se va en intereses, así que el mismo margen mensual paga un préstamo más pequeño. Prueba subir o bajar la tasa un punto para ver cuánto se mueve el precio.',
     },
     {
       q: '¿Por qué el precio es más bajo que el que me dijo un prestamista?',
@@ -91,7 +91,7 @@ export default {
     },
     {
       q: '¿Qué límite me afecta a mí?',
-      a: 'El que deja menos margen. Con pocas deudas, el límite de vivienda suele fijar el precio; con un préstamo para auto o préstamos estudiantiles, muchas veces lo fija el límite de deuda total. Las dos tarjetas debajo del resultado muestran los dos.',
+      a: 'Con pocas deudas, el límite de vivienda suele fijar el precio; con un préstamo para auto o préstamos estudiantiles, muchas veces lo fija el límite de deuda total. Las dos tarjetas debajo del resultado muestran los dos.',
     },
     {
       q: '¿Lo máximo que puedo pagar es lo que debo gastar?',

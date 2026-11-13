@@ -93,8 +93,8 @@ export default {
       a: 'Yes. Typing the same rate isolates the effect of the term alone; typing the rates you were quoted shows the real offers.',
     },
     {
-      q: 'What about the down payment and PMI?',
-      a: 'The loan amount is the same for both terms, so PMI, tax and insurance do not change the comparison. The mortgage calculator adds them to the payment.',
+      q: 'Where do I see taxes, insurance and PMI?',
+      a: 'In the mortgage calculator, which adds them to the payment of one term at a time.',
     },
     {
       q: 'Does the table show both loans?',

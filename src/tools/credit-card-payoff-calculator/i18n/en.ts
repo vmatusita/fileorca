@@ -74,11 +74,11 @@ export default {
     },
     {
       q: "What if my payment doesn't cover the interest?",
-      a: 'Then the balance never goes down. The calculator says so and tells you the smallest monthly payment that starts to lower it.',
+      a: 'The calculator says so and tells you the smallest monthly payment that starts to lower the balance.',
     },
     {
-      q: 'Why can my statement show slightly different interest?',
-      a: 'Many issuers work out interest daily on the average daily balance. The calculator uses the APR divided by 12 each month, a simpler rule that lands close but not to the cent.',
+      q: 'How long a payoff can it work out?',
+      a: 'Up to 100 years with the payment you pick; past that, it asks for a larger payment. For a target date, up to 600 months.',
     },
     {
       q: 'Does it work with several cards?',

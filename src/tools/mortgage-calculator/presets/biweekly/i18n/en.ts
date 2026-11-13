@@ -50,13 +50,13 @@ export default {
     {
       heading: 'Where the savings come from',
       paragraphs: [
-        'A year has 52 weeks, so half a payment every two weeks is 26 half payments, which add up to 13 monthly payments instead of 12. That extra payment a year goes to principal, and the interest charged every two weeks on a smaller balance does the rest.',
+        'The extra monthly payment that the half payments add each year goes to principal, and the interest charged every two weeks on a smaller balance does the rest.',
       ],
     },
     {
       heading: 'Biweekly programs that charge a fee',
       paragraphs: [
-        'You can usually reach the same result by adding one twelfth of a payment to each monthly payment, at no cost. The CFPB sued a company that charged enrollment and yearly fees for biweekly plans, saying the fees could take years to recover. Ask your servicer how it applies payments before you sign up for a program.',
+        'The CFPB sued a company that charged enrollment and yearly fees for biweekly plans, saying the fees could take years to recover.',
       ],
     },
   ],
@@ -85,12 +85,12 @@ export default {
       a: 'No. It is the same loan paid in halves every two weeks. Whether the servicer credits each half at once or holds it until the monthly due date changes how much you save.',
     },
     {
-      q: 'Why does it save money?',
-      a: 'Mostly because 26 half payments make one extra monthly payment a year, and that extra lowers the balance. Interest charged every two weeks adds a little more.',
+      q: 'Do taxes, insurance and PMI change the saving?',
+      a: 'No. The half payment and the saving come from the loan alone, principal and interest. Taxes, insurance, PMI and HOA dues only add to what you pay each month.',
     },
     {
       q: 'Can I get the same result without a biweekly plan?',
-      a: 'Close to it, by paying one twelfth more with each monthly payment. The extra payments calculator shows that case.',
+      a: 'Close to it, at no cost, by paying one twelfth more with each monthly payment. The extra payments calculator shows that case.',
     },
     {
       q: 'Does biweekly fit my pay schedule?',

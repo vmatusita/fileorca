@@ -74,11 +74,11 @@ export default {
     },
     {
       q: '¿Y si mi pago no cubre los intereses?',
-      a: 'Entonces el saldo nunca disminuye. La calculadora te lo dice y te muestra el pago mensual más pequeño con el que empieza a bajar.',
+      a: 'La calculadora te lo dice y te muestra el pago mensual más pequeño con el que el saldo empieza a bajar.',
     },
     {
-      q: '¿Por qué mi estado de cuenta puede mostrar intereses un poco distintos?',
-      a: 'Muchos emisores calculan los intereses a diario sobre el saldo diario promedio. La calculadora usa la APR dividida entre 12 cada mes, una regla más simple que da un resultado cercano, pero no exacto al centavo.',
+      q: '¿Hasta qué plazo puede calcular?',
+      a: 'Hasta 100 años con el pago que elijas; si tardaría más, te pide un pago mayor. Para una fecha meta, hasta 600 meses.',
     },
     {
       q: '¿Funciona con varias tarjetas?',

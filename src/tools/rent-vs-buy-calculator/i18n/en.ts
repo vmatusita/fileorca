@@ -88,8 +88,8 @@ export default {
       a: 'The home is most of what the owner has at the end. A point more or less of yearly change, over ten years, moves the gap more than most other fields. Try a few values.',
     },
     {
-      q: 'What does "buying catches up" mean?',
-      a: 'The first year in which selling the home and paying off the loan would leave the owner at least as much as the renter has saved. Before it, the costs of buying weigh more.',
+      q: 'What happens before buying catches up?',
+      a: 'The costs of buying weigh more: if you sold the home in one of those years, after paying off the loan you would have less than renting would have left you.',
     },
     {
       q: 'Why are taxes left out?',

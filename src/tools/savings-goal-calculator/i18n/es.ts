@@ -78,7 +78,7 @@ export default {
   faq: [
     {
       q: '¿Por qué el depósito es menor que la meta dividida entre los meses?',
-      a: 'Los intereses hacen parte del trabajo, y lo que ya ahorraste también crece. Al 0 % el depósito es justo lo que falta dividido entre los meses, redondeado hacia arriba al centavo: la misma cuenta, sin intereses, de la hoja de trabajo de la CFPB.',
+      a: 'Los intereses hacen parte del trabajo, y lo que ya ahorraste también crece. Al 0 % el depósito es lo que falta dividido entre los meses: la misma cuenta, sin intereses, de la hoja de trabajo de la CFPB.',
     },
     {
       q: '¿Qué tasa debo usar?',
@@ -86,7 +86,7 @@ export default {
     },
     {
       q: '¿Y si me salto un mes?',
-      a: 'El plan supone un depósito cada mes. Para ponerte al día, vuelve a hacer la cuenta con lo que tengas ahorrado en ese momento y los meses que falten.',
+      a: 'Para ponerte al día, vuelve a hacer la cuenta con lo que tengas ahorrado en ese momento y los meses que falten.',
     },
     {
       q: '¿Puede planear una meta para dentro de muchos años?',

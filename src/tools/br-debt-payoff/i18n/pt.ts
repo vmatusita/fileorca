@@ -69,12 +69,12 @@ export default {
   faqHeading: 'Perguntas sobre sair das dívidas',
   faq: [
     {
-      q: 'Qual é a diferença entre bola de neve e avalanche?',
-      a: 'Na bola de neve você quita primeiro a menor dívida, o que dá uma vitória rápida e libera um mínimo mais cedo. Na avalanche você quita primeiro a de juros mais altos, o que normalmente economiza mais juros.',
+      q: 'Qual método paga menos juros?',
+      a: 'Normalmente a avalanche, porque a dívida de juros mais altos para de cobrar primeiro. Se as dívidas ficam na mesma ordem por saldo e por juros, os dois métodos dão o mesmo resultado.',
     },
     {
-      q: 'Qual método é melhor?',
-      a: 'A avalanche costuma pagar menos juros; a bola de neve costuma motivar mais. A calculadora mostra a diferença em reais e em meses, para você ver se a economia vale a troca.',
+      q: 'Então por que escolher a bola de neve?',
+      a: 'Cada dívida pequena quitada é uma vitória rápida, e isso costuma motivar mais. A calculadora mostra a diferença em reais e em meses, para você ver se a economia da avalanche vale a troca.',
     },
     {
       q: 'Os juros do cartão entram como?',
@@ -82,7 +82,7 @@ export default {
     },
     {
       q: 'E se o orçamento não cobrir os juros?',
-      a: 'A calculadora avisa e diz o orçamento mínimo para a dívida começar a cair. Com menos que isso, o saldo cresce todo mês, e o caminho é aumentar o valor extra ou renegociar.',
+      a: 'A calculadora avisa e diz o orçamento mínimo para a dívida começar a cair. Com menos que isso, o saldo cresce todo mês.',
     },
   ],
   privacyHeading: 'Privacidade',

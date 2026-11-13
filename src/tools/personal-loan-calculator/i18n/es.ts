@@ -42,13 +42,13 @@ export default {
     'Escribe el monto que pedirías prestado y la tasa de la oferta.',
     'Escribe el plazo en meses, de 1 a 120.',
     'Agrega el cargo por emisión como porcentaje, si el prestamista lo cobra, para ver la APR.',
-    'Abre la tabla o guárdala en PDF o CSV para comparar ofertas lado a lado.',
+    'Abre la tabla, o guárdala en PDF o CSV.',
   ],
   worksHeading: 'Cómo se calculan el pago y la APR',
   formulaHeading: 'La fórmula',
   formula: [
     'El pago es M = P × r × (1 + r)^n ÷ ((1 + r)^n − 1), donde P es el monto del préstamo, r es la tasa anual dividida entre 12 y n es el número de meses.',
-    'Con un cargo, recibes menos de lo que devuelves. La APR es la tasa anual con la que los pagos valen exactamente el dinero que recibes: la tasa mensual x que resuelve (monto − cargo) = M ÷ (1 + x) + M ÷ (1 + x)^2 + … + M ÷ (1 + x)^n, multiplicada por 12. Se muestra con dos decimales.',
+    'La APR es la tasa anual con la que los pagos valen exactamente el dinero que recibes: la tasa mensual x que resuelve (monto − cargo) = M ÷ (1 + x) + M ÷ (1 + x)^2 + … + M ÷ (1 + x)^n, multiplicada por 12. Se muestra con dos decimales.',
   ],
   premisesHeading: 'Supuestos',
   exampleHeading: 'Ejemplo resuelto',
@@ -74,11 +74,11 @@ export default {
   faq: [
     {
       q: '¿Por qué la APR es más alta que la tasa de interés?',
-      a: 'La APR cuenta el cargo por emisión como un costo del préstamo. Devuelves el monto completo pero recibes menos, así que el costo anual del dinero que de verdad recibes es más alto que la tasa del contrato.',
+      a: 'La APR cuenta el cargo por emisión como un costo del préstamo, así que el costo anual del dinero que de verdad recibes es más alto que la tasa del contrato.',
     },
     {
-      q: '¿Cómo se cobra el cargo por emisión?',
-      a: 'Aquí se descuenta del dinero que recibes, que es como lo cobran muchos prestamistas. Si el tuyo lo suma al saldo, escribe como monto el saldo completo, con el cargo incluido, y el cargo como porcentaje de ese saldo: el dinero que recibes y los pagos salen iguales, y la APR también.',
+      q: '¿Y si mi prestamista suma el cargo al saldo?',
+      a: 'Entonces escribe como monto el saldo completo, con el cargo incluido, y el cargo como porcentaje de ese saldo: el dinero que recibes y los pagos salen iguales, y la APR también.',
     },
     {
       q: '¿Un plazo más largo ahorra dinero?',
@@ -86,11 +86,11 @@ export default {
     },
     {
       q: '¿La APR de aquí es la misma que la de mi divulgación del préstamo?',
-      a: 'Usa el método de la Regulation Z para un préstamo con pagos mensuales iguales y un primer período normal. Una divulgación puede incluir otros cargos o un primer período irregular, así que puede haber pequeñas diferencias.',
+      a: 'No siempre. Una divulgación puede incluir otros cargos o un primer período irregular, así que puede haber pequeñas diferencias.',
     },
     {
       q: '¿Puedo comparar dos ofertas?',
-      a: 'Escribe una oferta y copia el enlace, luego escribe la otra y copia ese enlace. Cada enlace abre la calculadora con sus propios números, y los PDF guardan las dos tablas.',
+      a: 'Escribe una oferta y copia el enlace, luego escribe la otra y copia ese enlace. Los PDF guardan las dos tablas.',
     },
   ],
   privacyHeading: 'Privacidad',

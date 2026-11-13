@@ -51,13 +51,13 @@ export default {
     {
       heading: 'De dónde sale el ahorro',
       paragraphs: [
-        'Un año tiene 52 semanas, así que la mitad de un pago cada dos semanas son 26 medios pagos, que suman 13 pagos mensuales en lugar de 12. Ese pago de más cada año va al capital, y los intereses que se cobran cada dos semanas sobre un saldo menor hacen el resto.',
+        'El pago mensual de más que suman los medios pagos cada año va al capital, y los intereses que se cobran cada dos semanas sobre un saldo menor hacen el resto.',
       ],
     },
     {
       heading: 'Programas de pagos cada dos semanas que cobran un cargo',
       paragraphs: [
-        'Por lo general puedes lograr un resultado parecido sin pagar ningún cargo: haz un pago mensual adicional cada año, o suma una doceava parte del pago a cada pago mensual. El CFPB demandó a una empresa que cobraba un cargo de inscripción y cargos anuales por planes de pagos cada dos semanas, y dijo que esos cargos podían tardar años en recuperarse. Pregúntale a tu administrador del préstamo cómo aplica los pagos antes de inscribirte en un programa.',
+        'El CFPB demandó a una empresa que cobraba un cargo de inscripción y cargos anuales por planes de pagos cada dos semanas, y dijo que esos cargos podían tardar años en recuperarse.',
       ],
     },
   ],
@@ -93,12 +93,12 @@ export default {
       a: 'No. Es el mismo préstamo, pagado en mitades cada dos semanas. Que el administrador acredite cada mitad en el momento o la guarde hasta la fecha del pago mensual cambia cuánto ahorras.',
     },
     {
-      q: '¿Por qué ahorra dinero?',
-      a: 'Sobre todo porque 26 medios pagos hacen un pago mensual de más al año, y ese pago de más baja el saldo. Los intereses que se cobran cada dos semanas suman un poco más.',
+      q: '¿Los impuestos, el seguro y el PMI cambian el ahorro?',
+      a: 'No. El medio pago y el ahorro salen solo del préstamo, del capital y los intereses. Los impuestos, el seguro, el PMI y la cuota de HOA solo se suman a lo que pagas cada mes.',
     },
     {
       q: '¿Puedo lograr lo mismo sin un plan de pagos cada dos semanas?',
-      a: 'Casi lo mismo, si pagas una doceava parte más con cada pago mensual. La calculadora de pagos adicionales muestra ese caso.',
+      a: 'Casi lo mismo, sin pagar ningún cargo: haz un pago mensual adicional cada año, o paga una doceava parte más con cada pago mensual. La calculadora de pagos adicionales muestra ese caso.',
     },
     {
       q: '¿Los pagos cada dos semanas encajan con mi sueldo?',

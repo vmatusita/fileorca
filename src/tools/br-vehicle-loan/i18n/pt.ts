@@ -65,7 +65,7 @@ export default {
     'Digite o preço do veículo e quanto você vai dar de entrada.',
     'Digite o prazo em meses e os juros ao mês da proposta.',
     'Depois do resultado, copie o IOF e as tarifas da proposta e diga se vai financiar junto ou pagar à vista.',
-    'Veja o CET, abra o cronograma ou baixe em PDF e CSV para comparar propostas.',
+    'Veja o CET, abra o cronograma ou baixe em PDF e CSV.',
   ],
   worksHeading: 'Como a parcela e o CET são calculados',
   formulaHeading: 'As fórmulas',
@@ -91,15 +91,15 @@ export default {
     },
     {
       q: 'Como eu sei o valor do IOF?',
-      a: 'Ele está na proposta e no demonstrativo do CET. O IOF do crédito tem uma parte diária, limitada a 365 dias, e uma parte fixa, e as alíquotas são definidas pelo governo. Por isso o simulador pede o valor em reais, como a proposta mostra.',
+      a: 'Ele está na proposta e no demonstrativo do CET. O IOF do crédito tem uma parte diária, limitada a 365 dias, e uma parte fixa, e as alíquotas são definidas pelo governo.',
     },
     {
       q: 'É melhor financiar o IOF ou pagar à vista?',
-      a: 'Financiado, o IOF paga juros até o fim do contrato, então o total pago sobe. À vista, você precisa do dinheiro na hora, mas economiza esses juros. Troque a opção depois do resultado e compare os dois totais.',
+      a: 'À vista, você precisa do dinheiro na hora, mas o total pago fica menor. Troque a opção depois do resultado e compare os dois totais.',
     },
     {
       q: 'Por que o CET é maior que os juros ao mês?',
-      a: 'Porque o CET conta também o IOF e as tarifas. Você recebe o crédito e paga parcelas que incluem esses custos, então a taxa do dinheiro que você realmente usa fica acima da taxa de juros.',
+      a: 'Porque os juros correm sobre um valor maior do que o dinheiro que você realmente recebe: a diferença são o IOF e as tarifas.',
     },
     {
       q: 'Posso quitar o financiamento antes?',

@@ -66,7 +66,7 @@ export default {
   formulaHeading: 'The formula',
   formula: [
     'Both payments use M = P × r × (1 + r)^n ÷ ((1 + r)^n − 1), where P is the balance (plus the closing costs if they are added to the loan), r is the yearly rate divided by 12 and n is the number of months.',
-    'Every month of both schedules, the calculator adds up the interest paid so far. The break-even month is the first one in which closing costs + interest paid on the new loan ≤ interest the current loan would have charged. Counting interest, not payments, keeps a longer term from looking like a saving when it only spreads the debt out.',
+    'Every month of both schedules, the calculator adds up the interest paid so far. The break-even month is the first one in which closing costs + interest paid on the new loan ≤ interest the current loan would have charged.',
   ],
   premisesHeading: 'Assumptions',
   exampleHeading: 'Worked example',
@@ -83,12 +83,12 @@ export default {
   faqHeading: 'Questions about refinancing',
   faq: [
     {
-      q: 'What is the break-even month?',
-      a: 'The month in which what you save in interest has paid back the closing costs. Before it, refinancing has cost you money; after it, it starts to save.',
+      q: 'What does the break-even month tell me?',
+      a: 'Before it, refinancing has cost you money; after it, it starts to save.',
     },
     {
       q: 'Why are there two break-even numbers?',
-      a: 'The common shortcut divides the closing costs by the drop in the monthly payment. When the new loan is longer, part of that drop comes from spreading the debt over more years, so the shortcut can look better than the interest really is. The calculator shows both.',
+      a: 'Because the common shortcut can mislead. When the new loan is longer, part of the drop in the monthly payment comes from spreading the debt over more years, so the shortcut can look better than the interest really is.',
     },
     {
       q: 'Is a no-closing-cost refinance free?',

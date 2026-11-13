@@ -70,8 +70,8 @@ export default {
   faqHeading: 'Questions about balloon loans',
   faq: [
     {
-      q: 'Why is the monthly payment so low?',
-      a: 'It is worked out on a long amortization term, so each payment only repays a little principal. The rest waits for the balloon.',
+      q: 'Which payment can the balloon come with?',
+      a: 'Any payment before the last one of the amortization term, up to payment 479: on a 30-year term, payment 359 at the latest.',
     },
     {
       q: 'Where are balloon loans used?',
@@ -79,11 +79,11 @@ export default {
     },
     {
       q: 'What happens if I cannot pay the balloon?',
-      a: 'You would need to refinance, sell or reach an agreement with the lender. Plan for it from the start.',
+      a: 'You would need to refinance, sell or reach an agreement with the lender.',
     },
     {
-      q: 'Is the balloon the same as the last payment?',
-      a: 'The balloon is what is left after the regular payment of that month; the last payment is the two together. The calculator shows both.',
+      q: 'Does an earlier balloon mean a larger one?',
+      a: 'Yes. Fewer regular payments have lowered the balance by then, so more of the loan is left to pay at once.',
     },
   ],
   privacyHeading: 'Privacy',

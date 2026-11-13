@@ -85,19 +85,19 @@ export default {
   faq: [
     {
       q: '¿Un pago más bajo significa que consolidar ahorra dinero?',
-      a: 'No por sí solo. Un plazo más largo puede bajar el pago mientras los intereses totales suben. Compara el total pagado de los dos lados, no solo el pago mensual.',
+      a: 'No por sí solo. Un plazo más largo puede bajar el pago mientras los intereses totales suben.',
     },
     {
       q: '¿Cómo se cuenta el cargo por emisión?',
-      a: 'Aquí se suma al préstamo nuevo, así que pides prestado lo suficiente para pagar cada deuda y el cargo. Su costo aparece en los intereses y cargos del préstamo nuevo.',
+      a: 'Su costo aparece en los intereses y cargos del préstamo nuevo, y pagas intereses sobre él junto con los saldos.',
     },
     {
       q: '¿Y si sigo usando las tarjetas después de consolidar?',
-      a: 'Entonces crecen saldos nuevos junto al préstamo. La calculadora supone que no cargas nada nuevo a las deudas que pagas.',
+      a: 'Entonces crecen saldos nuevos junto al préstamo, y pagas los dos.',
     },
     {
       q: '¿Por qué pide el pago que hago ahora?',
-      a: 'El lado actual paga cada deuda con ese pago hasta que se termina. Un pago más alto ahí la acorta y baja sus intereses.',
+      a: 'Ese pago fija qué tan rápido se paga cada deuda tal como está. Un pago más alto ahí la acorta y baja sus intereses.',
     },
   ],
   privacyHeading: 'Privacidad',
