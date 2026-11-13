@@ -28,6 +28,7 @@ import GuideCard from '../components/GuideCard.astro';
 import AdBreak from '../ads/AdBreak.astro';
 import PdfIsland from '../tools/pdf/PdfIsland.astro';
 import Reviewed from '../tools/guides/Reviewed.astro';
+import AuthorBox from '../components/AuthorBox.astro';
 import { routeById, type Lang } from '../i18n/routes.ts';
 import { fmt } from '../i18n/format.ts';
 import { TEXTS } from '../i18n/texts.ts';
@@ -182,6 +183,8 @@ const note = [fill(t.measuredNote), ...constants.map(fill)].join(' ');
     <ul>{t.sources.map((source) => <li><a href={source.href}>{source.label}</a>. {readBefore}<time datetime={source.read}>{longDate(source.read, lang)}</time>{readAfter}</li>)}</ul>
   </section>
   <AdBreak />
+  {/* F19a (decision 6; DECISOES § 763): the author box, out of the word count of the guide (no data-guide-text). */}
+  <AuthorBox lang={lang} kind="file" measuredOn={MEASURED.measuredOn} />
   <section class="fo-section" aria-labelledby="related" data-content="related">
     <h2 id="related">{t.relatedHeading}</h2>
     <ul class="fo-grid">

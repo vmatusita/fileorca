@@ -14,6 +14,7 @@ import Oli from '../components/Oli.astro';
 import ToolCard from '../components/ToolCard.astro';
 import PrivacySeal from '../components/PrivacySeal.astro';
 import GuideCard from '../components/GuideCard.astro';
+import HowToCheck from '../components/HowToCheck.astro';
 import { pagePath, routeById, type Lang } from '../i18n/routes.ts';
 import { TEXTS } from '../i18n/texts.ts';
 import type { HomeBandTexts } from '../i18n/types.ts';
@@ -104,6 +105,7 @@ const website = {
   <AdBreak />
   <section class="fo-section fo-prose" aria-labelledby="privacy-home">
     <h2 id="privacy-home">{t.privacyHeading}</h2>
-    <p>{t.privacyBody}</p>
+    {/* F19a (decision 7; DECISOES § 759): the link to How it works, where the steps of each browser are. */}
+    <p>{t.privacyBody}<HowToCheck lang={lang} /></p>
   </section>
 </BaseLayout>

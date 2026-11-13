@@ -4,8 +4,8 @@
 // two sentences with the long dates of the review and of the first publication and what the review changed; the first
 // publication and what changed went to the history line at the end of "What we measured" (FileGuideView). No data-ymyl:
 // the file guides are in the ad area "arquivos", outside gate:dinheiro-saude.
-import type { Lang } from '../../i18n/routes.ts';
-import { fmt } from '../../i18n/format.ts';
+// F19a (decision 6; DECISOES § 763): the name is a link to the About of the language; the line keeps its one <time>.
+import { pathFor, type Lang } from '../../i18n/routes.ts';
 import { shortDate } from '../../i18n/dates.ts';
 import { AUTHOR } from '../../platform/site.ts';
 import { GUIDE_REVIEWED_ON, GUIDE_SHARED } from './page.ts';
@@ -15,6 +15,8 @@ interface Props {
 }
 const { lang = 'en' } = Astro.props;
 const reviewed = GUIDE_REVIEWED_ON[lang];
-const [before, after = ''] = fmt(GUIDE_SHARED[lang].reviewed, { name: AUTHOR.name }).split('{date}');
+// "Reviewed by {name} · {date}": the name before the date in every language.
+const [before = '', rest = ''] = GUIDE_SHARED[lang].reviewed.split('{name}');
+const [between = '', after = ''] = rest.split('{date}');
 ---
-<p class="fo-reviewed fo-sig">{before}<time datetime={reviewed}>{shortDate(reviewed, lang)}</time>{after}</p>
+<p class="fo-reviewed fo-sig">{before}<a href={pathFor('about', lang)} rel="author">{AUTHOR.name}</a>{between}<time datetime={reviewed}>{shortDate(reviewed, lang)}</time>{after}</p>

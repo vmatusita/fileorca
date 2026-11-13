@@ -26,7 +26,7 @@ export default {
         'The QR code generator works the same way. The code is made in your browser from the text or address you type, and that text stays on your device: it is not added to the address of the page, no analytics event carries it, it is not kept in your browser or in a cookie, and it is not in the name of the files you save, qr-code.png and qr-code.svg. FileOrca never opens the address you type and never sends a request to it.',
         'The PDF tools work the same way. Your PDF is read and written on your device, by PDF.js and qpdf, two open-source libraries that run in your browser. What you type there, such as a page range or the text of a watermark, stays in your browser. The password you type in Protect PDF or Unlock PDF never leaves your device and is not kept, not on a server and not in your browser. The signature you draw, upload or type in Sign PDF is not stored anywhere either.',
         'The image tools, for example, save a new copy of your picture that leaves out the photo metadata, including the GPS location.',
-        'You can check this yourself. Open the Network tab of your browser while you use a tool: no request carries your file.',
+        'You can check this yourself. Open the Network tab of your browser while you use a tool: no request carries your file. The steps for each browser are at https://fileorca.com/how-it-works/.',
       ],
     },
     {
