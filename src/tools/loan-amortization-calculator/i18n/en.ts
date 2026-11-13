@@ -36,14 +36,14 @@ export default {
   howSteps: [
     'Enter the loan amount, the yearly rate and the term in years.',
     'Read the monthly payment and how much of the total goes to interest.',
-    'Open the schedule: each year shows its balance, and opening a year shows its payments.',
+    'Open the schedule and any of its years.',
     'Save the schedule as a PDF or a CSV to open it in a spreadsheet.',
   ],
   worksHeading: 'How amortization works',
   formulaHeading: 'The formula',
   formula: [
     'The payment is M = P × r × (1 + r)^n ÷ ((1 + r)^n − 1), where P is the amount, r is the yearly rate divided by 12 and n is the number of months.',
-    'Each month, interest = balance × r, rounded to the cent; principal = M − interest; the new balance is the old one minus that principal. Early payments are mostly interest; late ones are mostly principal.',
+    'Each month, interest = balance × r, rounded to the cent; principal = M − interest; the new balance is the old one minus that principal.',
   ],
   premisesHeading: 'Assumptions',
   exampleHeading: 'Worked example',
@@ -65,12 +65,12 @@ export default {
       a: 'The balance left at the end of that loan year. Open a year to see its payments one by one: the amount, the principal, the interest and the balance after each.',
     },
     {
-      q: 'Why is the last payment different?',
-      a: 'The payment and the interest of each month are rounded to the cent, and the last payment closes whatever is left, so it can be a few cents more or less.',
+      q: 'Does a longer term cost more?',
+      a: 'At any rate above zero, yes. Each payment is smaller, but the balance falls more slowly, so interest is charged on more money for more months. Try the same amount over a few terms and compare the interest in the sentence.',
     },
     {
       q: 'Can I use it for any loan?',
-      a: 'For any loan with a fixed rate and equal monthly payments: a mortgage, a car loan, a personal or student loan. A loan with a balloon at the end has its own calculator.',
+      a: 'A mortgage, a car loan, a personal or a student loan: any loan that fits the assumptions above.',
     },
   ],
   privacyHeading: 'Privacy',

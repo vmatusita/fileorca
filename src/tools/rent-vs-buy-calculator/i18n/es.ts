@@ -96,8 +96,8 @@ export default {
       a: 'La vivienda es casi todo lo que tiene quien compra al final. Un punto más o menos de cambio al año, en diez años, mueve la diferencia más que casi cualquier otro campo. Prueba varios valores.',
     },
     {
-      q: '¿Qué significa que comprar alcanza a alquilar?',
-      a: 'Es el primer año en que vender la vivienda y pagar el préstamo le dejaría a quien compra por lo menos lo mismo que ha ahorrado quien alquila. Antes de ese año, pesan más los costos de comprar.',
+      q: '¿Qué pasa antes de que comprar alcance a alquilar?',
+      a: 'Pesan más los costos de comprar: si vendieras la vivienda en uno de esos años, después de pagar el préstamo tendrías menos de lo que te habría dejado alquilar.',
     },
     {
       q: '¿Por qué se dejan fuera los impuestos?',

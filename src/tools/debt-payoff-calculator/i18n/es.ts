@@ -72,16 +72,16 @@ export default {
   faqHeading: 'Preguntas sobre cómo pagar deudas',
   faq: [
     {
-      q: '¿Qué es la bola de nieve?',
-      a: 'Pagas el mínimo de cada deuda y pones todo lo adicional en el saldo más pequeño. Cuando lo terminas de pagar, ese pago pasa a la siguiente deuda más pequeña. El CFPB lo describe como pagar primero la deuda más pequeña.',
+      q: '¿Qué plan paga menos intereses?',
+      a: 'Por lo general la avalancha, porque la tasa más alta deja de cobrar primero; cuánto menos depende de tus deudas. Si tus deudas quedan en el mismo orden por saldo y por tasa, los dos planes dan lo mismo.',
     },
     {
-      q: '¿Qué es la avalancha?',
-      a: 'Es el mismo plan, pero lo adicional va primero a la deuda con la tasa de interés más alta. Por lo general paga menos intereses; cuánto menos depende de tus deudas.',
+      q: '¿Entonces por qué elegir la bola de nieve?',
+      a: 'Por los logros rápidos de terminar con los saldos pequeños, que algunas personas prefieren a pagar menos intereses.',
     },
     {
       q: '¿Cuál debo elegir?',
-      a: 'La calculadora te muestra los dos con tus propias deudas. Algunas personas prefieren los logros rápidos de terminar con los saldos pequeños; otras prefieren pagar menos intereses. Los dos funcionan si sigues pagando.',
+      a: 'La calculadora te muestra los dos con tus propias deudas, así que ves cuánto cuestan los logros rápidos. Los dos funcionan si sigues pagando.',
     },
     {
       q: '¿Y si un pago mínimo es menor que los intereses de esa deuda?',

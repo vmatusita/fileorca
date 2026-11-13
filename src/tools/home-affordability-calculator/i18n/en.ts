@@ -81,8 +81,8 @@ export default {
   faqHeading: 'Questions about home affordability',
   faq: [
     {
-      q: 'Where do 28% and 36% come from?',
-      a: 'They are common rules of thumb for the housing share and the total debt share of gross monthly income. The CFPB explains that different loan products and lenders set different limits, so change the two fields to match yours.',
+      q: 'Why does a higher rate lower the price?',
+      a: 'More of each payment goes to interest, so the same monthly room repays a smaller loan. Try a rate one point higher or lower to see how far the price moves.',
     },
     {
       q: 'Why is the price lower than a lender said?',
@@ -90,7 +90,7 @@ export default {
     },
     {
       q: 'Which limit matters for me?',
-      a: 'The one that leaves less room. With few other debts the housing limit usually sets the price; with a car loan or student loans, the total debt limit often does. The two cards under the result show both.',
+      a: 'With few other debts the housing limit usually sets the price; with a car loan or student loans, the total debt limit often does. The two cards under the result show both.',
     },
     {
       q: 'Is the most I can afford what I should spend?',

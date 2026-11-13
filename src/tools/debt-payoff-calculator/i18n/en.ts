@@ -66,16 +66,16 @@ export default {
   faqHeading: 'Questions about paying off debt',
   faq: [
     {
-      q: 'What is the debt snowball?',
-      a: 'You pay the minimum on every debt and put everything extra on the smallest balance. When it is gone, its payment goes to the next smallest. The CFPB describes it as paying the smallest balance first.',
+      q: 'Which plan pays less interest?',
+      a: 'Usually the avalanche, since the highest rate stops charging first; how much less depends on your debts. When your debts are in the same order by balance and by rate, both plans come out the same.',
     },
     {
-      q: 'What is the debt avalanche?',
-      a: 'The same plan, but the extra goes to the debt with the highest interest rate first. It usually pays less interest; how much less depends on your debts.',
+      q: 'Why choose the snowball, then?',
+      a: 'For the quick wins of clearing small balances, which some people prefer to paying less interest.',
     },
     {
       q: 'Which one should I choose?',
-      a: 'The calculator shows both on your own debts. Some people prefer the quick wins of clearing small balances; others prefer paying less interest. Both work if you keep paying.',
+      a: 'The calculator shows both on your own debts, so you can see what the quick wins cost. Both work if you keep paying.',
     },
     {
       q: 'What if a minimum payment is lower than the interest on that debt?',

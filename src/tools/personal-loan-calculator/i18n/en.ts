@@ -42,13 +42,13 @@ export default {
     'Enter the amount you would borrow and the rate on the offer.',
     'Enter the term in months, from 1 to 120.',
     'Add the origination fee as a percent, if the lender charges one, to see the APR.',
-    'Open the schedule or save it as a PDF or a CSV to compare offers side by side.',
+    'Open the schedule, or save it as a PDF or a CSV.',
   ],
   worksHeading: 'How the payment and the APR are worked out',
   formulaHeading: 'The formula',
   formula: [
     'The payment is M = P × r × (1 + r)^n ÷ ((1 + r)^n − 1), where P is the loan amount, r is the yearly rate divided by 12 and n is the number of months.',
-    'With a fee, you receive less than you repay. The APR is the yearly rate that makes the payments worth exactly the money you receive: the monthly rate x that solves (amount − fee) = M ÷ (1 + x) + M ÷ (1 + x)^2 + … + M ÷ (1 + x)^n, times 12. It is shown with two decimals.',
+    'The APR is the yearly rate that makes the payments worth exactly the money you receive: the monthly rate x that solves (amount − fee) = M ÷ (1 + x) + M ÷ (1 + x)^2 + … + M ÷ (1 + x)^n, times 12. It is shown with two decimals.',
   ],
   premisesHeading: 'Assumptions',
   exampleHeading: 'Worked example',
@@ -67,11 +67,11 @@ export default {
   faq: [
     {
       q: 'Why is the APR higher than the interest rate?',
-      a: 'The APR counts the origination fee as a cost of the loan. You repay the whole amount but receive less, so the yearly cost of the money you actually get is higher than the rate on the note.',
+      a: 'The APR counts the origination fee as a cost of the loan, so the yearly cost of the money you actually get is higher than the rate on the note.',
     },
     {
-      q: 'How is the origination fee charged?',
-      a: 'Here it comes out of the money you receive, which is how many lenders charge it. If yours adds it to the balance instead, enter the whole balance, fee included, as the amount, and the fee as a percent of that balance: the money you receive and the payments come out the same, and so does the APR.',
+      q: 'What if my lender adds the fee to the balance?',
+      a: 'Then enter the whole balance, fee included, as the amount, and the fee as a percent of that balance: the money you receive and the payments come out the same, and so does the APR.',
     },
     {
       q: 'Does a longer term save money?',
@@ -79,11 +79,11 @@ export default {
     },
     {
       q: 'Is the APR here the same as on my disclosure?',
-      a: 'It uses the method of Regulation Z for a loan with equal monthly payments and a regular first period. A disclosure can include other charges or an odd first period, so small differences are possible.',
+      a: 'Not always. A disclosure can include other charges or an odd first period, so small differences are possible.',
     },
     {
       q: 'Can I compare two offers?',
-      a: 'Enter one offer and copy the link, then the other and copy that link. Each link opens the calculator with its own numbers, and the PDFs keep both schedules.',
+      a: 'Enter one offer and copy the link, then the other and copy that link. The PDFs keep both schedules.',
     },
   ],
   privacyHeading: 'Privacy',
