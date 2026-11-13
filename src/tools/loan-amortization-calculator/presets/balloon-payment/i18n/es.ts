@@ -78,8 +78,8 @@ export default {
   faqHeading: 'Preguntas sobre los préstamos con pago global',
   faq: [
     {
-      q: '¿Por qué el pago mensual es tan bajo?',
-      a: 'Se calcula sobre un plazo de amortización largo, así que cada pago devuelve poco capital. El resto espera al pago global.',
+      q: '¿Con qué pago puede venir el pago global?',
+      a: 'Con cualquier pago anterior al último del plazo de amortización, hasta el pago 479: con un plazo de 30 años, a más tardar el pago 359.',
     },
     {
       q: '¿Dónde se usan los préstamos con pago global?',
@@ -87,11 +87,11 @@ export default {
     },
     {
       q: '¿Qué pasa si no puedo hacer el pago global?',
-      a: 'Tendrías que refinanciar, vender o llegar a un acuerdo con el prestamista. Planéalo desde el principio.',
+      a: 'Tendrías que refinanciar, vender o llegar a un acuerdo con el prestamista.',
     },
     {
-      q: '¿El pago global es lo mismo que el último pago?',
-      a: 'El pago global es lo que queda después del pago regular de ese mes; el último pago son los dos juntos. La calculadora muestra los dos.',
+      q: '¿Un pago global más temprano es más grande?',
+      a: 'Sí. Menos pagos regulares han bajado el saldo para entonces, así que queda más del préstamo por pagar de una sola vez.',
     },
   ],
   privacyHeading: 'Privacidad',
