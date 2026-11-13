@@ -10,9 +10,9 @@ const texts: PdfToolTexts<RotatePdfTexts> = {
   h1: 'Rotate PDF',
   howHeading: 'How it works',
   howSteps: [
-    'Drop your PDF files on the box, choose them, or paste them. Add as many as you like.',
+    'Drop your PDF files on the box, choose them, or paste them.',
     'Pick a turn: 90° right, 180° or 90° left. With one file you can also turn page by page, using the button on each thumbnail; the magnifier opens a page large.',
-    'Download the turned PDF, or all of them together in a ZIP. Your original files stay untouched.',
+    'Download the turned PDFs.',
   ],
   specsHeading: 'What goes in and what comes out',
   specs: {
@@ -21,10 +21,9 @@ const texts: PdfToolTexts<RotatePdfTexts> = {
     rows: [
       ['Files it takes', 'PDF files, as many as you like. Oli checks what is inside the file, not its name.'],
       ['Turns', '90° to the right (the default), 180° or 90° to the left.'],
-      ['No loss', 'Only the rotation setting of each page changes. Nothing is redrawn, so text, images and quality stay exactly as they were.'],
       ['All pages', 'Every page of the file is turned the same way. In a batch, this is what happens to each file.'],
       ['Page by page', 'With one file, the grid shows every page, and a button on each thumbnail turns just that page.'],
-      ['Batch', 'No limit on the number of files. Each one gets its own download, and two or more come together in one ZIP.'],
+      ['Batch', 'No limit on the number of files. Each one gets its own download, and two or more come together in one ZIP. Your original files stay untouched.'],
       [
         'Details kept',
         'Forms, links, bookmarks and the info fields and XMP metadata of your PDF stay. Oli adds no date, no Producer and nothing from your device.',
@@ -47,24 +46,20 @@ const texts: PdfToolTexts<RotatePdfTexts> = {
       a: 'No. Oli changes only the rotation setting of each page. Nothing is redrawn or compressed again, so text stays sharp and selectable, and images keep every pixel.',
     },
     {
-      q: 'Can I rotate just one page?',
-      a: 'Yes, when you work on one PDF. Choose Page by page, and each thumbnail gets a button that turns that page. With several files at once, Oli turns every page of each file, so do single pages one file at a time.',
+      q: 'What happens to a page that was already turned?',
+      a: 'The new turn is added to the one it has: a page saved at 90° that gets 90° right ends at 180°.',
     },
     {
-      q: 'Will forms, links and bookmarks still work?',
-      a: 'Yes. They stay in the file, and so does the metadata. The one thing Oli takes out is an XFA form layer, which only Adobe apps read; the regular form fields keep working.',
+      q: 'Can I straighten a crooked scan by a few degrees?',
+      a: 'No. The PDF standard turns a page only in quarter turns, multiples of 90°. Straightening a crooked scan means drawing the page again, which this tool does not do.',
     },
     {
-      q: 'Why was my PDF refused?',
-      a: 'A PDF that needs a password to open, or that has editing restrictions, is refused with a link to Unlock PDF. An empty or cut-short file, or one that is not a PDF, is refused too. The other files in the batch carry on.',
-    },
-    {
-      q: 'Is my PDF uploaded?',
-      a: "No. FileOrca reads and writes your PDF on your device, in your browser, and PDF.js draws the page thumbnails there too. Open your browser's Network tab while you rotate: no request carries your files.",
+      q: 'Can I rotate a PDF that has a password?',
+      a: 'Not as it is. Take the password off in Unlock PDF first, then bring the unlocked copy back here.',
     },
   ],
   privacyHeading: 'Privacy',
-  privacyNote: 'PDFs are rotated on your device, in your browser, and are never sent to a server. Your original files stay untouched.',
+  privacyNote: 'PDFs are rotated on your device, in your browser, and are never sent to a server.',
   relatedHeading: 'Related tools',
   panel: {
     suffix: 'rotated',

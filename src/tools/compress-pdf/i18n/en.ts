@@ -11,9 +11,9 @@ const texts: PdfToolTexts<CompressPdfTexts> = {
   h1: 'Compress PDF',
   howHeading: 'How it works',
   howSteps: [
-    'Drop your PDF files on the box, choose them, or paste them. Add as many as you like.',
-    'Pick Lossless, Recommended or Strong. Oli compresses each PDF in your browser, one after another, and redoes the batch if you change the level.',
-    'Download one PDF, or all of them together in a ZIP. Your original files stay untouched.',
+    'Drop your PDF files on the box, choose them, or paste them.',
+    'Pick Lossless, Recommended or Strong. Oli compresses each PDF, one after another, and redoes the batch if you change the level.',
+    'Download the compressed PDFs.',
   ],
   specsHeading: 'What goes in and what comes out',
   specs: {
@@ -34,7 +34,7 @@ const texts: PdfToolTexts<CompressPdfTexts> = {
         'Every page becomes a JPG picture at 100 ppi. The text can no longer be selected or searched, and form fields, links and bookmarks are lost. Oli says so before you choose it.',
       ],
       ['Already optimized', 'If the result would not be smaller, you get your original back, byte for byte. Oli never gives you a bigger file.'],
-      ['Batch', 'No limit on the number of files. Each one gets its own download, and two or more come together in one ZIP.'],
+      ['Batch', 'No limit on the number of files. Each one gets its own download, and two or more come together in one ZIP. Your original files stay untouched.'],
       [
         'Details kept',
         'In Lossless and Recommended the text, forms, links and bookmarks stay as they are, and so do the info fields and XMP metadata of your PDF. Oli adds no date, no Producer and nothing from your device.',
@@ -53,27 +53,23 @@ const texts: PdfToolTexts<CompressPdfTexts> = {
   faq: [
     {
       q: 'How much smaller will my PDF get?',
-      a: 'It depends on what is inside. A PDF full of photos can shrink a lot at Recommended, while a PDF that is mostly text has little to take out. Oli shows the size before and after for each file, so you see the real saving, and Strong is the level that goes furthest.',
+      a: 'It depends on what is inside. A PDF full of photos can shrink a lot at Recommended, while a PDF that is mostly text has little to take out. Oli shows the size before and after for each file, so you see the real saving, and on a PDF of photos Strong is the level that goes furthest.',
     },
     {
       q: 'Does compressing reduce the quality of my PDF?',
-      a: 'Lossless changes nothing you can see. Recommended saves photos again as JPEG at quality 75, which can cost a little fine detail, but the text stays sharp and selectable. Strong turns every page into a picture at 100 ppi, so small print looks softer when you zoom in.',
+      a: 'Not at Lossless. At Recommended, a photo saved again can lose a little fine detail, while the text stays sharp and selectable. At Strong, small print looks softer when you zoom in, because it has become part of a picture.',
     },
     {
-      q: 'Can I still select the text and use the form after compressing?',
-      a: 'Yes at Lossless and Recommended. At Strong, no: every page becomes a picture, so the text cannot be selected or searched, and form fields, links and bookmarks are lost. Oli warns you before you choose it. If you need the text, stay on Recommended.',
+      q: 'Can I compress a PDF that has a password?',
+      a: 'Not as it is. Take the password off in Unlock PDF, compress the unlocked copy here, then put a password back on with Protect PDF.',
     },
     {
       q: 'Why did my PDF come back the same size?',
-      a: 'Some PDFs are already well packed. When the result would not be smaller, Oli gives you the original back, byte for byte, instead of a bigger file, and says it was already optimized. If you can live with pictures instead of text, Strong may still make it smaller.',
-    },
-    {
-      q: 'Is my PDF uploaded?',
-      a: "No. FileOrca reads and writes your PDF on your device, in your browser, with qpdf and PDF.js. Open your browser's Network tab while you compress: no request carries your files.",
+      a: 'Some PDFs are already well packed. Strong does not always help either: on a page of text, a picture of the page can weigh more than the text it replaces.',
     },
   ],
   privacyHeading: 'Privacy',
-  privacyNote: 'PDFs are compressed on your device, in your browser, and are never sent to a server. Your original files stay untouched.',
+  privacyNote: 'PDFs are compressed on your device, in your browser, and are never sent to a server.',
   relatedHeading: 'Related tools',
   panel: {
     suffix: 'compressed',

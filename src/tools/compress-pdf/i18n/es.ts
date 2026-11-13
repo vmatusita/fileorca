@@ -11,9 +11,9 @@ const texts: PdfToolTexts<CompressPdfTexts> = {
   h1: 'Comprimir PDF',
   howHeading: 'Cómo funciona',
   howSteps: [
-    'Suelta tus archivos PDF en el cuadro, elígelos o pégalos, todos los que quieras.',
-    'Elige Sin pérdida, Recomendada o Fuerte, y Oli comprime cada PDF en tu navegador, uno tras otro, y rehace el lote si cambias el nivel.',
-    'Descarga un PDF o todos juntos en un ZIP; tus archivos originales no se tocan.',
+    'Suelta tus archivos PDF en el cuadro, elígelos o pégalos.',
+    'Elige Sin pérdida, Recomendada o Fuerte, y Oli comprime cada PDF, uno tras otro, y rehace el lote si cambias el nivel.',
+    'Descarga los PDF comprimidos.',
   ],
   specsHeading: 'Qué entra y qué sale',
   specs: {
@@ -34,7 +34,7 @@ const texts: PdfToolTexts<CompressPdfTexts> = {
         'Cada página se convierte en una imagen JPG a 100 ppp. El texto ya no se puede seleccionar ni buscar, y se pierden los campos de formulario, los enlaces y los marcadores. Oli te lo avisa antes de que lo elijas.',
       ],
       ['Ya optimizado', 'Si el resultado no fuera más pequeño, recibes tu original de vuelta, byte por byte. Oli nunca te da un archivo más grande.'],
-      ['Lote', 'Sin límite de archivos. Cada uno tiene su propia descarga, y dos o más llegan juntos en un ZIP.'],
+      ['Lote', 'Sin límite de archivos. Cada uno tiene su propia descarga, y dos o más llegan juntos en un ZIP. Tus archivos originales no se tocan.'],
       [
         'Lo que se conserva',
         'En Sin pérdida y Recomendada, el texto, los formularios, los enlaces y los marcadores quedan como están, igual que los campos de información y los metadatos XMP de tu PDF. Oli no agrega fecha, ni el campo Producer, ni nada de tu dispositivo.',
@@ -53,27 +53,23 @@ const texts: PdfToolTexts<CompressPdfTexts> = {
   faq: [
     {
       q: '¿Cuánto más pequeño quedará mi PDF?',
-      a: 'Depende de lo que tenga dentro. Un PDF lleno de fotos puede reducirse mucho con Recomendada, mientras que un PDF casi todo de texto tiene poco que quitar. Oli muestra el tamaño de antes y de después de cada archivo, para que veas el ahorro real, y Fuerte es el nivel que más reduce.',
+      a: 'Depende de lo que tenga dentro. Un PDF lleno de fotos puede reducirse mucho con Recomendada, mientras que un PDF casi todo de texto tiene poco que quitar. Oli muestra el tamaño de antes y de después de cada archivo, para que veas el ahorro real, y en un PDF de fotos Fuerte es el nivel que más reduce.',
     },
     {
       q: '¿Comprimir baja la calidad de mi PDF?',
-      a: 'Sin pérdida no cambia nada de lo que ves. Recomendada vuelve a guardar las fotos como JPEG con calidad 75, lo que puede costar un poco de detalle fino, pero el texto sigue nítido y se puede seleccionar. Fuerte convierte cada página en una imagen a 100 ppp, así que la letra pequeña se ve menos nítida al hacer zoom.',
+      a: 'Con Sin pérdida, no. Con Recomendada, una foto guardada de nuevo puede perder un poco de detalle fino, y el texto sigue nítido y se puede seleccionar. Con Fuerte, la letra pequeña se ve menos nítida al hacer zoom, porque pasó a ser parte de una imagen.',
     },
     {
-      q: '¿Puedo seguir seleccionando el texto y usando el formulario después de comprimir?',
-      a: 'Sí con Sin pérdida y Recomendada. Con Fuerte, no: cada página se convierte en una imagen, así que el texto no se puede seleccionar ni buscar, y se pierden los campos de formulario, los enlaces y los marcadores. Oli te avisa antes de que lo elijas. Si necesitas el texto, quédate en Recomendada.',
+      q: '¿Puedo comprimir un PDF que tiene contraseña?',
+      a: 'Tal como está, no. Quita la contraseña en Desbloquear PDF, comprime aquí la copia desbloqueada y después vuelve a ponerle una contraseña con Proteger PDF.',
     },
     {
       q: '¿Por qué mi PDF volvió con el mismo tamaño?',
-      a: 'Algunos PDF ya están bien compactados. Cuando el resultado no sería más pequeño, Oli te devuelve el original, byte por byte, en lugar de un archivo más grande, y te dice que ya estaba optimizado. Si puedes aceptar imágenes en lugar de texto, Fuerte quizá lo reduzca de todos modos.',
-    },
-    {
-      q: '¿Mi PDF se sube a algún lugar?',
-      a: 'No. FileOrca lee y escribe tu PDF en tu dispositivo, en tu navegador, con qpdf y PDF.js. Abre la pestaña Red de tu navegador mientras comprimes: ninguna solicitud lleva tus archivos.',
+      a: 'Algunos PDF ya están bien compactados. Fuerte tampoco ayuda siempre: en una página de texto, la imagen de la página puede pesar más que el texto que reemplaza.',
     },
   ],
   privacyHeading: 'Privacidad',
-  privacyNote: 'Los PDF se comprimen en tu dispositivo, en tu navegador, y nunca se envían a un servidor. Tus archivos originales no se tocan.',
+  privacyNote: 'Los PDF se comprimen en tu dispositivo, en tu navegador, y nunca se envían a un servidor.',
   relatedHeading: 'Herramientas relacionadas',
   panel: {
     suffix: 'comprimido',
