@@ -66,7 +66,7 @@ export default {
       {
         native: 'Para leer una imagen, la herramienta le pide primero al navegador; WebAssembly entra cuando la imagen es demasiado grande para que el navegador la dibuje de una vez y cuando el navegador no lee su formato.',
         js: 'PDF.js, que dibuja las páginas de un PDF, y pdf-lib, que arma y edita archivos PDF, son JavaScript; solo los dos decodificadores de imagen dentro de PDF.js son WebAssembly.',
-        threads: 'Cada biblioteca está hecha para correr en un solo hilo, así que ninguna página usa memoria compartida ni necesita los encabezados de aislamiento que algunos sitios le piden al navegador.',
+        threads: 'Ninguna biblioteca de aquí usa memoria compartida, así que ninguna página necesita los encabezados de aislamiento que algunos sitios le piden al navegador.',
         licenses: 'La página {licenses} tiene la licencia de cada biblioteca; libheif, que es LGPL-3.0, queda en un archivo aparte, sin cambios.',
       },
     ],
