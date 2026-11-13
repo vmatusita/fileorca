@@ -2,7 +2,7 @@
 // hreflang reciprocal and self-referencing with x-default in English; one sitemap per language
 // inside an index, valid and matching the route map; canonical, title and description per page;
 // robots.txt fixed; no robots meta; JSON-LD parses; 404 out of sitemaps and hreflang.
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { DIST, Problems, allPages, readHtml, requireDist } from '../lib/dist.ts';
 import { compareAlternates, robotsProblems, validateHreflang, validateSitemap, type PageHead } from '../lib/seo-checks.ts';
 import { BR_PAGE_IDS, SITEMAP_REGISTRY_IDS, descriptionProblem, fileGuideTitleProblems, fileGuideWant, missingFromSitemap, requiredSchemaTypes, schemaProblems, titleProblem, type LdNode } from '../lib/seo-pages.ts';
@@ -10,7 +10,7 @@ import { isFileGuide } from '../../src/tools/guides/registry.ts';
 import { alternatesFor } from '../../src/seo/meta.ts';
 import { LANGS, LANG_TAG, ROUTES, type Lang } from '../../src/i18n/routes.ts';
 import { SITE_ORIGIN } from '../../src/platform/site.ts';
-import { sitemapPath, sitemapUrls } from '../../src/seo/sitemap.ts';
+import { sitemapEntries, sitemapPath, sitemapUrls } from '../../src/seo/sitemap.ts';
 
 requireDist();
 const problems = new Problems();
@@ -106,9 +106,13 @@ const indexed = [...index.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match
 const expectedIndex = LANGS.map((lang) => new URL(sitemapPath(lang), SITE_ORIGIN).href);
 if (JSON.stringify(indexed) !== JSON.stringify(expectedIndex)) problems.add(`sitemap-index.xml lista ${indexed.join(', ')}`);
 if (!index.includes('<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')) problems.add('sitemap-index.xml sem o namespace');
+// F19a (decision 3; DECISOES § 753): every <url> has a <lastmod> in the form AAAA-MM-DD, never after the day of the build in
+// UTC (the day dist/build.txt was written), and the one src/platform/changelog.ts gives the page in the language.
+const buildDay = statSync(`${DIST}/build.txt`).mtime.toISOString().slice(0, 10);
 for (const lang of LANGS) {
   const xml = readFileSync(`${DIST}${sitemapPath(lang)}`, 'utf8');
-  for (const problem of validateSitemap(xml, sitemapUrls(lang), SITE_ORIGIN)) problems.add(`${sitemapPath(lang)}: ${problem}`);
+  const lastmods = new Map(sitemapEntries(lang).map((entry) => [entry.url, entry.lastmod]));
+  for (const problem of validateSitemap(xml, sitemapUrls(lang), SITE_ORIGIN, { today: buildDay, lastmods })) problems.add(`${sitemapPath(lang)}: ${problem}`);
 }
 // Every image tool, preset and the hub is in the English sitemap; the money hub, calculators, presets and guides of the
 // F4 too, the PDF hub and tools of the F5a and the file guides of the F5b. F6: each one is also in the sitemap of every

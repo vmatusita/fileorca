@@ -1,5 +1,8 @@
 // One sitemap per language inside an index (PLANO "SEO agressivo › Técnico").
-import { LANGS, ROUTES, type Lang } from '../i18n/routes.ts';
+// F19a (decision 3; DECISOES § 753): every <url> has its <lastmod>, the date of the newest change of the page in the
+// language (lastmodOf, src/platform/changelog.ts), the same source as the What's new page and the line "Updated on".
+import { LANGS, ROUTES, type Lang, type RouteId } from '../i18n/routes.ts';
+import { lastmodOf } from '../platform/changelog.ts';
 import { absolute } from './meta.ts';
 
 function escapeXml(value: string): string {
@@ -16,8 +19,17 @@ export function sitemapUrls(lang: Lang): string[] {
   );
 }
 
+/** The URL and the <lastmod> of every indexable page of a language, in the order of the route map. */
+export function sitemapEntries(lang: Lang): { id: RouteId; url: string; lastmod: string }[] {
+  return ROUTES.filter((route) => route.indexable && route.paths[lang] !== undefined).map((route) => ({
+    id: route.id,
+    url: absolute(route.paths[lang] ?? '/'),
+    lastmod: lastmodOf(route.id, lang),
+  }));
+}
+
 export function sitemapXml(lang: Lang): string {
-  const entries = sitemapUrls(lang).map((url) => `  <url><loc>${escapeXml(url)}</loc></url>`);
+  const entries = sitemapEntries(lang).map(({ url, lastmod }) => `  <url><loc>${escapeXml(url)}</loc><lastmod>${lastmod}</lastmod></url>`);
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entries.join('\n')}\n</urlset>\n`;
 }
 

@@ -87,7 +87,9 @@ describe('sitemaps', () => {
   // the institutional ones (19 before), and the other 13 pages of the image area in Portuguese and Spanish (11 before).
   // F18 (DECISOES § 743): Remove EXIF data and Flip image in the image area (23 in English, the other 15 in pt and es), and
   // Organize PDF and the 2 PDF presets in the PDF area (16: the hub, 13 tools and 2 presets; 13 before), in each language.
-  const SIZES = { en: 23 + 24 + 16 + 10 + f7Rows.length + 1, pt: 8 + 15 + 16 + brRows + 1 + 10 + 1, es: 8 + 15 + 16 + 1 + CALC_PAGE_IDS.length + GUIDE_IDS.length + 1 + 10 + 1 } as const;
+  // F19a (decisions 2 and 7; DECISOES § 752): What's new and How it works, one page each in every language (the institutional
+  // part grows by 2: 25 in English with the image area, 10 in Portuguese and Spanish).
+  const SIZES = { en: 25 + 24 + 16 + 10 + f7Rows.length + 1, pt: 10 + 15 + 16 + brRows + 1 + 10 + 1, es: 10 + 15 + 16 + 1 + CALC_PAGE_IDS.length + GUIDE_IDS.length + 1 + 10 + 1 } as const;
 
   it('builds one valid sitemap per language and an index, with the counts of the route map', () => {
     expect([0, 1 + BR_CALC_IDS.length]).toContain(brRows);
@@ -140,7 +142,8 @@ describe('sitemaps', () => {
   });
 
   it('flags missing, extra, duplicated and foreign URLs', () => {
-    const xml = sitemapXml('en').replace('</urlset>', `  <url><loc>${O}/</loc></url>\n  <url><loc>https://evil.test/</loc></url>\n</urlset>`);
+    // F19a (DECISOES § 753): the extra entries carry a <lastmod>, as every entry of the sitemap does now.
+    const xml = sitemapXml('en').replace('</urlset>', `  <url><loc>${O}/</loc><lastmod>2026-11-13</lastmod></url>\n  <url><loc>https://evil.test/</loc><lastmod>2026-11-13</lastmod></url>\n</urlset>`);
     const problems = validateSitemap(xml, [...sitemapUrls('en'), `${O}/missing/`], O).join('\n');
     expect(problems).toMatch(/repetida/);
     expect(problems).toMatch(/fora do domínio/);
