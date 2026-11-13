@@ -37,7 +37,7 @@ export default {
     },
     'pdf-tools': {
       title: 'PDF tools',
-      body: 'Merge, split, compress and rotate PDFs, delete or reorder pages, add page numbers or a watermark, sign, protect and unlock them, and turn pages into JPG. The PDF is read and written in your browser.',
+      body: 'Merge, split, compress and rotate PDFs, delete or reorder pages, add page numbers or a watermark, sign them, add or remove a password, and turn pages into JPG. The PDF is read and written in your browser.',
     },
     'pdf-terms': {
       title: 'Terms for passwords and signatures',
