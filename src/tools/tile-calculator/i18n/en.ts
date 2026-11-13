@@ -69,11 +69,11 @@ export default {
   faq: [
     {
       q: 'How much extra tile should I add?',
-      a: 'Enough for cuts at the edges, the pattern and a few broken tiles. The example uses 10%; a diagonal or herringbone layout cuts more tiles, so ask the store or your installer what to add for yours.',
+      a: 'It depends on the layout: a diagonal or herringbone layout cuts more tiles than a straight one.',
     },
     {
       q: 'Why are the grout lines left out?',
-      a: 'A joint is a fraction of an inch and changes with the tile and the installer. Leaving it out counts each tile as covering only its own size, so the count errs a little on the high side.',
+      a: 'A joint is a fraction of an inch and changes with the tile and the installer.',
     },
     {
       q: 'How do I tile a room that is not a rectangle?',
@@ -81,7 +81,7 @@ export default {
     },
     {
       q: 'What if I don’t know the tiles per box?',
-      a: 'Leave it at 0. The calculator still counts the tiles and leaves the boxes out; the number per box is printed on the box.',
+      a: 'Leave it at 0, and you still get the number of tiles to buy.',
     },
     {
       q: 'Does it work for a wall or a backsplash?',

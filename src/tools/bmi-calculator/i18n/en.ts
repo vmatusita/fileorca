@@ -67,28 +67,24 @@ export default {
     { label: 'CDC, "About Body Mass Index (BMI)"', href: 'https://www.cdc.gov/bmi/about/index.html' },
   ],
   disclaimer:
-    'This calculator is an educational tool for adults 18 and older, not medical advice. It takes ages from 20 because the CDC adult categories start at 20. A BMI does not diagnose anything: talk with a doctor or another health professional about what it means for you.',
+    'This calculator is an educational tool for adults 18 and older, not medical advice. It takes ages from 20 because the CDC adult categories start at 20. A BMI does not diagnose anything: talk with a doctor or another health professional, who can read it together with your history and other measures.',
   faqHeading: 'Questions about BMI',
   faq: [
     {
       q: 'What does BMI measure?',
-      a: 'It compares your weight with your height. The CDC calls it a screening measure: it does not tell fat from muscle and bone, and it does not show where fat is in the body.',
+      a: 'It compares your weight with your height. As the CDC notes, it does not tell fat from muscle and bone.',
     },
     {
       q: 'Why does the calculator start at age 20?',
-      a: 'The CDC adult categories are for adults 20 and older. From 2 to 19, the CDC reads BMI against growth percentiles by age and sex, which this page does not do.',
+      a: 'From 2 to 19, the CDC reads BMI against growth percentiles by age and sex, which this page does not do.',
     },
     {
       q: 'Why can US and metric give a slightly different BMI?',
-      a: 'The CDC formula for pounds and inches uses 703, a rounded factor. The same body in kilograms and meters can land 0.1 apart after rounding.',
+      a: 'Because 703 is a rounded factor: the same body in kilograms and meters can land 0.1 apart after rounding.',
     },
     {
       q: 'Which category is a BMI of 24.96?',
-      a: 'The calculator rounds to one decimal first, so 24.96 shows as 25.0 and falls in Overweight, the way the CDC calculator lists its ranges (18.5 to 24.9, 25.0 to 29.9).',
-    },
-    {
-      q: 'What should I do with my result?',
-      a: 'Talk about it with a doctor or another health professional, who can read it together with your history and other measures.',
+      a: 'Overweight: 24.96 shows as 25.0, the first number of the CDC range for Overweight, 25.0 to 29.9.',
     },
   ],
   privacyHeading: 'Privacy',

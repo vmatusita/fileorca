@@ -10,7 +10,7 @@ export default {
   howSteps: [
     'Escribe o pega un enlace, o cualquier texto, en el cuadro. El código aparece mientras escribes.',
     'Elige si Oli va en el centro y el tamaño del PNG.',
-    'Descarga el PNG para una pantalla o un documento, o el SVG para imprimir en cualquier tamaño.',
+    'Descarga el PNG o el SVG.',
     'Escanea el código con la cámara de tu teléfono antes de compartirlo o imprimirlo.',
   ],
   specsHeading: 'Especificaciones',
@@ -25,22 +25,21 @@ export default {
       ['SVG', 'Un archivo vectorial con los mismos cuadritos y la misma Oli. Se ve nítido en cualquier tamaño, desde una tarjeta de presentación hasta un póster.'],
       ['Colores', 'Cuadritos negros sobre fondo blanco, con un margen blanco de 4 cuadritos alrededor, como pide el estándar de los códigos QR.'],
       ['Nombres de los archivos', 'Siempre codigo-qr.png y codigo-qr.svg, nunca tu texto.'],
-      ['Tipo de código', 'Un código estático: guarda tu texto tal cual, sin enlace acortado, sin rastreo y sin fecha de vencimiento. Un texto nuevo necesita un código nuevo.'],
     ],
   },
   faqHeading: 'Preguntas',
   faq: [
     {
       q: '¿Estos códigos QR vencen?',
-      a: 'No. El código guarda tu enlace o tu texto tal cual, no un enlace acortado que pasa por un servidor, así que nadie puede desactivarlo después. Funciona mientras funcione el enlace que lleva dentro.',
+      a: 'No. Son códigos estáticos: cada uno guarda tu enlace o tu texto tal cual, sin pasar por un enlace acortado en un servidor y sin rastreo, así que nadie puede desactivarlo después. Funciona mientras funcione el enlace que lleva dentro.',
     },
     {
       q: '¿Puedo cambiar el enlace después de imprimir el código?',
-      a: 'No. Un código que guarda el enlace tal cual no se puede cambiar. Crea un código nuevo con el enlace nuevo e imprime ese.',
+      a: 'No. Crea un código nuevo con el enlace nuevo e imprime ese.',
     },
     {
       q: '¿El código se puede escanear con Oli en el centro?',
-      a: 'Sí. El código usa la corrección de errores H, la más alta, que reconstruye la parte que queda debajo del ícono. En nuestras pruebas, los códigos de todos los tamaños se volvieron a leer con Oli en el centro. Escanea el tuyo antes de imprimirlo y, para una impresión muy pequeña, desactiva la opción de Oli.',
+      a: 'Sí. En nuestras pruebas, los códigos de todos los tamaños se volvieron a leer con Oli en el centro. Para una impresión muy pequeña, desactiva la opción de Oli.',
     },
     {
       q: '¿Por qué un texto largo crea un código más denso?',
@@ -48,20 +47,16 @@ export default {
     },
     {
       q: '¿Descargo el PNG o el SVG?',
-      a: 'El PNG sirve para una pantalla, una presentación o un documento. El SVG sirve para imprimir y para programas de diseño, porque se ve nítido en cualquier tamaño.',
+      a: 'El PNG sirve para una pantalla, una presentación o un documento. El SVG sirve para imprimir y para programas de diseño.',
     },
     {
       q: '¿Puedo usar el código en productos o en mi negocio?',
-      a: 'Sí. El código es tuyo para usarlo donde quieras, gratis, sin marca de agua y sin tener que dar crédito.',
-    },
-    {
-      q: '¿FileOrca ve lo que escribo?',
-      a: 'No. El código se crea en tu navegador. Tu texto no se agrega a la dirección de la página, no va en ningún evento de analítica, no se guarda en una cookie ni en el almacenamiento del navegador y no se usa como nombre de archivo. FileOrca nunca abre el enlace que escribes.',
+      a: 'Sí. El código es tuyo para usarlo donde quieras, sin marca de agua y sin tener que dar crédito.',
     },
   ],
   privacyHeading: 'Privacidad',
   privacyNote:
-    'Tu texto se queda en tu dispositivo. El código se crea en tu navegador, y el texto nunca va a la dirección de la página, a un evento de analítica, a una cookie, al almacenamiento del navegador ni al nombre del archivo. FileOrca nunca abre el enlace que escribes ni le hace ninguna solicitud.',
+    'Tu texto se queda en tu dispositivo. El código se crea en tu navegador, y el texto nunca va a la dirección de la página, a un evento de analítica, a una cookie ni al almacenamiento del navegador. FileOrca nunca abre el enlace que escribes ni le hace ninguna solicitud.',
   relatedHeading: 'Más herramientas',
   panel: {
     file: 'codigo-qr',

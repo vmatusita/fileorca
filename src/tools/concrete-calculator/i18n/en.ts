@@ -84,23 +84,23 @@ export default {
   faq: [
     {
       q: 'How many bags of concrete make a cubic yard?',
-      a: 'It depends on the yield printed on the bag. A cubic yard is 27 cubic feet, so it takes 45 bags that make 0.60 cu ft each, 60 bags of 0.45 cu ft or 90 bags of 0.30 cu ft.',
+      a: 'It takes 45 bags that make 0.60 cu ft each, 60 bags of 0.45 cu ft or 90 bags of 0.30 cu ft.',
     },
     {
       q: 'Why are the bag yields marked as examples?',
-      a: 'The yield changes from one product to another, and each bag prints its own. The examples, 0.30, 0.45 and 0.60 cu ft for bags of 40, 60 and 80 lb, are a starting point: type the numbers from the bags you buy.',
+      a: 'The yield changes from one product to another, and each bag prints its own.',
     },
     {
       q: 'How much extra should I add?',
-      a: 'The extra is for spills, an uneven base and forms that bow. The example uses 10%; your supplier or contractor can tell you what to add for your job.',
+      a: 'The extra is for spills, an uneven base and forms that bow, which change from one job to another.',
     },
     {
       q: 'Can I work out post holes or a round form tube?',
-      a: 'Yes. Choose Round column, enter the diameter and the depth in inches, and the number of holes as the quantity. Each one is worked out as a cylinder; if a post stands in the hole, the concrete is a little less.',
+      a: 'Yes. Choose Round column, enter the diameter and the depth in inches, and the number of holes as the quantity. If a post stands in the hole, the concrete is a little less.',
     },
     {
       q: 'Why is the thickness in inches and the length in feet?',
-      a: 'That is how slabs are described, as a 4-inch slab of 10 by 10 feet. The calculator divides the inches by 12, so every number is in feet before it multiplies.',
+      a: 'That is how slabs are described: a 4-inch slab of 10 by 10 feet.',
     },
   ],
   privacyHeading: 'Privacy',

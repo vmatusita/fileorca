@@ -32,15 +32,15 @@ export default {
   },
   howHeading: 'How to use the ovulation calculator',
   howSteps: [
-    'Enter the first day of your last period.',
-    'Enter how many days your cycle usually lasts, from the first day of one period to the first day of the next.',
-    'Read the estimated ovulation and fertile window, and the six cycles in the table; save them as a PDF or a CSV.',
+    'Enter the date in "First day of last period".',
+    'Enter how many days your cycle usually lasts.',
+    'Read the estimated ovulation and fertile window, and the cycles in the table; save them as a PDF or a CSV.',
   ],
   worksHeading: 'How ovulation is estimated',
   formulaHeading: 'The formula',
   formula: [
     'Ovulation day = first day of the period + (cycle length − 15) days, which is day (cycle length − 14) of the cycle: day 14 in a 28-day cycle. The fertile window runs from 5 days before that day to the day itself. The next period starts one cycle length after the last one.',
-    'The NICHD puts ovulation around day 12 to 14 of an average 28-day cycle, and the Office on Women’s Health counts the fertile window as about 6 days: an egg lives 12 to 24 hours, and sperm up to 5 days.',
+    'The NICHD puts ovulation around day 12 to 14 of an average 28-day cycle.',
   ],
   premisesHeading: 'Assumptions',
   exampleHeading: 'Worked example',
@@ -52,12 +52,12 @@ export default {
     { label: 'NICHD, "About Menstruation"', href: 'https://www.nichd.nih.gov/health/topics/menstruation/conditioninfo' },
   ],
   disclaimer:
-    'This calculator is an educational tool for adults 18 and older, not medical advice. It is an estimate from the calendar, and it cannot tell you when you will or will not get pregnant: do not use it to prevent pregnancy. Irregular cycles make the dates less reliable. Talk with a doctor or nurse about your cycle, and if your cycles are often shorter than 24 days or longer than 38.',
+    'This calculator is an educational tool for adults 18 and older, not medical advice. It is an estimate from the calendar: do not use it to prevent pregnancy. Irregular cycles make the dates less reliable. Talk with a doctor or nurse about your cycle and about ways to avoid pregnancy, and if your cycles are often shorter than 24 days or longer than 38.',
   faqHeading: 'Questions about ovulation',
   faq: [
     {
       q: 'What is the fertile window?',
-      a: 'The days when sex can lead to pregnancy: about the 5 days before ovulation and the day of ovulation, because sperm can live up to 5 days and an egg 12 to 24 hours.',
+      a: 'The days when sex can lead to pregnancy. The Office on Women’s Health counts about 6 of them, because sperm can live up to 5 days and an egg 12 to 24 hours.',
     },
     {
       q: 'How do I find my cycle length?',
@@ -65,15 +65,15 @@ export default {
     },
     {
       q: 'How exact is this?',
-      a: 'It is a calendar estimate. Ovulation can move from month to month, even in regular cycles, so the real days can differ from the ones shown.',
+      a: 'Ovulation can move even in regular cycles, so the real days can differ from the ones shown.',
     },
     {
       q: 'Can I use it to avoid getting pregnant?',
-      a: 'No. A calendar estimate cannot tell you which days are safe. Talk with a doctor or nurse about ways to prevent pregnancy.',
+      a: 'No. A calendar estimate cannot tell you which days are safe.',
     },
     {
       q: 'Why does the calculator take cycles from 20 to 40 days?',
-      a: 'It is the range of the Office on Women’s Health ovulation calculator. Cycles shorter than 24 days or longer than 38 are worth talking about with a doctor or nurse.',
+      a: 'It is the range of the Office on Women’s Health ovulation calculator.',
     },
   ],
   privacyHeading: 'Privacy',

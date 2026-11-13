@@ -10,7 +10,7 @@ export default {
   howSteps: [
     'Digite ou cole um link, ou qualquer texto, na caixa. O código aparece enquanto você digita.',
     'Escolha se a Oli fica no centro e o tamanho do PNG.',
-    'Baixe o PNG para usar numa tela ou num documento, ou o SVG para imprimir em qualquer tamanho.',
+    'Baixe o PNG ou o SVG.',
     'Escaneie o código com a câmera do celular antes de compartilhar ou imprimir.',
   ],
   specsHeading: 'Especificações',
@@ -25,22 +25,21 @@ export default {
       ['SVG', 'Um arquivo vetorial com os mesmos quadradinhos e a mesma Oli. Ele fica nítido em qualquer tamanho, de um cartão de visita a um pôster.'],
       ['Cores', 'Quadradinhos pretos sobre fundo branco, com uma margem branca de 4 quadradinhos em volta, como pede o padrão do QR code.'],
       ['Nomes dos arquivos', 'Sempre qr-code.png e qr-code.svg, nunca o seu texto.'],
-      ['Tipo de código', 'Um código estático: ele guarda o próprio texto, sem link encurtado, sem rastreamento e sem data de validade. Um texto novo pede um código novo.'],
     ],
   },
   faqHeading: 'Perguntas',
   faq: [
     {
       q: 'Esses QR codes expiram?',
-      a: 'Não. O código guarda o próprio link ou texto, e não um link encurtado que passa por um servidor, então ninguém consegue desativá-lo depois. Ele funciona enquanto o link que está dentro dele funcionar.',
+      a: 'Não. São códigos estáticos: cada um guarda o próprio link ou texto, sem passar por um link encurtado num servidor e sem rastreamento, então ninguém consegue desativá-lo depois. Ele funciona enquanto o link que está dentro dele funcionar.',
     },
     {
       q: 'Posso mudar o link depois de imprimir o código?',
-      a: 'Não. Um código que guarda o próprio link não muda. Crie um código novo com o link novo e imprima esse.',
+      a: 'Não. Crie um código novo com o link novo e imprima esse.',
     },
     {
       q: 'O código continua funcionando com a Oli no centro?',
-      a: 'Sim. O código usa a correção de erros H, a mais alta, que reconstrói a parte que fica embaixo do ícone. Nos nossos testes, códigos de todos os tamanhos foram lidos de volta com a Oli no centro. Escaneie o seu antes de imprimir e, numa impressão muito pequena, desligue a Oli.',
+      a: 'Sim. Nos nossos testes, códigos de todos os tamanhos foram lidos de volta com a Oli no centro. Numa impressão muito pequena, desligue a Oli.',
     },
     {
       q: 'Por que um texto longo deixa o código mais denso?',
@@ -48,20 +47,16 @@ export default {
     },
     {
       q: 'Devo baixar o PNG ou o SVG?',
-      a: 'O PNG serve para uma tela, um slide ou um documento. O SVG serve para impressão e para programas de design, porque fica nítido em qualquer tamanho.',
+      a: 'O PNG serve para uma tela, um slide ou um documento. O SVG serve para impressão e para programas de design.',
     },
     {
       q: 'Posso usar o código em produtos ou na minha empresa?',
-      a: "Pode. O código é seu para usar onde quiser, de graça, sem marca d'água e sem precisar dar crédito.",
-    },
-    {
-      q: 'O FileOrca vê o que eu digito?',
-      a: 'Não. O código é criado no seu navegador. Seu texto não entra no endereço da página, não vai em nenhum evento de medição, não fica guardado em cookie nem no armazenamento do navegador e não vira nome de arquivo. O FileOrca nunca abre o link que você digita.',
+      a: "Pode. O código é seu para usar onde quiser, sem marca d'água e sem precisar dar crédito.",
     },
   ],
   privacyHeading: 'Privacidade',
   privacyNote:
-    'Seu texto fica no seu aparelho. O código é criado no seu navegador, e o texto nunca entra no endereço da página, em evento de medição, em cookie, no armazenamento do navegador nem no nome do arquivo. O FileOrca nunca abre o link que você digita e nunca faz requisição a ele.',
+    'Seu texto fica no seu aparelho. O código é criado no seu navegador, e o texto nunca entra no endereço da página, em evento de medição, em cookie nem no armazenamento do navegador. O FileOrca nunca abre o link que você digita e nunca faz requisição a ele.',
   relatedHeading: 'Mais ferramentas',
   panel: {
     file: 'qr-code',

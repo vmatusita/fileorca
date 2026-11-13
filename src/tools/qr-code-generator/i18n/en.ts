@@ -10,7 +10,7 @@ export default {
   howSteps: [
     'Type or paste a link, or any text, in the box. The code appears as you type.',
     'Choose whether Oli sits in the middle, and the size of the PNG.',
-    'Download the PNG for a screen or a document, or the SVG to print at any size.',
+    'Download the PNG or the SVG.',
     'Scan the code with your phone camera before you share or print it.',
   ],
   specsHeading: 'Specifications',
@@ -25,22 +25,21 @@ export default {
       ['SVG', 'A vector file with the same squares and the same Oli. It stays sharp at any size, from a business card to a poster.'],
       ['Colors', 'Black squares on white, with a white margin 4 squares wide all around, as the QR code standard asks.'],
       ['File names', 'Always qr-code.png and qr-code.svg, never your text.'],
-      ['Kind of code', 'A static code: it holds your text itself, with no short link, no tracking and no expiry date. A new text needs a new code.'],
     ],
   },
   faqHeading: 'Questions',
   faq: [
     {
       q: 'Do these QR codes expire?',
-      a: 'No. The code holds your link or text itself, not a short link to a server, so nobody can switch it off later. It works for as long as the link inside it works.',
+      a: 'No. These are static codes: each one holds your link or text itself, with no short link to a server and no tracking, so nobody can switch it off later. It works for as long as the link inside it works.',
     },
     {
       q: 'Can I change the link after I print the code?',
-      a: 'No. A code that holds the link itself cannot change. Make a new code with the new link and print that one.',
+      a: 'No. Make a new code with the new link and print that one.',
     },
     {
       q: 'Will the code still scan with Oli in the middle?',
-      a: 'Yes. The code uses error correction H, the highest, which rebuilds the part under the icon. Our tests read codes of every size back with Oli in the middle. Scan yours before you print it, and turn Oli off for a very small print.',
+      a: 'Yes. Our tests read codes of every size back with Oli in the middle. For a very small print, turn Oli off.',
     },
     {
       q: 'Why does a long text make a denser code?',
@@ -48,20 +47,16 @@ export default {
     },
     {
       q: 'Should I download the PNG or the SVG?',
-      a: 'The PNG suits a screen, a slide or a document. The SVG suits print and design apps, because it stays sharp at any size.',
+      a: 'The PNG suits a screen, a slide or a document. The SVG suits print and design apps.',
     },
     {
       q: 'Can I use the code on products or for my business?',
-      a: 'Yes. The code is yours to use anywhere, for free, with no watermark and no credit to give.',
-    },
-    {
-      q: 'Does FileOrca see what I type?',
-      a: 'No. The code is made in your browser. Your text is not added to the page address, sent in an analytics event, kept in a cookie or in your browser storage, or put in the file name. FileOrca never opens the link you type.',
+      a: 'Yes. The code is yours to use anywhere, with no watermark and no credit to give.',
     },
   ],
   privacyHeading: 'Privacy',
   privacyNote:
-    'Your text stays on your device. The code is made in your browser, and the text never goes into the page address, an analytics event, a cookie, your browser storage or the file name. FileOrca never opens the link you type and never sends a request to it.',
+    'Your text stays on your device. The code is made in your browser, and the text never goes into the page address, an analytics event, a cookie or your browser storage. FileOrca never opens the link you type and never sends a request to it.',
   relatedHeading: 'More tools',
   panel: {
     file: 'qr-code',
