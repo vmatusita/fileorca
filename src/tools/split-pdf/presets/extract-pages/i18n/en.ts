@@ -14,9 +14,9 @@ const texts: PdfToolTexts<ExtractTexts> = {
   howHeading: 'How to extract pages from a PDF',
   howSteps: [
     'Drop one PDF on the box, choose it, or paste it. Oli shows a thumbnail of every page, and the magnifier opens a page large.',
-    'Pick the pages you want in the grid, or type their numbers, like 2-4, 7.',
-    'Press Extract pages. Oli copies the picked pages into one new PDF, in the order they have in your file.',
-    'Download the new PDF, named after your file with -extracted. Your original keeps every page.',
+    'Pick the pages you want in the grid, or type their numbers.',
+    'Press Extract pages.',
+    'Download the new PDF.',
   ],
   specsHeading: 'What the extracted PDF keeps',
   specs: {
@@ -25,7 +25,7 @@ const texts: PdfToolTexts<ExtractTexts> = {
     rows: [
       ['What it takes', 'One PDF at a time. Oli reads what is inside the file, not its name or its ending.'],
       ['Choosing pages', 'Tap pages in the grid of thumbnails, or type numbers and ranges like 2-4, 7 and Oli picks them for you. Pick all, Pick none and Invert selection work on the whole grid.'],
-      ['What you get', 'One PDF with the picked pages, in the order they have in your file, named with -extracted. The pages are copied, so your original keeps all of them.'],
+      ['What you get', 'One PDF with the picked pages, in the order they have in your file, named with -extracted.'],
       ['Form fields', 'The new PDF keeps the form fields that sit on the extracted pages. The XFA layer, which only Adobe apps read, is removed.'],
       ['Bookmarks and links', 'Bookmarks and links between pages stay when they point to an extracted page. Links to a web address stay too, and links to the pages left behind go away.'],
       ['Document info', 'The new PDF takes the title, author and other metadata of your file. Oli adds no date, no producer name and nothing from your device.'],
@@ -37,23 +37,19 @@ const texts: PdfToolTexts<ExtractTexts> = {
   faq: [
     {
       q: 'What is the difference between extracting pages and splitting a PDF?',
-      a: 'Extract pages from PDF gives one PDF with the pages you pick. Split PDF can also put every page in a file of its own, or cut the PDF into several files by ranges like 1-3, 4-6. To pull a few pages out into one file, Extract pages from PDF has fewer steps.',
+      a: 'Extract pages from PDF gives one PDF with the pages you pick. Split PDF can also put every page in a file of its own, or cut the PDF into several files, one for each range you type. To pull a few pages out into one file, Extract pages from PDF has fewer steps.',
     },
     {
       q: 'Should I use Delete PDF pages instead?',
-      a: 'Use Delete PDF pages when it is quicker to pick the pages that go than the pages that stay: it gives your PDF without the pages you pick. Extract pages from PDF works the other way round and gives only the pages you pick.',
+      a: 'Use Delete PDF pages when it is quicker to pick the pages that go than the pages that stay: it gives your PDF without the pages you pick. Here it is the other way round.',
     },
     {
       q: 'Can I put the extracted pages in another order?',
-      a: 'They come out in the order they have in your file. To change the order, turn a page or take one out as well, open the new PDF in Organize PDF.',
+      a: 'Not here: the order is the one of your file. To move pages, turn one or take one out as well, open the new PDF in Organize PDF.',
     },
     {
       q: 'Does my original PDF lose the pages I extract?',
       a: 'No. Oli copies the picked pages into a new file and never changes yours, which keeps every page it had.',
-    },
-    {
-      q: 'Is my PDF uploaded to extract the pages?',
-      a: 'No. The PDF is read and the new file is written on your device, in your browser, and nothing is sent to a server. Open the Network tab of your browser while you extract pages: no request carries your file.',
     },
   ],
   privacyHeading: 'Privacy',

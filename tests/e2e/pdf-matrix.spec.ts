@@ -880,10 +880,11 @@ test('PDF to PNG: the small fixtures at 150 ppi, the owner-restricted one drawn,
   expect(outs).toHaveLength(files.reduce((sum, name) => sum + pages(name), 0));
   await recordEach('png-small', { tool: 'pdf-to-jpg-to-png', browser: browserName }, rows, files, async (fixture) => {
     await checkImages(outs, fixture, 150, Array.from({ length: pages(fixture) }, (_, i) => i + 1), 'png');
-    // "For a PDF of photos, the PNG files of all its pages add up to several times the size of the JPG files. For a PDF of
-    // text and lines, the two are of a similar size: the PNG files of all its pages add up to between about half and about
-    // twice the size of the JPG files, so they can even be the smaller ones." (the specs and the FAQ of the page; DECISOES
-    // § 729). The sentence and this check are per PDF: the bytes of all the pages of a fixture added up (bytesOf). One page
+    // "For a PDF of photos, yes: the PNG files of all its pages add up to several times the size of the JPG files […] For a
+    // PDF of text and lines, not always: the PNG files of all its pages add up to between about half and about twice the
+    // size of the JPG files, so they can even be the smaller ones." (the FAQ of the page, its one place since the F19a cut
+    // the row of the specs that said it again; DECISOES § 729 and § 766; the FAQ of PDF to JPG says it too). The sentence
+    // and this check are per PDF: the bytes of all the pages of a fixture added up (bytesOf). One page
     // alone goes further (0.39 to 2.9 on the other fixtures, down to 2.5 on a photo page; front P), so the page says it of
     // the PDF.
     // This test runs at 150 ppi, in both browsers. Several times: more than 3 (4.68 to 6.34 here in the recorded runs; 4.1

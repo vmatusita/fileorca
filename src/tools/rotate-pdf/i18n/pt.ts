@@ -10,9 +10,9 @@ const texts: PdfToolTexts<RotatePdfTexts> = {
   h1: 'Girar PDF',
   howHeading: 'Como funciona',
   howSteps: [
-    'Solte seus PDFs na caixa, escolha os arquivos ou cole, quantos quiser.',
+    'Solte seus PDFs na caixa, escolha os arquivos ou cole.',
     'Escolha um giro (90° à direita, 180° ou 90° à esquerda) ou, com um arquivo só, gire página por página pelo botão de cada miniatura, e a lupa abre a página em tamanho grande.',
-    'Baixe o PDF girado ou todos juntos num ZIP, e os seus arquivos originais continuam intactos.',
+    'Baixe os PDFs girados.',
   ],
   specsHeading: 'O que entra e o que sai',
   specs: {
@@ -21,10 +21,9 @@ const texts: PdfToolTexts<RotatePdfTexts> = {
     rows: [
       ['Arquivos que aceita', 'Arquivos PDF, quantos quiser. A Oli confere o que há dentro do arquivo, não o nome dele.'],
       ['Giros', '90° à direita (o padrão), 180° ou 90° à esquerda.'],
-      ['Sem perda', 'Só muda a configuração de giro de cada página. Nada é redesenhado, então o texto, as imagens e a qualidade ficam exatamente como eram.'],
       ['Todas as páginas', 'Todas as páginas do arquivo giram do mesmo jeito. Num lote, é isso que acontece com cada arquivo.'],
       ['Página por página', 'Com um arquivo só, a grade mostra todas as páginas, e um botão em cada miniatura gira só aquela página.'],
-      ['Lote', 'Sem limite de arquivos. Cada um ganha o próprio download, e dois ou mais vêm juntos num ZIP só.'],
+      ['Lote', 'Sem limite de arquivos. Cada um ganha o próprio download, e dois ou mais vêm juntos num ZIP só. Os seus arquivos originais continuam intactos.'],
       [
         'O que fica',
         'Os formulários, os links, os marcadores, os campos de informação e os metadados XMP do seu PDF ficam. A Oli não acrescenta data, nome de programa (Producer) nem nada do seu aparelho.',
@@ -47,24 +46,20 @@ const texts: PdfToolTexts<RotatePdfTexts> = {
       a: 'Não. A Oli muda só a configuração de giro de cada página. Nada é redesenhado nem comprimido de novo, então o texto continua nítido e selecionável, e as imagens mantêm todos os pixels.',
     },
     {
-      q: 'Dá para girar só uma página?',
-      a: 'Dá, quando você trabalha com um PDF só. Escolha Página por página, e cada miniatura ganha um botão que gira aquela página. Com vários arquivos de uma vez, a Oli gira todas as páginas de cada arquivo, então gire páginas soltas um arquivo por vez.',
+      q: 'O que acontece com uma página que já estava girada?',
+      a: 'O giro novo soma com o que ela já tem: uma página salva a 90° que ganha 90° à direita termina a 180°.',
     },
     {
-      q: 'Os formulários, os links e os marcadores continuam funcionando?',
-      a: 'Sim. Eles ficam no arquivo, assim como os metadados. A única coisa que a Oli tira é a camada de formulário XFA, que só os programas da Adobe leem; os campos de formulário comuns continuam funcionando.',
+      q: 'Dá para endireitar uma digitalização torta em poucos graus?',
+      a: 'Não. O padrão do PDF só gira uma página em quartos de volta, múltiplos de 90°. Endireitar uma digitalização torta pede desenhar a página de novo, e esta ferramenta não faz isso.',
     },
     {
-      q: 'Por que meu PDF foi recusado?',
-      a: 'Um PDF que pede senha para abrir, ou que tem restrições de edição, é recusado com um link para Desbloquear PDF. Um arquivo vazio ou cortado, ou que não é PDF, também é recusado. Os outros arquivos do lote seguem.',
-    },
-    {
-      q: 'Meu PDF é enviado para algum lugar?',
-      a: 'Não. O FileOrca lê e grava o seu PDF no seu aparelho, no navegador, e o PDF.js desenha as miniaturas das páginas ali também. Abra a aba Rede do navegador enquanto gira: nenhuma requisição leva os seus arquivos.',
+      q: 'Dá para girar um PDF que tem senha?',
+      a: 'Do jeito que ele está, não. Tire a senha na Desbloquear PDF primeiro e depois traga a cópia desbloqueada de volta para cá.',
     },
   ],
   privacyHeading: 'Privacidade',
-  privacyNote: 'Os PDFs são girados no seu aparelho, no navegador, e nunca são enviados a um servidor. Os seus arquivos originais continuam intactos.',
+  privacyNote: 'Os PDFs são girados no seu aparelho, no navegador, e nunca são enviados a um servidor.',
   relatedHeading: 'Ferramentas relacionadas',
   panel: {
     suffix: 'girado',

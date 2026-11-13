@@ -11,21 +11,20 @@ const texts: PdfToolTexts<UnlockTexts> = {
   h1: 'Desbloquear PDF',
   howHeading: 'Cómo funciona',
   howSteps: [
-    'Suelta un PDF en el cuadro, elígelo o pégalo; Oli trabaja con un PDF a la vez, porque cada archivo tiene su propia contraseña.',
-    'Si el PDF solo tiene restricciones, Oli las quita enseguida, y si necesita contraseña para abrirse, escríbela en el cuadro y presiona Quitar la contraseña.',
-    'Descarga el PDF nuevo, que se abre sin contraseña; tu archivo original no se toca.',
+    'Suelta un PDF en el cuadro, elígelo o pégalo.',
+    'Si el PDF necesita contraseña para abrirse, escríbela en el cuadro y presiona Quitar la contraseña.',
+    'Descarga el PDF nuevo.',
   ],
   specsHeading: 'Qué entra y qué sale',
   specs: {
     caption: 'Lo que Desbloquear PDF recibe y entrega',
     head: ['Detalle', 'Qué pasa'],
     rows: [
-      ['Archivos', 'Un PDF a la vez. Oli comprueba que es un PDF por lo que hay dentro del archivo, no por su nombre.'],
+      ['Archivos', 'Un PDF a la vez, porque cada archivo tiene su propia contraseña. Oli comprueba que es un PDF por lo que hay dentro del archivo, no por su nombre.'],
       ['Solo restricciones', 'Un PDF que se abre libremente pero bloquea cosas como editar, imprimir o copiar pierde esas restricciones de inmediato. Oli no te pide nada.'],
-      ['Contraseña para abrir', 'Un PDF que pide contraseña al abrirlo necesita esa contraseña aquí. Escríbela en el cuadro y presiona Quitar la contraseña.'],
+      ['Contraseña para abrir', 'Un PDF que pide contraseña al abrirlo necesita esa contraseña aquí.'],
       ['Contraseña incorrecta', 'Oli te dice que la contraseña no abrió el archivo, y puedes volver a intentarlo todas las veces que necesites.'],
-      ['Tipos de protección', 'AES-256, AES-128 y la antigua protección RC4, que procesa qpdf funcionando en tu navegador.'],
-      ['Sin adivinar', 'Sin la contraseña correcta, el archivo sigue cerrado: Oli no adivina ni rompe contraseñas. Usa esto solo con archivos que tienes derecho a abrir y modificar.'],
+      ['Tipos de protección', 'AES-256, AES-128 y la antigua protección RC4, que procesa qpdf.'],
       ['Lo que se conserva', 'Las páginas, el texto, las imágenes, los campos de formulario, los enlaces, los marcadores y las propiedades del documento quedan como estaban. Solo se va la protección.'],
       ['Lo que recibes', 'Un PDF nuevo sin contraseña y sin restricciones. Tu archivo original no cambia.'],
       ['Nada que quitar', 'Un PDF sin contraseña y sin restricciones no tiene nada que quitar, así que Oli te lo dice en lugar de devolverte el mismo archivo.'],
@@ -35,7 +34,7 @@ const texts: PdfToolTexts<UnlockTexts> = {
   faq: [
     {
       q: '¿Qué diferencia hay entre una contraseña para abrir y las restricciones?',
-      a: 'Una contraseña para abrir impide que alguien lea el PDF, así que aquí la necesitas. Las restricciones las pone quien creó el archivo: puedes leerlo, pero cosas como editar, imprimir o copiar texto están bloqueadas. Oli quita las restricciones por su cuenta y solo pide contraseña cuando el archivo la necesita para abrirse.',
+      a: 'Una contraseña para abrir impide que alguien lea el PDF. Las restricciones las pone quien creó el archivo: puedes leerlo, pero cosas como editar, imprimir o copiar texto están bloqueadas.',
     },
     {
       q: '¿Puedo abrir un PDF si olvidé la contraseña?',
@@ -46,12 +45,8 @@ const texts: PdfToolTexts<UnlockTexts> = {
       a: 'Usa esto solo con archivos que tienes derecho a abrir y modificar, como tus propios documentos o archivos cuyo dueño lo permitió. Quitar una contraseña no te da permiso para compartir ni editar el trabajo de otra persona. Si tienes dudas, pregúntale primero al dueño.',
     },
     {
-      q: '¿Mi PDF o mi contraseña se suben a algún lugar?',
-      a: 'No. Oli lee y escribe el PDF en tu dispositivo, en tu navegador, con qpdf funcionando dentro de la página. Ni el archivo ni la contraseña que escribes se envían a ningún lugar. Abre la pestaña Red de tu navegador mientras usas la herramienta: ninguna solicitud lleva tus archivos.',
-    },
-    {
-      q: '¿Qué tipos de protección acepta?',
-      a: 'AES-256, AES-128 y la protección RC4, más antigua. Oli quita solo la protección, así que las páginas, el texto, los formularios, los enlaces y los marcadores quedan como estaban.',
+      q: '¿Puedo volver a ponerle una contraseña después?',
+      a: 'Sí, con Proteger PDF, usando la misma contraseña o una nueva.',
     },
   ],
   privacyHeading: 'Privacidad',

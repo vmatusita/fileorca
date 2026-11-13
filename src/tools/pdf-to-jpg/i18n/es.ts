@@ -11,10 +11,10 @@ const texts: PdfToolTexts<ImagesTexts> = {
   h1: 'PDF a JPG',
   howHeading: 'Cómo funciona',
   howSteps: [
-    'Elige JPG o PNG, una resolución, y todas las páginas o un rango como 1-3, 5, 8-10.',
-    'Suelta tus PDF en el cuadro, elígelos o pégalos, todos los que quieras.',
-    'Oli dibuja cada página como una imagen en tu navegador, un PDF tras otro.',
-    'Descarga una imagen o todas juntas en un ZIP.',
+    'Elige JPG o PNG, una resolución y qué páginas convertir.',
+    'Suelta tus PDF en el cuadro, elígelos o pégalos.',
+    'Oli dibuja cada página como una imagen, un PDF tras otro.',
+    'Descarga las imágenes.',
   ],
   specsHeading: 'Qué entra y qué sale',
   specs: {
@@ -23,7 +23,7 @@ const texts: PdfToolTexts<ImagesTexts> = {
     rows: [
       ['Qué acepta', 'Archivos PDF, todos los que quieras. Oli revisa lo que hay dentro de cada archivo, no su nombre ni su extensión.'],
       ['Qué sale', 'Una imagen por página, con el nombre del PDF y -pagina-1, -pagina-2 y así sucesivamente, como informe-pagina-1.jpg.'],
-      ['Formatos', 'JPG con calidad 92, o PNG. En las páginas con fotos, los archivos JPG son mucho más pequeños; el PNG mantiene nítidos el texto y las líneas finas.'],
+      ['Formatos', 'JPG, guardado con calidad 92, o PNG, guardado sin pérdida.'],
       ['Resolución', '72 ppp (píxeles por pulgada) para pantalla, 150 ppp para uso general (la opción predeterminada) o 300 ppp para imprimir.'],
       ['Páginas', 'Todas las páginas, o un rango como 1-3, 5, 8-10. El mismo rango se aplica a cada PDF.'],
       ['Muchas imágenes', 'Varias imágenes se descargan juntas en un ZIP.'],
@@ -37,27 +37,23 @@ const texts: PdfToolTexts<ImagesTexts> = {
   faq: [
     {
       q: '¿Qué resolución debo elegir?',
-      a: 'Usa 72 ppp para ver las páginas en una pantalla, 150 ppp para uso general y 300 ppp si piensas imprimirlas. Una resolución más alta da imágenes más nítidas, pero archivos más grandes que tardan más en crearse. Una página muy grande, de más de 16.7 megapíxeles, se dibuja con una resolución menor porque el navegador no puede dibujarla más grande, y el resultado lo dice.',
+      a: 'La que va con el destino de las imágenes: la más baja para una pantalla, la más alta para imprimir. Cada paso hacia arriba da imágenes más nítidas, pero archivos más grandes que tardan más en crearse: una página tamaño Carta sale de 612 × 792 píxeles con la resolución más baja, de 1275 × 1650 con la predeterminada y de 2550 × 3300 con la más alta.',
     },
     {
-      q: '¿Puedo convertir solo algunas páginas?',
-      a: 'Sí. Elige Rango de páginas y escribe las páginas, como 1-3, 5, 8-10. Oli crea imágenes solo de esas páginas. Si agregas varios PDF, el mismo rango se aplica a cada uno.',
+      q: '¿Y si uno de mis PDF tiene menos páginas que el rango?',
+      a: 'Oli crea imágenes de las páginas del rango que ese PDF tiene. Un PDF sin ninguna página dentro del rango se queda fuera, y su fila te lo dice.',
     },
     {
       q: '¿Elijo JPG o PNG?',
-      a: 'El JPG, guardado con calidad 92, va bien con páginas que tienen fotos: en un PDF de fotos, los archivos PNG de todas sus páginas, sumados, tienen varias veces el peso de los archivos JPG. El PNG no pierde nada, así que el texto y las líneas finas de la página quedan nítidos; en un PDF de texto y líneas, los archivos PNG de todas sus páginas, sumados, pesan aproximadamente entre la mitad y el doble que los archivos JPG, y hasta pueden ser los más pequeños. En los dos casos el texto de la página pasa a ser parte de la imagen, así que ya no se puede seleccionar ni buscar.',
+      a: 'Para un PDF de fotos, JPG: los archivos PNG de todas sus páginas, sumados, tienen varias veces el peso de los archivos JPG. Para un PDF de texto y líneas, el PNG mantiene nítidas las líneas finas, y sus archivos, sumados, pesan aproximadamente entre la mitad y el doble que los archivos JPG, así que hasta pueden ser los más pequeños. En los dos formatos el texto de la página pasa a ser parte de la imagen y ya no se puede seleccionar ni buscar.',
     },
     {
-      q: '¿Puedo convertir un PDF con restricciones de edición o con contraseña?',
-      a: 'Un PDF que solo tiene restricciones de edición se dibuja tal como se ve en pantalla. Un PDF que necesita contraseña para abrirse se rechaza con un enlace a Desbloquear PDF, donde puedes quitar la contraseña primero y después traer el resultado aquí.',
-    },
-    {
-      q: '¿Mi PDF se sube a algún lugar?',
-      a: 'No. PDF.js dibuja las páginas en tu dispositivo, dentro de tu navegador, y las imágenes también se crean allí. Nada se envía a un servidor. Abre la pestaña Red de tu navegador mientras conviertes: ninguna solicitud lleva tus archivos.',
+      q: '¿Puedo convertir un PDF que necesita contraseña para abrirse?',
+      a: 'Tal como está, no. Quita la contraseña en Desbloquear PDF primero y después trae la copia desbloqueada aquí.',
     },
   ],
   privacyHeading: 'Privacidad',
-  privacyNote: 'Tus PDF se dibujan en tu dispositivo y nunca se envían a un servidor. Las imágenes salen sin datos Exif ni ubicación GPS.',
+  privacyNote: 'Tus PDF se dibujan en tu dispositivo y nunca se envían a un servidor. Las imágenes también se crean allí.',
   relatedHeading: 'Herramientas relacionadas',
   // F18 (decision 5; DECISOES § 725): the table of the presets of this tool, with their links.
   presets: {

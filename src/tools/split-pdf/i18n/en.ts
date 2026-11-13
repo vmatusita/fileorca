@@ -11,9 +11,9 @@ const texts: PdfToolTexts<SplitTexts> = {
   howHeading: 'How it works',
   howSteps: [
     'Drop one PDF on the box, choose it, or paste it.',
-    'Pick how to split it: every page in its own file, page ranges like 1-3, 5, 8-10, or the pages you pick in the grid of thumbnails, where the magnifier opens each page large.',
-    'Press Split PDF. Oli cuts the file in your browser.',
-    'Download the result. One file downloads on its own, and several files come together in a ZIP.',
+    'Pick how to split it: every page in its own file, page ranges you type, or the pages you pick in the grid of thumbnails, where the magnifier opens each page large.',
+    'Press Split PDF, and Oli cuts the file.',
+    'Download the result.',
   ],
   specsHeading: 'What goes in and what comes out',
   specs: {
@@ -35,24 +35,20 @@ const texts: PdfToolTexts<SplitTexts> = {
   faqHeading: 'Questions',
   faq: [
     {
-      q: 'How do I split a PDF into single pages?',
-      a: 'Choose Every page and press Split PDF. Oli saves each page as its own PDF, named after your file with -page-1, -page-2 and so on, and the files come together in a ZIP.',
-    },
-    {
-      q: 'How do I split a PDF by page numbers?',
-      a: 'Choose Page ranges and type them like 1-3, 5, 8-10. You get one PDF for each range: here, pages 1 to 3, then page 5, then pages 8 to 10. The files are named -part-1, -part-2 and -part-3 in the order you typed the ranges.',
+      q: 'Can my ranges overlap, or run past the last page?',
+      a: 'They can overlap, because each range makes its own file: 1-3 and 2-4 give two files that both have pages 2 and 3. A range has to go from the lower page to the higher one and stay within the pages the PDF has; if it does not, the field asks you to fix it.',
     },
     {
       q: 'Can I take just a few pages out into one new PDF?',
-      a: 'Yes. Choose Pick pages, pick the pages you want in the grid of thumbnails, and Oli puts them together into one PDF named with -selected. The pages keep the order they have in the original.',
+      a: 'Yes, with Pick pages here, or with Extract pages from PDF, which does only that. Either way the pages come out in the order they have in your file, whatever order you tap them in.',
     },
     {
-      q: 'Do forms and bookmarks survive the split?',
-      a: 'Each part keeps the form fields, the bookmarks and the links between pages that belong to its own pages. A link to a page that went into another part has nowhere to go, so it is dropped. Links to the web stay.',
+      q: 'Will each part be smaller than my PDF?',
+      a: 'Usually. A part carries only its own pages and what they use, such as their images. A font that many pages share goes into every part that needs it, so all the parts together can weigh more than your PDF.',
     },
     {
-      q: 'Is my PDF uploaded?',
-      a: 'No. The PDF is read and written on your device, inside your browser, and nothing is sent to a server. Open the Network tab of your browser while you split: no request carries your file.',
+      q: 'Do hidden layers stay hidden in the parts?',
+      a: 'Yes. Each part keeps the layers its pages use, each one on or off as your PDF had it, so a layer the author hid stays hidden.',
     },
   ],
   privacyHeading: 'Privacy',
