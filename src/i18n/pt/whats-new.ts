@@ -25,7 +25,7 @@ export default {
     },
     'calculator-terms': {
       title: 'Privacidade e termos das calculadoras',
-      body: 'A Privacidade diz que os números que você digita numa calculadora são calculados no seu aparelho e nunca são enviados. Os Termos dizem que as calculadoras servem para aprender e se informar, e não são aconselhamento financeiro.',
+      body: 'A Privacidade diz que os números que você digita numa calculadora são calculados no seu aparelho e nunca são enviados. Os Termos dizem que as calculadoras servem para aprender e se informar, e que nenhuma delas é aconselhamento financeiro.',
     },
     'pdf-terms': {
       title: 'Termos para senhas e assinaturas',
@@ -37,7 +37,7 @@ export default {
     },
     'health-terms': {
       title: 'Termos para saúde, casa e QR code',
-      body: 'Os Termos dizem que as calculadoras de saúde, em inglês, dão estimativas por fórmulas publicadas e não são aconselhamento médico, e a Privacidade diz que as medidas, as datas e o texto que você digita ficam no seu aparelho. As Licenças dão o crédito das bibliotecas do QR code.',
+      body: 'Os Termos dizem que as calculadoras de saúde, em inglês, dão estimativas por fórmulas publicadas e que nenhuma delas é aconselhamento médico, e a Privacidade diz que as medidas, as datas e o texto que você digita ficam no seu aparelho. As Licenças dão o crédito das bibliotecas do QR code.',
     },
     offline: {
       title: 'As páginas que você abriu funcionam sem internet',

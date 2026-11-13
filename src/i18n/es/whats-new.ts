@@ -77,7 +77,7 @@ export default {
     },
     'file-guide-page': {
       title: 'Una página de guía más clara',
-      body: 'Cada guía de archivos abre con lo que se midió y la herramienta justo debajo del título, y sus tablas se leen mejor en el celular.',
+      body: 'Cada guía de archivos empieza con lo que se midió y con la herramienta, debajo del título, y sus tablas se leen mejor en el celular.',
     },
     'home-and-hubs': {
       title: 'Página de inicio y categorías nuevas',
@@ -121,7 +121,7 @@ export default {
     },
     'trust-and-content': {
       title: 'Novedades y Cómo funciona',
-      body: 'Esta página reúne cada cambio que ves, y Cómo funciona muestra qué pasa con tu archivo y cómo comprobarlo en tu navegador. Las páginas de las herramientas y de las calculadoras ahora dicen cada cosa en un solo lugar, y Acerca de dice cuándo salió al aire el sitio.',
+      body: 'Esta página reúne cada cambio que ves, y Cómo funciona muestra qué pasa con tu archivo y cómo comprobarlo en tu navegador. Las páginas de las herramientas y de las calculadoras ahora dicen cada cosa en un solo lugar, y el día en que el sitio salió al aire está ahora en Acerca de.',
     },
   },
 } satisfies WhatsNewTexts;

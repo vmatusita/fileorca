@@ -8,7 +8,7 @@ export default {
   title: "What's new on FileOrca",
   description: 'Every change you can see on FileOrca since the site went live: new tools, new languages and new guides, each with the day it reached the site.',
   h1: "What's new",
-  intro: 'Every change you can see on FileOrca, newest first, with the day it reached the site and links to the pages it changed.',
+  intro: 'Every change you can see on FileOrca, from the latest to the first, with the day it reached the site and links to the pages it changed.',
   more: 'and {n} more',
   entries: {
     launch: {
@@ -21,7 +21,7 @@ export default {
     },
     'private-chunks': {
       title: 'No hidden data in PNG and WebP',
-      body: 'The image tools now also remove the private blocks some apps hide inside PNG and WebP files. Image tools now says which tool fits each job.',
+      body: 'The image tools now also remove the private blocks some apps hide inside PNG and WebP files. The Image tools page now says which tool fits each job.',
     },
     'cookie-notice-space': {
       title: 'The cookie notice floats',
@@ -113,7 +113,7 @@ export default {
     },
     'pdf-pages': {
       title: 'Whole pages in the PDF tools',
-      body: 'The PDF tools show each page whole, small or large, and a magnifier opens it big, with the action of the tool. Delete PDF pages shows the pages that will go, and a result that is one PDF has View the new PDF.',
+      body: 'The PDF tools show each page whole, small or large, and a magnifier opens it big, with the action of the tool. Delete PDF pages shows the pages that will go, and a result that is one PDF can be opened with View the new PDF.',
     },
     'next-steps': {
       title: 'Next steps that take your file along',
