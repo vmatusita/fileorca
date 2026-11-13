@@ -12,9 +12,9 @@ const texts: PdfToolTexts<DeleteTexts> = {
   howHeading: 'Como funciona',
   howSteps: [
     'Solte um PDF na caixa, escolha o arquivo ou cole.',
-    'Marque as páginas que vão sair na grade de miniaturas, ou digite os números delas, como 1-3, 5. A lupa de cada página abre a página em tamanho grande, para você conferir antes.',
+    'Toque nas miniaturas das páginas que vão sair, ou digite os números delas. A lupa de cada página abre a página em tamanho grande, para você conferir antes.',
     'Aperte Excluir páginas, e a Oli monta um PDF novo com as páginas que sobraram.',
-    'Baixe o PDF novo, e o seu arquivo original continua intacto.',
+    'Baixe o PDF novo.',
   ],
   specsHeading: 'O que entra e o que sai',
   specs: {
@@ -26,7 +26,7 @@ const texts: PdfToolTexts<DeleteTexts> = {
       ['Todas as páginas', 'Não dá para excluir todas as páginas: um PDF precisa de pelo menos uma página, então uma tem de ficar desmarcada.'],
       [
         'O arquivo novo',
-        'A Oli copia as páginas que ficam para um PDF novo. As páginas excluídas, e o que só elas usavam, ficam de fora, então o arquivo fica menor.',
+        'A Oli copia as páginas que ficam para um PDF novo.',
       ],
       ['Formulários', 'Os campos de formulário das páginas que ficam continuam. A camada de formulário XFA, que só os programas da Adobe leem, sai; os campos de formulário comuns continuam funcionando.'],
       [
@@ -47,27 +47,23 @@ const texts: PdfToolTexts<DeleteTexts> = {
   faq: [
     {
       q: 'Dá para excluir várias páginas de uma vez, como da 2 à 5?',
-      a: 'Dá. Marque as miniaturas na grade ou digite os números no campo embaixo dela, como 2-5 ou 1-3, 7. A Oli marca as páginas para você, e ainda dá para marcar ou desmarcar páginas soltas antes de apertar Excluir páginas.',
+      a: 'Dá. Digite 2-5 no campo embaixo da grade, e a Oli marca essas quatro páginas para você; ainda dá para tocar nas miniaturas e marcar ou desmarcar páginas soltas antes de apertar Excluir páginas.',
     },
     {
       q: 'Dá para desfazer se eu excluir as páginas erradas?',
       a: 'O seu arquivo original nunca muda, porque a Oli grava um PDF novo. Depois do resultado, as páginas continuam à vista: marque ou desmarque outras, e o botão para excluir volta, pronto para fazer outro PDF. Só aperte Começar de novo para escolher outro arquivo.',
     },
     {
-      q: 'Os formulários, os links e os marcadores continuam?',
-      a: 'Sim, nas páginas que ficam. Os campos de formulário ficam, os marcadores que apontam para as páginas mantidas ficam, e os links para a web e entre as páginas mantidas também. Os links para uma página que você excluiu saem, porque não sobrou nada para onde levar.',
+      q: 'O que acontece com o marcador de uma página que eu excluí?',
+      a: 'Ele sai, a não ser que guarde marcadores de páginas mantidas. Nesse caso, vira um título que não leva a lugar nenhum, acima desses marcadores.',
     },
     {
       q: 'Por que o PDF novo ficou menor?',
       a: 'As páginas excluídas saem do arquivo, e tudo o que só elas usavam também, como as próprias imagens. O que uma página mantida também usa fica, então a economia depende de quanto pesavam as páginas excluídas.',
     },
-    {
-      q: 'Meu PDF é enviado para algum lugar?',
-      a: 'Não. O FileOrca lê e grava o seu PDF no seu aparelho, no navegador, e o PDF.js desenha as miniaturas das páginas ali também. Abra a aba Rede do navegador enquanto exclui as páginas: nenhuma requisição leva os seus arquivos.',
-    },
   ],
   privacyHeading: 'Privacidade',
-  privacyNote: 'Seu PDF é lido e gravado de novo no seu aparelho, no navegador, e nunca é enviado a um servidor. O seu arquivo original continua intacto.',
+  privacyNote: 'Seu PDF é lido e gravado de novo no seu aparelho, no navegador, e nunca é enviado a um servidor.',
   relatedHeading: 'Ferramentas relacionadas',
   panel: {
     suffix: 'editado',

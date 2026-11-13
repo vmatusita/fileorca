@@ -12,9 +12,9 @@ const texts: PdfToolTexts<DeleteTexts> = {
   howHeading: 'Cómo funciona',
   howSteps: [
     'Suelta un PDF en el cuadro, elígelo o pégalo.',
-    'Elige en la cuadrícula de miniaturas las páginas que quieres eliminar o escribe sus números, como 1-3, 5. La lupa de cada página la abre en tamaño grande, para que la revises antes.',
+    'Elige en la cuadrícula de miniaturas las páginas que quieres eliminar o escribe sus números. La lupa de cada página la abre en tamaño grande, para que la revises antes.',
     'Presiona Eliminar páginas y Oli crea un PDF nuevo con las páginas que quedan.',
-    'Descarga el PDF nuevo; tu archivo original no se toca.',
+    'Descarga el PDF nuevo.',
   ],
   specsHeading: 'Qué entra y qué sale',
   specs: {
@@ -26,7 +26,7 @@ const texts: PdfToolTexts<DeleteTexts> = {
       ['Todas las páginas', 'No se pueden eliminar todas las páginas: un PDF necesita al menos una página, así que una tiene que quedar sin elegir.'],
       [
         'El archivo nuevo',
-        'Oli copia las páginas que conservas a un PDF nuevo. Las páginas eliminadas, y lo que solo ellas usaban, quedan fuera, así que el archivo queda más pequeño.',
+        'Oli copia las páginas que conservas a un PDF nuevo.',
       ],
       ['Formularios', 'Los campos de formulario de las páginas que quedan se conservan. Se quita la capa de formulario XFA, que solo leen las aplicaciones de Adobe; los campos de formulario normales siguen funcionando.'],
       [
@@ -47,27 +47,23 @@ const texts: PdfToolTexts<DeleteTexts> = {
   faq: [
     {
       q: '¿Puedo eliminar varias páginas a la vez, como de la 2 a la 5?',
-      a: 'Sí. Elige las miniaturas en la cuadrícula o escribe los números en el campo de abajo, como 2-5 o 1-3, 7. Oli las elige por ti, y todavía puedes agregar o quitar páginas sueltas antes de presionar Eliminar páginas.',
+      a: 'Sí. Escribe 2-5 en el campo debajo de la cuadrícula y Oli elige esas cuatro páginas por ti; todavía puedes tocar miniaturas para agregar o quitar páginas sueltas antes de presionar Eliminar páginas.',
     },
     {
       q: '¿Puedo deshacerlo si elimino las páginas equivocadas?',
       a: 'Tu archivo original nunca cambia, porque Oli escribe un PDF nuevo. Después del resultado, las páginas siguen a la vista: elige o desmarca otras, y el botón para eliminarlas vuelve, listo para crear otro PDF. Presiona Empezar de nuevo solo para elegir otro archivo.',
     },
     {
-      q: '¿Los formularios, los enlaces y los marcadores sobreviven?',
-      a: 'Sí, en las páginas que quedan. Los campos de formulario se quedan, los marcadores que apuntan a páginas conservadas se quedan, y también los enlaces a la web y los enlaces entre páginas conservadas. Los enlaces a una página que eliminaste se quitan, porque ya no tienen adónde ir.',
+      q: '¿Qué pasa con el marcador de una página que eliminé?',
+      a: 'Se va, salvo que contenga marcadores de páginas que conservas. En ese caso permanece como un título que no lleva a ninguna parte, encima de esos marcadores.',
     },
     {
       q: '¿Por qué el PDF nuevo es más pequeño?',
       a: 'Las páginas eliminadas salen del archivo, y también todo lo que solo ellas usaban, como sus propias imágenes. Lo que también usa una página que conservas se queda, así que el ahorro depende de cuánto pesaban las páginas eliminadas.',
     },
-    {
-      q: '¿Mi PDF se sube a algún lugar?',
-      a: 'No. FileOrca lee y escribe tu PDF en tu dispositivo, en tu navegador, y PDF.js también dibuja allí las miniaturas de las páginas. Abre la pestaña Red de tu navegador mientras eliminas páginas: ninguna solicitud lleva tus archivos.',
-    },
   ],
   privacyHeading: 'Privacidad',
-  privacyNote: 'Tu PDF se lee y se vuelve a escribir en tu dispositivo, en tu navegador, y nunca se envía a un servidor. Tu archivo original no se toca.',
+  privacyNote: 'Tu PDF se lee y se vuelve a escribir en tu dispositivo, en tu navegador, y nunca se envía a un servidor.',
   relatedHeading: 'Herramientas relacionadas',
   panel: {
     suffix: 'editado',

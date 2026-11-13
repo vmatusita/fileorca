@@ -12,9 +12,9 @@ const texts: PdfToolTexts<DeleteTexts> = {
   howHeading: 'How it works',
   howSteps: [
     'Drop a PDF on the box, choose one, or paste it.',
-    'Pick the pages to delete in the grid of thumbnails, or type their numbers, like 1-3, 5. The magnifier on each page opens it large, so you can check it first.',
+    'Pick the pages to delete in the grid of thumbnails, or type their numbers. The magnifier on each page opens it large, so you can check it first.',
     'Press Delete pages. Oli makes a new PDF with the pages that are left.',
-    'Download the new PDF. Your original file stays untouched.',
+    'Download the new PDF.',
   ],
   specsHeading: 'What goes in and what comes out',
   specs: {
@@ -26,7 +26,7 @@ const texts: PdfToolTexts<DeleteTexts> = {
       ['Every page', 'Deleting all the pages is not possible: a PDF needs at least one page, so one page has to stay unpicked.'],
       [
         'The new file',
-        'Oli copies the pages you keep into a new PDF. The deleted pages, and what only they used, are left out, so the file gets smaller.',
+        'Oli copies the pages you keep into a new PDF.',
       ],
       ['Forms', 'Form fields on the remaining pages stay. An XFA form layer, which only Adobe apps read, is removed; the regular form fields still work.'],
       [
@@ -47,27 +47,23 @@ const texts: PdfToolTexts<DeleteTexts> = {
   faq: [
     {
       q: 'Can I delete several pages at once, like pages 2 to 5?',
-      a: 'Yes. Pick the thumbnails in the grid, or type the numbers in the field below it, like 2-5 or 1-3, 7. Oli picks them for you, and you can still add or remove single pages before you press Delete pages.',
+      a: 'Yes. Type 2-5 in the field below the grid and Oli picks those four pages for you; you can still tap thumbnails to add or take out single pages before you press Delete pages.',
     },
     {
       q: 'Can I undo it if I delete the wrong pages?',
       a: 'Your original file is never changed, because Oli writes a new PDF. After the result the pages stay on screen: pick or unpick others, and the button to delete them comes back to make another PDF. Press Start over only to choose another file.',
     },
     {
-      q: 'Will forms, links and bookmarks survive?',
-      a: 'Yes, on the remaining pages. Form fields stay, bookmarks that point to kept pages stay, and so do links to the web and links between kept pages. Links to a page you deleted are removed, because there is nowhere left for them to go.',
+      q: 'What happens to a bookmark of a page I deleted?',
+      a: 'It goes, unless it holds bookmarks of pages you keep. Then it remains as a heading that leads nowhere, above those bookmarks.',
     },
     {
       q: 'Why is the new PDF smaller?',
       a: 'The deleted pages leave the file, and so does whatever only they used, such as their own images. Anything a page you keep also uses stays, so the saving depends on how heavy the deleted pages were.',
     },
-    {
-      q: 'Is my PDF uploaded?',
-      a: "No. FileOrca reads and writes your PDF on your device, in your browser, and PDF.js draws the page thumbnails there too. Open your browser's Network tab while you delete pages: no request carries your files.",
-    },
   ],
   privacyHeading: 'Privacy',
-  privacyNote: 'Your PDF is read and rewritten on your device, in your browser, and is never sent to a server. Your original file stays untouched.',
+  privacyNote: 'Your PDF is read and rewritten on your device, in your browser, and is never sent to a server.',
   relatedHeading: 'Related tools',
   panel: {
     suffix: 'edited',
