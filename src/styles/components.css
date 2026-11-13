@@ -1008,7 +1008,10 @@ body:has(#fo-menu:popover-open, #fo-langmenu:popover-open)::after { scale: 1; tr
 .fo-footer .fo-footer__updated { color: var(--on-deep-muted); font-size: 14px; white-space: nowrap; text-decoration: underline; text-underline-offset: 3px; }
 /* F19a · What's new (decision 2; DECISOES § 756): the entries, newest first, one under the other in the measure of the
    prose, a hairline between them. The title in the H2 of the prose, the date muted under it, the text, then the pages it
-   touched as inline links of a sentence (target size: inline, WCAG 2.5.8). No image, no ad, nothing that moves. */
+   touched as inline links of a sentence (target size: inline, WCAG 2.5.8). No image, no ad, nothing that moves: the text
+   is in the Figtree that never swaps (as the 404 and the sections of the home), so a paragraph that the fallback font wraps
+   in another number of lines never moves the entries under it when Figtree arrives (es at 360 px moved them 26 px). */
+.fo-view--whats-new { --fo-font-text: var(--fo-font-steady); font-family: var(--fo-font-steady); }
 .fo-changes { list-style: none; margin: 0; padding: 0; max-width: var(--fo-measure); }
 .fo-change { padding-block: var(--space-6); border-top: var(--stroke-hair) solid var(--hairline); scroll-margin-top: var(--space-4); }
 .fo-change:last-child { padding-bottom: 0; }
