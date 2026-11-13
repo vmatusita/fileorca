@@ -406,7 +406,9 @@ export function newestIn(lang: Lang): Change {
 
 /**
  * The <lastmod> of a page (decision 3): the date of the newest 'conteudo' entry that touched it in the language. Every
- * indexable page of every language has one (its birth at least), so a missing one stops the build.
+ * indexable page of every language has one (its birth at least), so a missing one stops the build. The What's new page
+ * shows every entry of its language, of either kind, so its text changes with each one: its <lastmod> is the date of the
+ * newest entry it shows (DECISOES § 756), never older than a date it shows (tests/unit/declared-dates.test.ts).
  */
 export function lastmodOf(id: RouteId, lang: Lang): string {
   let date: string | undefined;
@@ -414,5 +416,9 @@ export function lastmodOf(id: RouteId, lang: Lang): string {
     if (entry.kind === 'conteudo' && pagesIn(entry, lang).includes(id) && (date === undefined || entry.date > date)) date = entry.date;
   }
   if (date === undefined) throw new Error(`no 'conteudo' entry of the changelog touched ${id} in ${lang}`);
+  if (id === 'whats-new') {
+    const newest = newestIn(lang).date;
+    if (newest > date) date = newest;
+  }
   return date;
 }
