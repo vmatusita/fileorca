@@ -28,7 +28,15 @@ export default {
   tableHeading: "A medida",
   measuredIntro: "Este guia está sendo escrito.",
   measuredNote: "Medido em {date}.",
-  tables: [],
+  // F19b (front M1): the shape of the table, which the front T rewrites in words and keeps.
+  tables: [
+    {
+      heading: "Cada PDF assinado de cada jeito",
+      caption: "Cada PDF assinado em todas as páginas pelo Assinar PDF no Chromium, dos três jeitos: o arquivo depois e o que a assinatura acrescentou",
+      head: ["PDF", "Assinatura", "Arquivo depois", "Acrescentado"],
+      labels: ["Desenhada", "Imagem enviada", "Nome digitado"],
+    },
+  ],
   sourcesHeading: "Fontes",
   sources: [],
   facts: {},

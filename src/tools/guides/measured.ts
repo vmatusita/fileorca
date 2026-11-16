@@ -350,11 +350,90 @@ const BUILDERS: Record<FileGuideId, Builder> = {
       [labels[3] ?? '', cellSize(col(t, row, 'pdfAfterBytes'), c.f), share(col(t, row, 'pdfAfterBytes'), photos, c.f)],
     ]];
   },
-  // F19b, slice 1: the front M writes the tables of these guides.
-  'guides-compress-photo-for-online-form': () => [],
-  'guides-webp-vs-avif-vs-jpg': () => [],
-  'guides-sign-pdf-without-printing': () => [],
-  'guides-what-a-pdf-password-protects': () => [],
+  // F19b (front M1): the limit, the photo, what Compress image gave in Chromium (the bytes, the dimensions and the quality
+  // its tables say), and the highest quality at which the whole photo, at its full size, would have fit (Node).
+  'guides-compress-photo-for-online-form': (c) => {
+    const t = measuredTable('guides-compress-photo-for-online-form', 'fitted', c.file);
+    return [t.rows.filter((row) => col(t, row, 'browser') === 'chromium').map((row) => {
+      const quality = col(t, row, 'quality');
+      const full = col(t, row, 'fullSizeQuality');
+      return [
+        size(Number(col(t, row, 'limitKb')) * 1000, c.f),
+        label(c, String(col(t, row, 'photo'))),
+        // To the byte: rounded, a copy of 199,598 bytes would read "200 KB", the limit itself.
+        unit(fmt(c.shared.bytes, { n: grouped(Number(col(t, row, 'bytes')), c.f) }), c.f),
+        pixels(col(t, row, 'width'), col(t, row, 'height'), c.f),
+        typeof quality === 'number' ? grouped(quality, c.f) : c.shared.notStated,
+        typeof full === 'number' ? grouped(full, c.f) : c.shared.none,
+      ];
+    })];
+  },
+  // F19b (front M1): the three photos in the three formats, with the share of the original, in Chromium; then the PNG with
+  // transparent corners in each format (the row names are the texts' labels), and whether its transparency stayed.
+  'guides-webp-vs-avif-vs-jpg': (c) => {
+    const photos = measuredTable('guides-webp-vs-avif-vs-jpg', 'photos', c.file);
+    const png = measuredTable('guides-webp-vs-avif-vs-jpg', 'transparent', c.file);
+    const withShare = (bytes: Cell, whole: Cell): string => `${cellSize(bytes, c.f)} (${share(bytes, whole, c.f)})`;
+    const labels = c.texts.tables[1]?.labels ?? [];
+    // Kept: every corner that was transparent in the PNG is still transparent in the copy.
+    const clear = c.file.guides['guides-webp-vs-avif-vs-jpg'].numbers['pngClearCorners']?.value;
+    return [
+      photos.rows.filter((row) => col(photos, row, 'browser') === 'chromium').map((row) => {
+        const original = col(photos, row, 'originalBytes');
+        return [label(c, String(col(photos, row, 'photo'))), cellSize(original, c.f), withShare(col(photos, row, 'jpgBytes'), original), withShare(col(photos, row, 'webpBytes'), original), withShare(col(photos, row, 'avifBytes'), original)];
+      }),
+      ['jpg', 'webp', 'avif'].map((format, index) => {
+        const row = png.rows.find((candidate) => col(png, candidate, 'format') === format && col(png, candidate, 'browser') === 'chromium');
+        if (!row) throw new Error(`no Chromium row for the PNG as ${format}`);
+        return [labels[index] ?? format, withShare(col(png, row, 'bytes'), col(png, row, 'pngBytes')), clear !== undefined && col(png, row, 'clearCorners') === clear ? c.shared.yes : c.shared.no];
+      }),
+    ];
+  },
+  // F19b (front M1): each PDF signed on all pages in the three ways, in Chromium: the file after and what the signature
+  // added (the names of the three ways are the texts' labels, in the order drawn, uploaded image, typed name).
+  'guides-sign-pdf-without-printing': (c) => {
+    const t = measuredTable('guides-sign-pdf-without-printing', 'signed', c.file);
+    const labels = c.texts.tables[0]?.labels ?? [];
+    const modes = ['draw', 'upload', 'type'];
+    return [t.rows.filter((row) => col(t, row, 'browser') === 'chromium').map((row) => {
+      const before = Number(col(t, row, 'beforeBytes'));
+      const after = Number(col(t, row, 'afterBytes'));
+      return [
+        label(c, String(col(t, row, 'file'))),
+        labels[modes.indexOf(String(col(t, row, 'mode')))] ?? String(col(t, row, 'mode')),
+        size(after, c.f),
+        after >= before ? `+${size(after - before, c.f)}` : `−${size(before - after, c.f)}`,
+      ];
+    })];
+  },
+  // F19b (front M1): the three PDFs protected (pages, the size before and after, the bytes added); then the file locked by
+  // restrictions alone as it came and after Unlock PDF, beside one PDF after Protect PDF (the row names are the texts'
+  // labels): its size, whether a reader opens it with no password, and how many of the actions qpdf lists it blocks.
+  'guides-what-a-pdf-password-protects': (c) => {
+    const t = measuredTable('guides-what-a-pdf-password-protects', 'protected', c.file);
+    const numbers = c.file.guides['guides-what-a-pdf-password-protects'].numbers;
+    const value = (name: string): number => {
+      const found = numbers[name];
+      if (!found) throw new Error(`guide 4: no number ${name}`);
+      return found.value;
+    };
+    const labels = c.texts.tables[1]?.labels ?? [];
+    const blocked = (count: number): string => (count === 0 ? c.shared.none : grouped(count, c.f));
+    return [
+      t.rows.map((row) => [
+        label(c, String(col(t, row, 'file'))),
+        grouped(Number(col(t, row, 'pages')), c.f),
+        cellSize(col(t, row, 'beforeBytes'), c.f),
+        cellSize(col(t, row, 'afterBytes'), c.f),
+        `+${unit(fmt(c.shared.bytes, { n: grouped(Number(col(t, row, 'afterBytes')) - Number(col(t, row, 'beforeBytes')), c.f) }), c.f)}`,
+      ]),
+      [
+        [labels[0] ?? '', size(value('ownerBytes'), c.f), value('ownerOpensWithout') === 1 ? c.shared.yes : c.shared.no, blocked(value('ownerBlocked'))],
+        [labels[1] ?? '', size(value('unlockedBytes'), c.f), value('unlockedEncrypted') === 0 && value('unlockedPages') === value('ownerPages') ? c.shared.yes : c.shared.no, blocked(value('unlockedBlocked'))],
+        [labels[2] ?? '', size(value('mixedAfter'), c.f), value('refusedWithout') === value('files') ? c.shared.no : c.shared.yes, blocked(value('blocked'))],
+      ],
+    ];
+  },
 };
 
 /** The rows of each table of a guide, in the order of its texts. */

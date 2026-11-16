@@ -28,7 +28,15 @@ export default {
   tableHeading: "The measurement",
   measuredIntro: "This guide is being written.",
   measuredNote: "Measured on {date}.",
-  tables: [],
+  // F19b (front M1): the shape of the table, which the front E rewrites in words and keeps.
+  tables: [
+    {
+      heading: "Each PDF signed in each way",
+      caption: "Each PDF signed on all pages by Sign PDF in Chromium, in the three ways: the file after and what the signature added",
+      head: ["PDF", "Signature", "File after", "Added"],
+      labels: ["Drawn", "Uploaded image", "Typed name"],
+    },
+  ],
   sourcesHeading: "Sources",
   sources: [],
   facts: {},
