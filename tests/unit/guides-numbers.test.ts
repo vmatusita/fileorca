@@ -267,6 +267,8 @@ const FEMININE: Record<'pt' | 'es', Partial<Record<FileGuideId, readonly string[
     'guides-remove-location-from-photos': ['withGps', 'withCamera', 'withDate', 'removeExifDataIdenticalChromium', 'removeExifDataOrientationChromium', 'photos', 'browsersSameSize', 'candidates'],
     'guides-photos-to-one-pdf': ['photos'],
     'guides-what-a-pdf-password-protects': ['ownerBlocked', 'capabilities', 'ownerPages'],
+    // F19b (front T2): "fotos" is feminine; "cantos" (pngClearCorners) is masculine.
+    'guides-webp-vs-avif-vs-jpg': ['photos'],
   },
   es: {
     'guides-heic-to-jpg-on-windows': ['identicalBrowsers'],
@@ -276,6 +278,8 @@ const FEMININE: Record<'pt' | 'es', Partial<Record<FileGuideId, readonly string[
     'guides-remove-location-from-photos': ['withGps', 'withCamera', 'withDate', 'removeExifDataIdenticalChromium', 'removeExifDataOrientationChromium', 'photos', 'browsersSameSize', 'candidates'],
     'guides-photos-to-one-pdf': ['photos'],
     'guides-what-a-pdf-password-protects': ['ownerBlocked', 'capabilities', 'ownerPages'],
+    // F19b (front T2): "fotos" and "esquinas" (pngClearCorners) are feminine.
+    'guides-webp-vs-avif-vs-jpg': ['photos', 'pngClearCorners'],
   },
 };
 
