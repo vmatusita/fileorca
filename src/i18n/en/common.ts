@@ -368,7 +368,7 @@ export default {
     },
     "guides-how-much-house-can-i-afford": {
       name: "How much house can I afford",
-      description: "The two income limits a lender starts from, and which one sets the price you can pay.",
+      description: "Two shares of your income set what a home may cost a month. Which one sets the price, and what other debts do.",
       synonyms: ["guide", "house budget", "afford a house"],
     },
   },
@@ -426,12 +426,12 @@ export default {
     // F19b (DECISOES § 780 and § 790): the new file guides.
     "guides-compress-photo-for-online-form": {
       name: "Photo for an online form",
-      description: "What the size limit of a form means, and what a phone photo gives up to fit under it.",
+      description: "What a size limit in KB counts, and what our phone photos gave up to fit under it.",
       synonyms: ["guide", "photo size limit", "upload form"],
     },
     "guides-webp-vs-avif-vs-jpg": {
       name: "WebP vs AVIF vs JPG",
-      description: "How much the same photos weigh in each format, and when each one is the one to use.",
+      description: "What the same photos weighed as JPG, WebP and AVIF, which kept transparency, and when to use each.",
       synonyms: ["guide", "webp or jpeg", "image format"],
     },
     "guides-sign-pdf-without-printing": {

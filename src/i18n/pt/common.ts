@@ -342,12 +342,12 @@ export default {
     // F19b (DECISOES § 780 and § 790): the new file guides.
     "guides-compress-photo-for-online-form": {
       name: "Foto para formulário online",
-      description: "O que o limite de tamanho de um formulário quer dizer, e o que uma foto de celular perde para caber nele.",
+      description: "O que um limite em KB conta e o que nossas fotos de celular perderam para caber nele.",
       synonyms: ["guia", "limite de tamanho da foto", "formulário de envio"],
     },
     "guides-webp-vs-avif-vs-jpg": {
       name: "WebP, AVIF ou JPG",
-      description: "Quanto as mesmas fotos pesam em cada formato, e quando cada um é o que serve.",
+      description: "Quanto as mesmas fotos pesam em JPG, WebP e AVIF, qual mantém a transparência e quando usar cada um.",
       synonyms: ["guia", "webp ou jpeg", "formato de imagem"],
     },
     "guides-sign-pdf-without-printing": {
@@ -357,7 +357,7 @@ export default {
     },
     "guides-what-a-pdf-password-protects": {
       name: "O que a senha de um PDF protege",
-      description: "O que a senha de abrir faz, o que as restrições não fazem, e por que uma senha curta é fraca.",
+      description: "O que a senha para abrir faz, o que as restrições não fazem e por que uma senha curta é fraca.",
       synonyms: ["guia", "criptografia de pdf", "segurança do pdf"],
     },
     // F19b (DECISOES § 780 and § 790): the QR code guide; no synonym is a query of the QR code generator itself.

@@ -396,12 +396,12 @@ export default {
     // F19b (DECISOES § 780 and § 790): the new file guides.
     "guides-compress-photo-for-online-form": {
       name: "Foto para un formulario en línea",
-      description: "Qué quiere decir el límite de tamaño de un formulario y qué pierde una foto de celular para caber en él.",
+      description: "Qué cuenta un límite en KB y qué perdieron nuestras fotos de celular para caber en él.",
       synonyms: ["guía", "límite de tamaño de la foto", "formulario de envío"],
     },
     "guides-webp-vs-avif-vs-jpg": {
       name: "WebP, AVIF o JPG",
-      description: "Cuánto pesan las mismas fotos en cada formato y cuándo conviene cada uno.",
+      description: "Cuánto pesan las mismas fotos en JPG, WebP y AVIF, cuál conserva la transparencia y cuándo usar cada uno.",
       synonyms: ["guía", "webp o jpeg", "formato de imagen"],
     },
     "guides-sign-pdf-without-printing": {
@@ -460,7 +460,7 @@ export default {
     },
     "guides-how-much-house-can-i-afford": {
       name: "Cuánta casa puedo pagar",
-      description: "Los dos límites de ingreso de los que parte un prestamista y cuál de ellos fija el precio que puedes pagar.",
+      description: "Dos partes de tu ingreso limitan el pago de la vivienda. Cuál de ellas fija el precio y qué cambian tus otras deudas.",
       synonyms: ["guía", "presupuesto para una casa", "pagar una casa"],
     },
   },
