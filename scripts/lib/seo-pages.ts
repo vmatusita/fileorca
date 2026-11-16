@@ -124,6 +124,15 @@ export function titleProblem(routeId: string, title: string, h1: string): string
   return h1 !== '' && title.startsWith(h1) ? null : `título não começa pelo nome da ferramenta (${h1})`;
 }
 
+/**
+ * F19b (DECISOES § 790): the brand goes once at the end of every title, added by pageTitle (src/seo/meta.ts); a text that
+ * writes " | FileOrca" itself would end with it twice ("Photo for an online form | FileOrca | FileOrca"). A page whose
+ * own name says FileOrca ("About FileOrca and who makes the site | FileOrca") is fine: only the suffix twice is wrong.
+ */
+export function brandSuffixProblem(title: string): string | null {
+  return /\|\s*FileOrca\s*\|\s*FileOrca\s*$/.test(title) ? 'a marca duas vezes no fim do título' : null;
+}
+
 export interface LdNode {
   '@type'?: string;
   url?: string;

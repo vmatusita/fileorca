@@ -9,6 +9,7 @@ import {
   PDF_PAGE_IDS,
   SITEMAP_REGISTRY_IDS,
   TRANSLATED_DESCRIPTION_RANGE,
+  brandSuffixProblem,
   descriptionProblem,
   fileGuideTitleProblems,
   fileGuideWant,
@@ -77,6 +78,15 @@ describe('title against the H1', () => {
   it('leaves the other pages alone', () => {
     expect(titleProblem(HUB_ID, 'Free image tools | FileOrca', 'Image tools')).toBeNull();
     expect(titleProblem('privacy', 'Privacy | FileOrca', 'Something else')).toBeNull();
+  });
+
+  // F19b (DECISOES § 790): the minimal texts of the new guides wrote the brand themselves, and pageTitle added it again.
+  it('flags the brand twice at the end of any title, and keeps a page whose own name says FileOrca', () => {
+    expect(brandSuffixProblem('Foto para formulário online | FileOrca | FileOrca')).toMatch(/a marca duas vezes/);
+    expect(brandSuffixProblem('WebP, AVIF o JPG |FileOrca| FileOrca')).toMatch(/a marca duas vezes/);
+    expect(brandSuffixProblem('Photo for an Online Form: How to Fit It Under the Size Limit | FileOrca')).toBeNull();
+    expect(brandSuffixProblem('About FileOrca and who makes the site | FileOrca')).toBeNull();
+    expect(brandSuffixProblem("What's new on FileOrca | FileOrca")).toBeNull();
   });
 });
 

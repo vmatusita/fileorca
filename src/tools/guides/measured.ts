@@ -114,6 +114,9 @@ export function globals(file: MeasuredFile = MEASURED, lang: Lang = 'en', id?: F
  */
 export function measuredOf(id: FileGuideId, file: MeasuredFile = MEASURED): string {
   const guide = file.guides[id];
+  // F19b (front O): a guide of the registry with no measurement yet stops with its name, as the build does, instead of a
+  // TypeError in the lint:texto.
+  if (!guide) throw new Error(`${id}: no measured file in data/guides-measured.json`);
   const day = Object.values(guide.numbers)[0]?.date ?? Object.values(guide.tables)[0]?.date;
   if (day === undefined) throw new Error(`${id} has no measured number`);
   return day;

@@ -282,6 +282,9 @@ describe('the words of the guides still match their numbers', () => {
     const input = DEFS['home-affordability-calculator'].toInput(DEFS['home-affordability-calculator'].initial) as AffordabilityInput;
     const owing = (debts: number) => homeAffordability({ ...input, debts });
     const example = owing(input.debts);
+    // F19b (E8): the guide cites the CFPB home loan toolkit for the housing share it opens with (its "rule of thumb" of
+    // 28%), so the calculator must keep opening there; the total debt share is the calculator's own 36%, cited from no page.
+    expect([input.frontRatio, input.backRatio]).toEqual([280_000, 360_000]);
     expect(example.noRoom).toBe(false);
     expect(example.limit).toBe('front');
     expect(example.frontCap).toBeLessThan(example.backCap);
