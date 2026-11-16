@@ -80,6 +80,8 @@ export type AdArea = 'geral' | 'arquivos' | 'dinheiro' | 'casa-saude' | 'utilida
 
 /** The QR code generator (prompt F7, decision 8): in the ad area "utilidades", with no hub; in pt and es since the languages adjustment. */
 export const QR_ID = 'qr-code-generator';
+/** The ad area of the QR code generator, which the guides that embed it share (F19b, decision 7; DECISOES § 791). */
+const QR_AREA: AdArea = 'utilidades';
 
 export interface RouteDef {
   id: RouteId;
@@ -193,7 +195,7 @@ export const ROUTES: readonly RouteDef[] = [
     indexable: true,
     view: 'src/tools/qr-code-generator/',
     texts: ['src/tools/qr-code-generator/i18n/{lang}.ts'],
-    adArea: 'utilidades',
+    adArea: QR_AREA,
   },
   {
     id: 'privacy',
@@ -441,16 +443,21 @@ function pdfRoutes(): RouteDef[] {
 function fileGuideRoutes(): RouteDef[] {
   return FILE_GUIDE_IDS.map((id): RouteDef => {
     const tool = FILE_GUIDES[id].tool;
-    const toolTexts = (PDF_TOOL_IDS as readonly string[]).includes(tool)
-      ? [`src/tools/${tool}/i18n/{lang}.ts`, 'src/tools/pdf/i18n/{lang}.ts']
-      : [`src/tools/${tool}/i18n/{lang}.ts`, 'src/tools/image/i18n/{lang}.ts'];
+    // F19b (decisions 4 and 7; DECISOES § 786 and § 791): a guide of the QR code generator reads the QR texts (no shared
+    // image or PDF texts) and sits in the ad area of the QR code, "utilidades"; the image and PDF guides stay in "arquivos".
+    const qr = tool === QR_ID;
+    const toolTexts = qr
+      ? [`src/tools/${tool}/i18n/{lang}.ts`]
+      : (PDF_TOOL_IDS as readonly string[]).includes(tool)
+        ? [`src/tools/${tool}/i18n/{lang}.ts`, 'src/tools/pdf/i18n/{lang}.ts']
+        : [`src/tools/${tool}/i18n/{lang}.ts`, 'src/tools/image/i18n/{lang}.ts'];
     return {
       id,
       paths: { ...FILE_GUIDES[id].paths },
       indexable: true,
       view: 'src/views/FileGuideView.astro',
       texts: [`src/i18n/{lang}/guide-${id.replace(/^guides-/, '')}.ts`, 'src/i18n/{lang}/file-guides.ts', ...toolTexts],
-      adArea: 'arquivos',
+      adArea: qr ? QR_AREA : 'arquivos',
     };
   });
 }

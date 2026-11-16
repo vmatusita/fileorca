@@ -191,7 +191,8 @@ describe('the home and health pages of the F7', () => {
 
 describe('the money pages of the F4', () => {
   it('asks each kind of money page for its schema types', () => {
-    expect(MONEY_PAGE_IDS).toHaveLength(1 + 18 + 5);
+    // F19b (DECISOES § 796): the hub, 18 calculators and 8 money guides (5 before).
+    expect(MONEY_PAGE_IDS).toHaveLength(1 + 18 + 8);
     expect(requiredSchemaTypes('mortgage-calculator')).toEqual(['Organization', 'BreadcrumbList', 'WebApplication', 'Person']);
     expect(requiredSchemaTypes('mortgage-calculator-15-vs-30-year')).toEqual(['Organization', 'BreadcrumbList', 'WebApplication', 'Person']);
     expect(requiredSchemaTypes('money-calculators')).toEqual(['Organization', 'BreadcrumbList', 'CollectionPage', 'Person']);

@@ -1,8 +1,8 @@
 // The ad map in every page with ads (F12, decisions 3 and 11; UX-07 A; DECISOES § 419 to § 422), on the test build
 // (fake ids in the 37 units, the worst case). The name puts this spec next to the other specs of the test build in the
 // parts of the CI (after events.spec.ts, with header-menu.spec.ts; DECISOES § 422).
-//   - The 205 pages (184 until the F17 added AVIF to JPG and Convert to WebP in the three languages, 190 until the F18 added
-//     its five pages in the three languages), in blocks: at 360 × 740, the conservative density of § 351 up to 30 %, 1,110 px or more between two
+//   - The 223 pages (184 until the F17 added AVIF to JPG and Convert to WebP in the three languages, 190 until the F18 added
+//     its five pages in the three languages, 205 until the F19b added its guides), in blocks: at 360 × 740, the conservative density of § 351 up to 30 %, 1,110 px or more between two
 //     content ads edge to edge, 150 px from every target, nothing above the tool, the first ad after the piece of its mold,
 //     no box in a grid, a table, a list, a question, a form, the panel, the schedule or a band, none against a table or a
 //     heading; the cookie notice open 150 px or more from the first content box at 360 × 740 and 1280 × 800 (and, since the
@@ -16,7 +16,9 @@
 //     page scrolled to the end.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
-import { routeById } from '../../src/i18n/routes.ts';
+import { LANGS, QR_ID, routeById } from '../../src/i18n/routes.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
+import { GUIDE_IDS, guidePathIn } from '../../src/tools/calc/registry.ts';
 import { AD_PAGES, contentGaps, densityOf, distance, frames, measureMap, type AdPage, type MapMeasure } from './lib/ad-map.ts';
 import { expectInitialBudget } from './lib/budgets.ts';
 import { chooseImage, dismissCookies, hydrated } from './lib/page.ts';
@@ -55,8 +57,23 @@ const F18_AD_PAGES: [path: string, mold: 'tool-image' | 'tool-pdf'][] = [
   ['/split-pdf/extract-pages/', 'tool-pdf'], ['/pt/dividir-pdf/extrair-paginas/', 'tool-pdf'], ['/es/dividir-pdf/extraer-paginas/', 'tool-pdf'],
   ['/pdf-to-jpg/to-png/', 'tool-pdf'], ['/pt/pdf-para-jpg/para-png/', 'tool-pdf'], ['/es/pdf-a-jpg/a-png/', 'tool-pdf'],
 ];
-test('the map reads the 205 pages with ads of the route map', () => {
-  expect(AD_PAGES).toHaveLength(205);
+// F19b (decision 7; DECISOES § 791 and § 796): 205 → 223, the four file guides in three languages and the three money
+// guides in two (the QR code guide adds its three pages, in the area of the QR code). Every guide is read from the
+// registries, each in the area of its group and the mold of its view.
+test('the map reads the 223 pages with ads of the route map', () => {
+  expect(AD_PAGES).toHaveLength(223);
+  for (const id of FILE_GUIDE_IDS) {
+    for (const lang of LANGS) {
+      const path = FILE_GUIDES[id].paths[lang];
+      expect(AD_PAGES.find((page) => page.path === path), path).toMatchObject({ area: FILE_GUIDES[id].tool === QR_ID ? 'utilidades' : 'arquivos', mold: 'guide-arquivos' });
+    }
+  }
+  for (const id of GUIDE_IDS) {
+    for (const lang of LANGS) {
+      const path = guidePathIn(id, lang);
+      if (path) expect(AD_PAGES.find((page) => page.path === path), path).toMatchObject({ area: 'dinheiro', mold: 'guide-dinheiro' });
+    }
+  }
   for (const path of ['/avif-to-jpg/', '/convert-to-webp/', '/pt/avif-para-jpg/', '/pt/converter-para-webp/', '/es/avif-a-jpg/', '/es/convertir-a-webp/']) {
     expect(AD_PAGES.find((page) => page.path === path), path).toMatchObject({ area: 'arquivos', mold: 'tool-image' });
   }

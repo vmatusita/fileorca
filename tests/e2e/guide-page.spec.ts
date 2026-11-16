@@ -5,6 +5,7 @@ import { violationsEverywhere } from './lib/axe.ts';
 import { fixtureFile } from './lib/matrix.ts';
 import { hydrated, type TestFile } from './lib/page.ts';
 import { pdfFile } from './lib/pdf-tools.ts';
+import { signWithTypedName, typePasswordTwice } from './lib/guide-flows.ts';
 
 // F13b · a página de guia (UX-13 A, decision 5 of the run; DECISOES § 376 and § 557 to § 565), the tests of the
 // specification (docs/propostas/ux-v2/guide-page.html, "Testes que a F13 escreve") on the 30 file guides, in both
@@ -20,8 +21,20 @@ const WIDE = { width: 1280, height: 800 } as const;
 const PAGES = FILE_GUIDE_IDS.flatMap((id) => LANGS.map((lang) => ({ id, lang, path: FILE_GUIDES[id].paths[lang] })));
 const FONTS = /(figtree|fredoka)[^/]*\.woff2$/;
 
-/** The file each guide's tool takes on its usual path (the cases of tool-guides.spec.ts), and the tools with a button. */
-const USE: Record<FileGuideId, { files: () => TestFile[]; action?: true }> = {
+/**
+ * The file each guide's tool takes on its usual path (the cases of tool-guides.spec.ts), and the tools with a button. F19b
+ * (DECISOES § 796): what a person sets before the button (the signature, the password twice: tests/e2e/lib/guide-flows.ts);
+ * for a tool that takes text instead of a file (the QR code generator), what is typed in place of the file, and no chip
+ * after its result (its panel has none).
+ */
+interface Use {
+  files: () => TestFile[];
+  action?: true;
+  prepare?: (page: Page, lang: Lang) => Promise<void>;
+  input?: (page: Page, lang: Lang) => Promise<void>;
+  noChips?: true;
+}
+const USE: Record<FileGuideId, Use> = {
   'guides-heic-to-jpg-on-windows': { files: () => [fixtureFile('heic-06-iphone7-paisagem-gps.heic')] },
   'guides-why-is-my-pdf-so-large': { files: () => [pdfFile('gen-fotos.pdf')] },
   'guides-social-media-image-sizes': { files: () => [fixtureFile('jpg-02-iphone6-paisagem-gps.jpg')] },
@@ -32,11 +45,12 @@ const USE: Record<FileGuideId, { files: () => TestFile[]; action?: true }> = {
   'guides-split-pdf-file-size': { files: () => [pdfFile('gen-paginas-mistas.pdf')], action: true },
   'guides-combine-pdfs-on-phone': { files: () => [pdfFile('gen-paginas-mistas.pdf'), pdfFile('gen-acoes.pdf')], action: true },
   'guides-photos-to-one-pdf': { files: () => [fixtureFile('jpg-02-iphone6-paisagem-gps.jpg'), fixtureFile('gen-png-transparente.png')] },
-  // F19b, slice 1: the front S gives each new guide its use.
+  // F19b (DECISOES § 796): Compress image opens in "Up to a size" and Convert to WebP in WebP, each running by itself on
+  // the photo; Sign PDF waits for a signature and Protect PDF for the password, each before its button.
   'guides-compress-photo-for-online-form': { files: () => [fixtureFile('jpg-02-iphone6-paisagem-gps.jpg')] },
   'guides-webp-vs-avif-vs-jpg': { files: () => [fixtureFile('jpg-02-iphone6-paisagem-gps.jpg')] },
-  'guides-sign-pdf-without-printing': { files: () => [pdfFile('gen-paginas-mistas.pdf')], action: true },
-  'guides-what-a-pdf-password-protects': { files: () => [pdfFile('gen-paginas-mistas.pdf')], action: true },
+  'guides-sign-pdf-without-printing': { files: () => [pdfFile('gen-paginas-mistas.pdf')], action: true, prepare: signWithTypedName },
+  'guides-what-a-pdf-password-protects': { files: () => [pdfFile('gen-paginas-mistas.pdf')], action: true, prepare: typePasswordTwice },
 };
 
 async function guideContext(browser: Browser, viewport: { width: number; height: number }, fonts = true): Promise<BrowserContext> {
@@ -67,9 +81,11 @@ function fold(page: Page): Promise<Fold> {
     const box = (selector: string): DOMRect => document.querySelector(selector)?.getBoundingClientRect() ?? new DOMRect();
     const sheet = box('[data-content="facts"]');
     const oli = box('#fo-tool-root [data-oli]');
+    // F19b (DECISOES § 796): the panel of the QR code generator has no slot and no Choose button: its panel (.fo-qr) and its
+    // first control, the text box, stand for them.
     return {
-      slotTop: box('#fo-tool-root .fo-slot').top + scrollY,
-      chooseBottom: box('#fo-tool-root .fo-drop button').bottom + scrollY,
+      slotTop: box('#fo-tool-root .fo-slot, #fo-tool-root .fo-qr').top + scrollY,
+      chooseBottom: box('#fo-tool-root .fo-drop button, #fo-tool-root #fo-qr-text').bottom + scrollY,
       signature: box('.fo-top .fo-reviewed').height,
       oliOverSheet: sheet.height > 0 && oli.top < sheet.bottom && oli.bottom > sheet.top && oli.left < sheet.right && oli.right > sheet.left,
       oliInSheet: document.querySelectorAll('[data-content="facts"] [data-oli]').length,
@@ -211,6 +227,8 @@ async function watchShifts(context: BrowserContext): Promise<void> {
 }
 
 const UNLOCK = '.fo-slot, .fo-slot > * { min-height: 0 !important; } .fo-band { min-height: 0 !important; } .fo-band__ghost { display: none !important; }';
+/** The first control of the panel, which a tap brings into view: the Choose button, or the text box of the QR code generator. */
+const FIRST_CONTROL = '#fo-tool-root .fo-drop button, #fo-tool-root #fo-qr-text';
 
 /** One use of the guide's tool: the layout shift, where the paragraph under the tool was before and after, and the chip. */
 async function oneUse(browser: Browser, id: FileGuideId, lang: Lang, viewport: { width: number; height: number }, unlock = false): Promise<{ cls: number; moved: string[]; before: number; after: number; onScreen: boolean; chipBelowDownload: number }> {
@@ -222,7 +240,7 @@ async function oneUse(browser: Browser, id: FileGuideId, lang: Lang, viewport: {
   if (unlock) {
     await page.addStyleTag({ content: UNLOCK });
     await page.evaluate(() => document.querySelector('#fo-tool-root .fo-slot')?.scrollIntoView({ block: 'start' }));
-  } else await page.locator('#fo-tool-root .fo-drop button').scrollIntoViewIfNeeded();
+  } else await page.locator(FIRST_CONTROL).first().scrollIntoViewIfNeeded();
   await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(() => done(null)))));
   // The first block under the island (the paragraph of the tool; the link of before the F13b), not one of its scripts:
   // its top in the page, and in the window.
@@ -238,10 +256,15 @@ async function oneUse(browser: Browser, id: FileGuideId, lang: Lang, viewport: {
   await page.evaluate(() => {
     (window as unknown as { __shifts: { from: number } }).__shifts.from = performance.now();
   });
-  await page.setInputFiles('#fo-tool-root input[type="file"]', USE[id].files());
-  if (USE[id].action) {
+  const use = USE[id];
+  const files = use.files();
+  if (files.length > 0) await page.setInputFiles('#fo-tool-root input[type="file"]', files);
+  else if (use.input) await use.input(page, lang);
+  else throw new Error(`${id}: a use with no file and no input`);
+  if (use.action) {
     const ready = page.locator('#fo-tool-root :is(.fo-ready, .fo-merge-panel)');
     await expect(ready).toBeVisible({ timeout: 30_000 });
+    if (use.prepare) await use.prepare(page, lang);
     await ready.locator('.fo-btn--brand').click();
   }
   await expect(page.locator('#fo-tool-root .fo-btn--download')).toBeVisible({ timeout: 60_000 });
@@ -266,7 +289,7 @@ test.describe('the result pushes no text: the use moves nothing, and the first c
         console.log(`[cls do uso] ${browserName} ${path} ${viewport.width}: ${use.cls.toFixed(3)}${use.moved.length ? ` (${use.moved.slice(0, 3).join('; ')})` : ''}`);
         if (browserName === 'chromium') expect(use.cls, `${viewport.width}px: ${use.moved.join('; ')}`).toBeLessThanOrEqual(0.05);
         if (use.onScreen) expect(use.after, `${viewport.width}px: the paragraph under the tool, on the screen, keeps its place`).toBe(use.before);
-        if (viewport === PHONE) expect(use.chipBelowDownload, 'the first chip, measured from the top of the Download').toBeLessThanOrEqual(PHONE.height);
+        if (viewport === PHONE && !USE[id].noChips) expect(use.chipBelowDownload, 'the first chip, measured from the top of the Download').toBeLessThanOrEqual(PHONE.height);
       }
     });
   }

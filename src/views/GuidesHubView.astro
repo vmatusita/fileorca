@@ -3,6 +3,8 @@
 // docs/propostas/ux-v2/guides-hub.html, alternative A, as the F11 delivers it (?ads=off). The breadcrumb Home › Guides, the
 // band in brand-soft (eyebrow, H1 and the line with the number of guides), the shortcuts to the three groups, one section
 // per group (Image, PDF, Money, with the anchors #image, #pdf and #money) and "How these guides are made" at the end. Every
+// F19b (decision 4; DECISOES § 786): the Utilities group (#util, the QR code guides) between PDF and Money, shown in a
+// language once it has a guide there. Every
 // guide comes from the registries (src/tools/guides/hub.ts), once, only where it exists in the language, as a GuideCard in
 // the grid of its group (DECISOES § 395): in pt the money group is only the note that leads to the Brazilian money
 // calculators. The text of the hub's own (the line of the band, the note and "How these guides are made") carries
@@ -20,7 +22,7 @@ import { TEXTS } from '../i18n/texts.ts';
 import { fmt, groupDigits } from '../i18n/format.ts';
 import { breadcrumbLd, collectionPageLd, homePath } from '../seo/meta.ts';
 import { GUIDES_HUB_ID } from '../tools/guides/registry.ts';
-import { HUB_GROUPS, hubGuides, type HubGroup } from '../tools/guides/hub.ts';
+import { hubGuides, shownGroups, type HubGroup } from '../tools/guides/hub.ts';
 import { guideCardData } from '../tools/guides/card.ts';
 import type { IconName } from '../icons/svg.ts';
 
@@ -40,10 +42,11 @@ const crumbs = [
   { name: common.breadcrumb.home, path: homePath(lang) },
   { name: common.guidesHub, path },
 ];
-// The icon of each shortcut, in the circle of the group's category (image, PDF, money).
-const JUMP_ICON: Record<HubGroup, IconName> = { image: 'image', pdf: 'pdf', money: 'calculator' };
-const groups = HUB_GROUPS.map((group) => ({ group, guides: guides.filter((guide) => guide.group === group).map((guide) => guideCardData(guide.id, lang)) }));
-// A group with no guide in the language says why and where to go instead; only the money group of pt has one today.
+// The icon of each shortcut, in the circle of the group's category (image, PDF, utilities, money).
+const JUMP_ICON: Record<HubGroup, IconName> = { image: 'image', pdf: 'pdf', util: 'qr', money: 'calculator' };
+// F19b (DECISOES § 786): only the groups the hub shows in the language (shownGroups): a group with no guide there has no
+// section and no shortcut, but for the money group, which says why and where to go instead (the money group of pt).
+const groups = shownGroups(lang).map((group) => ({ group, guides: guides.filter((guide) => guide.group === group).map((guide) => guideCardData(guide.id, lang)) }));
 for (const { group, guides: inGroup } of groups) {
   if (inGroup.length === 0 && !t.moneyNote) throw new Error(`guides hub ${lang}: the ${group} group has no guide and no note`);
 }
@@ -68,7 +71,7 @@ const list = guides.map((guide) => ({ name: guide.name, path: guide.path }));
   </div>
   <nav class="fo-jump" aria-label={t.jumpLabel}>
     <ul>
-      {HUB_GROUPS.map((group) => (
+      {groups.map(({ group }) => (
         <li><a class={`fo-chip fo-cat--${group}`} href={`#${group}`}><span class="fo-chip__dot" aria-hidden="true"><Icon name={JUMP_ICON[group]} /></span><span>{t.groups[group].jump}</span></a></li>
       ))}
     </ul>

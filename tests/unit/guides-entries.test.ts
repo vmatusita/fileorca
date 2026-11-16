@@ -1,14 +1,14 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { parse, type HTMLElement } from 'node-html-parser';
 import { describe, expect, it } from 'vitest';
-import { LANGS, type Lang } from '../../src/i18n/routes.ts';
+import { LANGS, QR_ID, type Lang } from '../../src/i18n/routes.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
-import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID, guidesOfTool, isFileGuide, type FileGuideTool } from '../../src/tools/guides/registry.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID, guidesOfHub, guidesOfTool, isFileGuide, type FileGuideTool } from '../../src/tools/guides/registry.ts';
 import { guideCardData } from '../../src/tools/guides/card.ts';
 import { CALC_PAGES, GUIDE_IDS, guidePathIn, isBrCalc, isCalcPage, isLifeCalc } from '../../src/tools/calc/registry.ts';
 import { IMAGE_PAGES, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 import { PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
-import { HOME_GUIDES, HUB_GROUPS, hubGroup, hubGuides } from '../../src/tools/guides/hub.ts';
+import { HOME_GUIDES, HUB_GROUPS, hubGroup, hubGuides, shownGroups, type HubGroup } from '../../src/tools/guides/hub.ts';
 import { fmt, groupDigits } from '../../src/i18n/format.ts';
 import { routeById } from '../../src/i18n/routes.ts';
 import { DIST, allPages, fileForPath, listFiles } from '../../scripts/lib/dist.ts';
@@ -20,6 +20,8 @@ import { ICONS } from '../../src/icons/icons.ts';
 // as for guides-hub-route.test.ts): what every page of a language carries, and where the guides hub leads from.
 
 const HUB: Record<Lang, string> = { en: routeById(GUIDES_HUB_ID).paths.en ?? '', pt: routeById(GUIDES_HUB_ID).paths.pt ?? '', es: routeById(GUIDES_HUB_ID).paths.es ?? '' };
+/** The group of the guides hub of each hub of a file guide, by hand (F19b, DECISOES § 786: Utilities for the QR code). */
+const GROUP_OF_HUB = { 'image-tools': 'image', 'pdf-tools': 'pdf', utilities: 'util' } as const;
 /** Every built page of the route map (the 404s included), with its language. */
 const PAGES = allPages().filter((page) => existsSync(fileForPath(page.path)));
 const read = (path: string): string => readFileSync(fileForPath(path), 'utf8');
@@ -42,8 +44,10 @@ describe('the Guides block of the footer, on every page of each language', () =>
     it(`${lang}: under Utilities, "${TEXTS[lang].common.footer.guidesAll}" leads to the guides hub and each group of the hub that has a guide in the language`, () => {
       const common = TEXTS[lang].common;
       const groups = HUB_GROUPS.filter((group) => hubGroup(group, lang).length > 0);
-      // pt has no money guide: its block lists the hub, the image and the PDF groups; en and es, the three groups.
-      expect(groups, lang).toEqual(lang === 'pt' ? ['image', 'pdf'] : ['image', 'pdf', 'money']);
+      // pt has no money guide: its block lists the hub, the image and the PDF groups; en and es, the money group too. F19b
+      // (DECISOES § 786 and § 796): and the Utilities group, between PDF and money, once the QR code has a guide.
+      const util = guidesOfHub('utilities').length > 0 ? ['util'] : [];
+      expect(groups, lang).toEqual(lang === 'pt' ? ['image', 'pdf', ...util] : ['image', 'pdf', ...util, 'money']);
       const want = [
         [HUB[lang], common.footer.guidesAll],
         ...groups.map((group) => [`${HUB[lang]}#${group}`, TEXTS[lang].guides.groups[group].heading]),
@@ -70,10 +74,13 @@ describe('the Guides block of the footer, on every page of each language', () =>
     }, 60_000);
   }
 
-  it('leads to anchors the hub has: a section with the id of each group', () => {
+  // F19b (DECISOES § 796): the groups the hub shows in the language (shownGroups), each with its section; a group with no
+  // guide in the language (the utilities, before the QR code guide) has none, and the footer never leads to it.
+  it('leads to anchors the hub has: a section with the id of each group it shows', () => {
     for (const lang of LANGS) {
       const hub = parse(read(HUB[lang]));
-      for (const group of HUB_GROUPS) expect(hub.querySelector(`main section#${group}`), `${lang} #${group}`).not.toBeNull();
+      for (const group of shownGroups(lang)) expect(hub.querySelector(`main section#${group}`), `${lang} #${group}`).not.toBeNull();
+      for (const group of HUB_GROUPS.filter((candidate) => !shownGroups(lang).includes(candidate))) expect(hub.querySelector(`main section#${group}`), `${lang} #${group}`).toBeNull();
     }
   });
 });
@@ -87,7 +94,7 @@ describe('the GuideCard on the page of each tool and calculator a guide embeds',
   const PDF = new Set<string>(PDF_TOOL_IDS);
   /** The guides a page should show, in order, by the registries alone. */
   const wanted = (id: string, lang: Lang): string[] => {
-    if (IMAGE.has(id) || PDF.has(id)) return guidesOfTool(id as FileGuideTool).map((guide) => FILE_GUIDES[guide].paths[lang]);
+    if (IMAGE.has(id) || PDF.has(id) || id === QR_ID) return guidesOfTool(id as FileGuideTool).map((guide) => FILE_GUIDES[guide].paths[lang]);
     if (isCalcPage(id)) {
       const guide = CALC_PAGES[id].guide;
       const path = guide ? guidePathIn(guide, lang) : null;
@@ -95,7 +102,8 @@ describe('the GuideCard on the page of each tool and calculator a guide embeds',
     }
     return [];
   };
-  const MOLDS = PAGES.filter((page) => Object.hasOwn(IMAGE_PAGES, page.route.id) || PDF.has(page.route.id) || isCalcPage(page.route.id) || isBrCalc(page.route.id) || isLifeCalc(page.route.id));
+  // F19b (DECISOES § 786 and § 796): the QR code page too, which shows the card of each guide that embeds it.
+  const MOLDS = PAGES.filter((page) => Object.hasOwn(IMAGE_PAGES, page.route.id) || PDF.has(page.route.id) || page.route.id === QR_ID || isCalcPage(page.route.id) || isBrCalc(page.route.id) || isLifeCalc(page.route.id));
 
   it('shows a card for every guide of the registries, one under the other, and nothing on the other tools and calculators', () => {
     let pages = 0;
@@ -133,7 +141,10 @@ describe('the GuideCard on the page of each tool and calculator a guide embeds',
     // 10 tools in three languages, one guide each (30 cards: since the F18 the location guide embeds Remove EXIF data, so
     // Resize image keeps only the social sizes guide; DECISOES § 733), and the six calculators of the five money guides in
     // English and Spanish (12): read from the registries above, checked here against the counts of the specification.
-    expect([pages, cards]).toEqual([30 + 12, 30 + 12]);
+    // F19b (DECISOES § 796): Compress image, Convert to WebP, Sign PDF and Protect PDF in three languages, one guide each
+    // (12), and the three calculators of the new money guides in English and Spanish (6). The QR code guide adds its page
+    // in three languages (3).
+    expect([pages, cards]).toEqual([30 + 12 + 12 + 6, 30 + 12 + 12 + 6]);
   }, 60_000);
 });
 
@@ -144,8 +155,10 @@ describe('no guide with the ToolCard, on any page of dist/', () => {
   const GUIDE_PATHS = new Set([...FILE_GUIDE_IDS.flatMap((id) => LANGS.map((lang) => FILE_GUIDES[id].paths[lang])), ...GUIDE_IDS.flatMap((id) => LANGS.flatMap((lang) => guidePathIn(id, lang) ?? []))]);
   const HTML_FILES = listFiles(DIST).filter((file) => file.endsWith('.html'));
 
-  it('reads the 40 guide pages and every HTML file of dist/', () => {
-    expect(GUIDE_PATHS.size).toBe(40);
+  // F19b (DECISOES § 796): 40 before, 58 with the four file guides (12 pages) and three money guides (6); 61 with the QR
+  // code guide.
+  it('reads the 58 guide pages and every HTML file of dist/', () => {
+    expect(GUIDE_PATHS.size).toBe(58);
     expect(HTML_FILES.length).toBeGreaterThanOrEqual(211);
   });
 
@@ -196,8 +209,9 @@ describe('no guide with the ToolCard, on any page of dist/', () => {
         }
       }
     }
-    // 18 guides in the related grids of each language (§ 189), now drawn as guides.
-    expect(total).toBe(18 * LANGS.length);
+    // 18 guides in the related grids of each language (§ 189), now drawn as guides. F19b (DECISOES § 796): nine more in
+    // the grids of the four new file guides (two, three, two and two), none in the grids of the first ten.
+    expect(total).toBe((18 + 9) * LANGS.length);
   });
 });
 
@@ -206,7 +220,7 @@ describe('no guide with the ToolCard, on any page of dist/', () => {
 describe('the search index with the kind of each entry', () => {
   const GUIDE_IDS_ALL = new Set<string>([...GUIDE_IDS, ...FILE_GUIDE_IDS]);
 
-  it('marks the 15 guides as guides and every other entry as a tool, in the order of before', () => {
+  it('marks every guide of the registries as a guide and every other entry as a tool, in the order of before', () => {
     const index = searchIndex();
     expect(index.filter((entry) => entry.kind === 'guide').map((entry) => entry.id)).toEqual([...GUIDE_IDS, ...FILE_GUIDE_IDS]);
     for (const entry of index) expect(entry.kind, entry.id).toBe(GUIDE_IDS_ALL.has(entry.id) ? 'guide' : 'tool');
@@ -219,7 +233,7 @@ describe('the search index with the kind of each entry', () => {
     for (const entry of searchIndex().filter((candidate) => candidate.kind === 'guide')) {
       expect(entry.icon, entry.id).toBe(ICONS.file);
       for (const lang of Object.keys(entry.href) as Lang[]) expect(entry.category[lang], `${entry.id} ${lang}`).toBe(TEXTS[lang].common.search.guideCategory);
-      const group = isFileGuide(entry.id) ? (FILE_GUIDES[entry.id].hub === 'pdf-tools' ? 'pdf' : 'image') : 'money';
+      const group = isFileGuide(entry.id) ? GROUP_OF_HUB[FILE_GUIDES[entry.id].hub] : 'money';
       expect(entry.cat, entry.id).toBe(group);
     }
     expect(LANGS.map((lang) => TEXTS[lang].common.search.guideCategory)).toEqual(['Guide', 'Guia', 'Guía']);
@@ -245,7 +259,12 @@ describe('the search index with the kind of each entry', () => {
 
 // F11 (decision 7; DECISOES § 398): the "Read a guide" section of the home, with the four guides of HOME_GUIDES.
 describe('the guides on the home', () => {
-  const groupOf = (id: string): string => (isFileGuide(id) ? (FILE_GUIDES[id].hub === 'pdf-tools' ? 'pdf' : 'image') : 'money');
+  const groupOf = (id: string): string => (isFileGuide(id) ? GROUP_OF_HUB[FILE_GUIDES[id].hub] : 'money');
+  /**
+   * The groups of § 398 that the home holds a guide of: image, PDF and money. F19b (DECISOES § 796): the Utilities group of
+   * the QR code guides is not among them; the home keeps its four cards (§ 398), and the hub and the footer lead to it.
+   */
+  const HOME_GROUPS: readonly HubGroup[] = ['image', 'pdf', 'money'];
 
   it('lists four guides per language: one per group of the hub that has guides in it and a fourth, all with a page there', () => {
     const want = ['guides-heic-to-jpg-on-windows', 'guides-why-is-my-pdf-so-large', 'guides-combine-pdfs-on-phone'];
@@ -259,8 +278,8 @@ describe('the guides on the home', () => {
       expect(new Set(ids).size, lang).toBe(4);
       const paths = hubGuides(lang).map((guide) => guide.id);
       for (const id of ids) expect(paths, `${lang} ${id}`).toContain(id);
-      // Every group of the hub that has a guide in the language has one on the home.
-      for (const group of HUB_GROUPS.filter((candidate) => hubGroup(candidate, lang).length > 0)) expect(ids.map(groupOf), `${lang} ${group}`).toContain(group);
+      // Every group of § 398 that has a guide in the language has one on the home.
+      for (const group of HOME_GROUPS.filter((candidate) => hubGroup(candidate, lang).length > 0)) expect(ids.map(groupOf), `${lang} ${group}`).toContain(group);
     }
   });
 
@@ -283,11 +302,12 @@ describe('the guides on the home', () => {
         expect(card.querySelector('.fo-guidecard__proof')?.text.trim(), `${lang} ${data.id}`).toBe(data.proof);
         expect(card.querySelector('.fo-guidecard__tool > span:last-child > span:last-child')?.text, `${lang} ${data.id}`).toBe(data.tool.name);
       }
-      // "See all 15 guides": the hub of the language, with the number of its guides read from the registries.
+      // "See all 22 guides": the hub of the language, with the number of its guides read from the registries. F19b
+      // (DECISOES § 796): 15 and 10 before; 22 and 14 with the guides of the F19b (23 and 15 with the QR code guide).
       const more = section?.querySelector('p.fo-more a');
       expect(more?.getAttribute('href'), lang).toBe(HUB[lang]);
       expect(more?.text, lang).toBe(fmt(t.hubLink, { n: groupDigits(hubGuides(lang).length, lang) }));
-      expect(more?.text, lang).toMatch(lang === 'pt' ? /\b10\b/ : /\b15\b/);
+      expect(more?.text, lang).toMatch(lang === 'pt' ? /\b14\b/ : /\b22\b/);
       // Still no AdSlot and no card of a guide as a tool on the home (gate:prontidao counts main a.fo-tool).
       expect(main?.querySelectorAll('.fo-ad'), lang).toHaveLength(0);
       expect(section?.querySelectorAll('a.fo-tool'), lang).toHaveLength(0);

@@ -5,7 +5,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { CALC_PAGES, CALC_PAGE_IDS, guidePathIn, moneyPage } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID } from '../../src/tools/pdf/registry.ts';
-import { LANGS, ROUTES, routeById } from '../../src/i18n/routes.ts';
+import { LANGS, QR_ID, ROUTES, routeById } from '../../src/i18n/routes.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS, type FileGuideId } from '../../src/tools/guides/registry.ts';
 import { chooseImages, dismissCookies, hydrated } from './lib/page.ts';
 import { PDF_WALKS, walkPdfTool, type PdfState } from './lib/pdf-states.ts';
@@ -238,8 +238,10 @@ test.describe('distância dos anúncios nos guias de arquivo, a 360×740 e a 128
           const adCount = await page.locator('.fo-ad').count();
           expect(adCount).toBeGreaterThan(0);
           gaps.push(`repouso: ${(await guideSpots(page, 'repouso', adCount, TARGETS)).toFixed(0)}`);
-          const toolPath = routeById(guide.tool).paths.en ?? '/';
-          await chooseImages(page, await smallFiles(page, toolPath, 1));
+          // F19b (DECISOES § 796): a guide of the QR code generator takes a link instead of a file (its text box, its
+          // options and its buttons are TARGETS too).
+          if (guide.tool === QR_ID) await page.locator('#fo-qr-text').fill('https://fileorca.com/');
+          else await chooseImages(page, await smallFiles(page, routeById(guide.tool).paths.en ?? '/', 1));
           await expect(page.locator('.fo-btn--download')).toBeVisible({ timeout: 30_000 });
           await openOnScreen(page);
           for (const selector of GUIDE_ON_SCREEN[id] ?? []) expect((await boxes(page, selector)).length, `${selector} na tela com o resultado`).toBeGreaterThan(0);
@@ -264,7 +266,9 @@ for (const lang of LANGS) {
       const page = moneyPage(id, lang);
       return guide && page && guidePathIn(guide, lang) !== null ? [page.path] : [];
     });
-    expect(calcs.length, `${lang}: as calculadoras com guia`).toBe(lang === 'pt' ? 0 : 6);
+    // F19b (DECISOES § 796): the three calculators of the new money guides (APR to APY, credit card payoff, home
+    // affordability) join the six of before, in English and Spanish.
+    expect(calcs.length, `${lang}: as calculadoras com guia`).toBe(lang === 'pt' ? 0 : 9);
     for (const path of [...tools, ...calcs]) {
       expect((await page.goto(path))?.status(), path).toBe(200);
       for (const viewport of VIEWPORTS) {

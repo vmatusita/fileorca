@@ -12,7 +12,7 @@ import { BR_CALC_IDS, BR_HUB_ID, CALC_PAGES, CALC_PAGE_IDS, GUIDES, GUIDE_IDS, H
 import { PDF_HUB_ID, PDF_PRESET_IDS, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { PDF_PANEL_TEXTS, PDF_TOOL_TEXTS } from '../../src/tools/pdf/texts.ts';
 import enCommon from '../../src/i18n/en/common.ts';
-import { FILE_GUIDE_IDS, GUIDES_HUB_ID, isFileGuide } from '../../src/tools/guides/registry.ts';
+import { FILE_GUIDE_IDS, GUIDES_HUB_ID, guidesOfTool, isFileGuide } from '../../src/tools/guides/registry.ts';
 import { FILE_SUFFIX } from '../../scripts/lib/design-checks.ts';
 import type { Lang } from '../../src/i18n/routes.ts';
 
@@ -75,14 +75,17 @@ describe('mapa de rotas', () => {
     // F7: the hubs and the 11 calculators are the area "casa-saude", and the QR code generator alone is "utilidades".
     expect(LIFE_CALC_IDS).toHaveLength(11);
     expect(ROUTES.filter((route) => route.adArea === 'casa-saude').map((route) => route.id)).toEqual([HOUSE_HUB_ID, HEALTH_HUB_ID, ...LIFE_CALC_IDS]);
-    expect(ROUTES.filter((route) => route.adArea === 'utilidades').map((route) => route.id)).toEqual([QR_ID]);
+    // F19b (decision 7; DECISOES § 791 and § 796): and the guides that embed the QR code generator, in its area.
+    const qrGuides = guidesOfTool(QR_ID);
+    expect(ROUTES.filter((route) => route.adArea === 'utilidades').map((route) => route.id)).toEqual([...qrGuides, QR_ID]);
+    for (const id of qrGuides) expect(textFilesFor(routeById(id), 'en'), id).toEqual([`src/i18n/en/guide-${id.replace(/^guides-/, '')}.ts`, 'src/i18n/en/file-guides.ts', 'src/tools/qr-code-generator/i18n/en.ts']);
     for (const id of LIFE_CALC_IDS) expect(isLifeCalc(id), id).toBe(true);
     // F6 (decisions 2 and 4): every image page, the image hub, the PDF hub and the 12 PDF tools are translations, in the
     // three languages (before the F6 only Compress image was, DECISOES § 58). The languages adjustment: the 10 file guides
     // too (English only in the F5b, DECISOES § 190), and the QR code generator.
     const everyLanguage = ROUTES.filter((route) => route.adArea === 'arquivos').map((route) => route.id);
-    expect(everyLanguage).toHaveLength(Object.keys(IMAGE_PAGES).length + 1 + PDF_TOOL_IDS.length + PDF_PRESET_IDS.length + 1 + FILE_GUIDE_IDS.length);
-    for (const id of [...everyLanguage, QR_ID] as RouteId[]) expect(languagesOf(routeById(id)), id).toEqual([...LANGS]);
+    expect(everyLanguage).toHaveLength(Object.keys(IMAGE_PAGES).length + 1 + PDF_TOOL_IDS.length + PDF_PRESET_IDS.length + 1 + FILE_GUIDE_IDS.length - qrGuides.length);
+    for (const id of [...everyLanguage, ...qrGuides, QR_ID] as RouteId[]) expect(languagesOf(routeById(id)), id).toEqual([...LANGS]);
     // What stays English only: the 13 pages of home and health (F7, decision 1; their trigger is DECISOES § 273).
     const englishOnly = ROUTES.filter((route) => languagesFor(route.id).length === 1 && languagesFor(route.id)[0] === 'en').map((route) => route.id);
     expect(englishOnly).toEqual([...LIFE_IDS]);
@@ -96,7 +99,8 @@ describe('mapa de rotas', () => {
   it('puts every page of the calculator registry, every guide and the money hub in the money ad area, read from the registries', () => {
     // The ids come from the registries, not from the URL: a calculator whose path does not end in "-calculator" is still checked.
     const english = [MONEY_HUB_ID, ...Object.keys(CALC_PAGES), ...Object.keys(GUIDES)];
-    expect(english).toHaveLength(1 + 18 + 5);
+    // F19b (DECISOES § 796): the five money guides of the F4 and the three of the F19b.
+    expect(english).toHaveLength(1 + 18 + 8);
     // F6 (decision 2): the Brazilian pages are in the money area too, read from the map (none or all nine of them).
     const money = [...english, ...brRoutes().map((route) => route.id)];
     for (const id of money) expect(routeById(id as Parameters<typeof routeById>[0]).adArea, id).toBe('dinheiro');
@@ -252,7 +256,8 @@ describe('tool search', () => {
     // F18 (decision 5; DECISOES § 725): the 2 PDF presets right after the PDF tools, as the image presets after the image tools.
     expect(ids(index)).toEqual([...Object.keys(IMAGE_PAGES), ...PDF_TOOL_IDS, ...PDF_PRESET_IDS, ...CALC_PAGE_IDS, ...br, ...GUIDE_IDS, ...FILE_GUIDE_IDS, ...LIFE_CALC_IDS, QR_ID]);
     // F17: 13 image pages (10 tools and 3 presets; 11 before). F18 (DECISOES § 743): 15 (11 tools and 4 presets).
-    expect(index).toHaveLength(15 + PDF_TOOL_IDS.length + PDF_PRESET_IDS.length + 18 + br.length + 5 + FILE_GUIDE_IDS.length + 11 + 1);
+    // F19b (DECISOES § 796): 8 money guides (5 before).
+    expect(index).toHaveLength(15 + PDF_TOOL_IDS.length + PDF_PRESET_IDS.length + 18 + br.length + 8 + FILE_GUIDE_IDS.length + 11 + 1);
     expect(index[0]?.href).toEqual({ en: '/compress-image/', pt: '/pt/comprimir-imagem/', es: '/es/comprimir-imagen/' });
     for (const entry of index) {
       const route = routeById(entry.id as ImagePageId);
@@ -369,7 +374,8 @@ describe('tool search', () => {
       ['rotate', ['rotate-image', 'rotate-pdf', 'organize-pdf']],
       // F17 (decision 9; DECISOES § 716): the AVIF pages of the F2 are back. "avif" finds AVIF to JPG (its name) and then
       // Convert to WebP (a synonym: it makes AVIF too), as before the 3812f49; it found nothing from the F2 to the F16.
-      ['avif', ['avif-to-jpg', 'convert-to-webp']],
+      // F19b (DECISOES § 790 and § 796): and the guide WebP vs AVIF vs JPG after them, by construction (its name says AVIF).
+      ['avif', ['avif-to-jpg', 'convert-to-webp', 'guides-webp-vs-avif-vs-jpg']],
       ['convert to avif', ['convert-to-webp', 'avif-to-jpg']],
     ];
     for (const [query, found] of expected) expect(ids(filterEntries(index, query)), query).toEqual(found);
@@ -386,11 +392,11 @@ describe('tool search', () => {
         if (found.includes('organize-pdf')) expect(found.indexOf(page), `${query} ${lang}: ${found.join(', ')}`).toBeLessThan(found.indexOf('organize-pdf'));
       }
     }
-    // In each language, "avif" finds the two, each at the page of that language.
+    // In each language, "avif" finds the two, each at the page of that language, and then the guide (F19b, by construction).
     for (const lang of LANGS) {
       const avif = filterEntries(index, 'avif', lang);
-      expect(ids(avif), lang).toEqual(['avif-to-jpg', 'convert-to-webp']);
-      expect(avif.map((entry) => entry.href[lang]), lang).toEqual([routeById('avif-to-jpg').paths[lang], routeById('convert-to-webp').paths[lang]]);
+      expect(ids(avif), lang).toEqual(['avif-to-jpg', 'convert-to-webp', 'guides-webp-vs-avif-vs-jpg']);
+      expect(avif.map((entry) => entry.href[lang]), lang).toEqual([routeById('avif-to-jpg').paths[lang], routeById('convert-to-webp').paths[lang], routeById('guides-webp-vs-avif-vs-jpg').paths[lang]]);
       // The WebP pages: Convert to WebP joins the tools that take or make a WebP.
       expect(ids(filterEntries(index, 'webp', lang)), lang).toContain('convert-to-webp');
     }

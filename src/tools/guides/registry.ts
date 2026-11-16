@@ -2,7 +2,7 @@
 // the languages adjustment they exist in Portuguese and Spanish too (/pt/guias/<slug>/, /es/guias/<slug>/), each the same
 // guide translated, with a pair in hreflang. The pages, the hubs, the search, the gates and the tests read this registry,
 // the way the money guides read GUIDES (src/tools/calc/registry.ts). Plain data: never import it from an island.
-import type { Lang } from '../../i18n/routes.ts';
+import type { Lang, QR_ID } from '../../i18n/routes.ts';
 import type { ImagePresetId, ImageToolId } from '../image/registry.ts';
 import type { PdfToolId } from '../pdf/registry.ts';
 
@@ -77,9 +77,26 @@ export function publishedOn(id: FileGuideId, lang: Lang): string {
   return OWN_DAY[id] ?? GUIDE_PUBLISHED_ON[lang];
 }
 
-export type FileGuideHub = 'image-tools' | 'pdf-tools';
-export type FileGuideTool = ImageToolId | PdfToolId;
-export type FileGuideRelated = ImageToolId | ImagePresetId | PdfToolId | FileGuideId;
+/**
+ * F19b (decision 4; DECISOES § 786): the QR code generator is the one tool outside the image and PDF registries that a file
+ * guide embeds, with the smallest deviation: its id joins the tools a guide embeds and links to, and its guides form the
+ * group Utilities of the guides hub (the hub 'utilities', which has no page of its own: the breadcrumb of every guide is
+ * Home › Guides › guide, as the QR page has no hub between Home and itself). The type comes from the route map by a
+ * type-only import, so this registry still imports nothing from routes.ts at run time (routes.ts imports FILE_GUIDES).
+ */
+export type QrToolId = typeof QR_ID;
+export type FileGuideHub = 'image-tools' | 'pdf-tools' | 'utilities';
+export type FileGuideTool = ImageToolId | PdfToolId | QrToolId;
+export type FileGuideRelated = ImageToolId | ImagePresetId | PdfToolId | QrToolId | FileGuideId;
+
+/** The group of the guides hub of each hub of a file guide, which is also the colour of its card and of its sheet. */
+export type FileGuideGroup = 'image' | 'pdf' | 'util';
+export const FILE_GUIDE_GROUP: Record<FileGuideHub, FileGuideGroup> = { 'image-tools': 'image', 'pdf-tools': 'pdf', utilities: 'util' };
+
+/** The group of a file guide on the guides hub: Image, PDF or Utilities. */
+export function fileGuideGroup(id: FileGuideId): FileGuideGroup {
+  return FILE_GUIDE_GROUP[FILE_GUIDES[id].hub];
+}
 
 export interface FileGuideDef {
   id: FileGuideId;
@@ -89,7 +106,10 @@ export interface FileGuideDef {
   paths: Record<Lang, string>;
   /** The tool the guide embeds: the same island and entry as the tool's own page. */
   tool: FileGuideTool;
-  /** The hub of the breadcrumb, which also lists the guide. */
+  /**
+   * The hub that lists the guide (the image or PDF hub; 'utilities' has no page) and the group of the guides hub where the
+   * guide sits (FILE_GUIDE_GROUP). Since the F11 the breadcrumb is Home › Guides › guide for every guide.
+   */
   hub: FileGuideHub;
   /** Up to 6 pages that exist: tools, presets or other guides. */
   related: readonly FileGuideRelated[];

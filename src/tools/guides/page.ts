@@ -2,7 +2,7 @@
 // embeds as the page links to it, the crumbs and the related cards, in the language of the page. A related card or a
 // link goes only to a page that exists in that language (DECISOES § 6); every guide exists in English, Portuguese and
 // Spanish since the languages adjustment, and so does every tool, preset and guide they link to.
-import { pathFor, type Lang } from '../../i18n/routes.ts';
+import { QR_ID, pathFor, type Lang } from '../../i18n/routes.ts';
 import { TEXTS } from '../../i18n/texts.ts';
 import enShared from '../../i18n/en/file-guides.ts';
 import ptShared from '../../i18n/pt/file-guides.ts';
@@ -14,6 +14,7 @@ import { IMAGE_PAGES, type ImagePageId } from '../image/registry.ts';
 import { imageToolTexts } from '../image/texts.ts';
 import { PDF_PAGES, type PdfPageId } from '../pdf/registry.ts';
 import { PDF_TOOL_TEXTS } from '../pdf/texts.ts';
+import { QR_TEXTS } from '../qr-code-generator/page.ts';
 import { FILE_GUIDES, GUIDES_HUB_ID, isFileGuide, type FileGuideId, type FileGuideRelated, type FileGuideTool } from './registry.ts';
 import { guideCardData, type GuideCardData } from './card.ts';
 
@@ -48,12 +49,22 @@ export interface ToolInfo {
   h1: string;
   path: string;
   icon: IconName;
-  category: 'image' | 'pdf';
+  /** The colour of the tool's own category: image, PDF or, for the QR code generator (F19b), the lime of the utilities. */
+  category: 'image' | 'pdf' | 'util';
   pdf: boolean;
+}
+
+/** The card name of the QR code generator in a language (its card exists wherever its page does). */
+function qrName(lang: Lang): string {
+  const name = TEXTS[lang].common.qr?.name;
+  if (!name) throw new Error(`no ${lang} card for ${QR_ID}`);
+  return name;
 }
 
 export function toolInfo(tool: FileGuideTool, lang: Lang = 'en'): ToolInfo {
   const common = TEXTS[lang].common;
+  // F19b (decision 4; DECISOES § 786): the QR code generator, which an image tool's page component never was.
+  if (tool === QR_ID) return { name: qrName(lang), h1: QR_TEXTS[lang].h1, path: pathFor(QR_ID, lang), icon: 'qr', category: 'util', pdf: false };
   if (isPdfTool(tool)) {
     return { name: common.pdf[tool].name, h1: PDF_TOOL_TEXTS[lang][tool].h1, path: pathFor(tool, lang), icon: PDF_PAGES[tool].icon, category: 'pdf', pdf: true };
   }
@@ -81,7 +92,7 @@ export interface RelatedToolCard {
   name: string;
   description: string;
   icon: IconName;
-  category: 'image' | 'pdf';
+  category: 'image' | 'pdf' | 'util';
 }
 
 /** A guide in the related grid of a guide: the data of its GuideCard (F11, decision 7; the F5b F-12). */
@@ -106,6 +117,11 @@ function blurbOf(id: FileGuideId, lang: Lang): { name: string; description: stri
 function cardOf(target: FileGuideRelated, lang: Lang): RelatedCard {
   const common = TEXTS[lang].common;
   if (isFileGuide(target)) return { kind: 'guide', card: guideCardData(target, lang) };
+  if (target === QR_ID) {
+    const card = common.qr;
+    if (!card) throw new Error(`no ${lang} card for ${QR_ID}`);
+    return { kind: 'tool', href: pathFor(QR_ID, lang), name: card.name, description: card.description, icon: 'qr', category: 'util' };
+  }
   if (isPdfTool(target)) return { kind: 'tool', href: pathFor(target, lang), name: common.pdf[target].name, description: common.pdf[target].description, icon: PDF_PAGES[target].icon, category: 'pdf' };
   if (!isImagePage(target)) throw new Error(`unknown page ${String(target)}`);
   const def = IMAGE_PAGES[target];
