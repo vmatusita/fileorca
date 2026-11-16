@@ -4,18 +4,24 @@
 import { describe, expect, it } from 'vitest';
 import {
   FACTS,
+  GUIDES_BEFORE_F19B,
+  GUIDE_FACTS,
   MIN_SENTENCE_WORDS,
   NEAR_DUPLICATE,
   OWN_SUBJECT,
   checkRepetition,
   factsInLine,
+  guideUnitsOf,
   nearDuplicates,
   normalizeWords,
   pageKind,
   similarity,
+  underRule,
   unitsOf,
 } from '../../scripts/lib/repeticao.ts';
 import { LANGS, ROUTES, languagesOf, type Lang } from '../../src/i18n/routes.ts';
+import { FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
+import { GUIDE_IDS } from '../../src/tools/calc/registry.ts';
 
 interface Parts {
   head?: string;
@@ -119,11 +125,15 @@ describe('repetição: as unidades da página', () => {
     expect(checkRepetition(html, 'en').join('\n')).toMatch(/batch-zip.*specs, other/);
   });
 
-  it('gives every route of the rule a kind, and none to the hubs, the guides and the institutional pages', () => {
+  // F19b (decision 8; DECISOES § 792 and § 796): the guides have a kind now, file-guide and money-guide; the hubs (the guides
+  // hub among them) and the institutional pages still have none.
+  it('gives every route of the rule a kind, and none to the hubs and the institutional pages', () => {
     const kinds = ROUTES.flatMap((route) => languagesOf(route).map(() => pageKind(route.id))).filter((kind) => kind !== null);
     // The 148 pages of the baseline (ferramentas, presets, calculadoras e QR code nos idiomas de cada uma), or more.
     expect(kinds.length).toBeGreaterThanOrEqual(148);
     for (const id of ['home', 'about', 'image-tools', 'pdf-tools', 'guides', 'how-it-works', 'whats-new']) expect(pageKind(id), id).toBeNull();
+    for (const id of FILE_GUIDE_IDS) expect(pageKind(id), id).toBe('file-guide');
+    for (const id of GUIDE_IDS) expect(pageKind(id), id).toBe('money-guide');
     expect(pageKind('compress-image')).toBe('image-tool');
     expect(pageKind('compress-image-to-100kb')).toBe('image-preset');
     expect(pageKind('merge-pdf')).toBe('pdf-tool');
@@ -328,4 +338,144 @@ describe('repetição: os padrões de cada fato obrigatório, nos três idiomas'
       expect(factsInLine(no, lang, only)).toEqual([]);
     });
   }
+});
+
+// ---- F19b: the guides (decision 8; DECISOES § 792) ---------------------------------------------------------------------
+
+interface GuideParts {
+  lead?: string;
+  toolIntro?: string;
+  intro?: string;
+  parts?: [string, string[]][];
+  measured?: string;
+  sheet?: string;
+  table?: string;
+  source?: string;
+  island?: string;
+}
+
+/** A file guide in the shape of FileGuideView: the top band, the sheet, the tool, the text blocks, the measured section. */
+function fileGuide(parts: GuideParts = {}): string {
+  const sections = parts.parts ?? [
+    ['What a limit means', ['A form that asks for a photo under a size counts the bytes of the file you send it.']],
+    ['What we measured', ['We put three phone photos through the tool at three limits and read the size of each copy.']],
+  ];
+  return `<!doctype html><html><head><title>A guide | FileOrca</title></head><body><main>
+  <nav aria-label="Breadcrumb"><ol class="fo-crumbs"><li><a href="/">Home</a></li></ol></nav>
+  <div class="fo-top fo-top--calc" data-guide-text><h1 class="fo-h1">Photo for an online form</h1><p class="fo-lead">${parts.lead ?? 'How small a photo has to be for a form, and what it gives up.'}</p><p class="fo-reviewed fo-sig">Reviewed by <a href="/about/">Victor</a> · <time datetime="2026-11-16">Nov 16, 2026</time></p></div>
+  <section class="fo-sheet" data-content="facts"><h2>What we measured</h2><p class="fo-sheet__sample">${parts.sheet ?? 'Three phone photos.'}</p></section>
+  <section class="fo-section fo-prose fo-guide__tool" aria-labelledby="guide-tool" data-guide-text><h2 id="guide-tool">Try it on your photo</h2></section>
+  <div id="fo-tool-root" data-props="{}"><p>${parts.island ?? 'Drop a photo here.'}</p></div>
+  <p class="fo-guide__toolintro" data-guide-text>${parts.toolIntro ?? 'Pick Up to a size and type the limit of the form.'}</p>
+  <div class="fo-prose fo-guide" data-guide-text><p>${parts.intro ?? 'Forms set a limit so their servers do not fill up with large files.'}</p></div>
+  ${sections.map(([heading, paragraphs], index) => `<section class="fo-section fo-prose" aria-labelledby="part-${index}" data-guide-text><h2 id="part-${index}">${heading}</h2>${paragraphs.map((paragraph) => `<p>${paragraph}</p>`).join('')}</section>`).join('\n  ')}
+  <section class="fo-section fo-prose" data-content="measured"><h2 id="measured">What we measured</h2><p data-guide-text>${parts.measured ?? 'Each row is one photo at one limit.'}</p><div class="fo-table-wrap"><table class="fo-table"><tbody><tr><th scope="row">Photo</th><td>${parts.table ?? '98 KB'}</td></tr></tbody></table></div><p class="fo-reviewed" data-guide-text>Measured in Chromium and WebKit on November 16, 2026.</p><p class="fo-reviewed fo-guide__history" data-guide-text>First published on <time datetime="2026-11-16">November 16, 2026</time>.</p></section>
+  <section class="fo-section fo-prose" data-content="sources"><h2 id="sources">Sources</h2><ul><li><a href="https://example.org/">${parts.source ?? 'A source'}</a>. Read on <time datetime="2026-11-16">November 16, 2026</time>.</li></ul></section>
+  <section class="fo-section" data-content="author"><h2>About the author</h2><p>Victor makes FileOrca on his own device.</p></section>
+  <section class="fo-section" data-content="related"><h2 id="related">Related</h2><ul class="fo-grid"><li><a class="fo-guidecard" href="/guides/x/"><span>Guide</span> <span>Everything happens on your device.</span></a></li></ul></section>
+</main></body></html>`;
+}
+
+/** A money guide in the shape of GuideView: the marked blocks, the calculator, the table and the blocks of How it works. */
+function moneyGuide(parts: { calc?: string; part?: string; example?: string; disclaimer?: string; source?: string } = {}): string {
+  return `<!doctype html><html><head><title>APR vs APY | FileOrca</title></head><body><main>
+  <div class="fo-top fo-top--calc" data-guide-text><h1 class="fo-h1">APR vs APY</h1><p class="fo-lead">Why the same rate earns more when it compounds more often.</p><p class="fo-reviewed" data-ymyl="reviewed">Reviewed by <a href="/about/">Victor</a> on <time datetime="2026-11-16">November 16, 2026</time>.</p></div>
+  <div class="fo-prose fo-guide" data-guide-text><p>A rate on a savings account is quoted as a yearly number.</p></div>
+  <section class="fo-section fo-prose" aria-labelledby="guide-calc" data-guide-text="calc"><h2 id="guide-calc">Try a rate</h2><p>${parts.calc ?? 'Change the compounding to see the yield move.'}</p></section>
+  <div id="fo-tool-root" class="fo-calc-island"><p>Your numbers stay on your device.</p></div>
+  <section class="fo-section fo-prose" aria-labelledby="part-0" data-guide-text><h2 id="part-0">Daily against monthly</h2><p>${parts.part ?? 'Interest added each day starts to earn interest the next day.'}</p></section>
+  <section class="fo-section fo-prose" aria-labelledby="measured"><h2 id="measured">The same rate, compounded five ways</h2><p data-guide-text="table">Each row compounds the same rate a different number of times.</p><p class="fo-reviewed">Worked out on <time datetime="2026-11-16">November 16, 2026</time>.</p></section>
+  <section class="fo-section fo-prose" aria-labelledby="works"><h2 id="works">How it is worked out</h2>
+    <div data-ymyl="formula" data-guide-text="formula"><p>The yield is one plus the rate over the periods, to the power of the periods, minus one.</p></div>
+    <div data-ymyl="premises" data-guide-text="premises"><h3>What it assumes</h3><ul><li>The rate stays the same for the whole year.</li></ul></div>
+    <div data-ymyl="example" data-guide-text="example"><h3>An example</h3><p>${parts.example ?? 'A rate of 5% compounded daily gives a yield of about 5.13%.'}</p></div>
+    <div data-ymyl="source"><h3>Sources</h3><ul><li><a href="https://example.org/">${parts.source ?? 'CFPB'}</a>.</li></ul></div>
+    <div data-ymyl="disclaimer" data-guide-text="disclaimer"><h3>Before you decide</h3><p>${parts.disclaimer ?? 'An educational tool, not financial advice.'}</p></div>
+  </section>
+</main></body></html>`;
+}
+
+/** The sending or the device said in two parts, and a fact a guide is about said in two parts, per language. */
+const GUIDE_CASES: Record<Lang, { device: [string, string]; subject: [string, string]; copy: [string, string] }> = {
+  en: {
+    device: ['The photo is made smaller on your device.', 'Nothing leaves the page: it all happens in your browser.'],
+    subject: ['Transparent areas turn white in a JPG.', 'In the JPG the transparent corners of our test image came out white.'],
+    copy: ['We put three phone photos through the tool at three limits and read the size of each copy.', 'We put the three phone photos through the tool at three limits and read the size of every copy.'],
+  },
+  pt: {
+    device: ['A foto fica menor no seu aparelho.', 'Tudo acontece dentro do navegador, sem sair da página.'],
+    subject: ['As áreas transparentes ficam brancas no JPG.', 'No JPG, os cantos transparentes da nossa imagem de teste saíram brancos.'],
+    copy: ['Passamos três fotos de celular pela ferramenta em três limites e lemos o tamanho de cada cópia.', 'Passamos as três fotos de celular pela ferramenta nos três limites e lemos o tamanho de cada cópia.'],
+  },
+  es: {
+    device: ['La foto se hace más pequeña en tu dispositivo.', 'Todo pasa dentro del navegador, sin salir de la página.'],
+    subject: ['Las zonas transparentes quedan blancas en el JPG.', 'En el JPG, las esquinas transparentes de nuestra imagen de prueba salieron blancas.'],
+    copy: ['Pasamos tres fotos de celular por la herramienta en tres límites y leímos el tamaño de cada copia.', 'Pasamos las tres fotos de celular por la herramienta en los tres límites y leímos el tamaño de cada copia.'],
+  },
+};
+const NEW_FILE_GUIDE = FILE_GUIDE_IDS.find((id) => !GUIDES_BEFORE_F19B.includes(id)) ?? 'guides-compress-photo-for-online-form';
+const NEW_MONEY_GUIDE = GUIDE_IDS.find((id) => !GUIDES_BEFORE_F19B.includes(id)) ?? 'guides-apr-vs-apy';
+
+describe('repetição: os guias (F19b)', () => {
+  it('reads the text blocks of a file guide, the heading of each part as its label, and nothing that is not its text', () => {
+    const units = guideUnitsOf(fileGuide());
+    expect(units.map((unit) => unit.name)).toEqual(['top', 'tool', 'tool intro', 'intro', 'part 1', 'part 2', 'measured', 'note', 'history']);
+    expect(units.find((unit) => unit.name === 'part 2')?.question).toBe('What we measured');
+    expect(units.find((unit) => unit.name === 'top')?.lines).toEqual(['How small a photo has to be for a form, and what it gives up.']);
+    const text = units.flatMap((unit) => unit.lines).join('\n');
+    // The H1, the signature, the sheet, the island, the table, the sources, the author box and the cards are out.
+    for (const never of ['Photo for an online form', 'Reviewed by', 'Three phone photos.', 'Drop a photo here.', '98 KB', 'A source', 'Victor makes FileOrca', 'Everything happens on your device']) {
+      expect(text, never).not.toContain(never);
+    }
+  });
+
+  it('reads the text blocks of a money guide by their marks, and not the calculator, the table note nor the sources', () => {
+    const units = guideUnitsOf(moneyGuide());
+    expect(units.map((unit) => unit.name)).toEqual(['top', 'intro', 'calc', 'part 1', 'table', 'formula', 'premises', 'example', 'disclaimer']);
+    const text = units.flatMap((unit) => unit.lines).join('\n');
+    for (const never of ['APR vs APY', 'Reviewed by', 'Your numbers stay on your device', 'Worked out on', 'CFPB']) expect(text, never).not.toContain(never);
+  });
+
+  it('holds the guides to the facts of the sending and of the device only, and every guide added since the F19b to the rule', () => {
+    expect(GUIDE_FACTS).toEqual(['not-sent', 'on-device', 'calc-numbers', 'qr-text-private', 'qr-never-opens']);
+    for (const id of GUIDE_FACTS) expect(FACTS.some((fact) => fact.id === id), id).toBe(true);
+    // The fifteen guides before the F19b, out of the rule (a pendência of group 30): the first ten file guides and the first
+    // five money guides of the registries, whose order only grows at the end.
+    expect([...GUIDES_BEFORE_F19B]).toEqual([...FILE_GUIDE_IDS.slice(0, 10), ...GUIDE_IDS.slice(0, 5)]);
+    for (const id of GUIDES_BEFORE_F19B) expect(underRule(id), id).toBe(false);
+    for (const id of [...FILE_GUIDE_IDS, ...GUIDE_IDS].filter((candidate) => !GUIDES_BEFORE_F19B.includes(candidate))) expect(underRule(id), id).toBe(true);
+    expect(underRule('compress-image')).toBe(true);
+    expect(underRule('guides')).toBe(false);
+  });
+
+  for (const lang of LANGS) {
+    const { device, subject, copy } = GUIDE_CASES[lang];
+
+    it(`${lang}: passes a guide that says the device once and comes back to its subject in two parts`, () => {
+      const parts: [string, string[]][] = [['One', [device[0], subject[0]]], ['Two', [subject[1]]]];
+      expect(checkRepetition(fileGuide({ parts }), lang, NEW_FILE_GUIDE)).toEqual([]);
+      // The same sentences in the sheet, the island, the table or the sources are never the guide's text.
+      expect(checkRepetition(fileGuide({ parts, sheet: device[1], island: device[1], table: device[1], source: device[1] }), lang, NEW_FILE_GUIDE)).toEqual([]);
+    });
+
+    it(`${lang}: fails a guide that says the device in two parts, or a sentence near identical in two parts`, () => {
+      const twice = checkRepetition(fileGuide({ parts: [['One', [device[0]]], ['Two', [device[1]]]] }), lang, NEW_FILE_GUIDE);
+      expect(twice.join('\n')).toMatch(/\(on-device\) aparece em 2 blocos: part 1 \("One"\), part 2 \("Two"\)/);
+      const copied = checkRepetition(fileGuide({ parts: [['One', [copy[0]]]], measured: copy[1] }), lang, NEW_FILE_GUIDE);
+      expect(copied.join('\n')).toMatch(/frase quase igual \(\d+%\) em part 1 \("One"\) e measured/);
+    });
+
+    it(`${lang}: holds a money guide to the same rule, in its marked blocks`, () => {
+      expect(checkRepetition(moneyGuide({ calc: device[0] }), lang, NEW_MONEY_GUIDE)).toEqual([]);
+      expect(checkRepetition(moneyGuide({ calc: device[0], disclaimer: device[1] }), lang, NEW_MONEY_GUIDE).join('\n')).toMatch(/\(on-device\) aparece em 2 blocos: calc, disclaimer/);
+      expect(checkRepetition(moneyGuide({ part: copy[0], example: copy[1] }), lang, NEW_MONEY_GUIDE).join('\n')).toMatch(/frase quase igual \(\d+%\) em part 1 .* e example/);
+    });
+  }
+
+  it('reads a guide as a guide only by its route id: the same page as a tool page is read by the blocks of a tool', () => {
+    const html = fileGuide({ parts: [['One', [GUIDE_CASES.en.device[0]]], ['Two', [GUIDE_CASES.en.device[1]]]] });
+    expect(checkRepetition(html, 'en', NEW_FILE_GUIDE)).not.toEqual([]);
+    // With no id, the units of a tool page: no data-content block holds the text, so it is one unit ("other"), no repetition.
+    expect(checkRepetition(html, 'en')).toEqual([]);
+  });
 });

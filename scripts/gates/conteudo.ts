@@ -26,6 +26,9 @@
 // F19a (decision 8; DECISOES § 764 and § 765): one fact, one place. On every tool, preset, calculator and QR code page, in
 // each language, a recurring fact is said in one block only and no sentence is copied into a second block
 // (scripts/lib/repeticao.ts, tested in tests/unit/repeticao.test.ts).
+// F19b (decision 8; DECISOES § 792): the same rule on the guides added since the F19b, in the guide's own text blocks, and
+// the 800 to 1,500 words of their own text and no filler on the money guides too (checkMoneyGuide); the hub of the guides
+// with the groups it shows in each language (Utilities only where the QR code has a guide).
 // The checks are pure functions in scripts/lib/conteudo.ts, tested in tests/unit/conteudo.test.ts.
 import { existsSync, readFileSync } from 'node:fs';
 import { DIST, Problems, allPages, fileForPath, listFiles, requireDist } from '../lib/dist.ts';
@@ -50,14 +53,14 @@ import {
 import { LANGS, QR_ID, languagesOf, routeById } from '../../src/i18n/routes.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
-import { BR_CALC_IDS, CALC_PAGES, CALC_PAGE_IDS, LIFE_CALC_IDS, isBrCalc, isLifeCalc, moneyPage } from '../../src/tools/calc/registry.ts';
+import { BR_CALC_IDS, CALC_PAGES, CALC_PAGE_IDS, GUIDE_IDS, LIFE_CALC_IDS, guidePathIn, isBrCalc, isLifeCalc, moneyPage } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_PAGES, PDF_PRESET_IDS, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID } from '../../src/tools/guides/registry.ts';
 import { hubGuides, shownGroups } from '../../src/tools/guides/hub.ts';
-import { checkFileGuide, guideWords } from '../lib/file-guides.ts';
+import { checkFileGuide, checkMoneyGuide, guideWords } from '../lib/file-guides.ts';
 import { fileIn } from '../lib/prontidao.ts';
 import { buildVariant } from '../lib/test-build.ts';
-import { checkRepetition, pageKind } from '../lib/repeticao.ts';
+import { checkRepetition, underRule } from '../lib/repeticao.ts';
 import type { Lang } from '../../src/i18n/routes.ts';
 
 requireDist();
@@ -189,9 +192,9 @@ for (const lang of qrRoute ? languagesOf(qrRoute) : []) {
   repetition(path, html, lang, QR_ID);
 }
 // Every page of the rule was read: each page of the route map whose kind (pageKind, from the registries) is a tool, a
-// preset, a calculator or the QR code generator, in each of its languages.
-const repetitionWanted = pages.filter((page) => pageKind(page.route.id) !== null && existsSync(fileForPath(page.path))).length;
-if (repetitionPages !== repetitionWanted) problems.add(`${repetitionPages} página(s) conferida(s) pela regra da repetição, o mapa de rotas tem ${repetitionWanted}`);
+// preset, a calculator or the QR code generator, in each of its languages. F19b (decision 8; DECISOES § 792): and each guide
+// added since the F19b (underRule: the fifteen before it are a pendência); the guides are read in the loops below.
+const repetitionWanted = pages.filter((page) => underRule(page.route.id) && existsSync(fileForPath(page.path))).length;
 
 // The file guides, read from their registry, in each of their languages (the three since the languages adjustment): the
 // route map must have each one at the path of the registry, and the page must pass the guide rules of its language, with
@@ -223,11 +226,41 @@ for (const id of FILE_GUIDE_IDS) {
       continue;
     }
     for (const problem of checkFileGuide(readFileSync(adsFile, 'utf8'), { toolPath, lang })) problems.add(`${path}: ${problem}`);
+    // F19b (decision 8; DECISOES § 792): one fact, one place, in the guide's own text blocks.
+    if (underRule(id)) repetition(path, html, lang, id);
     guideWordCounts.push(`${lang}/${path.split('/').at(-2) ?? path} ${guideWords(html)}`);
   }
 }
 if (guidePages !== guideWanted) problems.add(`${guidePages} guia(s) de arquivo conferido(s), o registro tem ${guideWanted} (${FILE_GUIDE_IDS.length} guias em ${LANGS.length} idiomas)`);
 console.log(`palavras dos guias de arquivo: ${guideWordCounts.join(', ')}`);
+
+// F19b (prompt F19b, acceptance 2; DECISOES § 792): the money guides, read from their registry, in each language they have:
+// 800 to 1,500 words of their own text (the blocks marked data-guide-text in GuideView.astro) with no filler, and the
+// repetition rule. The five guides of the F4 are counted and shown, and held to neither (two of them have fewer than 800
+// words, and four fail the repetition rule in some language: a pendência of group 30); every guide added since is.
+let moneyGuidePages = 0;
+let moneyGuideWanted = 0;
+const moneyGuideWordCounts: string[] = [];
+for (const id of GUIDE_IDS) {
+  for (const lang of LANGS) {
+    const path = guidePathIn(id, lang);
+    if (!path) continue;
+    moneyGuideWanted += 1;
+    if (!existsSync(fileForPath(path))) {
+      problems.add(`${path}: a página não existe no dist`);
+      continue;
+    }
+    moneyGuidePages += 1;
+    const html = read(path);
+    moneyGuideWordCounts.push(`${lang}/${path.split('/').at(-2) ?? path} ${guideWords(html)}`);
+    if (!underRule(id)) continue;
+    for (const problem of checkMoneyGuide(html, lang)) problems.add(`${path}: ${problem}`);
+    repetition(path, html, lang, id);
+  }
+}
+if (moneyGuidePages !== moneyGuideWanted) problems.add(`${moneyGuidePages} guia(s) de dinheiro conferido(s), o registro tem ${moneyGuideWanted}`);
+console.log(`palavras dos guias de dinheiro: ${moneyGuideWordCounts.join(', ')}`);
+if (repetitionPages !== repetitionWanted) problems.add(`${repetitionPages} página(s) conferida(s) pela regra da repetição, o mapa de rotas tem ${repetitionWanted}`);
 
 // The guides hub (F11), in every language of its route: a card for each guide the registries give the language.
 let guidesHubPages = 0;
@@ -255,4 +288,4 @@ const sitePages = listFiles(DIST)
   .filter((page) => !isNotFoundPath(page.path));
 for (const problem of checkSite(sitePages)) problems.add(problem);
 
-problems.finish('conteúdo', `${toolPages} página(s) de ferramenta e de preset, ${calcPages} de calculadora, ${pdfPages} de PDF (as ferramentas, as presets e o hub), ${guidePages} guia(s) de arquivo, ${qrPages} do gerador de QR code e ${sitePages.length} página(s) do site conferida(s); ${guidesHubPages} do hub de guias; ${repetitionPages} sem repetição (um fato, um lugar)`);
+problems.finish('conteúdo', `${toolPages} página(s) de ferramenta e de preset, ${calcPages} de calculadora, ${pdfPages} de PDF (as ferramentas, as presets e o hub), ${guidePages} guia(s) de arquivo, ${qrPages} do gerador de QR code e ${sitePages.length} página(s) do site conferida(s); ${guidesHubPages} do hub de guias; ${moneyGuidePages} guia(s) de dinheiro; ${repetitionPages} sem repetição (um fato, um lugar)`);
