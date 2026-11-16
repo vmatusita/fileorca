@@ -28,7 +28,14 @@ export default {
   tableHeading: "The measurement",
   measuredIntro: "This guide is being written.",
   measuredNote: "Measured on {date}.",
-  tables: [],
+  // F19b (front M1): the shape of the table, which the front E rewrites in words and keeps.
+  tables: [
+    {
+      heading: "Each photo under each limit",
+      caption: "What Up to a size gave each phone photo under each limit in Chromium: the file, its dimensions, the quality it reached, and the highest quality at which the whole photo would have fit at its full size",
+      head: ["Limit", "Photo", "File", "Dimensions in pixels", "Quality reached", "Full size fits up to quality"],
+    },
+  ],
   sourcesHeading: "Sources",
   sources: [],
   facts: {},
