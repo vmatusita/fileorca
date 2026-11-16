@@ -270,6 +270,7 @@ const FEMININE: Record<'pt' | 'es', Partial<Record<FileGuideId, readonly string[
     // F19b (front T2): "fotos" is feminine; "cantos" (pngClearCorners) is masculine.
     'guides-webp-vs-avif-vs-jpg': ['photos'],
     'guides-compress-photo-for-online-form': ['photos', 'at500KeptChromium'],
+    'guides-sign-pdf-without-printing': ['textKeptChromium', 'textKeptWebkit', 'formXfaNoteChromium', 'formUsageRightsAfterChromium', 'mixedPages', 'formPages'],
   },
   es: {
     'guides-heic-to-jpg-on-windows': ['identicalBrowsers'],
@@ -282,6 +283,7 @@ const FEMININE: Record<'pt' | 'es', Partial<Record<FileGuideId, readonly string[
     // F19b (front T2): "fotos" and "esquinas" (pngClearCorners) are feminine.
     'guides-webp-vs-avif-vs-jpg': ['photos', 'pngClearCorners'],
     'guides-compress-photo-for-online-form': ['photos', 'at500KeptChromium'],
+    'guides-sign-pdf-without-printing': ['modes', 'textKeptChromium', 'textKeptWebkit', 'formXfaNoteChromium', 'formUsageRightsAfterChromium', 'mixedPages', 'formPages'],
   },
 };
 
