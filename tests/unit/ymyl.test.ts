@@ -151,8 +151,9 @@ describe('contagem do portão de dinheiro e saúde (F4)', () => {
     // F6 the Spanish hub and the five Spanish calculators (decision 6) and the Brazilian pages, once their rows are in the
     // map (decision 5), each counted in its one language.
     const routes = ROUTES.map((route) => ({ ...(route.adArea ? { adArea: route.adArea } : {}), indexable: route.indexable, languages: languagesOf(route).length }));
+    // F19b (DECISOES § 796): and the three money guides of the F19b (27; 24 before).
     const english = 1 + CALC_PAGE_IDS.length + GUIDE_IDS.length;
-    expect(english).toBe(24);
+    expect(english).toBe(27);
     const brazilian = ROUTES.filter((route) => route.id === BR_HUB_ID || isBrCalc(route.id)).length;
     expect([0, 1 + BR_CALC_IDS.length]).toContain(brazilian);
     // F7 (decision 1): the two hubs and the 11 home and health calculators, in English only (DECISOES § 259).

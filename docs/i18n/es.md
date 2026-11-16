@@ -243,7 +243,7 @@ Nomes das páginas, caminhos e nome do arquivo do PDF e do CSV (o bloco `es` do 
 | 15-year vs 30-year mortgage calculator | Calculadora de hipoteca a 15 o 30 años | /es/calculadora-de-hipoteca/15-o-30-anos/ | `hipoteca-15-o-30-anos` |
 | Balloon loan calculator | Calculadora de préstamo con pago global | /es/calculadora-de-amortizacion-de-prestamos/pago-global/ | `tabla-prestamo-con-pago-global` |
 
-Os 5 guias de dinheiro:
+Os guias de dinheiro (os 5 do ajuste de idiomas e os 3 da F19b):
 
 | Guia (inglês) | Nombre en español | Caminho |
 | --- | --- | --- |
@@ -252,6 +252,9 @@ Os 5 guias de dinheiro:
 | How extra payments shorten a mortgage | Cómo los pagos adicionales acortan una hipoteca | /es/guias/pagos-adicionales-a-la-hipoteca/ |
 | Refinancing: find your break-even month | Refinanciamiento: halla tu mes de equilibrio | /es/guias/punto-de-equilibrio-del-refinanciamiento/ |
 | Rent vs buy: when buying starts to pay off | Alquilar o comprar: cuándo empieza a convenir comprar | /es/guias/punto-de-equilibrio-entre-alquilar-y-comprar/ |
+| APR vs APY | APR o APY | /es/guias/apr-o-apy/ |
+| Credit card minimum payment: why it takes so long | Pago mínimo de la tarjeta de crédito: por qué tarda tanto | /es/guias/pago-minimo-de-la-tarjeta-de-credito/ |
+| How much house can I afford | Cuánta casa puedo pagar | /es/guias/cuanta-casa-puedo-pagar/ |
 
 ## Generador de códigos QR (ajuste idiomas)
 
@@ -270,7 +273,7 @@ Os 5 guias de dinheiro:
 
 ## Guías de archivo (ajuste idiomas)
 
-Os 10 guias em `/es/guias/<slug>/`. O número sai do código no formato do espanhol dos EUA: "2.4 MB", "68 %" (com espaço sem quebra), "5.2 veces" ("1.0 vez" só no 1 exato), "42.2 dB", "150 ppp" (como a PDF a JPG escreve na mesma página; DECISOES § 321). Contagem por extenso: `{x_word}` masculino ("dos archivos", "un PDF", sempre com o substantivo depois do "un") e `{x_wordf}` feminino ("dos fotos", "una imagen", "cuatro esquinas"); nunca no começo de uma frase (DECISOES § 314).
+Os guias de arquivo em `/es/guias/<slug>/`: os 10 do ajuste de idiomas e os da F19b, que entram na tabela com o caminho de cada um (DECISOES § 779). O número sai do código no formato do espanhol dos EUA: "2.4 MB", "68 %" (com espaço sem quebra), "5.2 veces" ("1.0 vez" só no 1 exato), "42.2 dB", "150 ppp" (como a PDF a JPG escreve na mesma página; DECISOES § 321). Contagem por extenso: `{x_word}` masculino ("dos archivos", "un PDF", sempre com o substantivo depois do "un") e `{x_wordf}` feminino ("dos fotos", "una imagen", "cuatro esquinas"); nunca no começo de uma frase (DECISOES § 314).
 
 | Guia (inglês) | Nombre en español | Caminho |
 | --- | --- | --- |
@@ -284,6 +287,10 @@ Os 10 guias em `/es/guias/<slug>/`. O número sai do código no formato do espan
 | How to split a PDF, and why the parts can weigh more | Cómo dividir un PDF y por qué las partes pueden pesar más | /es/guias/dividir-pdf-y-tamano-del-archivo/ |
 | How to combine PDFs on a phone | Cómo unir PDF en el celular | /es/guias/unir-pdf-en-el-celular/ |
 | How to turn photos into one PDF | Cómo convertir fotos en un solo PDF | /es/guias/fotos-en-un-solo-pdf/ |
+| Photo for an online form | Foto para un formulario en línea | /es/guias/comprimir-foto-para-formulario-en-linea/ |
+| WebP vs AVIF vs JPG | WebP, AVIF o JPG | /es/guias/webp-avif-o-jpg/ |
+| How to sign a PDF without printing it | Cómo firmar un PDF sin imprimirlo | /es/guias/firmar-pdf-sin-imprimir/ |
+| What a PDF password protects | Qué protege la contraseña de un PDF | /es/guias/que-protege-la-contrasena-de-un-pdf/ |
 
 | Inglês | Español | Observação |
 | --- | --- | --- |
@@ -303,7 +310,7 @@ Rótulos de sistema, como as páginas de suporte em espanhol escrevem (lidas em 
 
 ## El hub de guías, la tarjeta y la búsqueda (F11)
 
-O hub `/es/guias/` lista os 10 guias de arquivo e os 5 de dinheiro (DECISOES § 393). O número de guias sai do registro, nunca à mão. A F11 tirou a linha "Lee la guía" das ferramentas e calculadoras: o cartão de guia ficou no lugar dela (DECISOES § 396).
+O hub `/es/guias/` lista os guias de arquivo e os de dinheiro (DECISOES § 393). O número de guias sai do registro, nunca à mão. A F11 tirou a linha "Lee la guía" das ferramentas e calculadoras: o cartão de guia ficou no lugar dela (DECISOES § 396).
 
 | Inglês | Español | Observação |
 | --- | --- | --- |
@@ -313,6 +320,8 @@ O hub `/es/guias/` lista os 10 guias de arquivo e os 5 de dinheiro (DECISOES § 
 | All guides | Todas las guías | rodapé |
 | Guide (na tarjeta e na busca) | Guía | primeira palavra do nome do cartão |
 | Measured on N test files · Numbers worked out | Medida con N archivos de prueba · Números calculados | |
+| Measured on N test texts | Medida con N textos de prueba | F19b: uma guia que mede textos, não arquivos (a do código QR) |
+| Utilities · Utility guides | Utilidades · Guías de utilidades | F19b: o grupo das guias do código QR no hub e no rodapé, mostrado quando o idioma tem uma guia dele |
 | Tool in the guide | Herramienta en la guía | |
 | Read a guide · See all N guides | Lee una guía · Ver las N guías | a seção da home |
 | Search tools and guides · Find a tool or a guide | Buscar herramientas y guías · Busca una herramienta o una guía | o botão do cabeçalho segue "Buscar herramientas" |

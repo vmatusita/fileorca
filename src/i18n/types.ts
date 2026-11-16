@@ -1468,7 +1468,8 @@ export interface GuidesHubTexts extends PageMeta {
   intro: string;
   /** The name of the nav of the shortcuts (aria-label). */
   jumpLabel: string;
-  groups: Record<'image' | 'pdf' | 'money', GuidesHubGroupTexts>;
+  /** F19b (DECISOES § 786): the Utilities group (util) too, the group of the QR code guides, shown once it has a guide. */
+  groups: Record<'image' | 'pdf' | 'util' | 'money', GuidesHubGroupTexts>;
   /**
    * Only in a language with no money guide (pt): the note of the money group, which says why and leads to the money hub of
    * the language (the text before the link, the link, the text after it).
@@ -1489,6 +1490,11 @@ export interface GuidesHubTexts extends PageMeta {
 export interface GuideCardTexts {
   kind: string;
   measured: string;
+  /**
+   * F19b (DECISOES § 786): the measure of a file guide that measured texts the script generated instead of files (the QR
+   * code guide), with {n}, the number of its test texts.
+   */
+  measuredTexts: string;
   workedOut?: string;
   tool: string;
 }

@@ -220,3 +220,32 @@ export function checkFileGuide(html: string, want: GuideWant): string[] {
   for (const label of findFiller(main.querySelectorAll('[data-guide-text]').map(textOf).join(' '), lang)) problems.push(`frase de enchimento: "${label}"`);
   return problems;
 }
+
+/**
+ * F19b (prompt F19b, acceptance 2; DECISOES § 792): the text of a money guide (GuideView.astro), held to the rule of the file
+ * guides: 800 to 1,500 words of its own text and no filler phrase. Its own text is the blocks marked data-guide-text: the top
+ * band, the introduction, the calculator's paragraph, the parts, the paragraph before the table, the formula, the premises,
+ * the example and the warning. The calculator, the table and its note, the sources, the author box and the related cards
+ * are not, and none of them may be marked. The rest of a money guide is gate:dinheiro-saude's.
+ */
+export function checkMoneyGuide(html: string, lang: Lang = DEFAULT_LANG): string[] {
+  const main = parsed(html).querySelector('main');
+  if (!main) return ['sem <main>'];
+  const problems: string[] = [];
+  const blocks = main.querySelectorAll('[data-guide-text]');
+  if (blocks.length === 0) problems.push('nenhum bloco de texto do guia (data-guide-text)');
+  const outside: [string, string][] = [
+    ['#fo-tool-root', 'a calculadora'],
+    ['table', 'a tabela'],
+    ['[data-ymyl="source"]', 'as fontes'],
+    ['[data-content="author"]', 'o quadro do autor'],
+    ['a.fo-tool', 'um cartão'],
+  ];
+  for (const [selector, name] of outside) {
+    if (main.querySelectorAll(selector).some((node) => node.hasAttribute('data-guide-text') || node.closest('[data-guide-text]') !== null)) problems.push(`${name} entra na contagem de palavras do guia (data-guide-text)`);
+  }
+  const count = guideWords(html);
+  if (count < MIN_GUIDE_WORDS || count > MAX_GUIDE_WORDS) problems.push(`${count} palavras de texto (pede de ${MIN_GUIDE_WORDS} a ${MAX_GUIDE_WORDS})`);
+  for (const label of findFiller(blocks.map(textOf).join(' '), lang)) problems.push(`frase de enchimento: "${label}"`);
+  return problems;
+}

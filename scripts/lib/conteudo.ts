@@ -618,13 +618,21 @@ export const GUIDES_HUB_TITLE: Record<Lang, string> = { en: 'Guides', pt: 'Guias
  * and 120 at most, so the top stays short and the first card above the fold at 360 × 740 (§ 364: en 91, pt 108, es 97).
  */
 export const GUIDES_HUB_WORDS = { min: 60, max: 120 } as const;
-/** The sections of the groups, whose ids are the anchors of the footer and of the shortcuts (#image, #pdf, #money). */
-export const GUIDES_HUB_GROUPS = ['image', 'pdf', 'money'] as const;
+/**
+ * The sections of the groups, whose ids are the anchors of the footer and of the shortcuts (#image, #pdf, #util, #money).
+ * F19b (DECISOES § 786): #util, the Utilities group of the QR code guides, the HUB_GROUPS of src/tools/guides/hub.ts.
+ */
+export const GUIDES_HUB_GROUPS = ['image', 'pdf', 'util', 'money'] as const;
 
-/** What the guides hub must carry: the path of every guide of its language (the registries), and the language. */
+/**
+ * What the guides hub must carry: the path of every guide of its language (the registries), the language and the groups
+ * it shows in that language (shownGroups of src/tools/guides/hub.ts: a group with a guide there, and money). Without
+ * `groups`, every group of GUIDES_HUB_GROUPS.
+ */
 export interface GuidesHubWant {
   paths: readonly string[];
   lang?: Lang;
+  groups?: readonly (typeof GUIDES_HUB_GROUPS)[number][];
 }
 
 /** The words of the hub's own text: the blocks marked data-hub-text, each element boundary a break. */
@@ -638,7 +646,8 @@ export function guidesHubWords(html: string): number {
  * Rule 7 (F11): the guides hub, in the mould of the PDF hub's rule (§ 162). One H1; a title that starts with "Guides"
  * ("Guias", "Guías"); the introduction of its own in the band; its own text between 60 and 120 words; one GuideCard for
  * every guide of the language in the registries, each once and no other; no ToolCard (a guide is never shown as a tool);
- * the three groups with their anchors, each with its cards or the note that says why it has none; and no best, #1 or
+ * the groups it shows in its language with their anchors, each with its cards or the note that says why it has none (and
+ * no section of a group it does not show, F19b); and no best, #1 or
  * unmeasured number.
  */
 export function checkGuidesHub(html: string, want: GuidesHubWant): string[] {
@@ -665,8 +674,14 @@ export function checkGuidesHub(html: string, want: GuidesHubWant): string[] {
   const tools = root.querySelectorAll('main a.fo-tool');
   if (tools.length > 0) problems.push(`${tools.length} cartão(ões) de ferramenta (a.fo-tool) no hub de guias`);
 
+  const shown = want.groups ?? GUIDES_HUB_GROUPS;
   for (const group of GUIDES_HUB_GROUPS) {
     const section = root.querySelector(`main section#${group}`);
+    // F19b (DECISOES § 786): a group the hub does not show in the language (no guide there) has no section either.
+    if (!shown.includes(group)) {
+      if (section) problems.push(`a seção do grupo #${group} aparece, e o idioma não tem guia nesse grupo`);
+      continue;
+    }
     if (!section) problems.push(`sem a seção do grupo #${group}`);
     else if (section.querySelectorAll('a.fo-guidecard').length === 0 && !section.querySelectorAll('[data-hub-text]').some((note) => plainText(note) !== '')) problems.push(`o grupo #${group} não tem cartão nem a nota que diz por quê`);
   }

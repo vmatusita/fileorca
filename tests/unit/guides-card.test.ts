@@ -6,7 +6,7 @@ import { TEXTS } from '../../src/i18n/texts.ts';
 import { fmt, groupDigits } from '../../src/i18n/format.ts';
 import { CALC_PAGES, GUIDES, GUIDE_IDS, guidePathIn } from '../../src/tools/calc/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID, type FileGuideId } from '../../src/tools/guides/registry.ts';
-import { guideCardData, measuredFiles } from '../../src/tools/guides/card.ts';
+import { fileProof, guideCardData, measuredFiles, measuredTexts } from '../../src/tools/guides/card.ts';
 import { hubGuides } from '../../src/tools/guides/hub.ts';
 import { toolInfo } from '../../src/tools/guides/page.ts';
 import { routeById } from '../../src/i18n/routes.ts';
@@ -39,13 +39,29 @@ const SPEC_N: Record<FileGuideId, number> = {
   'guides-sign-pdf-without-printing': 4,
   'guides-what-a-pdf-password-protects': 4,
 };
-type Sampled = { sample: { files: string[] } };
-/** The same count by the shape of the JSON alone: the files of the numbers and of the tables of the guide, once each. */
-const byShape = (id: FileGuideId): number => {
+/**
+ * F19b (DECISOES § 786 and § 796): the distinct test texts of a guide that measured texts instead of files (the QR code
+ * guide; a sample of the kind 'texts'), counted by hand like SPEC_N; a guide absent here measured no text.
+ */
+const SPEC_TEXTS: Partial<Record<FileGuideId, number>> = {};
+/** The hub of each guide's group on the guides hub, by hand (F19b: Utilities for the QR code guides). */
+const GROUP_OF_HUB = { 'image-tools': 'image', 'pdf-tools': 'pdf', utilities: 'util' } as const;
+type Sampled = { sample: { kind?: string; files?: string[]; texts?: string[] } };
+/**
+ * The same count by the shape of the JSON alone: the files (or, with `texts`, the texts) of the numbers and of the tables
+ * of the guide, once each.
+ */
+const byShape = (id: FileGuideId, key: 'files' | 'texts' = 'files'): number => {
   const guide = (measured as unknown as { guides: Record<string, { numbers: Record<string, Sampled>; tables: Record<string, Sampled> }> }).guides[id];
-  return new Set([...Object.values(guide?.numbers ?? {}), ...Object.values(guide?.tables ?? {})].flatMap((entry) => entry.sample.files)).size;
+  return new Set([...Object.values(guide?.numbers ?? {}), ...Object.values(guide?.tables ?? {})].flatMap((entry) => entry.sample[key] ?? [])).size;
 };
 const KIND: Record<Lang, string> = { en: 'Guide', pt: 'Guia', es: 'Guía' };
+/** The measure a card shows, by the hand counts: "Measured on N test files", or N test texts for a guide of texts. */
+const proofOf = (id: FileGuideId, lang: Lang): string => {
+  const t = TEXTS[lang].guides.card;
+  const texts = SPEC_TEXTS[id];
+  return texts === undefined ? fmt(t.measured, { n: groupDigits(SPEC_N[id], lang) }) : fmt(t.measuredTexts, { n: groupDigits(texts, lang) });
+};
 
 const html = (path: string): HTMLElement => {
   const file = fileForPath(path);
@@ -60,6 +76,10 @@ describe('the measure of a file guide: the distinct test files of all its sample
       expect(files.length, id).toBe(SPEC_N[id]);
       expect(new Set(files).size, `${id}: each file once`).toBe(files.length);
       expect(files.length, id).toBe(byShape(id));
+      // F19b: and the texts of a guide that measured texts (none but the QR code guide).
+      const texts = measuredTexts(id);
+      expect(texts.length, `${id} texts`).toBe(SPEC_TEXTS[id] ?? 0);
+      expect(texts.length, `${id} texts`).toBe(byShape(id, 'texts'));
     }
     // A file in two samples counts once (the location guide: three JPG and ten HEIC files across its numbers).
     expect(measuredFiles('guides-remove-location-from-photos')).toHaveLength(13);
@@ -69,18 +89,32 @@ describe('the measure of a file guide: the distinct test files of all its sample
     const fake = { guides: { 'guides-jpg-vs-png': { numbers: { a: { sample: { files: ['x.jpg', 'y.png'] } } }, tables: { b: { sample: { files: ['y.png'] } } }, deep: [{ more: { sample: { files: ['z.jpg'] } } }] } } };
     expect(measuredFiles('guides-jpg-vs-png', fake as never).sort()).toEqual(['x.jpg', 'y.png', 'z.jpg']);
   });
+
+  // F19b (DECISOES § 786): a sample of texts is counted as texts, never as files, and the card says which it measured.
+  it('counts the texts of a sample of texts apart from the files, and says "test texts" on the card of such a guide', () => {
+    const texts = { guides: { 'guides-jpg-vs-png': { numbers: { a: { sample: { kind: 'texts', texts: ['short', 'long'], count: 2 } } }, tables: { b: { sample: { kind: 'texts', texts: ['long', 'café'], count: 2 } } } } } };
+    expect(measuredTexts('guides-jpg-vs-png', texts as never).sort()).toEqual(['café', 'long', 'short']);
+    expect(measuredFiles('guides-jpg-vs-png', texts as never)).toEqual([]);
+    for (const lang of LANGS) {
+      expect(fileProof('guides-jpg-vs-png', lang, texts as never), lang).toBe(fmt(TEXTS[lang].guides.card.measuredTexts, { n: groupDigits(3, lang) }));
+    }
+    expect(fileProof('guides-jpg-vs-png', 'en', texts as never)).toBe('Measured on 3 test texts');
+    // A guide that measured both, or neither, has no single count to show: the build stops.
+    const both = { guides: { 'guides-jpg-vs-png': { numbers: { a: { sample: { files: ['x.jpg'], count: 1 } }, b: { sample: { kind: 'texts', texts: ['t'], count: 1 } } }, tables: {} } } };
+    expect(() => fileProof('guides-jpg-vs-png', 'en', both as never)).toThrow(/a sample of files and one of texts/);
+    expect(() => fileProof('guides-jpg-vs-png', 'en', { guides: { 'guides-jpg-vs-png': { numbers: {}, tables: {} } } } as never)).toThrow(/no measured file/);
+  });
 });
 
 describe('the data of each guide card, in each language of the guide', () => {
   it('has the blurb, the group, the measure in the digits of the language and the tool of each file guide', () => {
     for (const lang of LANGS) {
-      const t = TEXTS[lang].guides.card;
       for (const id of FILE_GUIDE_IDS) {
         const card = guideCardData(id, lang);
         const blurb = TEXTS[lang].common.fileGuides?.[id];
         expect([card.href, card.name, card.description], `${lang} ${id}`).toEqual([FILE_GUIDES[id].paths[lang], blurb?.name, blurb?.description]);
-        expect(card.category, `${lang} ${id}`).toBe(FILE_GUIDES[id].hub === 'pdf-tools' ? 'pdf' : 'image');
-        expect(card.proof, `${lang} ${id}`).toBe(fmt(t.measured, { n: groupDigits(SPEC_N[id], lang) }));
+        expect(card.category, `${lang} ${id}`).toBe(GROUP_OF_HUB[FILE_GUIDES[id].hub]);
+        expect(card.proof, `${lang} ${id}`).toBe(proofOf(id, lang));
         // The tool at the foot: the one the guide embeds, with its name, icon and the colour of its own category.
         const tool = toolInfo(FILE_GUIDES[id].tool, lang);
         expect(card.tool, `${lang} ${id}`).toEqual({ name: tool.name, icon: tool.icon, category: tool.category });
@@ -113,7 +147,8 @@ describe('the data of each guide card, in each language of the guide', () => {
       const t = TEXTS[lang].guides.card;
       expect(t.kind, lang).toBe(KIND[lang]);
       expect(t.measured, lang).toContain('{n}');
-      for (const text of [t.kind, t.measured, t.workedOut ?? '', t.tool]) expect(text, lang).not.toMatch(/\d/);
+      expect(t.measuredTexts, lang).toContain('{n}');
+      for (const text of [t.kind, t.measured, t.measuredTexts, t.workedOut ?? '', t.tool]) expect(text, lang).not.toMatch(/\d/);
     }
   });
 });
@@ -149,7 +184,7 @@ describe('the guide cards of the hub in dist/', () => {
       // The measure of every file guide in the digits of the language, read from the JSON (no other number on the card).
       for (const id of FILE_GUIDE_IDS) {
         const card = cards.find((candidate) => candidate.getAttribute('href') === FILE_GUIDES[id].paths[lang]);
-        expect(card?.querySelector('.fo-guidecard__proof')?.text.trim(), `${lang} ${id}`).toBe(fmt(TEXTS[lang].guides.card.measured, { n: groupDigits(SPEC_N[id], lang) }));
+        expect(card?.querySelector('.fo-guidecard__proof')?.text.trim(), `${lang} ${id}`).toBe(proofOf(id, lang));
       }
     });
   }

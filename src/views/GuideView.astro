@@ -72,13 +72,16 @@ const firstInside = (t.sections[0]?.paragraphs.length ?? 0) > 1;
   schema={[breadcrumbLd(crumbs), articleLd(t.h1, t.description, path, lang, FIRST_PUBLISHED, REVIEWED, id), personLd()]}
 >
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
-  <div class="fo-top fo-top--calc">
+  {/* F19b (decision 8; DECISOES § 792): the guide's own text blocks carry data-guide-text, as on a file guide, so
+      gate:conteudo counts their words (800 to 1,500) and reads them for the repetition rule; no visible change. The
+      calculator, the table, its note, the sources, the author box and the related cards are not text of the guide. */}
+  <div class="fo-top fo-top--calc" data-guide-text>
     <h1 class="fo-h1">{t.h1}</h1>
     <p class="fo-lead">{t.lead}</p>
     <Reviewed lang={lang} of={id} />
   </div>
-  <div class="fo-prose fo-guide">{t.intro.map((paragraph) => <p>{fill(paragraph)}</p>)}</div>
-  <section class="fo-section fo-prose" aria-labelledby="guide-calc">
+  <div class="fo-prose fo-guide" data-guide-text>{t.intro.map((paragraph) => <p>{fill(paragraph)}</p>)}</div>
+  <section class="fo-section fo-prose" aria-labelledby="guide-calc" data-guide-text="calc">
     <h2 id="guide-calc">{t.calcHeading}</h2>
     <p>{fill(t.calcIntro)}</p>
   </section>
@@ -87,7 +90,7 @@ const firstInside = (t.sections[0]?.paragraphs.length ?? 0) > 1;
   {t.sections.map((section, index) => (
     <>
       {index > 0 && <AdBreak first={index === 1 && !firstInside} />}
-      <section class="fo-section fo-prose" aria-labelledby={`part-${index}`}>
+      <section class="fo-section fo-prose" aria-labelledby={`part-${index}`} data-guide-text>
         <h2 id={`part-${index}`}>{section.heading}</h2>
         {section.paragraphs.map((paragraph, at) => <>{at > 0 && <AdBreak first={index === 0 && at === 1} />}<p>{fill(paragraph)}</p></>)}
       </section>
@@ -95,7 +98,7 @@ const firstInside = (t.sections[0]?.paragraphs.length ?? 0) > 1;
   ))}
   <section class="fo-section fo-prose" aria-labelledby="measured">
     <h2 id="measured">{t.tableHeading}</h2>
-    <p>{fill(t.tableIntro)}</p>
+    <p data-guide-text="table">{fill(t.tableIntro)}</p>
     <div class="fo-table-wrap" tabindex="0" role="region" aria-label={t.tableCaption}>
       <table class="fo-table">
         <caption class="fo-sr">{t.tableCaption}</caption>
@@ -107,14 +110,14 @@ const firstInside = (t.sections[0]?.paragraphs.length ?? 0) > 1;
   </section>
   <section class="fo-section fo-prose" aria-labelledby="works">
     <h2 id="works">{t.formulaHeading}</h2>
-    <div data-ymyl="formula">{t.formula.map((paragraph, at) => <>{at > 0 && <AdBreak />}<p>{fill(paragraph)}</p></>)}</div>
+    <div data-ymyl="formula" data-guide-text="formula">{t.formula.map((paragraph, at) => <>{at > 0 && <AdBreak />}<p>{fill(paragraph)}</p></>)}</div>
     <AdBreak />
-    <div data-ymyl="premises">
+    <div data-ymyl="premises" data-guide-text="premises">
       <h3 class="fo-h3">{t.premisesHeading}</h3>
       <ul>{t.premises.map((premise) => <li>{fill(premise)}</li>)}</ul>
     </div>
     <AdBreak />
-    <div data-ymyl="example">
+    <div data-ymyl="example" data-guide-text="example">
       <h3 class="fo-h3">{t.exampleHeading}</h3>
       {t.example.map((paragraph, at) => <>{at > 0 && <AdBreak />}<p>{fill(paragraph)}</p></>)}
     </div>
@@ -124,7 +127,7 @@ const firstInside = (t.sections[0]?.paragraphs.length ?? 0) > 1;
       <ul>{t.sources.map((source) => <li><a href={source.href}>{source.label}</a>. {readBefore}<time datetime={REVIEWED}>{longDate(REVIEWED, lang)}</time>{readAfter}</li>)}</ul>
     </div>
     <AdBreak />
-    <div data-ymyl="disclaimer">
+    <div data-ymyl="disclaimer" data-guide-text="disclaimer">
       <h3 class="fo-h3">{t.disclaimerHeading}</h3>
       <p>{t.disclaimer}</p>
     </div>

@@ -8,7 +8,7 @@ import { absolute, alternatesFor, ogImagePath, pageTitle } from '../../src/seo/m
 import { sitemapUrls } from '../../src/seo/sitemap.ts';
 import { GUIDES, GUIDE_IDS, guidePathIn } from '../../src/tools/calc/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID, guidesOfHub } from '../../src/tools/guides/registry.ts';
-import { HUB_GROUPS, hubGroup, hubGuides } from '../../src/tools/guides/hub.ts';
+import { HUB_GROUPS, hubGroup, hubGuides, shownGroups } from '../../src/tools/guides/hub.ts';
 import { fileForPath } from '../../scripts/lib/dist.ts';
 import { descriptionProblem, requiredSchemaTypes, schemaProblems, type LdNode } from '../../scripts/lib/seo-pages.ts';
 
@@ -74,16 +74,22 @@ describe('the route of the guides hub', () => {
 });
 
 describe('the guides of the hub, read from the registries', () => {
-  it('lists each guide of the language once: 15 in en and es, 10 in pt, the file guides in registry order, then the money guides', () => {
-    expect(LANGS.map((lang) => hubGuides(lang).length)).toEqual([15, 10, 15]);
+  // F19b (DECISOES § 796): 22 in en and es and 14 in pt with the four file guides and three money guides of the F19b in
+  // the registries (the QR code guide, the fifth file guide, makes them 23 and 15).
+  it('lists each guide of the language once: 22 in en and es, 14 in pt, the file guides in registry order, then the money guides', () => {
+    expect(LANGS.map((lang) => hubGuides(lang).length)).toEqual([22, 14, 22]);
     for (const lang of LANGS) {
       const guides = hubGuides(lang);
       expect(new Set(guides.map((guide) => guide.path)).size, lang).toBe(guides.length);
       expect([...guides.map((guide) => guide.path)].sort(), lang).toEqual(wanted(lang).sort());
-      // The groups, in the order of the page: the image hub's guides, the PDF hub's, then the money guides of the language.
+      // The groups, in the order of the page: the image hub's guides, the PDF hub's, the utilities (F19b: the QR code
+      // guides), then the money guides of the language.
       expect(hubGroup('image', lang).map((guide) => guide.id), lang).toEqual(guidesOfHub('image-tools'));
       expect(hubGroup('pdf', lang).map((guide) => guide.id), lang).toEqual(guidesOfHub('pdf-tools'));
+      expect(hubGroup('util', lang).map((guide) => guide.id), lang).toEqual(guidesOfHub('utilities'));
       expect(hubGroup('money', lang).map((guide) => guide.id), lang).toEqual(GUIDE_IDS.filter((id) => guidePathIn(id, lang) !== null));
+      // The groups the page shows: image and PDF, the utilities once they have a guide, and money always (the note of pt).
+      expect(shownGroups(lang), lang).toEqual(['image', 'pdf', ...(guidesOfHub('utilities').length > 0 ? ['util'] : []), 'money']);
       expect(guides.map((guide) => guide.id), lang).toEqual(HUB_GROUPS.flatMap((group) => hubGroup(group, lang).map((guide) => guide.id)));
       // The names and descriptions of the cards of the language, never a text of the hub.
       for (const guide of guides) {
@@ -153,21 +159,26 @@ describe('the three pages of the guides hub in dist/', () => {
       expect(page?.mainEntity?.itemListElement?.map((item) => [item.position, item.name, item.url])).toEqual(hubGuides(lang).map((guide, index) => [index + 1, guide.name, absolute(guide.path)]));
     });
 
-    it(`${path}: one H1, the three groups with their anchors, each guide of ${lang} once, no AdSlot, no Oli and no tool card`, () => {
+    it(`${path}: one H1, the groups with their anchors, each guide of ${lang} once, no AdSlot, no Oli and no tool card`, () => {
       const root = html(path);
       const main = root.querySelector('main');
       expect(root.querySelectorAll('h1').map((h1) => h1.text.trim())).toEqual([t.h1]);
       expect(main?.querySelector('nav ol.fo-crumbs')?.querySelectorAll('li').map((crumb) => crumb.text.trim())).toEqual([TEXTS[lang].common.breadcrumb.home, TEXTS[lang].common.guidesHub]);
       expect(main?.querySelector('.fo-hubband.fo-cat--guide .fo-eyebrow')?.text).toBe(t.eyebrow);
       expect(main?.querySelector('.fo-hubband p')?.text).toBe(fmt(t.intro, { n: groupDigits(n, lang) }));
-      // The shortcuts lead to the three sections, whose ids are the anchors of the footer (#image, #pdf, #money).
+      // The shortcuts lead to the sections, whose ids are the anchors of the footer (#image, #pdf, #money and, F19b, #util
+      // once the QR code has a guide; DECISOES § 786 and § 796): the groups the page shows, and no section of another.
+      const shown = shownGroups(lang);
+      expect(shown.slice(0, 2), lang).toEqual(['image', 'pdf']);
+      expect(shown.at(-1), lang).toBe('money');
       expect(main?.querySelector('nav.fo-jump')?.getAttribute('aria-label')).toBe(t.jumpLabel);
-      expect(main?.querySelectorAll('nav.fo-jump a').map((link) => link.getAttribute('href'))).toEqual(['#image', '#pdf', '#money']);
-      expect(main?.querySelectorAll('section[id]').map((section) => section.id)).toEqual([...HUB_GROUPS, 'how']);
-      expect(main?.querySelectorAll('section > h2').map((h2) => h2.text.trim())).toEqual([...HUB_GROUPS.map((group) => t.groups[group].heading), t.howHeading]);
+      expect(main?.querySelectorAll('nav.fo-jump a').map((link) => link.getAttribute('href'))).toEqual(shown.map((group) => `#${group}`));
+      expect(main?.querySelectorAll('section[id]').map((section) => section.id)).toEqual([...shown, 'how']);
+      expect(main?.querySelectorAll('section > h2').map((h2) => h2.text.trim())).toEqual([...shown.map((group) => t.groups[group].heading), t.howHeading]);
+      for (const group of HUB_GROUPS.filter((candidate) => !shown.includes(candidate))) expect(main?.querySelector(`section#${group}`), `${lang} #${group}`).toBeNull();
       // Each group links to its guides of the language, each once, and nothing else; every guide of the language is there.
       const linked: string[] = [];
-      for (const group of HUB_GROUPS) {
+      for (const group of shown) {
         const links = main?.querySelectorAll(`section#${group} a[href]`).map((link) => link.getAttribute('href') ?? '') ?? [];
         const guides = hubGroup(group, lang).map((guide) => guide.path);
         expect(links, `${lang} ${group}`).toEqual(guides.length > 0 ? guides : [pathFor(moneyHubId(lang), lang)]);
@@ -190,15 +201,19 @@ describe('the three pages of the guides hub in dist/', () => {
 
 // F11 (decision 7): the breadcrumb of every guide goes through the guides hub (before, the image, PDF or money hub). It is
 // also the first link to the hub from a page of another route, which keeps the hub out of the orphans of gate:links.
-describe('the breadcrumb of the 40 guides in dist/: Home › Guides › the guide', () => {
+// F19b (decision 4; DECISOES § 786): the QR code guides too, though the QR page has no hub between Home and itself: a guide
+// is a page of the guides hub, whichever tool it embeds.
+describe('the breadcrumb of the 58 guides in dist/: Home › Guides › the guide', () => {
   const pages = [...FILE_GUIDE_IDS, ...GUIDE_IDS].flatMap((id) => LANGS.flatMap((lang) => {
     const path = routeById(id as RouteId).paths[lang];
     return path ? [{ id, lang, path }] : [];
   }));
 
-  it('has the 40 pages of guide, 15 in en and es and 10 in pt, read from the registries', () => {
-    expect(pages).toHaveLength(40);
-    expect(LANGS.map((lang) => pages.filter((page) => page.lang === lang).length)).toEqual([15, 10, 15]);
+  // F19b (DECISOES § 796): 40 before; the four file guides in three languages and the three money guides in two (the QR
+  // code guide makes them 61: 23, 15 and 23).
+  it('has the 58 pages of guide, 22 in en and es and 14 in pt, read from the registries', () => {
+    expect(pages).toHaveLength(58);
+    expect(LANGS.map((lang) => pages.filter((page) => page.lang === lang).length)).toEqual([22, 14, 22]);
   });
 
   it('leads each guide to the guides hub of its language, in the HTML and in the BreadcrumbList (position 2)', () => {

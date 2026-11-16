@@ -4,7 +4,7 @@ import { TEXTS } from '../../src/i18n/texts.ts';
 import { HEALTH_HUB_ID, HOME_MONEY_IDS, HOUSE_HUB_ID, LIFE_HUB_IDS } from '../../src/tools/calc/registry.ts';
 import { IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
 import { PDF_HUB_ID, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
-import { GUIDES_HUB_ID } from '../../src/tools/guides/registry.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID } from '../../src/tools/guides/registry.ts';
 import { newestIn } from '../../src/platform/changelog.ts';
 import { describedViolations } from './lib/axe.ts';
 import { dismissCookies } from './lib/page.ts';
@@ -43,7 +43,8 @@ function footerLinks(lang: Lang): string[] {
     pagePath(moneyHubId(lang), lang) ?? '', ...exists(HOME_MONEY_IDS[lang]),
     ...(lang === 'en' ? [pagePath(HOUSE_HUB_ID, 'en') ?? '', ...exists(LIFE_HUB_IDS.house), pagePath(HEALTH_HUB_ID, 'en') ?? '', ...exists(LIFE_HUB_IDS.health)] : []),
     pagePath(QR_ID, lang) ?? '',
-    guidesHub, ...(lang === 'pt' ? ['image', 'pdf'] : ['image', 'pdf', 'money']).map((group) => `${guidesHub}#${group}`),
+    // F19b (DECISOES § 786 and § 796): the Utilities group, after PDF, once the QR code has a guide.
+    guidesHub, ...['image', 'pdf', ...(FILE_GUIDE_IDS.some((id) => FILE_GUIDES[id].hub === 'utilities') ? ['util'] : []), ...(lang === 'pt' ? [] : ['money'])].map((group) => `${guidesHub}#${group}`),
     ...(['about', 'whats-new', 'how-it-works', 'privacy', 'terms', 'licenses', 'contact'] as const).map((id) => pathFor(id, lang)),
     `${pathFor('whats-new', lang)}#${newestIn(lang).id}`,
   ];
