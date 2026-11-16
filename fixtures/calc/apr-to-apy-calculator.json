@@ -2,11 +2,11 @@
   "calculator": "apr-to-apy-calculator",
   "oracle": {
     "script": "scripts/oracle/calc.py",
-    "sha256": "137e9380763616e99b827ce915c478aae3a44079e289f26ec435c8a850949ab0",
+    "sha256": "a42b86bc3e09e2cb877d5f34512faf7c44293ae6977e0c90c0baec34fb3a7b5a",
     "python": "3.13.18",
-    "numpy": "2.5.4",
+    "numpy": "2.5.5",
     "numpyFinancial": "1.1.0",
-    "date": "2026-11-01"
+    "date": "2026-11-16"
   },
   "units": {
     "money": "cents",
@@ -15,6 +15,10 @@
   },
   "cases": [
     {"id":"page-example","source":"page-example","full":false,"input":{"rate":50000,"compounding":365,"direction":"apr-to-apy"},"expected":{"result":513,"table":[[1,500],[2,506],[4,509],[12,512],[365,513]]}},
+    {"id":"guide-apr-vs-apy","source":"guide:apr-vs-apy","full":false,"input":{"rate":50000,"compounding":365,"direction":"apr-to-apy"},"expected":{"result":513,"table":[[1,500],[2,506],[4,509],[12,512],[365,513]]}},
+    {"id":"guide-apr-vs-apy-back","source":"guide:apr-vs-apy","full":false,"input":{"rate":50000,"compounding":365,"direction":"apy-to-apr"},"expected":{"result":488,"table":[[1,500],[2,494],[4,491],[12,489],[365,488]]}},
+    {"id":"guide-apr-vs-apy-1","source":"guide:apr-vs-apy","full":false,"input":{"rate":10000,"compounding":365,"direction":"apr-to-apy"},"expected":{"result":101,"table":[[1,100],[2,100],[4,100],[12,100],[365,101]]}},
+    {"id":"guide-apr-vs-apy-10","source":"guide:apr-vs-apy","full":false,"input":{"rate":100000,"compounding":365,"direction":"apr-to-apy"},"expected":{"result":1052,"table":[[1,1000],[2,1025],[4,1038],[12,1047],[365,1052]]}},
     {"id":"grid-001","source":"grid","full":false,"input":{"rate":0,"compounding":1,"direction":"apr-to-apy"},"expected":{"result":0,"table":[[1,0],[2,0],[4,0],[12,0],[365,0]]}},
     {"id":"grid-002","source":"grid","full":false,"input":{"rate":0,"compounding":1,"direction":"apy-to-apr"},"expected":{"result":0,"table":[[1,0],[2,0],[4,0],[12,0],[365,0]]}},
     {"id":"grid-003","source":"grid","full":false,"input":{"rate":0,"compounding":2,"direction":"apr-to-apy"},"expected":{"result":0,"table":[[1,0],[2,0],[4,0],[12,0],[365,0]]}},

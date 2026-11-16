@@ -4,7 +4,10 @@ import type { GuideTexts } from '../types.ts';
 export default {
   title: "APR o APY | FileOrca",
   description: "Por qué la misma tasa rinde más cuantas más veces se capitaliza, con los números.",
-  words: { head: ["Caso"] },
+  words: {
+    head: ['Capitalización', 'Veces al año', 'APY de una APR del {rate}', 'Por encima de la APR'],
+    compounding: ['Anual', 'Semestral', 'Trimestral', 'Mensual', 'Diaria'],
+  },
   h1: "APR o APY",
   lead: "Por qué la misma tasa rinde más cuantas más veces se capitaliza, con los números.",
   intro: ["Esta guía se está escribiendo."],

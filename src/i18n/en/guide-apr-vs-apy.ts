@@ -4,7 +4,10 @@ import type { GuideTexts } from '../types.ts';
 export default {
   title: "APR vs APY | FileOrca",
   description: "Why the same rate gives a higher yield the more often it compounds, with the numbers.",
-  words: { head: ["Case"] },
+  words: {
+    head: ['Compounding', 'Times a year', 'APY of a {rate} APR', 'Above the APR'],
+    compounding: ['Yearly', 'Twice a year', 'Quarterly', 'Monthly', 'Daily'],
+  },
   h1: "APR vs APY",
   lead: "Why the same rate gives a higher yield the more often it compounds, with the numbers.",
   intro: ["This guide is being written."],

@@ -4,7 +4,7 @@ import type { GuideTexts } from '../types.ts';
 export default {
   title: "Pago mínimo de la tarjeta de crédito: por qué tarda tanto | FileOrca",
   description: "Qué hace con el saldo un pago apenas mayor que los intereses, al lado de pagos fijos más grandes.",
-  words: { head: ["Caso"] },
+  words: { head: ['Pago al mes', 'Primer mes, al saldo', 'Se termina de pagar en', 'Intereses totales'] },
   h1: "Pago mínimo de la tarjeta de crédito: por qué tarda tanto",
   lead: "Qué hace con el saldo un pago apenas mayor que los intereses, al lado de pagos fijos más grandes.",
   intro: ["Esta guía se está escribiendo."],
