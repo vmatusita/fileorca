@@ -8,8 +8,8 @@
 // loses a line was 0.046 on Windows and 0.257 on the Linux of the CI, on the same page; DECISOES § 305).
 import { expect, test, type Browser, type Page } from '@playwright/test';
 import { guidePathIn, moneyPage, type CalcPageId, type GuideId } from '../../src/tools/calc/registry.ts';
-import { FILE_GUIDES, GUIDES_HUB_ID, type FileGuideId } from '../../src/tools/guides/registry.ts';
-import { LANGS, routeById } from '../../src/i18n/routes.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID, type FileGuideId } from '../../src/tools/guides/registry.ts';
+import { LANGS, QR_ID, routeById } from '../../src/i18n/routes.ts';
 import { useTestBuild } from './lib/test-build.ts';
 
 // Each width with the pages whose trail sat on the edge of a row there, in the sweeps of every page (before the
@@ -80,6 +80,17 @@ const F11_EDGE: Record<number, string[]> = {
   ],
 };
 for (const [width, paths] of Object.entries(F11_EDGE)) {
+  const pages = CASES[Number(width)] ?? [];
+  for (const path of paths) if (!pages.includes(path)) pages.push(path);
+}
+// F19b (DECISOES § 797): a sample of the new guides, with no sweep of their own: the file guide with the longest English name
+// (Sign a PDF without printing) at 360 px, the money guide with the longest Spanish name (the minimum payment of a credit
+// card) at 393 px, and every guide of the QR code generator, read from the registry, at 360 px (none until it has one).
+const F19B_SAMPLE: Record<number, string[]> = {
+  360: [FILE_GUIDES['guides-sign-pdf-without-printing'].paths.en, ...FILE_GUIDE_IDS.filter((id) => FILE_GUIDES[id].tool === QR_ID).map((id) => FILE_GUIDES[id].paths.en)],
+  393: [spanishGuide('guides-credit-card-minimum-payment')],
+};
+for (const [width, paths] of Object.entries(F19B_SAMPLE)) {
   const pages = CASES[Number(width)] ?? [];
   for (const path of paths) if (!pages.includes(path)) pages.push(path);
 }

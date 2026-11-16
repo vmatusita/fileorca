@@ -19,12 +19,18 @@ import { dismissCookies } from './lib/page.ts';
 const COMMON = { en: enCommon, pt: ptCommon, es: esCommon } as const;
 const HUB_TEXTS = { en: enGuides, pt: ptGuides, es: esGuides } as const;
 const KIND: Record<Lang, string> = { en: 'Guide', pt: 'Guia', es: 'Guía' };
-/** The guides of each group in a language, by the registries alone: the file guides by their hub, the money ones where they exist. */
-const groupsOf = (lang: Lang): Record<'image' | 'pdf' | 'money', string[]> => ({
+/**
+ * The guides of each group in a language, by the registries alone: the file guides by their hub, the money ones where they
+ * exist. F19b (DECISOES § 786 and § 796): the Utilities group, the guides of the QR code generator.
+ */
+const groupsOf = (lang: Lang): Record<'image' | 'pdf' | 'util' | 'money', string[]> => ({
   image: FILE_GUIDE_IDS.filter((id) => FILE_GUIDES[id].hub === 'image-tools').map((id) => FILE_GUIDES[id].paths[lang]),
   pdf: FILE_GUIDE_IDS.filter((id) => FILE_GUIDES[id].hub === 'pdf-tools').map((id) => FILE_GUIDES[id].paths[lang]),
+  util: FILE_GUIDE_IDS.filter((id) => FILE_GUIDES[id].hub === 'utilities').map((id) => FILE_GUIDES[id].paths[lang]),
   money: GUIDE_IDS.flatMap((id) => guidePathIn(id, lang) ?? []),
 });
+/** The groups the hub shows, in order: Utilities only once it has a guide; money always (the note of pt). */
+const shownOf = (lang: Lang): ('image' | 'pdf' | 'util' | 'money')[] => ['image', 'pdf', ...(groupsOf(lang).util.length > 0 ? (['util'] as const) : []), 'money'];
 
 for (const lang of LANGS) {
   const path = routeById(GUIDES_HUB_ID).paths[lang] ?? '/guides/';
@@ -34,8 +40,10 @@ for (const lang of LANGS) {
     expect((await page.goto(path))?.status(), path).toBe(200);
     const main = page.locator('main');
     const groups = groupsOf(lang);
-    const all = [...groups.image, ...groups.pdf, ...groups.money];
-    expect(all.length, lang).toBe(lang === 'pt' ? 10 : 15);
+    const all = [...groups.image, ...groups.pdf, ...groups.util, ...groups.money];
+    // F19b (DECISOES § 796): 10 and 15 before; 14 and 22 with the four file guides and three money guides of the F19b (15
+    // and 23 with the QR code guide).
+    expect(all.length, lang).toBe(lang === 'pt' ? 14 : 22);
     await expect(main.locator('a.fo-guidecard')).toHaveCount(all.length);
     for (const [group, paths] of Object.entries(groups)) {
       const cards = main.locator(`section#${group} a.fo-guidecard`);
@@ -64,14 +72,17 @@ for (const lang of LANGS) {
     await expect(page.locator('footer .fo-footer__more a[aria-current="page"]')).toHaveAttribute('href', path);
   });
 
-  test(`${lang}: the shortcuts lead to the three groups, with 48 px targets, and the cards keep their size at 360 and 1280 px`, async ({ page }) => {
+  test(`${lang}: the shortcuts lead to the groups, with 48 px targets, and the cards keep their size at 360 and 1280 px`, async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 740 });
     expect((await page.goto(path))?.status(), path).toBe(200);
     await dismissCookies(page);
     const jump = page.getByRole('navigation', { name: t.jumpLabel });
     const chips = jump.getByRole('link');
-    await expect(chips).toHaveText([t.groups.image.jump, t.groups.pdf.jump, t.groups.money.jump]);
-    expect(await chips.evaluateAll((links) => links.map((link) => link.getAttribute('href')))).toEqual(['#image', '#pdf', '#money']);
+    // F19b (DECISOES § 796): the groups the hub shows (Utilities once the QR code has a guide), and no section of another.
+    const shown = shownOf(lang);
+    await expect(chips).toHaveText(shown.map((group) => t.groups[group].jump));
+    expect(await chips.evaluateAll((links) => links.map((link) => link.getAttribute('href')))).toEqual(shown.map((group) => `#${group}`));
+    if (!shown.includes('util')) await expect(page.locator('main section#util')).toHaveCount(0);
     for (const chip of await chips.all()) expect((await chip.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(48);
     // The first card's name is above the fold of a phone (360 × 740), in the three languages (§ 364).
     const first = page.locator('main a.fo-guidecard .fo-guidecard__name').first();

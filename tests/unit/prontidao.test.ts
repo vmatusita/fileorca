@@ -414,7 +414,8 @@ describe('gate:prontidao, (c) nenhuma página em breve', () => {
     // F7 (decision 9; DECISOES § 259): and the 11 home and health calculators and the QR code generator.
     // F17 (DECISOES § 716): 13 image pages, with AVIF to JPG and Convert to WebP (11 before). F18 (DECISOES § 743): 15,
     // with Remove EXIF data and Flip image, and the 2 PDF presets after the PDF tools.
-    expect(site.searchIds).toHaveLength(15 + 18 + brazilian.length + 5 + PDF_TOOL_IDS.length + PDF_PRESET_IDS.length + FILE_GUIDE_IDS.length + 11 + 1);
+    // F19b (DECISOES § 796): 8 money guides (5 before).
+    expect(site.searchIds).toHaveLength(15 + 18 + brazilian.length + 8 + PDF_TOOL_IDS.length + PDF_PRESET_IDS.length + FILE_GUIDE_IDS.length + 11 + 1);
   });
 
   it('builds the F7 part of the real site from the calculator registry: the home cards, the two hubs and the search, home and health in English only (F7, decision 9)', () => {
