@@ -348,7 +348,7 @@ export default {
     "guides-webp-vs-avif-vs-jpg": {
       name: "WebP, AVIF ou JPG",
       description: "Quanto as mesmas fotos pesam em cada formato, e quando cada um é o que serve.",
-      synonyms: ["guia", "jpeg", "formato de imagem"],
+      synonyms: ["guia", "webp ou jpeg", "formato de imagem"],
     },
     "guides-sign-pdf-without-printing": {
       name: "Como assinar um PDF sem imprimir",
