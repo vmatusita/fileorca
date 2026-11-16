@@ -266,6 +266,7 @@ const FEMININE: Record<'pt' | 'es', Partial<Record<FileGuideId, readonly string[
     'guides-jpg-vs-png': ['photos'],
     'guides-remove-location-from-photos': ['withGps', 'withCamera', 'withDate', 'removeExifDataIdenticalChromium', 'removeExifDataOrientationChromium', 'photos', 'browsersSameSize', 'candidates'],
     'guides-photos-to-one-pdf': ['photos'],
+    'guides-compress-photo-for-online-form': ['photos', 'at500KeptChromium'],
   },
   es: {
     'guides-heic-to-jpg-on-windows': ['identicalBrowsers'],
@@ -274,6 +275,7 @@ const FEMININE: Record<'pt' | 'es', Partial<Record<FileGuideId, readonly string[
     'guides-jpg-vs-png': ['photos', 'transparentCornersBefore', 'transparentCornersWhiteChromium'],
     'guides-remove-location-from-photos': ['withGps', 'withCamera', 'withDate', 'removeExifDataIdenticalChromium', 'removeExifDataOrientationChromium', 'photos', 'browsersSameSize', 'candidates'],
     'guides-photos-to-one-pdf': ['photos'],
+    'guides-compress-photo-for-online-form': ['photos', 'at500KeptChromium'],
   },
 };
 
