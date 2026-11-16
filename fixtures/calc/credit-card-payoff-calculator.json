@@ -2,11 +2,11 @@
   "calculator": "credit-card-payoff-calculator",
   "oracle": {
     "script": "scripts/oracle/calc.py",
-    "sha256": "137e9380763616e99b827ce915c478aae3a44079e289f26ec435c8a850949ab0",
+    "sha256": "a42b86bc3e09e2cb877d5f34512faf7c44293ae6977e0c90c0baec34fb3a7b5a",
     "python": "3.13.18",
-    "numpy": "2.5.4",
+    "numpy": "2.5.5",
     "numpyFinancial": "1.1.0",
-    "date": "2026-11-01"
+    "date": "2026-11-16"
   },
   "units": {
     "money": "cents",
@@ -15,6 +15,15 @@
   },
   "cases": [
     {"id":"page-example","source":"page-example","full":true,"input":{"balance":650000,"apr":229900,"mode":"payment","payment":25000},"expected":{"payment":25000,"months":37,"count":37,"totalInterest":258238,"totalPaid":908238,"lastPayment":8238,"yearEnd":[482512,272192,8083,0],"rows":[[1,25000,12453,12547,637453],[2,25000,12213,12787,624666],[3,25000,11968,13032,611634],[4,25000,11718,13282,598352],[5,25000,11463,13537,584815],[6,25000,11204,13796,571019],[7,25000,10940,14060,556959],[8,25000,10670,14330,542629],[9,25000,10396,14604,528025],[10,25000,10116,14884,513141],[11,25000,9831,15169,497972],[12,25000,9540,15460,482512],[13,25000,9244,15756,466756],[14,25000,8942,16058,450698],[15,25000,8635,16365,434333],[16,25000,8321,16679,417654],[17,25000,8002,16998,400656],[18,25000,7676,17324,383332],[19,25000,7344,17656,365676],[20,25000,7006,17994,347682],[21,25000,6661,18339,329343],[22,25000,6310,18690,310653],[23,25000,5952,19048,291605],[24,25000,5587,19413,272192],[25,25000,5215,19785,252407],[26,25000,4836,20164,232243],[27,25000,4449,20551,211692],[28,25000,4056,20944,190748],[29,25000,3654,21346,169402],[30,25000,3245,21755,147647],[31,25000,2829,22171,125476],[32,25000,2404,22596,102880],[33,25000,1971,23029,79851],[34,25000,1530,23470,56381],[35,25000,1080,23920,32461],[36,25000,622,24378,8083],[37,8238,155,8083,0]]}},
+    {"id":"guide-card","source":"guide:credit-card-minimum-payment","full":false,"input":{"balance":650000,"apr":229900,"mode":"payment","payment":25000},"expected":{"payment":25000,"months":37,"count":37,"totalInterest":258238,"totalPaid":908238,"lastPayment":8238,"yearEnd":[482512,272192,8083,0]}},
+    {"id":"guide-card-interest-only","source":"guide:credit-card-minimum-payment","full":false,"input":{"balance":650000,"apr":229900,"mode":"payment","payment":12453},"expected":{"error":"too-low","minimum":12454}},
+    {"id":"guide-card-barely","source":"guide:credit-card-minimum-payment","full":false,"input":{"balance":650000,"apr":229900,"mode":"payment","payment":12500},"expected":{"payment":12500,"months":295,"count":295,"totalInterest":3026056,"totalPaid":3676056,"lastPayment":1056,"yearEnd":[649370,648580,647588,646340,644777,642812,640346,637249,633361,628477,622345,614646,604977,592834,577587,558440,534395,504202,466287,418675,358887,283809,189530,71141,0]}},
+    {"id":"guide-card-130","source":"guide:credit-card-minimum-payment","full":false,"input":{"balance":650000,"apr":229900,"mode":"payment","payment":13000},"expected":{"payment":13000,"months":167,"count":167,"totalInterest":1520277,"totalPaid":2170277,"lastPayment":12277,"yearEnd":[642697,633526,622010,607549,589390,566589,537954,501996,456843,400142,328941,239530,127254,0]}},
+    {"id":"guide-card-150","source":"guide:credit-card-minimum-payment","full":false,"input":{"balance":650000,"apr":229900,"mode":"payment","payment":15000},"expected":{"payment":15000,"months":94,"count":94,"totalInterest":751550,"totalPaid":1401550,"lastPayment":6550,"yearEnd":[616000,573304,519690,452364,367821,261657,128344,0]}},
+    {"id":"guide-card-200","source":"guide:credit-card-minimum-payment","full":false,"input":{"balance":650000,"apr":229900,"mode":"payment","payment":20000},"expected":{"payment":20000,"months":52,"count":52,"totalInterest":377149,"totalPaid":1027149,"lastPayment":7149,"yearEnd":[549257,422748,263887,64399,0]}},
+    {"id":"guide-card-300","source":"guide:credit-card-minimum-payment","full":false,"input":{"balance":650000,"apr":229900,"mode":"payment","payment":30000},"expected":{"payment":30000,"months":29,"count":29,"totalInterest":197880,"totalPaid":847880,"lastPayment":7880,"yearEnd":[415768,121633,0]}},
+    {"id":"guide-card-500","source":"guide:credit-card-minimum-payment","full":false,"input":{"balance":650000,"apr":229900,"mode":"payment","payment":50000},"expected":{"payment":50000,"months":16,"count":16,"totalInterest":104706,"totalPaid":754706,"lastPayment":4706,"yearEnd":[148793,0]}},
+    {"id":"guide-card-three-years","source":"guide:credit-card-minimum-payment","full":false,"input":{"balance":650000,"apr":229900,"mode":"months","months":36},"expected":{"payment":25158,"months":36,"count":36,"totalInterest":255690,"totalPaid":905690,"lastPayment":25160,"yearEnd":[480404,267435,0]}},
     {"id":"target-example","source":"grid","full":false,"input":{"balance":650000,"apr":229900,"mode":"months","months":24},"expected":{"payment":34039,"months":24,"count":24,"totalInterest":166947,"totalPaid":816947,"lastPayment":34050,"yearEnd":[361852,0]}},
     {"id":"barely-covers","source":"grid","full":false,"input":{"balance":2500000,"apr":599900,"mode":"payment","payment":124980},"expected":{"payment":124980,"months":246,"count":246,"totalInterest":28159737,"totalPaid":30659737,"lastPayment":39637,"yearEnd":[2499988,2499966,2499925,2499852,2499720,2499484,2499062,2498301,2496935,2494483,2490080,2482171,2467970,2442471,2396680,2314456,2166810,1901680,1425592,570690,0]}},
     {"id":"grid-001","source":"grid","full":false,"input":{"balance":50000,"apr":0,"mode":"payment","payment":2500},"expected":{"payment":2500,"months":20,"count":20,"totalInterest":0,"totalPaid":50000,"lastPayment":2500,"yearEnd":[20000,0]}},
