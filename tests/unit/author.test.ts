@@ -1,8 +1,8 @@
 // The authorship of the guides and the calculators (F19a, decision 6; DECISOES § 763), over dist/ after `pnpm build`:
-//  - the name in every "Reviewed by" line (the 10 file guides in en, pt and es, the 5 money guides in en and es, every
+//  - the name in every "Reviewed by" line (the file guides in en, pt and es, the money guides in en and es, every
 //    calculator and the hubs of the calculators) is a link to the About of the language, and the signature of a file guide
 //    keeps its one <time> (tests/unit/guide-page.test.ts);
-//  - the 40 guides end with the author box right before the related pages: the name with the link, who he is, and how the
+//  - every guide ends with the author box right before the related pages: the name with the link, who he is, and how the
 //    numbers of the guide were obtained (a file guide: measured on the day of data/guides-measured.json; a money guide:
 //    worked out by the calculator inside it). The box is out of the word count of a file guide, which checkFileGuide
 //    still counts from 800 to 1,500 words without it, and it has the order of checkFileGuide.
@@ -53,8 +53,9 @@ function signedMoneyPages(): string[] {
 const langOf = (path: string): Lang => (path.startsWith('/pt/') ? 'pt' : path.startsWith('/es/') ? 'es' : 'en');
 
 describe.runIf(BUILT)('the name of the author links to the About of the language (DECISOES § 763)', () => {
-  it('in the signature of the 30 file guides, which keeps its one date', () => {
-    expect(FILE_GUIDE_PAGES).toHaveLength(30);
+  // F19b (DECISOES § 796): 42 pages with the four file guides of the F19b (30 before; 45 with the QR code guide).
+  it('in the signature of the 42 file guides, which keeps its one date', () => {
+    expect(FILE_GUIDE_PAGES).toHaveLength(42);
     const wrong: string[] = [];
     for (const { lang, path } of FILE_GUIDE_PAGES) {
       const signature = mainOf(html(path)).querySelector('.fo-top .fo-reviewed');
@@ -82,8 +83,8 @@ describe.runIf(BUILT)('the name of the author links to the About of the language
   });
 });
 
-describe.runIf(BUILT)('the author box at the end of the 40 guides (DECISOES § 763)', () => {
-  it('is in the 30 file guides, right before the related pages, with the day of the measurement', () => {
+describe.runIf(BUILT)('the author box at the end of every guide (DECISOES § 763)', () => {
+  it('is in every file guide, right before the related pages, with the day of the measurement', () => {
     const wrong: string[] = [];
     for (const { id, lang, path } of FILE_GUIDE_PAGES) {
       const source = html(path);
@@ -117,8 +118,9 @@ describe.runIf(BUILT)('the author box at the end of the 40 guides (DECISOES § 7
     expect(wrong).toEqual([]);
   });
 
-  it('is in the 10 money guides, right before the related calculators, saying the calculator worked the numbers out', () => {
-    expect(MONEY_GUIDE_PAGES).toHaveLength(10);
+  // F19b (DECISOES § 796): the eight money guides in English and Spanish (10 pages before).
+  it('is in the 16 money guides, right before the related calculators, saying the calculator worked the numbers out', () => {
+    expect(MONEY_GUIDE_PAGES).toHaveLength(16);
     const wrong: string[] = [];
     for (const { lang, path } of MONEY_GUIDE_PAGES) {
       const main = mainOf(html(path));
