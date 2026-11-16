@@ -6,7 +6,7 @@
 import type { GuideTexts } from '../types.ts';
 
 export default {
-  title: 'Cuánta casa puedo pagar: qué límite de ingreso fija el precio',
+  title: 'Cuánta casa puedo pagar con mi ingreso: qué límite fija el precio',
   description: 'Cómo dos partes de tu ingreso se convierten en el precio de una vivienda, cuál de ellas lo fija y cómo lo mueven tus otras deudas, con un ejemplo.',
   words: {
     head: ['Otras deudas al mes', 'Límite que fija el precio', 'Margen para la vivienda', 'Precio de vivienda que puedes pagar'],
@@ -14,7 +14,7 @@ export default {
     back: 'Límite de deuda total, {rate}',
     both: 'Los dos límites',
   },
-  h1: 'Cuánta casa puedo pagar',
+  h1: 'Cuánta casa puedo pagar con mi ingreso',
   lead: 'Dos partes de tu ingreso ponen un tope al pago de la vivienda. La que deja menos margen fija el precio.',
   intro: [
     'El precio de una vivienda parte de un pago mensual, y el pago parte de tu ingreso. La calculadora de abajo fija dos límites, cada uno una parte de tu ingreso mensual bruto: el límite de vivienda, solo para la vivienda, y el límite de deuda total, para la vivienda y tus otras deudas. El que deja menos margen limita el pago, y el pago limita el préstamo.',

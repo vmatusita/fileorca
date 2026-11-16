@@ -4,13 +4,13 @@ import type { GuideTexts } from '../types.ts';
 // the English text; every rate is a {placeholder} the engine works out at build (src/tools/calc/guides.ts, aprVsApy) and
 // writes in the Spanish format (5.13 %, with the no-break space); the words of the table are the front O's.
 export default {
-  title: 'APR o APY: lo que la capitalización le suma a una tasa',
+  title: 'APR o APY: en qué se diferencian y qué suma la capitalización',
   description: 'Lo que cada capitalización le suma a una misma APR, calculado con una tasa, y por qué la APR de un depósito no es la APR de un préstamo.',
   words: {
     head: ['Capitalización', 'Veces al año', 'APY de una APR del {rate}', 'Por encima de la APR'],
     compounding: ['Anual', 'Semestral', 'Trimestral', 'Mensual', 'Diaria'],
   },
-  h1: 'APR o APY',
+  h1: 'APR o APY: en qué se diferencian',
   lead: 'La APR es la tasa antes de capitalizar; el APY, lo que rinde en un año. Esta es la diferencia con cada capitalización.',
   intro: [
     'Una cuenta de depósito trae dos tasas que suenan parecidas. La tasa de interés, que la calculadora de abajo llama tasa porcentual anual (APR), es la tasa anual antes de capitalizar. El rendimiento porcentual anual (APY) es lo que el dinero gana en un año cuando los intereses sumados al saldo generan sus propios intereses. Ambas son porcentajes anuales, y por eso es fácil confundirlas.',
