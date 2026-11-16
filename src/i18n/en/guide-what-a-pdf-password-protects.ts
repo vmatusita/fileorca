@@ -28,7 +28,20 @@ export default {
   tableHeading: "The measurement",
   measuredIntro: "This guide is being written.",
   measuredNote: "Measured on {date}.",
-  tables: [],
+  // F19b (front M1): the shape of the tables, which the front E rewrites in words and keeps.
+  tables: [
+    {
+      heading: "Three PDFs with a password",
+      caption: "Three PDFs protected by Protect PDF: their pages, the file before and after, and the bytes the encryption added",
+      head: ["PDF", "Pages", "Before", "After", "Added"],
+    },
+    {
+      heading: "Restrictions without a password",
+      caption: "The PDF with restrictions and no password to open, as it came and after Unlock PDF, beside a PDF after Protect PDF: the file, whether a reader opened it with no password, and the actions it blocks",
+      head: ["File", "Size", "Opens with no password", "Actions blocked"],
+      labels: ["Restrictions only, as it came", "The same PDF after Unlock PDF", "A PDF after Protect PDF"],
+    },
+  ],
   sourcesHeading: "Sources",
   sources: [],
   facts: {},
