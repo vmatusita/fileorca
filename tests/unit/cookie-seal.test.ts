@@ -10,12 +10,21 @@ import { listFiles } from '../../scripts/lib/dist.ts';
 import enCommon from '../../src/i18n/en/common.ts';
 import esCommon from '../../src/i18n/es/common.ts';
 import ptCommon from '../../src/i18n/pt/common.ts';
+import { QR_ID } from '../../src/i18n/routes.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
+import qrEn from '../../src/tools/qr-code-generator/i18n/en.ts';
+import qrPt from '../../src/tools/qr-code-generator/i18n/pt.ts';
+import qrEs from '../../src/tools/qr-code-generator/i18n/es.ts';
 
 // FO_COOKIE_DIST points the test at another build folder (the proof that it fails on the dist/ of the starting point).
 const DIST = process.env['FO_COOKIE_DIST'] ?? 'dist';
 const BUILT = existsSync(join(DIST, 'index.html'));
 const COMMON = { en: enCommon, pt: ptCommon, es: esCommon } as const;
 const HUBS = ['/money-calculators/', '/pt/calculadoras-financeiras/', '/es/calculadoras-financieras/', '/home-calculators/', '/health-calculators/'];
+// F19b (DECISOES § 786 and § 796): a guide that embeds the QR code generator takes no file, so its notice says the seal of
+// the QR code (its text never leaves the device), like the QR page; the image and PDF guides keep the seal of the files.
+const QR_SEAL = { en: qrEn.seal, pt: qrPt.seal, es: qrEs.seal } as const;
+const QR_GUIDE_PATHS = new Set(FILE_GUIDE_IDS.filter((id) => FILE_GUIDES[id].tool === QR_ID).flatMap((id) => Object.values(FILE_GUIDES[id].paths)));
 
 const text = (html: string): string =>
   html
@@ -42,7 +51,7 @@ describe.runIf(BUILT)('the cookie notice repeats the seal of its page', () => {
       const lang = (/<html[^>]*data-lang="(en|pt|es)"/.exec(html)?.[1] ?? 'en') as keyof typeof COMMON;
       const common = COMMON[lang];
       const own = /<span class="fo-seal"[^>]*>(.*?)<\/span>/s.exec(html)?.[1];
-      const seal = own ? text(own) : HUBS.includes(path) ? common.calcSeal : common.seal;
+      const seal = own ? text(own) : HUBS.includes(path) ? common.calcSeal : QR_GUIDE_PATHS.has(path) ? QR_SEAL[lang] : common.seal;
       const notice = text(/<p id="fo-cookie-text"[^>]*>(.*?)<\/p>/s.exec(html)?.[1] ?? '');
       const expected = `${common.cookie.title} ${common.cookie.body} ${seal}. ${common.cookie.privacyLink}`;
       if (notice !== expected) wrong.push(`${path}: "${notice}" (esperado "${expected}")`);
