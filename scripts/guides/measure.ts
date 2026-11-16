@@ -92,8 +92,17 @@ const out: MeasuredFile = {
   measuredOn: stamp.date,
   environment: { os: osName(), node: process.version, browsers: { chromium: versions.chromium || previous?.environment.browsers.chromium || '', webkit: versions.webkit || previous?.environment.browsers.webkit || '' } },
   tolerance: TOLERANCE,
-  guides: Object.fromEntries(FILE_GUIDE_IDS.map((id) => [id, guides[id] ?? previous?.guides[id]])) as Record<FileGuideId, GuideMeasure>,
+  guides: Object.fromEntries(FILE_GUIDE_IDS.flatMap((id) => {
+    const measure = guides[id] ?? previous?.guides[id];
+    return measure ? [[id, measure]] : [];
+  })) as Record<FileGuideId, GuideMeasure>,
 };
-for (const id of FILE_GUIDE_IDS) if (!out.guides[id]) throw new Error(`${id} has no measurement`);
+// F19b: a guide added to FILE_GUIDE_IDS that was never measured waits for its own --only run, one guide at a time, and
+// the file keeps every guide it already had (a guide the file had is never dropped: it comes back from `previous`).
+// tests/unit/guides-measured.test.ts fails while a guide is still out of the file.
+const waiting = FILE_GUIDE_IDS.filter((id) => !out.guides[id]);
+if (waiting.length > 0 && !only) throw new Error(`${waiting.join(', ')}: no measurement`);
+if (waiting.length > 0) console.log(`\nstill to measure, each with its own --only: ${waiting.join(', ')}`);
 writeFileSync(OUT, `${JSON.stringify(out, null, 2)}\n`);
-console.log(`\n${OUT}: ${FILE_GUIDE_IDS.length} guides, ${FILE_GUIDE_IDS.reduce((total, id) => total + Object.keys(out.guides[id].numbers).length, 0)} numbers, in ${((Date.now() - started) / 1000).toFixed(1)} s`);
+const measuredIds = FILE_GUIDE_IDS.filter((id) => out.guides[id]);
+console.log(`\n${OUT}: ${measuredIds.length} guides, ${measuredIds.reduce((total, id) => total + Object.keys(out.guides[id].numbers).length, 0)} numbers, in ${((Date.now() - started) / 1000).toFixed(1)} s`);

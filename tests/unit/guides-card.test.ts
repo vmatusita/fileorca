@@ -31,11 +31,13 @@ const SPEC_N: Record<FileGuideId, number> = {
   'guides-split-pdf-file-size': 5,
   'guides-combine-pdfs-on-phone': 7,
   'guides-photos-to-one-pdf': 3,
-  // F19b, slice 1: the front M counts the files of each new guide.
-  'guides-compress-photo-for-online-form': 0,
-  'guides-webp-vs-avif-vs-jpg': 0,
-  'guides-sign-pdf-without-printing': 0,
-  'guides-what-a-pdf-password-protects': 0,
+  // F19b (front M1), counted from the plans of the run (docs/relatorios/fase-19b-plano.md, section 3): the three phone
+  // photos; the photos and the PNG with transparent corners; three PDFs and the PNG uploaded as the signature; three PDFs
+  // and the one locked by restrictions alone.
+  'guides-compress-photo-for-online-form': 3,
+  'guides-webp-vs-avif-vs-jpg': 4,
+  'guides-sign-pdf-without-printing': 4,
+  'guides-what-a-pdf-password-protects': 4,
 };
 /**
  * F19b (DECISOES § 786 and § 796): the distinct test texts of a guide that measured texts instead of files (the QR code
