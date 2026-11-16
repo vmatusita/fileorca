@@ -1,15 +1,19 @@
-// The guides of the guides hub (F11, decision 5; DECISOES § 364), in its three groups, always read from the registries:
-// the file guides of FILE_GUIDES in the order of FILE_GUIDE_IDS, in the group of their hub (Image or PDF), then the money
+// The guides of the guides hub (F11, decision 5; DECISOES § 364), in its groups, always read from the registries:
+// the file guides of FILE_GUIDES in the order of FILE_GUIDE_IDS, in the group of their hub (Image, PDF or, since the F19b,
+// Utilities), then the money
 // guides of GUIDES in the order of GUIDE_IDS, each only in the languages where the route map has its page (the money guides
 // are not in Portuguese). The names and descriptions are those of the guide cards (common.fileGuides and common.guides).
 // Plain data, importable by Node (the gates and tests): no import.meta.glob here, and never import it from an island.
 import { LANGS, pagePath, type Lang } from '../../i18n/routes.ts';
 import { TEXTS } from '../../i18n/texts.ts';
 import { GUIDE_IDS, type GuideId } from '../calc/registry.ts';
-import { FILE_GUIDES, FILE_GUIDE_IDS, type FileGuideId } from './registry.ts';
+import { FILE_GUIDE_IDS, fileGuideGroup, type FileGuideId } from './registry.ts';
 
-/** The groups of the hub, in the order of the page; their section ids are the anchors #image, #pdf and #money. */
-export const HUB_GROUPS = ['image', 'pdf', 'money'] as const;
+/**
+ * The groups of the hub, in the order of the page; their section ids are the anchors #image, #pdf, #util and #money. F19b
+ * (decision 4; DECISOES § 786): Utilities, the group of the QR code guides, after PDF, the last group of the file guides.
+ */
+export const HUB_GROUPS = ['image', 'pdf', 'util', 'money'] as const;
 export type HubGroup = (typeof HUB_GROUPS)[number];
 
 export interface HubGuide {
@@ -27,14 +31,14 @@ function blurb(card: { name: string; description: string } | undefined, id: stri
   return card;
 }
 
-/** Every guide of a language, in the order of the hub: the image group, the PDF group, then the money group. */
+/** Every guide of a language, in the order of the hub: the image group, the PDF group, the Utilities group, then money. */
 export function hubGuides(lang: Lang): HubGuide[] {
   const common = TEXTS[lang].common;
   const files = FILE_GUIDE_IDS.flatMap((id): HubGuide[] => {
     const path = pagePath(id, lang);
     if (!path) return [];
     const { name, description } = blurb(common.fileGuides?.[id], id, lang);
-    return [{ id, group: FILE_GUIDES[id].hub === 'pdf-tools' ? 'pdf' : 'image', path, name, description }];
+    return [{ id, group: fileGuideGroup(id), path, name, description }];
   });
   const money = GUIDE_IDS.flatMap((id): HubGuide[] => {
     const path = pagePath(id, lang);
@@ -64,4 +68,14 @@ for (const lang of LANGS) {
 /** The guides of one group of the hub in a language, in the order of the page (an empty list where the group has none). */
 export function hubGroup(group: HubGroup, lang: Lang): HubGuide[] {
   return hubGuides(lang).filter((guide) => guide.group === group);
+}
+
+/**
+ * The groups the hub shows in a language, in the order of the page: each group with a guide in the language, and the money
+ * group always, which in Portuguese is the note that leads to the Brazilian money calculators (DECISOES § 364). F19b
+ * (DECISOES § 786): any other group with no guide in the language is not shown, with no section and no shortcut (the
+ * Utilities group, until its first guide).
+ */
+export function shownGroups(lang: Lang): HubGroup[] {
+  return HUB_GROUPS.filter((group) => group === 'money' || hubGroup(group, lang).length > 0);
 }

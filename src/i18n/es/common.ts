@@ -276,7 +276,10 @@ export default {
     'home-affordability-calculator': {
       name: 'Calculadora de cuánta casa puedo pagar',
       description: 'Cuánta casa cabe en tu ingreso, con las reglas generales del 28 % y el 36 %.',
-      synonyms: ['cuánta casa puedo pagar', 'cuánta casa puedo comprar', 'comprar casa', 'relación deudas-ingresos', 'dti', 'ingreso', 'pago inicial', 'hipoteca'],
+      // F19b (DECISOES § 790): "cuánta casa puedo pagar" left the synonyms when it became the whole name of the guide that
+      // embeds this calculator (§ 180 and § 724: a synonym is never the name of another page); the name of the calculator
+      // still holds it, so the search finds the calculator right after the guide.
+      synonyms: ['cuánta casa puedo comprar', 'comprar casa', 'relación deudas-ingresos', 'dti', 'ingreso', 'pago inicial', 'hipoteca'],
     },
     'loan-amortization-calculator': {
       name: 'Calculadora de amortización',
@@ -399,7 +402,7 @@ export default {
     "guides-webp-vs-avif-vs-jpg": {
       name: "WebP, AVIF o JPG",
       description: "Cuánto pesan las mismas fotos en cada formato y cuándo conviene cada uno.",
-      synonyms: ["guía", "jpeg", "formato de imagen"],
+      synonyms: ["guía", "webp o jpeg", "formato de imagen"],
     },
     "guides-sign-pdf-without-printing": {
       name: "Cómo firmar un PDF sin imprimirlo",

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { LANGS, type Lang } from '../../src/i18n/routes.ts';
+import { LANGS, QR_ID, type Lang } from '../../src/i18n/routes.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS, type FileGuideId } from '../../src/tools/guides/registry.ts';
 import { IMAGE_PANEL_TEXTS } from '../../src/tools/image/texts.ts';
 import { PDF_PAGES } from '../../src/tools/pdf/registry.ts';
@@ -10,6 +10,17 @@ import { dismissCookies, hydrated, type TestFile } from './lib/page.ts';
 import { pdfFile } from './lib/pdf-tools.ts';
 import { parsePdf, strictPdf } from './lib/pdf.ts';
 import { displaySize } from './lib/jpeg.ts';
+import { soundPdf } from './lib/pdf-tools.ts';
+import { opensWithoutPassword, readWithPdfjs } from './lib/pdfjs-read.ts';
+import { qpdfEncryption } from '../../scripts/lib/qpdf.ts';
+import { START_KB } from '../../src/tools/compress-image/size.ts';
+import qrEn from '../../src/tools/qr-code-generator/i18n/en.ts';
+import qrPt from '../../src/tools/qr-code-generator/i18n/pt.ts';
+import qrEs from '../../src/tools/qr-code-generator/i18n/es.ts';
+import { PASSWORD, SIGNER, protectedName, signWithTypedName, signedName, typePasswordTwice } from './lib/guide-flows.ts';
+
+/** F19b: the texts of the QR code generator in each language (the words of its PNG button). */
+const QR_PANEL_TEXTS = { en: qrEn, pt: qrPt, es: qrEs } as const;
 
 // The tool each file guide embeds (prompt F5b, decision 7), in both browsers: the guide's own fixture goes in, the result
 // shows, the Download hands it over, and what comes out passes the checks the tool's own page passes (it opens, it is the
@@ -22,16 +33,25 @@ import { displaySize } from './lib/jpeg.ts';
 // the PDF of photos, the words of the panel) is read from the panel texts of that language.
 
 interface Case {
+  /** The guide's fixtures, chosen in the tool; none for a tool that takes text (the QR code generator, with `input`). */
   files: () => TestFile[];
+  /** F19b: what a person types into a tool that takes text instead of a file (the QR code generator), in place of a file. */
+  input?: (page: Page, lang: Lang) => Promise<void>;
   /** A PDF tool that waits for its button (Split, Merge). */
   action?: true;
+  /** F19b: what the embedded tool shows before a file goes in (Compress image opens in "Up to a size"). */
+  opens?: (page: Page, lang: Lang) => Promise<void>;
+  /** F19b: what a person sets once the file is read and before the button (the signature; the password twice). */
+  prepare?: (page: Page, lang: Lang) => Promise<void>;
+  /** F19b: what a person types into the tool, which no request may carry, like the name of the file. */
+  typed?: readonly string[];
   check: (delivered: Delivered, lang: Lang) => Promise<void> | void;
 }
 
 const photo = (name: string): TestFile => fixtureFile(name);
 
 /** Each output: the format asked for, a size it can be opened at, and no metadata but the Orientation. */
-function expectImages(delivered: Delivered, format: 'jpeg' | 'png', count = 1): void {
+function expectImages(delivered: Delivered, format: 'jpeg' | 'png' | 'webp', count = 1): void {
   const outs = filesOf(delivered);
   expect(outs, 'one output per file').toHaveLength(count);
   for (const out of outs) {
@@ -134,31 +154,56 @@ const CASES: Record<FileGuideId, Case> = {
       expect(parsePdf(delivered.bytes).hasXmp, 'no XMP').toBe(false);
     },
   },
-  // F19b, slice 1: the front S writes the case of each new guide.
+  // F19b (DECISOES § 796): the new guides, each with the flow of its tool. The guide of a form's limit opens Compress image
+  // in "Up to a size", at the 200 KB it starts with, and a phone photo comes out a JPG under that limit (1 KB = 1,000 bytes).
   'guides-compress-photo-for-online-form': {
     files: () => [photo('jpg-02-iphone6-paisagem-gps.jpg')],
+    opens: async (page) => {
+      await expect(page.locator('#fo-tool-root input[name="ci-level"][value="size"]'), 'the guide opens in "Up to a size"').toBeChecked();
+      await expect(page.locator('#fo-tool-root #ci-max'), 'at the size it starts with').toHaveValue(String(START_KB));
+    },
     check: (delivered) => {
+      expect(delivered.name).toBe('jpg-02-iphone6-paisagem-gps.jpg');
       expectImages(delivered, 'jpeg');
+      expect(delivered.bytes.length, `${delivered.bytes.length} bytes against ${START_KB * 1000}`).toBeLessThanOrEqual(START_KB * 1000);
     },
   },
+  // Convert to WebP at its start, WebP: the same photo comes out a WebP, with no metadata.
   'guides-webp-vs-avif-vs-jpg': {
     files: () => [photo('jpg-02-iphone6-paisagem-gps.jpg')],
     check: (delivered) => {
-      for (const out of filesOf(delivered)) expect(sniff(out.bytes), out.name).toBe('webp');
+      expect(delivered.name).toBe('jpg-02-iphone6-paisagem-gps.webp');
+      expectImages(delivered, 'webp');
     },
   },
+  // Sign PDF needs a signature before its button: a typed name, on the page it starts with (This page), the first one.
   'guides-sign-pdf-without-printing': {
     files: () => [pdfFile('gen-paginas-mistas.pdf')],
     action: true,
-    check: async (delivered) => {
+    typed: [SIGNER],
+    prepare: signWithTypedName,
+    check: async (delivered, lang) => {
+      expect(delivered.name).toBe(signedName('gen-paginas-mistas', lang));
       await expectPdf(delivered.bytes, 8);
+      // The signature is an image on the first page, and only there: every other page draws what it drew before.
+      const before = await readWithPdfjs(new Uint8Array(pdfFile('gen-paginas-mistas.pdf').buffer));
+      const after = await soundPdf(delivered.bytes);
+      expect(after.pages.map((p) => p.images)).toEqual(before.pages.map((p, index) => p.images + (index === 0 ? 1 : 0)));
     },
   },
+  // Protect PDF needs the password typed twice: AES-256 (revision 6), and the copy opens only with it.
   'guides-what-a-pdf-password-protects': {
     files: () => [pdfFile('gen-paginas-mistas.pdf')],
     action: true,
-    check: (delivered) => {
+    typed: [PASSWORD],
+    prepare: typePasswordTwice,
+    check: async (delivered, lang) => {
+      expect(delivered.name).toBe(protectedName('gen-paginas-mistas', lang));
       expect(sniff(delivered.bytes), 'a PDF').toBe('pdf');
+      expect((await qpdfEncryption(delivered.bytes, PASSWORD)).out, 'AES-256, revision 6').toEqual(expect.arrayContaining(['R = 6', 'stream encryption method: AESv3']));
+      expect(await opensWithoutPassword(delivered.bytes), 'never opens without the password').toBe(false);
+      expect((await soundPdf(delivered.bytes, { password: PASSWORD })).pages, 'every page, with the password').toHaveLength(8);
+      expect(Buffer.from(delivered.bytes).includes(Buffer.from(PASSWORD, 'latin1')), 'the password is not in the file').toBe(false);
     },
   },
 };
@@ -178,9 +223,13 @@ function watch(page: Page): Seen[] {
   return seen;
 }
 
-/** The words of the Download of the embedded panel, in the language of the page (an image panel or the PDF one). */
+/**
+ * The words of the Download of the embedded panel, in the language of the page (an image panel or the PDF one; F19b: the
+ * PNG button of the QR code generator).
+ */
 function downloadWords(id: FileGuideId, lang: Lang): string {
   const tool = FILE_GUIDES[id].tool;
+  if (tool === QR_ID) return QR_PANEL_TEXTS[lang].panel.download.png;
   return (Object.hasOwn(PDF_PAGES, tool) ? PDF_PANEL_TEXTS : IMAGE_PANEL_TEXTS)[lang].result.download;
 }
 
@@ -193,12 +242,16 @@ async function expectToolWorks(page: Page, id: FileGuideId, lang: Lang): Promise
   await expect(page.locator('html'), 'the page is in its language').toHaveAttribute('lang', lang === 'pt' ? 'pt-BR' : lang);
   await hydrated(page);
   await dismissCookies(page);
+  if (kase.opens) await kase.opens(page, lang);
   const files = kase.files();
-  await page.setInputFiles('#fo-tool-root input[type="file"]', files);
+  if (files.length > 0) await page.setInputFiles('#fo-tool-root input[type="file"]', files);
+  else if (kase.input) await kase.input(page, lang);
+  else throw new Error(`${id}: a case with no file and no input`);
   if (kase.action) {
     // F13a (UX-04 A; DECISOES § 487): the Merge has its list in the rectangle instead of the ready card.
     const ready = page.locator('#fo-tool-root :is(.fo-ready, .fo-merge-panel)');
     await expect(ready).toBeVisible({ timeout: 30_000 });
+    if (kase.prepare) await kase.prepare(page, lang);
     await ready.locator('.fo-btn--brand').click();
   }
   const download = page.locator('#fo-tool-root .fo-btn--download');
@@ -217,6 +270,10 @@ async function expectToolWorks(page: Page, id: FileGuideId, lang: Lang): Promise
   for (const file of files) {
     const stem = file.name.replace(/\.[^.]+$/, '');
     expect(own.filter((request) => decodeURIComponent(request.url).includes(stem)).map((request) => request.url), `${file.name} only in the download name`).toEqual([]);
+  }
+  // F19b: nor what was typed into the tool (the name of the signature, the password).
+  for (const words of kase.typed ?? []) {
+    expect(own.filter((request) => decodeURIComponent(request.url).includes(words)).map((request) => request.url), `"${words}" in no request`).toEqual([]);
   }
 }
 
@@ -291,7 +348,12 @@ for (const lang of TRANSLATED) {
 
 test('every file guide has its case here, read from the registry, and a page in each language', () => {
   expect(Object.keys(CASES).sort()).toEqual([...FILE_GUIDE_IDS].sort());
-  for (const id of FILE_GUIDE_IDS) expect(CASES[id].files().length, id).toBeGreaterThan(0);
+  // F19b (DECISOES § 796): a file for every guide whose tool takes one, and what is typed for the one that takes text (the
+  // QR code generator); never neither.
+  for (const id of FILE_GUIDE_IDS) {
+    if (FILE_GUIDES[id].tool === QR_ID) expect(CASES[id].input, id).toBeDefined();
+    else expect(CASES[id].files().length, id).toBeGreaterThan(0);
+  }
   const paths = FILE_GUIDE_IDS.flatMap((id) => LANGS.map((lang) => FILE_GUIDES[id].paths[lang]));
   expect(new Set(paths).size, 'one path per guide and language').toBe(FILE_GUIDE_IDS.length * LANGS.length);
   for (const id of FILE_GUIDE_IDS) {

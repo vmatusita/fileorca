@@ -277,7 +277,8 @@ describe('the CSV of the calculators', () => {
   });
 
   it('holds in every column what the table declares, with the example of every page in every language', () => {
-    expect(PAGES.length).toBe(65);
+    // F19b (DECISOES § 796): the three money guides of the F19b in English and Spanish (71; 65 before).
+    expect(PAGES.length).toBe(71);
     for (const page of PAGES) {
       const table = tableOf(page, page.start);
       const file = DIR ? `${DIR}/${page.name}.csv` : '';

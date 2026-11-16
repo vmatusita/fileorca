@@ -12,17 +12,58 @@
 // <head>), the H1, the PrivacySeal, the island (#fo-tool-root: the panel and what the Oli says), the breadcrumb, the cards
 // (ToolCard and GuideCard), the ads, the footer (it is out of the <main>), the line "Updated" and the signature lines
 // ("Reviewed by", "First published").
+//
+// F19b (decision 8; DECISOES § 792): the guides too, file guides (FileGuideView) and money guides (GuideView). On a guide the
+// units are its own text blocks, the ones marked data-guide-text (guideUnitsOf): the lead, the paragraph under the tool, the
+// introduction, each part, the text of the measured section or of the table, and, on a money guide, the formula, the
+// premises, the example and the warning. The sheet, the tables, the sources, the author box, the cards and the tool are not
+// text of the guide and never count. No sentence is near identical in two of them, and a recurring fact of the tools (the
+// sending, the device) is said in one of them at most: the guide points to How it works when it needs more.
 import { parse, NodeType, type HTMLElement } from 'node-html-parser';
 import { QR_ID, type Lang } from '../../src/i18n/routes.ts';
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { PDF_PAGES } from '../../src/tools/pdf/registry.ts';
-import { CALC_PAGES, isBrCalc, isLifeCalc } from '../../src/tools/calc/registry.ts';
+import { CALC_PAGES, isBrCalc, isGuide, isLifeCalc } from '../../src/tools/calc/registry.ts';
+import { isFileGuide } from '../../src/tools/guides/registry.ts';
 
-/** The kinds of page the rule holds on (decision 8), by the registries: never a hand list. */
-export const PAGE_KINDS = ['image-tool', 'image-preset', 'pdf-tool', 'pdf-preset', 'qr', 'calc-money', 'calc-preset', 'calc-br', 'calc-life'] as const;
+/** The kinds of page the rule holds on (decision 8), by the registries: never a hand list. F19b: and the two kinds of guide. */
+export const PAGE_KINDS = ['image-tool', 'image-preset', 'pdf-tool', 'pdf-preset', 'qr', 'calc-money', 'calc-preset', 'calc-br', 'calc-life', 'file-guide', 'money-guide'] as const;
 export type PageKind = (typeof PAGE_KINDS)[number];
+/** The kinds whose units are the guide's own text blocks (guideUnitsOf), not the blocks of a tool page (unitsOf). */
+export const GUIDE_KINDS: readonly PageKind[] = ['file-guide', 'money-guide'];
 
-/** The kind of a route id, or null for a page out of the rule (a hub, a guide, the home, a legal page). */
+/**
+ * F19b (decision 8; DECISOES § 792): the fifteen guides before the F19b, the ten file guides of the F5b and the five money
+ * guides of the F4, out of the rule. On the build of the starting point (a017fc4) eight of the ten file guides and four of
+ * the five money guides fail it in some language (near-identical sentences between a part and the measured section or the
+ * example, the sending or the device in two parts), and this run never rewrites an old guide: the rule holds on every guide
+ * added since, and the old ones are a pendência of group 30 of docs/PENDENCIAS.md. The first ten of FILE_GUIDE_IDS and the
+ * first five of GUIDE_IDS (tests/unit/repeticao.test.ts).
+ */
+export const GUIDES_BEFORE_F19B: readonly string[] = [
+  'guides-heic-to-jpg-on-windows',
+  'guides-why-is-my-pdf-so-large',
+  'guides-social-media-image-sizes',
+  'guides-open-webp-save-as-jpg',
+  'guides-jpg-vs-png',
+  'guides-remove-location-from-photos',
+  'guides-pdf-to-jpg-resolution',
+  'guides-split-pdf-file-size',
+  'guides-combine-pdfs-on-phone',
+  'guides-photos-to-one-pdf',
+  'guides-15-vs-30-year-mortgage',
+  'guides-debt-snowball-vs-avalanche',
+  'guides-extra-mortgage-payments',
+  'guides-refinance-break-even',
+  'guides-rent-vs-buy-break-even',
+];
+
+/** Whether the gate holds a page to the rule: every page with a kind, but the guides before the F19b. */
+export function underRule(id: string): boolean {
+  return pageKind(id) !== null && !GUIDES_BEFORE_F19B.includes(id);
+}
+
+/** The kind of a route id, or null for a page out of the rule (a hub, the home, a legal page). */
 export function pageKind(id: string): PageKind | null {
   if (id === QR_ID) return 'qr';
   if (Object.hasOwn(IMAGE_PAGES, id)) return IMAGE_PAGES[id as keyof typeof IMAGE_PAGES].parent ? 'image-preset' : 'image-tool';
@@ -30,6 +71,8 @@ export function pageKind(id: string): PageKind | null {
   if (Object.hasOwn(CALC_PAGES, id)) return CALC_PAGES[id as keyof typeof CALC_PAGES].parent ? 'calc-preset' : 'calc-money';
   if (isBrCalc(id)) return 'calc-br';
   if (isLifeCalc(id)) return 'calc-life';
+  if (isFileGuide(id)) return 'file-guide';
+  if (isGuide(id)) return 'money-guide';
   return null;
 }
 
@@ -149,6 +192,50 @@ export function unitsOf(html: string): Unit[] {
   }
   units.push(unit('other', [main]));
   return units.filter((each) => each.lines.length > 0);
+}
+
+/**
+ * What never counts inside a text block of a guide (F19b): the H1 and the signature line of the top band ("Reviewed by"),
+ * and anything a block might hold that is not text of the guide.
+ */
+export const GUIDE_NEVER_COUNTED = ['script', 'style', 'noscript', 'template', 'svg', 'nav', 'h1', '.fo-sig', '[data-ymyl="reviewed"]', '#fo-tool-root', '.fo-ad', 'a.fo-tool', 'a.fo-guidecard', '[data-content="author"]'] as const;
+
+/** The name of a text block of a guide: its data-guide-text value, or what the view marks it with. */
+function guideBlockName(block: HTMLElement, index: number): string {
+  const own = block.getAttribute('data-guide-text');
+  if (own) return own;
+  const part = /^part-(\d+)$/.exec(block.getAttribute('aria-labelledby') ?? '');
+  if (part) return `part ${Number(part[1]) + 1}`;
+  if (block.getAttribute('aria-labelledby') === 'guide-tool') return 'tool';
+  if (block.classList.contains('fo-top')) return 'top';
+  if (block.classList.contains('fo-guide__toolintro')) return 'tool intro';
+  if (block.classList.contains('fo-guide')) return 'intro';
+  if (block.classList.contains('fo-guide__history')) return 'history';
+  if (block.classList.contains('fo-reviewed')) return 'note';
+  if (block.closest('[data-content="measured"]')) return 'measured';
+  return `text ${index + 1}`;
+}
+
+/**
+ * The units of a guide (F19b, decision 8; DECISOES § 792): each text block of the guide's own, marked data-guide-text in
+ * FileGuideView.astro and GuideView.astro, in the order of the page, with the heading of a part as its label (the messages
+ * quote it). What is not text of the guide has no data-guide-text and never counts: the sheet, the tool, the tables, the
+ * sources, the author box and the related cards.
+ */
+export function guideUnitsOf(html: string): Unit[] {
+  const main = parse(html).querySelector('main');
+  if (!main) return [];
+  const blocks = main.querySelectorAll('[data-guide-text]').filter((block) => !block.parentNode?.closest('[data-guide-text]'));
+  return blocks
+    .map((block, index) => {
+      const name = guideBlockName(block, index);
+      // A copy of the block alone, with what never counts taken out of it (the block itself is never one of those).
+      const copy = parse(block.outerHTML).childNodes.find((node) => node.nodeType === NodeType.ELEMENT_NODE) as HTMLElement;
+      for (const element of copy.querySelectorAll(GUIDE_NEVER_COUNTED.join(', '))) element.remove();
+      const heading = clean(copy.querySelector('h2, h3')?.structuredText ?? '');
+      return unit(name, [copy], name.startsWith('part ') && heading !== '' ? heading : undefined);
+    })
+    .filter((each) => each.lines.length > 0);
 }
 
 // ---- The recurring facts (DECISOES § 765) --------------------------------------------------------------------------------
@@ -506,6 +593,14 @@ export const FACTS: readonly Fact[] = [
 ];
 
 /**
+ * F19b (decision 8; DECISOES § 792): the recurring facts of the tools that a guide says in one of its blocks at most: where
+ * the work happens and what is sent (the file, the numbers of a calculator, the text of a QR code). The other facts of FACTS
+ * are what a guide is about (the metadata of a photo, the KB of a limit, the resolution of a page, the transparency of a
+ * format): its parts come back to them on purpose, and the near-identical sentences are what the rule catches there.
+ */
+export const GUIDE_FACTS: readonly string[] = ['not-sent', 'on-device', 'calc-numbers', 'qr-text-private', 'qr-never-opens'];
+
+/**
  * A fact that is the page's own subject is not a repetition: the Remove EXIF data page is about the photo metadata, as the
  * Compress image page is about compressing (DECISOES § 765). Keyed by route id.
  */
@@ -628,9 +723,14 @@ export function repeatedFacts(units: readonly Unit[], lang: Lang, id = '', facts
  * Rule 8 (F19a, decision 8): one fact, one place. A recurring fact (FACTS) in more than one unit of the page fails, and so do
  * two sentences of different units whose words are near identical (NEAR_DUPLICATE). The problems are in Portuguese, without
  * the path (the gate adds it): one per fact and one per pair of sentences. `id` is the route id of the page (OWN_SUBJECT).
+ * F19b (DECISOES § 792): on a guide (pageKind of `id`), the units are the guide's own text blocks (guideUnitsOf), and the
+ * facts are those of GUIDE_FACTS.
  */
-export function checkRepetition(html: string, lang: Lang, id = '', facts: readonly Fact[] = FACTS): string[] {
-  const units = unitsOf(html);
+export function checkRepetition(html: string, lang: Lang, id = '', every: readonly Fact[] = FACTS): string[] {
+  const kind = pageKind(id);
+  const guide = kind !== null && GUIDE_KINDS.includes(kind);
+  const units = guide ? guideUnitsOf(html) : unitsOf(html);
+  const facts = guide ? every.filter((fact) => GUIDE_FACTS.includes(fact.id)) : every;
   const byName = new Map(units.map((unit) => [unit.name, unit]));
   const named = (name: string): string => {
     const unit = byName.get(name);

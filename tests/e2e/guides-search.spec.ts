@@ -4,6 +4,10 @@ import enCommon from '../../src/i18n/en/common.ts';
 import ptCommon from '../../src/i18n/pt/common.ts';
 import esCommon from '../../src/i18n/es/common.ts';
 import { filterEntries, groupEntries, type SearchEntry } from '../../src/search/search.ts';
+import { FILE_GUIDES, isFileGuide } from '../../src/tools/guides/registry.ts';
+
+/** The colour of a file guide by the hub of its group, by hand (F19b, DECISOES § 786: the lime of the utilities for the QR code). */
+const GROUP_OF_HUB = { 'image-tools': 'image', 'pdf-tools': 'pdf', utilities: 'util' } as const;
 
 // The search in two groups (F11, decision 7; DECISOES § 397 and § 399): the tools first, then the guides, each a role="group"
 // named by its title inside the listbox; an empty group has no title; the arrows run through both groups as one list; the
@@ -44,10 +48,12 @@ test('the index marks every entry as a tool or a guide, and every guide has the 
   expect(entries.every((entry) => entry.kind === 'tool' || entry.kind === 'guide')).toBe(true);
   expect(guides.map((entry) => entry.id).every((id) => id.startsWith('guides-'))).toBe(true);
   expect(entries.filter((entry) => entry.kind === 'tool').some((entry) => entry.id.startsWith('guides-'))).toBe(false);
-  expect(guides).toHaveLength(15);
+  // F19b (DECISOES § 796): 15 before; 22 with the four file guides and three money guides of the F19b (23 with the QR code
+  // guide, whose colour is the lime of the utilities).
+  expect(guides).toHaveLength(22);
   for (const guide of guides) {
     expect(guide.icon, guide.id).toContain(FILE_ICON);
-    expect(['image', 'pdf', 'money'], guide.id).toContain(guide.cat);
+    expect(guide.cat, guide.id).toBe(isFileGuide(guide.id) ? GROUP_OF_HUB[FILE_GUIDES[guide.id].hub] : 'money');
     for (const lang of Object.keys(guide.href) as Lang[]) expect(guide.category[lang], `${guide.id} ${lang}`).toBe(SEARCH[lang].guideCategory);
   }
 });

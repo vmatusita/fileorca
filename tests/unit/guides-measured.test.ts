@@ -7,8 +7,8 @@
 //  4. a deterministic part, measured again here in Node with the same code, gives exactly the file's values.
 import { readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDE_PUBLISHED_ON, GUIDE_REVIEWED_ON, publishedOn, reviewedOn } from '../../src/tools/guides/registry.ts';
-import { LANGS } from '../../src/i18n/routes.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDE_PUBLISHED_ON, GUIDE_REVIEWED_ON, publishedOn, reviewedOn, type FileGuideTool } from '../../src/tools/guides/registry.ts';
+import { LANGS, QR_ID } from '../../src/i18n/routes.ts';
 import type { MeasuredFile, MeasuredNumber, MeasuredTable, Method, OfficialSize, Sample } from '../../src/tools/guides/measured-types.ts';
 import { scriptFiles, scriptHash } from '../../scripts/guides/lib/record.ts';
 import { breakdown, compress, merge, pdfFixture, splitEach } from '../../scripts/guides/lib/node-pdf.ts';
@@ -30,8 +30,26 @@ const measured = JSON.parse(readFileSync(FILE, 'utf8')) as MeasuredFile;
 const UNITS = ['bytes', 'ratio', 'count', 'px', 'db', 'ppi'];
 const FIXTURES = new Set([...readdirSync('fixtures/images'), ...readdirSync('fixtures/pdf')]);
 
-function sampleProblems(where: string, sample: Sample): string[] {
+/**
+ * The sample of a number or a table. A sample of files: every file a fixture, as many as its count. F19b (DECISOES § 786;
+ * § 796, a changed test): a sample of texts (kind 'texts') only in a guide whose tool is the QR code generator, the one
+ * tool that takes text instead of a file, with a list of distinct, non-empty texts as long as its count. The rule for the
+ * samples of files is the same as before, for every guide (a guide of the QR code too, if it ever measures a file).
+ */
+function sampleProblems(where: string, sample: Sample, tool: FileGuideTool): string[] {
   const problems: string[] = [];
+  if (sample.kind === 'texts') {
+    if (tool !== QR_ID) problems.push(`${where}: a sample of texts in a guide whose tool takes files (${tool})`);
+    if (!Array.isArray(sample.texts) || sample.texts.length === 0) problems.push(`${where}: no texts in the sample`);
+    else {
+      if (sample.count !== sample.texts.length) problems.push(`${where}: count ${sample.count} for ${sample.texts.length} texts`);
+      if (sample.texts.some((text) => typeof text !== 'string' || text.trim() === '')) problems.push(`${where}: an empty text in the sample`);
+      if (new Set(sample.texts).size !== sample.texts.length) problems.push(`${where}: a text twice in the sample`);
+    }
+    if ('files' in sample) problems.push(`${where}: a sample of texts with files`);
+    return problems;
+  }
+  if (sample.kind !== undefined && sample.kind !== 'files') problems.push(`${where}: a sample of the kind ${String(sample.kind)}`);
   if (!Array.isArray(sample.files) || sample.files.length === 0) problems.push(`${where}: no files in the sample`);
   if (sample.count !== sample.files.length) problems.push(`${where}: count ${sample.count} for ${sample.files.length} files`);
   for (const file of sample.files) if (!FIXTURES.has(file)) problems.push(`${where}: ${file} is not a fixture`);
@@ -80,7 +98,7 @@ function fileProblems(file: MeasuredFile): string[] {
       const where = `${id}.${name}`;
       if (typeof number.value !== 'number' || !Number.isFinite(number.value)) problems.push(`${where}: value ${number.value}`);
       if (!UNITS.includes(number.unit)) problems.push(`${where}: unit ${number.unit}`);
-      problems.push(...sampleProblems(where, number.sample), ...methodProblems(where, number.method), ...stampProblems(where, number, day));
+      problems.push(...sampleProblems(where, number.sample, FILE_GUIDES[id].tool),...methodProblems(where, number.method), ...stampProblems(where, number, day));
     }
     for (const [name, table] of Object.entries(guide.tables)) {
       const where = `${id} table ${name}`;
@@ -89,7 +107,7 @@ function fileProblems(file: MeasuredFile): string[] {
       else if (table.kinds.some((kind) => !['node', 'playwright'].includes(kind.runner) || ![...UNITS, 'label'].includes(kind.unit))) problems.push(`${where}: a column of an unknown kind`);
       for (const row of table.rows) if (row.length !== table.columns.length) problems.push(`${where}: a row of ${row.length} cells for ${table.columns.length} columns`);
       if (table.methods.length === 0) problems.push(`${where}: no method`);
-      problems.push(...sampleProblems(where, table.sample), ...table.methods.flatMap((how) => methodProblems(where, how)), ...stampProblems(where, table, day));
+      problems.push(...sampleProblems(where, table.sample, FILE_GUIDES[id].tool),...table.methods.flatMap((how) => methodProblems(where, how)), ...stampProblems(where, table, day));
     }
     for (const size of guide.official ?? []) {
       if (!/^https:\/\//.test(size.source.href) || !size.source.title || !/^\d{4}-\d{2}-\d{2}$/.test(size.source.read)) problems.push(`${id}: the source of ${size.id}`);
@@ -156,6 +174,22 @@ describe('the measurements of the file guides', () => {
     expect(problems.some((problem) => problem.includes('date 2020-01-01'))).toBe(true);
     expect(problems.some((problem) => problem.includes('my-photo.jpg is not a fixture'))).toBe(true);
     expect(problems.some((problem) => problem.includes('typed: value'))).toBe(true);
+  });
+
+  // F19b (DECISOES § 786): the QR code guide measures texts the script wrote, which no fixture holds. A sample of texts
+  // passes only in a guide of the QR code generator, with as many distinct texts as its count; a guide of files never
+  // takes one, and a sample of files keeps every rule it had.
+  it('take a sample of texts only in a guide of the QR code generator, with a list as long as its count', () => {
+    const texts: Sample = { kind: 'texts', texts: ['https://fileorca.com/', 'Olá, café'], count: 2, note: 'level H' };
+    expect(sampleProblems('qr', texts, QR_ID)).toEqual([]);
+    expect(sampleProblems('png', texts, 'png-to-jpg').join()).toMatch(/a sample of texts in a guide whose tool takes files \(png-to-jpg\)/);
+    expect(sampleProblems('qr', { ...texts, count: 3 }, QR_ID).join()).toMatch(/count 3 for 2 texts/);
+    expect(sampleProblems('qr', { kind: 'texts', texts: [], count: 0 }, QR_ID).join()).toMatch(/no texts in the sample/);
+    expect(sampleProblems('qr', { kind: 'texts', texts: ['a', ' '], count: 2 }, QR_ID).join()).toMatch(/an empty text in the sample/);
+    expect(sampleProblems('qr', { kind: 'texts', texts: ['a', 'a'], count: 2 }, QR_ID).join()).toMatch(/a text twice in the sample/);
+    // A sample of files in a QR code guide is held to the fixtures, as in any guide.
+    expect(sampleProblems('qr', { files: ['my-photo.jpg'], count: 1 }, QR_ID).join()).toMatch(/my-photo.jpg is not a fixture/);
+    expect(sampleProblems('png', { files: ['gen-png-transparente.png'], count: 1 }, 'png-to-jpg')).toEqual([]);
   });
 
   // DECISOES § 207: the "Reviewed" line and the dateModified of the Article schema never date the review before the day

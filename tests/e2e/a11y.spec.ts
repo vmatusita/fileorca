@@ -370,6 +370,15 @@ test.describe('axe nos guias de arquivo com a ferramenta embutida no resultado, 
       expect((await page.goto(guide.path))?.status()).toBe(200);
       await hydrated(page);
       await dismissCookies(page);
+      // F19b (DECISOES § 796): a guide of the QR code generator takes a link instead of a file; its result is the code with
+      // the Download PNG button.
+      if (guide.tool === QR_ID) {
+        await page.locator('#fo-qr-text').fill('https://fileorca.com/');
+        await expect(page.locator('#fo-tool-root .fo-btn--download')).toBeVisible({ timeout: 30_000 });
+        await animationsDone(page);
+        expect(await violationsEverywhere(page)).toEqual([]);
+        return;
+      }
       const own = GUIDE_FILE[guide.tool];
       const files: TestFile[] = own ? [{ name: own.fixture, mimeType: own.mimeType, buffer: readFileSync(resolve('fixtures/images', own.fixture)) }] : await jpegBatch(page, 1);
       await chooseImages(page, files);

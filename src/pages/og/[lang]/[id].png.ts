@@ -33,7 +33,7 @@ import { LIFE_HUB_TEXTS } from '../../../i18n/life-hubs.ts';
 import { SHARED_BY_LANG, calcTexts } from '../../../tools/calc/page.ts';
 import { PDF_HUB_ID, PDF_PAGES, type PdfPageId } from '../../../tools/pdf/registry.ts';
 import { PDF_TOOL_TEXTS } from '../../../tools/pdf/texts.ts';
-import { FILE_GUIDES, GUIDES_HUB_ID, isFileGuide, type FileGuideId } from '../../../tools/guides/registry.ts';
+import { FILE_GUIDES, GUIDES_HUB_ID, fileGuideGroup, isFileGuide, type FileGuideId } from '../../../tools/guides/registry.ts';
 import { QR_TEXTS } from '../../../tools/qr-code-generator/page.ts';
 
 /** A card title that must exist in the language of the page: an empty title would be an empty card. */
@@ -85,7 +85,8 @@ function heading(lang: Lang, id: RouteId): [string, string] {
   if (id === MONEY_HUB_ID || id === BR_HUB_ID) return [texts['money-calculators'].h1, moneySeal];
   if (isPdfPage(id)) return [PDF_TOOL_TEXTS[lang][id].h1, seal];
   if (id === PDF_HUB_ID) return [texts['pdf-tools'].h1, seal];
-  if (isFileGuide(id)) return [named(texts.common.fileGuides?.[id]?.name, id, lang), seal];
+  // F19b (DECISOES § 786): a guide of the QR code keeps no file either, so its card carries the seal of the QR page.
+  if (isFileGuide(id)) return [named(texts.common.fileGuides?.[id]?.name, id, lang), FILE_GUIDES[id].tool === QR_ID ? QR_TEXTS[lang].seal : seal];
   // F11: the guides hub shows its H1 in the language, with the seal of the files (most guides are of image and PDF).
   if (id === GUIDES_HUB_ID) return [texts.guides.h1, seal];
   return [texts[id as PlainId].h1, seal];
@@ -106,7 +107,9 @@ function toolOf(id: RouteId): OgTool | undefined {
   if (id === PDF_HUB_ID) return { icon: 'pdf', category: 'pdf' };
   if (isFileGuide(id)) {
     const tool = FILE_GUIDES[id].tool;
-    return { icon: isPdfPage(tool) ? PDF_PAGES[tool].icon : IMAGE_PAGES[tool].icon, category: FILE_GUIDES[id].hub === 'pdf-tools' ? 'pdf' : 'image' };
+    // F19b (DECISOES § 786): the QR icon for a guide of the QR code generator, in the lime of its group.
+    const icon = tool === QR_ID ? 'qr' : isPdfPage(tool) ? PDF_PAGES[tool].icon : IMAGE_PAGES[tool].icon;
+    return { icon, category: fileGuideGroup(id) };
   }
   // F11: the guides hub has no category colour; the book of its Menu entry, on the brand-soft of its band.
   if (id === GUIDES_HUB_ID) return { icon: 'book', category: 'guide' };

@@ -46,7 +46,8 @@ export function moldOf(route: RouteDef): Mold {
 /**
  * Every page with ads, in the three languages, from the route map (184 since the F12: the 178 of before, the homes and the
  * guides hubs; 190 since the F17: AVIF to JPG and Convert to WebP in the three languages; 205 since the F18: Remove EXIF
- * data, Flip image, Organize PDF and the two PDF presets in the three languages, the presets in the mold of a PDF tool).
+ * data, Flip image, Organize PDF and the two PDF presets in the three languages, the presets in the mold of a PDF tool;
+ * 223 since the F19b: its guides, each in the area of its group, a QR code guide in the one of the QR code).
  */
 export const AD_PAGES: AdPage[] = ROUTES.filter((route) => route.adArea).flatMap((route) =>
   LANGS.flatMap((lang) => {
