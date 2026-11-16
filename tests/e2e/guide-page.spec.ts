@@ -51,6 +51,15 @@ const USE: Record<FileGuideId, Use> = {
   'guides-webp-vs-avif-vs-jpg': { files: () => [fixtureFile('jpg-02-iphone6-paisagem-gps.jpg')] },
   'guides-sign-pdf-without-printing': { files: () => [pdfFile('gen-paginas-mistas.pdf')], action: true, prepare: signWithTypedName },
   'guides-what-a-pdf-password-protects': { files: () => [pdfFile('gen-paginas-mistas.pdf')], action: true, prepare: typePasswordTwice },
+  // F19b (front M5): the QR code generator takes a link typed in its box (the code is drawn as it is typed), and its panel
+  // has no chip after the result.
+  'guides-qr-code-size': {
+    files: () => [],
+    input: async (page) => {
+      await page.locator('#fo-tool-root #fo-qr-text').fill('https://fileorca.com/guides/qr-code-size/');
+    },
+    noChips: true,
+  },
 };
 
 async function guideContext(browser: Browser, viewport: { width: number; height: number }, fonts = true): Promise<BrowserContext> {

@@ -58,10 +58,10 @@ const F18_AD_PAGES: [path: string, mold: 'tool-image' | 'tool-pdf'][] = [
   ['/pdf-to-jpg/to-png/', 'tool-pdf'], ['/pt/pdf-para-jpg/para-png/', 'tool-pdf'], ['/es/pdf-a-jpg/a-png/', 'tool-pdf'],
 ];
 // F19b (decision 7; DECISOES § 791 and § 796): 205 → 223, the four file guides in three languages and the three money
-// guides in two (the QR code guide adds its three pages, in the area of the QR code). Every guide is read from the
-// registries, each in the area of its group and the mold of its view.
-test('the map reads the 223 pages with ads of the route map', () => {
-  expect(AD_PAGES).toHaveLength(223);
+// guides in two; 226 with the three pages of the QR code guide, in the area of the QR code (front M5). Every guide is read
+// from the registries, each in the area of its group and the mold of its view.
+test('the map reads the 226 pages with ads of the route map', () => {
+  expect(AD_PAGES).toHaveLength(226);
   for (const id of FILE_GUIDE_IDS) {
     for (const lang of LANGS) {
       const path = FILE_GUIDES[id].paths[lang];

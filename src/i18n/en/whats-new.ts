@@ -141,7 +141,7 @@ export default {
     },
     'new-guides': {
       title: 'New guides with numbers of our own',
-      body: 'New guides answer one question each with the tool inside them: a photo under the size limit of a form, WebP, AVIF or JPG, signing a PDF without printing it and what a PDF password protects. In English and Spanish there are also guides on APR and APY, the credit card minimum payment and how much house you can afford. Every number in them comes from our own measurement or from the calculator inside, checked against an independent calculation.',
+      body: 'New guides answer one question each with the tool inside them: a photo under the size limit of a form, WebP, AVIF or JPG, signing a PDF without printing it, what a PDF password protects and the size of a QR code. In English and Spanish there are also guides on APR and APY, the credit card minimum payment and how much house you can afford. Every number in them comes from our own measurement or from the calculator inside, checked against an independent calculation.',
     },
   },
 } satisfies WhatsNewTexts;

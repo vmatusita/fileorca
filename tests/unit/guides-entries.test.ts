@@ -143,8 +143,8 @@ describe('the GuideCard on the page of each tool and calculator a guide embeds',
     // English and Spanish (12): read from the registries above, checked here against the counts of the specification.
     // F19b (DECISOES § 796): Compress image, Convert to WebP, Sign PDF and Protect PDF in three languages, one guide each
     // (12), and the three calculators of the new money guides in English and Spanish (6). The QR code guide adds its page
-    // in three languages (3).
-    expect([pages, cards]).toEqual([30 + 12 + 12 + 6, 30 + 12 + 12 + 6]);
+    // in three languages (3; front M5).
+    expect([pages, cards]).toEqual([30 + 12 + 12 + 6 + 3, 30 + 12 + 12 + 6 + 3]);
   }, 60_000);
 });
 
@@ -156,9 +156,9 @@ describe('no guide with the ToolCard, on any page of dist/', () => {
   const HTML_FILES = listFiles(DIST).filter((file) => file.endsWith('.html'));
 
   // F19b (DECISOES § 796): 40 before, 58 with the four file guides (12 pages) and three money guides (6); 61 with the QR
-  // code guide.
-  it('reads the 58 guide pages and every HTML file of dist/', () => {
-    expect(GUIDE_PATHS.size).toBe(58);
+  // code guide (front M5).
+  it('reads the 61 guide pages and every HTML file of dist/', () => {
+    expect(GUIDE_PATHS.size).toBe(61);
     expect(HTML_FILES.length).toBeGreaterThanOrEqual(211);
   });
 
@@ -210,8 +210,9 @@ describe('no guide with the ToolCard, on any page of dist/', () => {
       }
     }
     // 18 guides in the related grids of each language (§ 189), now drawn as guides. F19b (DECISOES § 796): nine more in
-    // the grids of the four new file guides (two, three, two and two), none in the grids of the first ten.
-    expect(total).toBe((18 + 9) * LANGS.length);
+    // the grids of the four new file guides (two, three, two and two), none in the grids of the first ten; three more in the
+    // grid of the QR code guide (front M5: the social sizes, the photos in one PDF and the photo for a form).
+    expect(total).toBe((18 + 9 + 3) * LANGS.length);
   });
 });
 
@@ -302,12 +303,13 @@ describe('the guides on the home', () => {
         expect(card.querySelector('.fo-guidecard__proof')?.text.trim(), `${lang} ${data.id}`).toBe(data.proof);
         expect(card.querySelector('.fo-guidecard__tool > span:last-child > span:last-child')?.text, `${lang} ${data.id}`).toBe(data.tool.name);
       }
-      // "See all 22 guides": the hub of the language, with the number of its guides read from the registries. F19b
-      // (DECISOES § 796): 15 and 10 before; 22 and 14 with the guides of the F19b (23 and 15 with the QR code guide).
+      // "See all 23 guides": the hub of the language, with the number of its guides read from the registries. F19b
+      // (DECISOES § 796): 15 and 10 before; 22 and 14 with the guides 1 to 4 and 6 to 8 of the F19b, 23 and 15 with the QR
+      // code guide (front M5).
       const more = section?.querySelector('p.fo-more a');
       expect(more?.getAttribute('href'), lang).toBe(HUB[lang]);
       expect(more?.text, lang).toBe(fmt(t.hubLink, { n: groupDigits(hubGuides(lang).length, lang) }));
-      expect(more?.text, lang).toMatch(lang === 'pt' ? /\b14\b/ : /\b22\b/);
+      expect(more?.text, lang).toMatch(lang === 'pt' ? /\b15\b/ : /\b23\b/);
       // Still no AdSlot and no card of a guide as a tool on the home (gate:prontidao counts main a.fo-tool).
       expect(main?.querySelectorAll('.fo-ad'), lang).toHaveLength(0);
       expect(section?.querySelectorAll('a.fo-tool'), lang).toHaveLength(0);

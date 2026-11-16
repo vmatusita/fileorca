@@ -38,6 +38,8 @@ const SPEC_N: Record<FileGuideId, number> = {
   'guides-webp-vs-avif-vs-jpg': 4,
   'guides-sign-pdf-without-printing': 4,
   'guides-what-a-pdf-password-protects': 4,
+  // F19b (front M5): the QR code guide measured no file, only texts (SPEC_TEXTS).
+  'guides-qr-code-size': 0,
 };
 /**
  * F19b (DECISOES § 786 and § 796): the distinct test texts of a guide that measured texts instead of files (the QR code

@@ -93,8 +93,8 @@ describe('sitemaps', () => {
   // part grows by 2: 25 in English with the image area, 10 in Portuguese and Spanish).
   // F19b (DECISOES § 796): the four file guides in each language (14; 10 before) and the three money guides in English and
   // Spanish (the money area of English 27: the hub, 18 calculators and 8 guides; 24 before). The QR code guide makes the
-  // file guides 15.
-  const SIZES = { en: 25 + 27 + 16 + 14 + f7Rows.length + 1, pt: 10 + 15 + 16 + brRows + 1 + 14 + 1, es: 10 + 15 + 16 + 1 + CALC_PAGE_IDS.length + GUIDE_IDS.length + 1 + 14 + 1 } as const;
+  // file guides 15 (front M5).
+  const SIZES = { en: 25 + 27 + 16 + 15 + f7Rows.length + 1, pt: 10 + 15 + 16 + brRows + 1 + 15 + 1, es: 10 + 15 + 16 + 1 + CALC_PAGE_IDS.length + GUIDE_IDS.length + 1 + 15 + 1 } as const;
 
   it('builds one valid sitemap per language and an index, with the counts of the route map', () => {
     expect([0, 1 + BR_CALC_IDS.length]).toContain(brRows);

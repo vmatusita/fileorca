@@ -53,9 +53,9 @@ function signedMoneyPages(): string[] {
 const langOf = (path: string): Lang => (path.startsWith('/pt/') ? 'pt' : path.startsWith('/es/') ? 'es' : 'en');
 
 describe.runIf(BUILT)('the name of the author links to the About of the language (DECISOES § 763)', () => {
-  // F19b (DECISOES § 796): 42 pages with the four file guides of the F19b (30 before; 45 with the QR code guide).
-  it('in the signature of the 42 file guides, which keeps its one date', () => {
-    expect(FILE_GUIDE_PAGES).toHaveLength(42);
+  // F19b (DECISOES § 796): 42 pages with the four file guides of the F19b (30 before), 45 with the QR code guide (front M5).
+  it('in the signature of the 45 file guides, which keeps its one date', () => {
+    expect(FILE_GUIDE_PAGES).toHaveLength(45);
     const wrong: string[] = [];
     for (const { lang, path } of FILE_GUIDE_PAGES) {
       const signature = mainOf(html(path)).querySelector('.fo-top .fo-reviewed');

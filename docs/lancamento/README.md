@@ -220,7 +220,7 @@ A run F5b deixou em `product-hunt.md` o kit do lançamento no Product Hunt, e em
 ### Checklist para o Victor
 
 - [ ] Ler `product-hunt.md` inteiro, começando por "Leia antes de usar".
-- [ ] Conferir no dia as contagens (11 ferramentas de imagem, 4 presets de imagem, 13 de PDF, 14 calculadoras, 22 guias) e se os anúncios estão ligados.
+- [ ] Conferir no dia as contagens (11 ferramentas de imagem, 4 presets de imagem, 13 de PDF, 14 calculadoras, 23 guias) e se os anúncios estão ligados.
 - [ ] Criar ou conferir a conta pessoal, com a sua foto (a Oli fica só no produto).
 - [ ] Pôr o link do repositório público do motor só se ele estiver no ar.
 - [ ] Agendar para a primeira terça depois do merge, às 12:01 AM do Pacífico.

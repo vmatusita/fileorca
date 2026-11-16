@@ -75,9 +75,9 @@ describe('the route of the guides hub', () => {
 
 describe('the guides of the hub, read from the registries', () => {
   // F19b (DECISOES § 796): 22 in en and es and 14 in pt with the four file guides and three money guides of the F19b in
-  // the registries (the QR code guide, the fifth file guide, makes them 23 and 15).
-  it('lists each guide of the language once: 22 in en and es, 14 in pt, the file guides in registry order, then the money guides', () => {
-    expect(LANGS.map((lang) => hubGuides(lang).length)).toEqual([22, 14, 22]);
+  // the registries; 23 and 15 with the QR code guide, the fifth file guide (front M5).
+  it('lists each guide of the language once: 23 in en and es, 15 in pt, the file guides in registry order, then the money guides', () => {
+    expect(LANGS.map((lang) => hubGuides(lang).length)).toEqual([23, 15, 23]);
     for (const lang of LANGS) {
       const guides = hubGuides(lang);
       expect(new Set(guides.map((guide) => guide.path)).size, lang).toBe(guides.length);
@@ -203,17 +203,17 @@ describe('the three pages of the guides hub in dist/', () => {
 // also the first link to the hub from a page of another route, which keeps the hub out of the orphans of gate:links.
 // F19b (decision 4; DECISOES § 786): the QR code guides too, though the QR page has no hub between Home and itself: a guide
 // is a page of the guides hub, whichever tool it embeds.
-describe('the breadcrumb of the 58 guides in dist/: Home › Guides › the guide', () => {
+describe('the breadcrumb of the 61 guides in dist/: Home › Guides › the guide', () => {
   const pages = [...FILE_GUIDE_IDS, ...GUIDE_IDS].flatMap((id) => LANGS.flatMap((lang) => {
     const path = routeById(id as RouteId).paths[lang];
     return path ? [{ id, lang, path }] : [];
   }));
 
-  // F19b (DECISOES § 796): 40 before; the four file guides in three languages and the three money guides in two (the QR
-  // code guide makes them 61: 23, 15 and 23).
-  it('has the 58 pages of guide, 22 in en and es and 14 in pt, read from the registries', () => {
-    expect(pages).toHaveLength(58);
-    expect(LANGS.map((lang) => pages.filter((page) => page.lang === lang).length)).toEqual([22, 14, 22]);
+  // F19b (DECISOES § 796): 40 before; the four file guides in three languages and the three money guides in two (58), and
+  // the QR code guide in three (61: 23, 15 and 23; front M5).
+  it('has the 61 pages of guide, 23 in en and es and 15 in pt, read from the registries', () => {
+    expect(pages).toHaveLength(61);
+    expect(LANGS.map((lang) => pages.filter((page) => page.lang === lang).length)).toEqual([23, 15, 23]);
   });
 
   it('leads each guide to the guides hub of its language, in the HTML and in the BreadcrumbList (position 2)', () => {

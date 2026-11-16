@@ -41,9 +41,9 @@ for (const lang of LANGS) {
     const main = page.locator('main');
     const groups = groupsOf(lang);
     const all = [...groups.image, ...groups.pdf, ...groups.util, ...groups.money];
-    // F19b (DECISOES § 796): 10 and 15 before; 14 and 22 with the four file guides and three money guides of the F19b (15
-    // and 23 with the QR code guide).
-    expect(all.length, lang).toBe(lang === 'pt' ? 14 : 22);
+    // F19b (DECISOES § 796): 10 and 15 before; 14 and 22 with the four file guides and three money guides of the F19b; 15
+    // and 23 with the QR code guide (front M5).
+    expect(all.length, lang).toBe(lang === 'pt' ? 15 : 23);
     await expect(main.locator('a.fo-guidecard')).toHaveCount(all.length);
     for (const [group, paths] of Object.entries(groups)) {
       const cards = main.locator(`section#${group} a.fo-guidecard`);

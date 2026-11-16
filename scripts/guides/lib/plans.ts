@@ -1343,6 +1343,11 @@ async function pdfPassword(ctx: Context): Promise<GuideMeasure> {
   return g.done();
 }
 
+/** F19b (front M5): the QR code guide, in the registry before its plan; the next commit measures it. */
+function notYet(): Promise<GuideMeasure> {
+  return Promise.reject(new Error('no plan yet'));
+}
+
 export const PLANS: Record<FileGuideId, (ctx: Context) => Promise<GuideMeasure>> = {
   'guides-heic-to-jpg-on-windows': heicToJpg,
   'guides-why-is-my-pdf-so-large': pdfLarge,
@@ -1358,4 +1363,5 @@ export const PLANS: Record<FileGuideId, (ctx: Context) => Promise<GuideMeasure>>
   'guides-webp-vs-avif-vs-jpg': webpAvifJpg,
   'guides-sign-pdf-without-printing': signPdf,
   'guides-what-a-pdf-password-protects': pdfPassword,
+  'guides-qr-code-size': notYet,
 };

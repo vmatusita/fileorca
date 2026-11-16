@@ -22,6 +22,9 @@ export const FILE_GUIDE_IDS = [
   'guides-webp-vs-avif-vs-jpg',
   'guides-sign-pdf-without-printing',
   'guides-what-a-pdf-password-protects',
+  // F19b (decision 4; DECISOES § 785 and § 786): the guide of the QR code generator, the one file guide whose tool takes
+  // text instead of a file, in the group Utilities of the guides hub.
+  'guides-qr-code-size',
 ] as const;
 export type FileGuideId = (typeof FILE_GUIDE_IDS)[number];
 
@@ -65,6 +68,7 @@ const OWN_DAY: Partial<Record<FileGuideId, string>> = {
   'guides-webp-vs-avif-vs-jpg': '2026-11-16',
   'guides-sign-pdf-without-printing': '2026-11-16',
   'guides-what-a-pdf-password-protects': '2026-11-16',
+  'guides-qr-code-size': '2026-11-16',
 };
 
 /** The day a guide was reviewed in a language: its own day, or the day of the first ten. */
@@ -139,6 +143,7 @@ const SLUGS: Record<FileGuideId, { pt: string; es: string }> = {
   'guides-webp-vs-avif-vs-jpg': { pt: 'webp-avif-ou-jpg', es: 'webp-avif-o-jpg' },
   'guides-sign-pdf-without-printing': { pt: 'assinar-pdf-sem-imprimir', es: 'firmar-pdf-sin-imprimir' },
   'guides-what-a-pdf-password-protects': { pt: 'o-que-a-senha-do-pdf-protege', es: 'que-protege-la-contrasena-de-un-pdf' },
+  'guides-qr-code-size': { pt: 'tamanho-do-qr-code', es: 'tamano-del-codigo-qr' },
 };
 
 /**
@@ -161,6 +166,7 @@ const TOOL_SECTION: Record<FileGuideId, number> = {
   'guides-webp-vs-avif-vs-jpg': 2,
   'guides-sign-pdf-without-printing': 2,
   'guides-what-a-pdf-password-protects': 2,
+  'guides-qr-code-size': 2,
 };
 
 const def = (id: FileGuideId, tool: FileGuideTool, hub: FileGuideHub, related: readonly FileGuideRelated[]): FileGuideDef => ({
@@ -276,6 +282,16 @@ export const FILE_GUIDES: Record<FileGuideId, FileGuideDef> = {
     'merge-pdf',
     'guides-sign-pdf-without-printing',
     'guides-why-is-my-pdf-so-large',
+  ]),
+  // F19b (decision 4; DECISOES § 786 and § 789): the QR code generator in the group Utilities; the pages a person goes to
+  // with a QR image (fit it, put it on a sheet, make it lighter) and the guides about sizes and sheets.
+  'guides-qr-code-size': def('guides-qr-code-size', 'qr-code-generator', 'utilities', [
+    'resize-image',
+    'image-to-pdf',
+    'compress-image',
+    'guides-social-media-image-sizes',
+    'guides-photos-to-one-pdf',
+    'guides-compress-photo-for-online-form',
   ]),
 };
 

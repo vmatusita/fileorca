@@ -434,6 +434,8 @@ const BUILDERS: Record<FileGuideId, Builder> = {
       ],
     ];
   },
+  // F19b (front M5): the QR code guide, in the registry before its measurement; the next commit writes its tables.
+  'guides-qr-code-size': () => [],
 };
 
 /** The rows of each table of a guide, in the order of its texts. */
