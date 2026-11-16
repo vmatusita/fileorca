@@ -358,7 +358,7 @@ export default {
     // F19b (DECISOES § 780 and § 790): the new money guides.
     "guides-apr-vs-apy": {
       name: "APR vs APY",
-      description: "Why the same rate gives a higher yield the more often it compounds, with the numbers.",
+      description: "What each compounding adds to the same rate, and why the APR of a deposit is not the APR of a loan.",
       synonyms: ["guide", "annual percentage yield", "compounding"],
     },
     "guides-credit-card-minimum-payment": {

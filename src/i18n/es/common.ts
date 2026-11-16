@@ -449,7 +449,7 @@ export default {
     // calculator they embed first.
     "guides-apr-vs-apy": {
       name: "APR o APY: en qué se diferencian",
-      description: "Por qué la misma tasa rinde más cuantas más veces se capitaliza, con los números.",
+      description: "Lo que cada capitalización le suma a la misma tasa, y por qué la APR de un depósito no es la de un préstamo.",
       synonyms: ["guía", "rendimiento anual", "capitalización"],
     },
     "guides-credit-card-minimum-payment": {

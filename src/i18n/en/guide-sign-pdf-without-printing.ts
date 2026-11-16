@@ -14,7 +14,7 @@ const texts: FileGuideTexts = {
   toolIntro: 'Drop a PDF, make your signature with the option you like, place it on the preview and press Sign PDF. You get a signed copy to download.',
   sections: [
     {
-      heading: 'Two kinds of signature',
+      heading: 'The signature on the page and the digital signature',
       paragraphs: [
         'What Sign PDF puts on the page is an image: the lines you drew, the picture you chose, or your name drawn in the font of the site. It sits on the page the way a stamp sits on paper. Anyone who opens the PDF sees it, and nothing in the file ties it to you or to the moment you signed.',
         'A digital signature is something else. NIST, the standards agency of the United States, says in its Digital Signature Standard that digital signatures are used to detect unauthorized modifications to data and to authenticate the identity of the signatory. One is made from the bytes of the file with a private key that only the signer holds, and a certificate identifies the matching public key and its owner.',
@@ -35,7 +35,7 @@ const texts: FileGuideTexts = {
         'Draw: sign in the box with a finger, a pen or the mouse. On our files a drawn signature added from {drawAddedMinChromium} to {drawAddedMaxChromium} in Chromium. The same strokes, drawn by the same script in WebKit, added more, from {drawAddedMinWebkit} to {drawAddedMaxWebkit}.',
         'Upload: choose a PNG or a JPG of your signature. A PNG with a clear background puts only the ink on the page, where a JPG brings its whole rectangle along. Our test image is not a real signature but a picture of {signatureImageWidth} by {signatureImageHeight} pixels, {signatureImageBytes} as a PNG, and the tool saves it again before it goes on the page. The PDF of {mixedPages_word} pages grew by {mixedUploadAddedChromium_exact} and the form of {formPages_word} by {formUploadAddedChromium_exact}, nearly the same: the image went into each file once, however many pages show it. Still, it took our PDF of mixed pages from {mixedBefore} to {mixedUploadChromium}, so crop a photo or scan of your signature to the ink before you upload it.',
         'Type: write your name, and the tool draws it as an image in the font of the site. On each of our PDFs it added the least of any way, from {typeAddedMinChromium} to {typeAddedMaxChromium}.',
-        'Then drag the box to its spot and pick the pages: this page, all pages or the ones you choose. When two people have to sign, the first one signs and downloads, and the second opens that signed copy here and adds a signature.',
+        'Then drag the box to its spot and pick the pages: this page, all pages or the ones you choose. When more than one person has to sign, the first one signs and downloads, and the next one opens that signed copy here and adds a signature.',
       ],
     },
     {
