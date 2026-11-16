@@ -1,7 +1,9 @@
 // F19b (decision 5): guide 8, how much house an income can carry under the two limits of the home affordability calculator.
 // Every number is a {placeholder} the engines fill at build (src/tools/calc/guides.ts, howMuchHouse), each one a case of the
-// oracle; no digit is typed here. The 28% and 36% are the calculator's starting rules of thumb, never a rule of law, and no
-// source below is said to give them.
+// oracle; no digit is typed here. The 28% and 36% are the calculator's starting rules of thumb, never a rule of law: the CFPB
+// home loan toolkit (page 5) gives the 28% for the total monthly home payment as a rule of thumb, and no source below gives the
+// 36% or the 43%. "Rules of thumb, not rules of law" quotes the toolkit with {front}, so it holds while the calculator starts
+// at 28% (DEFS['home-affordability-calculator'].initial.fr).
 import type { GuideTexts } from '../types.ts';
 
 export default {
@@ -62,8 +64,8 @@ export default {
     {
       heading: 'Rules of thumb, not rules of law',
       paragraphs: [
-        'The calculator starts from {front} for housing and {back} for all debts because they are common rules of thumb. They are not a rule of law, and none of the CFPB pages this guide cites gives them. The CFPB page on the debt-to-income ratio names no single figure: it says different loan products and lenders have different limits.',
-        'So a lender may answer with a different price: its limits can differ from these, and it may count costs the calculator leaves out. If your lender quotes its own limits, enter them in the two limit fields and the price follows.',
+        'The calculator starts from {front} for housing and {back} for all debts, common rules of thumb and not a rule of law. The CFPB home loan toolkit gives the first one as a mortgage lending rule of thumb: a total monthly home payment, mortgage insurance included, at or below that share of your monthly income before taxes. None of the CFPB pages this guide cites gives the second one. The CFPB page on the debt-to-income ratio names no single figure: it says different loan products and lenders have different limits.',
+        'So a lender may answer with a different price. The same toolkit says lenders may approve you for more or for less, depending on your overall financial picture, and a lender may count costs the calculator leaves out. If your lender quotes its own limits, enter them in the two limit fields and the price follows.',
       ],
     },
   ],
@@ -99,6 +101,10 @@ export default {
       href: 'https://www.consumerfinance.gov/owning-a-home/prepare/figure-out-how-much-you-want-to-spend/',
     },
     { label: 'Consumer Financial Protection Bureau, "What is PITI?"', href: 'https://www.consumerfinance.gov/ask-cfpb/what-is-piti-en-152/' },
+    {
+      label: 'Consumer Financial Protection Bureau, "Your home loan toolkit: A step-by-step guide" (PDF)',
+      href: 'https://files.consumerfinance.gov/f/201503_cfpb_your-home-loan-toolkit-web.pdf',
+    },
   ],
   disclaimerHeading: 'Educational guide',
   disclaimer: 'This guide is educational, not financial advice and not a loan approval. A lender decides what it will lend you, at which rate and under which limits.',
