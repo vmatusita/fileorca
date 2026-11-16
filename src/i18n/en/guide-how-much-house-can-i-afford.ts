@@ -4,7 +4,12 @@ import type { GuideTexts } from '../types.ts';
 export default {
   title: "How much house can I afford | FileOrca",
   description: "The two income limits a lender starts from, and which one sets the price you can pay.",
-  words: { head: ["Case"] },
+  words: {
+    head: ['Other debts per month', 'Limit that sets the price', 'Room for housing', 'Home price you can afford'],
+    front: 'Housing limit, {rate}',
+    back: 'Total debt limit, {rate}',
+    both: 'Both limits',
+  },
   h1: "How much house can I afford",
   lead: "The two income limits a lender starts from, and which one sets the price you can pay.",
   intro: ["This guide is being written."],
