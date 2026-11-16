@@ -28,7 +28,20 @@ export default {
   tableHeading: "La medida",
   measuredIntro: "Esta guía se está escribiendo.",
   measuredNote: "Medido el {date}.",
-  tables: [],
+  // F19b (front M1): the shape of the tables, which the front T rewrites in words and keeps.
+  tables: [
+    {
+      heading: "Las tres fotos en cada formato",
+      caption: "Cada foto de celular en JPG con Comprimir imagen y en WebP y AVIF con Convertir a WebP, en la opción Recomendada, en Chromium, con la parte del original",
+      head: ["Foto", "Original", "JPG", "WebP", "AVIF"],
+    },
+    {
+      heading: "El PNG con las esquinas transparentes",
+      caption: "El PNG con las esquinas transparentes guardado en JPG con PNG a JPG y en WebP y AVIF con Convertir a WebP, en Chromium: el archivo, su parte del PNG y si la transparencia se conservó",
+      head: ["Guardado como", "Archivo", "Transparencia conservada"],
+      labels: ["JPG", "WebP", "AVIF"],
+    },
+  ],
   sourcesHeading: "Fuentes",
   sources: [],
   facts: {},
