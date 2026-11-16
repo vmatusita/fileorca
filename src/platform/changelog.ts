@@ -353,6 +353,7 @@ export const CHANGELOG = [
       'guides-apr-vs-apy',
       'guides-credit-card-minimum-payment',
       'guides-how-much-house-can-i-afford',
+      'guides-qr-code-size',
       'guides',
       'home',
       'image-tools',
@@ -365,6 +366,7 @@ export const CHANGELOG = [
       'apr-to-apy-calculator',
       'credit-card-payoff-calculator',
       'home-affordability-calculator',
+      'qr-code-generator',
     ],
   },
 ] as const satisfies readonly ChangeEntry[];

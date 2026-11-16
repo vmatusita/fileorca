@@ -414,6 +414,12 @@ export default {
       description: "Qué hace la contraseña para abrir, qué no hacen las restricciones y por qué una contraseña corta es débil.",
       synonyms: ["guía", "cifrado de pdf", "seguridad del pdf"],
     },
+    // F19b (DECISOES § 780 and § 790): the QR code guide; no synonym is a query of the QR code generator itself.
+    "guides-qr-code-size": {
+      name: "Tamaño del código QR",
+      description: "Cómo el texto que escribes define cuántos cuadritos tiene un código QR, y qué cambia eso en el PNG y al imprimir.",
+      synonyms: ["guía", "tamaño de impresión del código qr", "dimensiones del código qr"],
+    },
   },
   guides: {
     'guides-15-vs-30-year-mortgage': {

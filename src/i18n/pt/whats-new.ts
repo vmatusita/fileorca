@@ -125,7 +125,7 @@ export default {
     },
     'new-guides': {
       title: 'Guias novos com números medidos por nós',
-      body: 'Guias novos respondem a uma pergunta cada um, com a ferramenta dentro: uma foto abaixo do limite de tamanho de um formulário, WebP, AVIF ou JPG, assinar um PDF sem imprimir e o que a senha de um PDF protege. Todo número deles vem da nossa própria medida, feita com as ferramentas do site.',
+      body: 'Guias novos respondem a uma pergunta cada um, com a ferramenta dentro: uma foto abaixo do limite de tamanho de um formulário, WebP, AVIF ou JPG, assinar um PDF sem imprimir, o que a senha de um PDF protege e o tamanho de um QR code. Todo número deles vem da nossa própria medida, feita com as ferramentas do site.',
     },
   },
 } satisfies WhatsNewTexts;

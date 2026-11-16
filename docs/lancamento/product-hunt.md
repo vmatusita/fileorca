@@ -105,13 +105,13 @@ Por que a primeira: diz as três áreas e a diferença, sem adjetivo nem número
 **Descrição A (449 caracteres):**
 
 ```
-FileOrca is a set of free tools for everyday files, and the work happens in your browser: your files are not uploaded. Compress, resize, crop and convert images (HEIC, WebP, AVIF, PNG, JPG), merge, split, compress and sign PDFs, and work out a mortgage or a debt payoff plan. There are 11 image tools, 13 PDF tools and 14 money calculators, plus 22 guides, 14 of them with numbers measured on our test files. No sign-up: open a tool and drop a file.
+FileOrca is a set of free tools for everyday files, and the work happens in your browser: your files are not uploaded. Compress, resize, crop and convert images (HEIC, WebP, AVIF, PNG, JPG), merge, split, compress and sign PDFs, and work out a mortgage or a debt payoff plan. There are 11 image tools, 13 PDF tools and 14 money calculators, plus 23 guides, 15 of them with numbers measured on our test files. No sign-up: open a tool and drop a file.
 ```
 
 **Descrição B (314 caracteres):**
 
 ```
-Free image, PDF and money tools that run in your browser. Your files are not uploaded: the work happens on your device, and you can see it in the Network tab. 11 image tools, 13 PDF tools, 14 money calculators and 22 guides, 14 of them with measured numbers. No sign-up, and a batch of files comes back as one ZIP.
+Free image, PDF and money tools that run in your browser. Your files are not uploaded: the work happens on your device, and you can see it in the Network tab. 11 image tools, 13 PDF tools, 14 money calculators and 23 guides, 15 of them with measured numbers. No sign-up, and a batch of files comes back as one ZIP.
 ```
 
 Por que a A: começa pelo que é e pela diferença, lista o que dá para fazer com os nomes que as pessoas buscam (HEIC, WebP) e termina no que a pessoa faz primeiro. A B é a curta, para quando a página de produto já mostrar a lista na galeria.
@@ -135,7 +135,7 @@ What you can do today:
 - Images: compress, resize, crop, rotate or flip, HEIC to JPG, WebP to JPG, PNG to JPG, AVIF to JPG, JPG and PNG to WebP or AVIF, remove EXIF data, and images into one PDF. 11 image tools and 4 presets for common settings.
 - PDFs: merge, split, extract or organize pages, compress, PDF to JPG or PNG, sign, add or remove a password, watermark, page numbers and more. 13 PDF tools.
 - Money: a mortgage calculator, refinance, loans, debt payoff and others. 14 money calculators.
-- 22 guides: 14 file guides with numbers measured on our test files with the same tools, and 8 money guides worked out by the engines of the calculators.
+- 23 guides: 15 file guides with numbers measured on our test files with the same tools, and 8 money guides worked out by the engines of the calculators.
 
 How it works: the site is static. The tools run in your browser, with WebAssembly codecs that load the first time you need them. Your file is not uploaded: open the Network tab in your browser's developer tools, use a tool, and you will see that no request carries it. After the page and the codec for your type of file have loaded, the tool keeps working if you go offline.
 
@@ -150,7 +150,7 @@ Notas sobre o texto:
 
 - As afirmações técnicas do comentário são as da seção "Provas": o arquivo não é enviado (Network tab), a ferramenta segue funcionando offline depois que a página e o codec do tipo de arquivo carregaram, os anúncios fora das ferramentas, o Ko-fi, a ausência de conta, o lote com Ctrl+V e ZIP, e as contagens dos registros. O `tests/unit/launch-kit.test.ts` reprova uma frase técnica em inglês que não contenha uma das frases provadas.
 - O comentário não conta a história de como o site nasceu: a run não sabe essa história. Se quiser contá-la, escreva com as suas palavras, sem falar de outros sites.
-- "measured" vale só para os 14 guias de arquivo. Os 8 guias de dinheiro têm os números calculados pelos motores das calculadoras, sem arquivo de teste.
+- "measured" vale só para os 15 guias de arquivo. Os 8 guias de dinheiro têm os números calculados pelos motores das calculadoras, sem arquivo de teste.
 - A frase "ads from Google AdSense" só vale **se os anúncios estiverem ligados no dia**. Se não estiverem, troque por "Ads are not on yet. When they are, Google AdSense will pay the costs. There is also an optional Ko-fi link."
 - O comentário não diz se o código é aberto. Veja a pergunta abaixo.
 - A exclamação do "Hi Product Hunt!" é do tom do site, mas reescreva como você cumprimentaria.
@@ -195,9 +195,9 @@ Cada afirmação técnica do kit tem um teste que passa no `pnpm verificar` da r
    - **Prova:** `tests/e2e/budgets.spec.ts`: nenhuma página de ferramenta ou guia pede um worker ou um `.wasm` antes do primeiro arquivo, e cada uma carrega dois arquivos de JavaScript.
 4. **"tested automatically in Chromium and in WebKit".** Só esses dois motores: o teste do kit reprova o nome de outro navegador (Chrome, Edge, Firefox, Safari) nos textos em inglês.
    - **Prova:** `playwright.config.ts` (os dois projetos) e as partes do CI, que rodam a suíte inteira nos dois motores.
-5. **"14 of them with numbers measured on our test files" / "14 of them with measured numbers" / "14 file guides with numbers measured on our test files" / "File guides with numbers measured on our test files".** "measured" vale só para os 14 guias de arquivo; os 8 guias de dinheiro têm os números calculados pelos motores das calculadoras no build.
-   - **Prova:** `tests/unit/guides-measured.test.ts` (cada número dos 14 guias de arquivo vem de `data/guides-measured.json`, com amostra, método e data), `tests/unit/guides-numbers.test.ts` (nenhum algarismo à mão) e `tests/unit/calc-guides.test.ts` (os guias de dinheiro contra o motor e o oráculo). O `tests/unit/launch-kit.test.ts` reprova "measured" junto de outra contagem.
-6. **As contagens** (11 image tools, 4 presets, 13 PDF tools, 14 money calculators, 22 guides, 14 file guides, 8 money guides).
+5. **"15 of them with numbers measured on our test files" / "15 of them with measured numbers" / "15 file guides with numbers measured on our test files" / "File guides with numbers measured on our test files".** "measured" vale só para os 15 guias de arquivo; os 8 guias de dinheiro têm os números calculados pelos motores das calculadoras no build.
+   - **Prova:** `tests/unit/guides-measured.test.ts` (cada número dos 15 guias de arquivo vem de `data/guides-measured.json`, com amostra, método e data), `tests/unit/guides-numbers.test.ts` (nenhum algarismo à mão) e `tests/unit/calc-guides.test.ts` (os guias de dinheiro contra o motor e o oráculo). O `tests/unit/launch-kit.test.ts` reprova "measured" junto de outra contagem.
+6. **As contagens** (11 image tools, 4 presets, 13 PDF tools, 14 money calculators, 23 guides, 15 file guides, 8 money guides).
    - **Prova:** `tests/unit/launch-kit.test.ts` compara cada contagem deste arquivo com os registros (`src/tools/image/registry.ts`, `src/tools/pdf/registry.ts`, `src/tools/calc/registry.ts`, `src/tools/guides/registry.ts`).
 7. **"There is no account" / "No sign-up".**
    - **Prova:** `tests/unit/routes.test.ts`: a lista de rotas é a do mapa, nenhuma página fica fora dele, e nenhum caminho nem página é de conta, login, cadastro ou perfil ("has no page of an account").
@@ -212,7 +212,7 @@ Cada afirmação técnica do kit tem um teste que passa no `pnpm verificar` da r
 12. **"keep your numbers on your device".** A legenda da galeria 5.
     - **Prova:** `tests/e2e/money-privacy.spec.ts` ("no typed number leaves the device"), em cada calculadora e guia de dinheiro.
 
-<!-- contagens: image-tools=11 image-presets=4 pdf-tools=13 calculators=14 guides=22 file-guides=14 money-guides=8 -->
+<!-- contagens: image-tools=11 image-presets=4 pdf-tools=13 calculators=14 guides=23 file-guides=15 money-guides=8 -->
 
 ## O que ficou fora do texto de propósito
 
@@ -229,7 +229,7 @@ Cada afirmação técnica do kit tem um teste que passa no `pnpm verificar` da r
 
 - [ ] Conta pessoal com foto sua, nome e bio de pessoa. Se for nova, criada com uma semana de folga.
 - [ ] Reescrever a tagline, a descrição e o primeiro comentário com as suas palavras.
-- [ ] Conferir em <https://fileorca.com/> as contagens (8, 3, 12, 14, 22) e se os anúncios estão ligados; ajustar a frase do dinheiro.
+- [ ] Conferir em <https://fileorca.com/> as contagens (8, 3, 12, 14, 23) e se os anúncios estão ligados; ajustar a frase do dinheiro.
 - [ ] Conferir se o repositório público do motor existe; se não, apagar a resposta de código aberto com link.
 - [ ] Subir a miniatura (`thumbnail.gif`, ou `thumbnail.png` se o formulário recusar o GIF) e de 3 a 5 imagens da galeria, na ordem da tabela.
 - [ ] Link do produto: `https://fileorca.com/`, sem UTM e sem encurtador.

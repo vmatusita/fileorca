@@ -444,6 +444,12 @@ export default {
       description: "What the password to open does, what the restrictions do not, and why a short password is a weak one.",
       synonyms: ["guide", "pdf encryption", "pdf security"],
     },
+    // F19b (DECISOES § 780 and § 790): the QR code guide; no synonym is a query of the QR code generator itself.
+    "guides-qr-code-size": {
+      name: "QR code size",
+      description: "How the text you type sets the number of squares in a QR code, and what that means for the PNG and for print.",
+      synonyms: ["guide", "qr code print size", "qr code dimensions"],
+    },
   },
   tools: {
     'compress-image': {

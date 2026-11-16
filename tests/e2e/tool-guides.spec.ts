@@ -18,9 +18,16 @@ import qrEn from '../../src/tools/qr-code-generator/i18n/en.ts';
 import qrPt from '../../src/tools/qr-code-generator/i18n/pt.ts';
 import qrEs from '../../src/tools/qr-code-generator/i18n/es.ts';
 import { PASSWORD, SIGNER, protectedName, signWithTypedName, signedName, typePasswordTwice } from './lib/guide-flows.ts';
+import { pngPixels } from './lib/png.ts';
+import jsQR from 'jsqr';
 
 /** F19b: the texts of the QR code generator in each language (the words of its PNG button). */
 const QR_PANEL_TEXTS = { en: qrEn, pt: qrPt, es: qrEs } as const;
+/**
+ * F19b (front M5): the link typed into the QR code generator of the QR code guide, a sentinel that no request may carry
+ * (like the name of a file), with an accent so its UTF-8 is not its characters.
+ */
+const QR_LINK = 'https://qr-guide-sentinel-5k2w.example/olá?ref=guia-7d3';
 
 // The tool each file guide embeds (prompt F5b, decision 7), in both browsers: the guide's own fixture goes in, the result
 // shows, the Download hands it over, and what comes out passes the checks the tool's own page passes (it opens, it is the
@@ -204,6 +211,29 @@ const CASES: Record<FileGuideId, Case> = {
       expect(await opensWithoutPassword(delivered.bytes), 'never opens without the password').toBe(false);
       expect((await soundPdf(delivered.bytes, { password: PASSWORD })).pages, 'every page, with the password').toHaveLength(8);
       expect(Buffer.from(delivered.bytes).includes(Buffer.from(PASSWORD, 'latin1')), 'the password is not in the file').toBe(false);
+    },
+  },
+  // F19b (front M5; DECISOES § 796): the QR code generator takes a link typed in its box, not a file. The PNG of the
+  // Download, at the size it starts with (Small), with the Oli in the middle, reads back to the exact UTF-8 of the link
+  // (jsQR on the pixels, as tests/e2e/qr-code.spec.ts reads it), every pixel opaque, and its name is the language's
+  // (`panel.file`), never the text.
+  'guides-qr-code-size': {
+    files: () => [],
+    input: async (page) => {
+      await page.locator('#fo-tool-root #fo-qr-text').fill(QR_LINK);
+      await expect(page.locator('#fo-tool-root .fo-qr__code > svg'), 'the code is drawn as the link is typed').toBeVisible();
+    },
+    typed: [QR_LINK],
+    check: (delivered, lang) => {
+      expect(delivered.name).toBe(`${QR_PANEL_TEXTS[lang].panel.file}.png`);
+      expect(sniff(delivered.bytes), 'a PNG').toBe('png');
+      const { width, height, rgba } = pngPixels(delivered.bytes);
+      expect(width, 'a square').toBe(height);
+      let clear = 0;
+      for (let at = 3; at < rgba.length; at += 4) if (rgba[at] !== 255) clear += 1;
+      expect(clear, 'every pixel opaque').toBe(0);
+      const read = jsQR(new Uint8ClampedArray(rgba.buffer, rgba.byteOffset, rgba.length), width, height);
+      expect(Buffer.from(Uint8Array.from(read?.binaryData ?? [])).equals(Buffer.from(QR_LINK, 'utf8')), 'the PNG reads back to the link').toBe(true);
     },
   },
 };

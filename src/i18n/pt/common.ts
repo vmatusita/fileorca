@@ -360,5 +360,11 @@ export default {
       description: "O que a senha de abrir faz, o que as restrições não fazem, e por que uma senha curta é fraca.",
       synonyms: ["guia", "criptografia de pdf", "segurança do pdf"],
     },
+    // F19b (DECISOES § 780 and § 790): the QR code guide; no synonym is a query of the QR code generator itself.
+    "guides-qr-code-size": {
+      name: "Tamanho do QR code",
+      description: "Como o texto que você digita define quantos quadradinhos um QR code tem, e o que isso muda no PNG e na impressão.",
+      synonyms: ["guia", "tamanho de impressão do qr code", "dimensões do qr code"],
+    },
   },
 } satisfies PtCommonTexts;

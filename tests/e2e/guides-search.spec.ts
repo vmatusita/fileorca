@@ -48,9 +48,9 @@ test('the index marks every entry as a tool or a guide, and every guide has the 
   expect(entries.every((entry) => entry.kind === 'tool' || entry.kind === 'guide')).toBe(true);
   expect(guides.map((entry) => entry.id).every((id) => id.startsWith('guides-'))).toBe(true);
   expect(entries.filter((entry) => entry.kind === 'tool').some((entry) => entry.id.startsWith('guides-'))).toBe(false);
-  // F19b (DECISOES § 796): 15 before; 22 with the four file guides and three money guides of the F19b (23 with the QR code
-  // guide, whose colour is the lime of the utilities).
-  expect(guides).toHaveLength(22);
+  // F19b (DECISOES § 796): 15 before; 22 with the four file guides and three money guides of the F19b; 23 with the QR code
+  // guide, whose colour is the lime of the utilities (front M5).
+  expect(guides).toHaveLength(23);
   for (const guide of guides) {
     expect(guide.icon, guide.id).toContain(FILE_ICON);
     expect(guide.cat, guide.id).toBe(isFileGuide(guide.id) ? GROUP_OF_HUB[FILE_GUIDES[guide.id].hub] : 'money');

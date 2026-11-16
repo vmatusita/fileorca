@@ -12,9 +12,9 @@
       "scripts/guides/lib/record.ts",
       "scripts/guides/measure.ts"
     ],
-    "sha256": "77397ad4a79203bd34c5d1bcdc0a236cdb3b5ad9ca16c8403c7c981983cc1ddf"
+    "sha256": "a1fa02a024648ba7d7f35eef5e525223a3b9856178906ed263e2b2072587ca1d"
   },
-  "commit": "5adad20569b7f28be0d90e97c2cfe3b8a7dbb396",
+  "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da",
   "measuredOn": "2026-11-16",
   "environment": {
     "os": "Windows 10.0.26300",
@@ -24359,6 +24359,3607 @@
       "facts": {
         "method": "AESv3"
       }
+    },
+    "guides-qr-code-size": {
+      "numbers": {
+        "texts": {
+          "value": 4,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "method": {
+            "runner": "node",
+            "engine": "the characters and the UTF-8 bytes of the text in Node (TextEncoder), the bytes the tool counts and encodes"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortChars": {
+          "value": 21,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "node",
+            "engine": "the characters and the UTF-8 bytes of the text in Node (TextEncoder), the bytes the tool counts and encodes"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortBytes": {
+          "value": 21,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "node",
+            "engine": "the characters and the UTF-8 bytes of the text in Node (TextEncoder), the bytes the tool counts and encodes"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainChars": {
+          "value": 76,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "node",
+            "engine": "the characters and the UTF-8 bytes of the text in Node (TextEncoder), the bytes the tool counts and encodes"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainBytes": {
+          "value": 76,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "node",
+            "engine": "the characters and the UTF-8 bytes of the text in Node (TextEncoder), the bytes the tool counts and encodes"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsChars": {
+          "value": 76,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "node",
+            "engine": "the characters and the UTF-8 bytes of the text in Node (TextEncoder), the bytes the tool counts and encodes"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsBytes": {
+          "value": 85,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "node",
+            "engine": "the characters and the UTF-8 bytes of the text in Node (TextEncoder), the bytes the tool counts and encodes"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longChars": {
+          "value": 195,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "node",
+            "engine": "the characters and the UTF-8 bytes of the text in Node (TextEncoder), the bytes the tool counts and encodes"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longBytes": {
+          "value": 195,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "node",
+            "engine": "the characters and the UTF-8 bytes of the text in Node (TextEncoder), the bytes the tool counts and encodes"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsMultibyte": {
+          "value": 9,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "node",
+            "engine": "the characters and the UTF-8 bytes of the text in Node (TextEncoder), the bytes the tool counts and encodes"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortSmallSideChromium": {
+          "value": 481,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortSmallPerModuleChromium": {
+          "value": 13,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortSmallBytesChromium": {
+          "value": 13098,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortMediumSideChromium": {
+          "value": 999,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortMediumPerModuleChromium": {
+          "value": 27,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortMediumBytesChromium": {
+          "value": 37233,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortLargeSideChromium": {
+          "value": 2035,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortLargePerModuleChromium": {
+          "value": 55,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortLargeBytesChromium": {
+          "value": 114383,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortVersionChromium": {
+          "value": 3,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "node",
+            "engine": "jsQR 1.4.0 in Node on the pixels of the downloaded PNG (tests/e2e/lib/png.ts), the reader of tests/e2e/qr-code.spec.ts: the bytes it reads back and the version it finds"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortModulesChromium": {
+          "value": 29,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortSideChromium": {
+          "value": 37,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortDarkChromium": {
+          "value": 434,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortHiddenChromium": {
+          "value": 16,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortHiddenShareChromium": {
+          "value": 0.0369,
+          "unit": "ratio",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainSmallSideChromium": {
+          "value": 456,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainSmallPerModuleChromium": {
+          "value": 8,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainSmallBytesChromium": {
+          "value": 14549,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainMediumSideChromium": {
+          "value": 969,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainMediumPerModuleChromium": {
+          "value": 17,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainMediumBytesChromium": {
+          "value": 38769,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainLargeSideChromium": {
+          "value": 1995,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainLargePerModuleChromium": {
+          "value": 35,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainLargeBytesChromium": {
+          "value": 114846,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainVersionChromium": {
+          "value": 8,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "node",
+            "engine": "jsQR 1.4.0 in Node on the pixels of the downloaded PNG (tests/e2e/lib/png.ts), the reader of tests/e2e/qr-code.spec.ts: the bytes it reads back and the version it finds"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainModulesChromium": {
+          "value": 49,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainSideChromium": {
+          "value": 57,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainDarkChromium": {
+          "value": 1232,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainHiddenChromium": {
+          "value": 67,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainHiddenShareChromium": {
+          "value": 0.0544,
+          "unit": "ratio",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsSmallSideChromium": {
+          "value": 488,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsSmallPerModuleChromium": {
+          "value": 8,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsSmallBytesChromium": {
+          "value": 15955,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsMediumSideChromium": {
+          "value": 976,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsMediumPerModuleChromium": {
+          "value": 16,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsMediumBytesChromium": {
+          "value": 38610,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsLargeSideChromium": {
+          "value": 2013,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsLargePerModuleChromium": {
+          "value": 33,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsLargeBytesChromium": {
+          "value": 115929,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsVersionChromium": {
+          "value": 9,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "node",
+            "engine": "jsQR 1.4.0 in Node on the pixels of the downloaded PNG (tests/e2e/lib/png.ts), the reader of tests/e2e/qr-code.spec.ts: the bytes it reads back and the version it finds"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsModulesChromium": {
+          "value": 53,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsSideChromium": {
+          "value": 61,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsDarkChromium": {
+          "value": 1430,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsHiddenChromium": {
+          "value": 60,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsHiddenShareChromium": {
+          "value": 0.042,
+          "unit": "ratio",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longSmallSideChromium": {
+          "value": 510,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longSmallPerModuleChromium": {
+          "value": 6,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longSmallBytesChromium": {
+          "value": 21062,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longMediumSideChromium": {
+          "value": 1020,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longMediumPerModuleChromium": {
+          "value": 12,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longMediumBytesChromium": {
+          "value": 46776,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longLargeSideChromium": {
+          "value": 2040,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longLargePerModuleChromium": {
+          "value": 24,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longLargeBytesChromium": {
+          "value": 125747,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longVersionChromium": {
+          "value": 15,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "node",
+            "engine": "jsQR 1.4.0 in Node on the pixels of the downloaded PNG (tests/e2e/lib/png.ts), the reader of tests/e2e/qr-code.spec.ts: the bytes it reads back and the version it finds"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longModulesChromium": {
+          "value": 77,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longSideChromium": {
+          "value": 85,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longDarkChromium": {
+          "value": 3005,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longHiddenChromium": {
+          "value": 140,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longHiddenShareChromium": {
+          "value": 0.0466,
+          "unit": "ratio",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "quietZoneChromium": {
+          "value": 4,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "pngsChromium": {
+          "value": 12,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "readChromium": {
+          "value": 12,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "method": {
+            "runner": "node",
+            "engine": "jsQR 1.4.0 in Node on the pixels of the downloaded PNG (tests/e2e/lib/png.ts), the reader of tests/e2e/qr-code.spec.ts: the bytes it reads back and the version it finds"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "smallPerModuleMinChromium": {
+          "value": 6,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "smallPerModuleMaxChromium": {
+          "value": 13,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "mediumPerModuleMinChromium": {
+          "value": 12,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "mediumPerModuleMaxChromium": {
+          "value": 27,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "largePerModuleMinChromium": {
+          "value": 24,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "largePerModuleMaxChromium": {
+          "value": 55,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "hiddenShareMinChromium": {
+          "value": 0.0369,
+          "unit": "ratio",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "hiddenShareMaxChromium": {
+          "value": 0.0544,
+          "unit": "ratio",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "chromium",
+            "version": "156.0.8078.4",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortSmallSideWebkit": {
+          "value": 481,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortSmallPerModuleWebkit": {
+          "value": 13,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortSmallBytesWebkit": {
+          "value": 7084,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortMediumSideWebkit": {
+          "value": 999,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortMediumPerModuleWebkit": {
+          "value": 27,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortMediumBytesWebkit": {
+          "value": 16736,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortLargeSideWebkit": {
+          "value": 2035,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortLargePerModuleWebkit": {
+          "value": 55,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortLargeBytesWebkit": {
+          "value": 42210,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortVersionWebkit": {
+          "value": 3,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "node",
+            "engine": "jsQR 1.4.0 in Node on the pixels of the downloaded PNG (tests/e2e/lib/png.ts), the reader of tests/e2e/qr-code.spec.ts: the bytes it reads back and the version it finds"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortModulesWebkit": {
+          "value": 29,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortSideWebkit": {
+          "value": 37,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortDarkWebkit": {
+          "value": 434,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortHiddenWebkit": {
+          "value": 16,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "shortHiddenShareWebkit": {
+          "value": 0.0369,
+          "unit": "ratio",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainSmallSideWebkit": {
+          "value": 456,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainSmallPerModuleWebkit": {
+          "value": 8,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainSmallBytesWebkit": {
+          "value": 7526,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainMediumSideWebkit": {
+          "value": 969,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainMediumPerModuleWebkit": {
+          "value": 17,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainMediumBytesWebkit": {
+          "value": 17712,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainLargeSideWebkit": {
+          "value": 1995,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainLargePerModuleWebkit": {
+          "value": 35,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainLargeBytesWebkit": {
+          "value": 43158,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainVersionWebkit": {
+          "value": 8,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "node",
+            "engine": "jsQR 1.4.0 in Node on the pixels of the downloaded PNG (tests/e2e/lib/png.ts), the reader of tests/e2e/qr-code.spec.ts: the bytes it reads back and the version it finds"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainModulesWebkit": {
+          "value": 49,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainSideWebkit": {
+          "value": 57,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainDarkWebkit": {
+          "value": 1232,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainHiddenWebkit": {
+          "value": 67,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "plainHiddenShareWebkit": {
+          "value": 0.0544,
+          "unit": "ratio",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsSmallSideWebkit": {
+          "value": 488,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsSmallPerModuleWebkit": {
+          "value": 8,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsSmallBytesWebkit": {
+          "value": 8099,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsMediumSideWebkit": {
+          "value": 976,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsMediumPerModuleWebkit": {
+          "value": 16,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsMediumBytesWebkit": {
+          "value": 17593,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsLargeSideWebkit": {
+          "value": 2013,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsLargePerModuleWebkit": {
+          "value": 33,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsLargeBytesWebkit": {
+          "value": 42735,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsVersionWebkit": {
+          "value": 9,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "node",
+            "engine": "jsQR 1.4.0 in Node on the pixels of the downloaded PNG (tests/e2e/lib/png.ts), the reader of tests/e2e/qr-code.spec.ts: the bytes it reads back and the version it finds"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsModulesWebkit": {
+          "value": 53,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsSideWebkit": {
+          "value": 61,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsDarkWebkit": {
+          "value": 1430,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsHiddenWebkit": {
+          "value": 60,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "accentsHiddenShareWebkit": {
+          "value": 0.042,
+          "unit": "ratio",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês."
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longSmallSideWebkit": {
+          "value": 510,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longSmallPerModuleWebkit": {
+          "value": 6,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longSmallBytesWebkit": {
+          "value": 10594,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longMediumSideWebkit": {
+          "value": 1020,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longMediumPerModuleWebkit": {
+          "value": 12,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longMediumBytesWebkit": {
+          "value": 21986,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longLargeSideWebkit": {
+          "value": 2040,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longLargePerModuleWebkit": {
+          "value": 24,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longLargeBytesWebkit": {
+          "value": 48709,
+          "unit": "bytes",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longVersionWebkit": {
+          "value": 15,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "node",
+            "engine": "jsQR 1.4.0 in Node on the pixels of the downloaded PNG (tests/e2e/lib/png.ts), the reader of tests/e2e/qr-code.spec.ts: the bytes it reads back and the version it finds"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longModulesWebkit": {
+          "value": 77,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longSideWebkit": {
+          "value": 85,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longDarkWebkit": {
+          "value": 3005,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longHiddenWebkit": {
+          "value": 140,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "longHiddenShareWebkit": {
+          "value": 0.0466,
+          "unit": "ratio",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 1
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "quietZoneWebkit": {
+          "value": 4,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "pngsWebkit": {
+          "value": 12,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "readWebkit": {
+          "value": 12,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "method": {
+            "runner": "node",
+            "engine": "jsQR 1.4.0 in Node on the pixels of the downloaded PNG (tests/e2e/lib/png.ts), the reader of tests/e2e/qr-code.spec.ts: the bytes it reads back and the version it finds"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "smallPerModuleMinWebkit": {
+          "value": 6,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "smallPerModuleMaxWebkit": {
+          "value": 13,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "mediumPerModuleMinWebkit": {
+          "value": 12,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "mediumPerModuleMaxWebkit": {
+          "value": 27,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "largePerModuleMinWebkit": {
+          "value": 24,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "largePerModuleMaxWebkit": {
+          "value": 55,
+          "unit": "px",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "hiddenShareMinWebkit": {
+          "value": 0.0369,
+          "unit": "ratio",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "hiddenShareMaxWebkit": {
+          "value": 0.0544,
+          "unit": "ratio",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "sameCodes": {
+          "value": 4,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "samePngBytes": {
+          "value": 0,
+          "unit": "count",
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "method": {
+            "runner": "playwright",
+            "browser": "webkit",
+            "version": "27.2",
+            "os": "Windows 10.0.26300",
+            "path": "/qr-code-generator/"
+          },
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        }
+      },
+      "tables": {
+        "codes": {
+          "columns": [
+            "text",
+            "browser",
+            "chars",
+            "bytes",
+            "version",
+            "modules",
+            "side",
+            "dark",
+            "hidden"
+          ],
+          "kinds": [
+            {
+              "runner": "node",
+              "unit": "label"
+            },
+            {
+              "runner": "node",
+              "unit": "label"
+            },
+            {
+              "runner": "node",
+              "unit": "count"
+            },
+            {
+              "runner": "node",
+              "unit": "bytes"
+            },
+            {
+              "runner": "node",
+              "unit": "count"
+            },
+            {
+              "runner": "playwright",
+              "unit": "count"
+            },
+            {
+              "runner": "playwright",
+              "unit": "count"
+            },
+            {
+              "runner": "playwright",
+              "unit": "count"
+            },
+            {
+              "runner": "playwright",
+              "unit": "count"
+            }
+          ],
+          "rows": [
+            [
+              "short",
+              "chromium",
+              21,
+              21,
+              3,
+              29,
+              37,
+              434,
+              16
+            ],
+            [
+              "plain",
+              "chromium",
+              76,
+              76,
+              8,
+              49,
+              57,
+              1232,
+              67
+            ],
+            [
+              "accents",
+              "chromium",
+              76,
+              85,
+              9,
+              53,
+              61,
+              1430,
+              60
+            ],
+            [
+              "long",
+              "chromium",
+              195,
+              195,
+              15,
+              77,
+              85,
+              3005,
+              140
+            ],
+            [
+              "short",
+              "webkit",
+              21,
+              21,
+              3,
+              29,
+              37,
+              434,
+              16
+            ],
+            [
+              "plain",
+              "webkit",
+              76,
+              76,
+              8,
+              49,
+              57,
+              1232,
+              67
+            ],
+            [
+              "accents",
+              "webkit",
+              76,
+              85,
+              9,
+              53,
+              61,
+              1430,
+              60
+            ],
+            [
+              "long",
+              "webkit",
+              195,
+              195,
+              15,
+              77,
+              85,
+              3005,
+              140
+            ]
+          ],
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "methods": [
+            {
+              "runner": "node",
+              "engine": "the characters and the UTF-8 bytes of the text in Node (TextEncoder), the bytes the tool counts and encodes"
+            },
+            {
+              "runner": "node",
+              "engine": "jsQR 1.4.0 in Node on the pixels of the downloaded PNG (tests/e2e/lib/png.ts), the reader of tests/e2e/qr-code.spec.ts: the bytes it reads back and the version it finds"
+            },
+            {
+              "runner": "playwright",
+              "browser": "chromium",
+              "version": "156.0.8078.4",
+              "os": "Windows 10.0.26300",
+              "path": "/qr-code-generator/"
+            },
+            {
+              "runner": "playwright",
+              "browser": "webkit",
+              "version": "27.2",
+              "os": "Windows 10.0.26300",
+              "path": "/qr-code-generator/"
+            }
+          ],
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        },
+        "pngs": {
+          "columns": [
+            "text",
+            "size",
+            "browser",
+            "side",
+            "perModule",
+            "bytes",
+            "read"
+          ],
+          "kinds": [
+            {
+              "runner": "node",
+              "unit": "label"
+            },
+            {
+              "runner": "node",
+              "unit": "label"
+            },
+            {
+              "runner": "node",
+              "unit": "label"
+            },
+            {
+              "runner": "playwright",
+              "unit": "px"
+            },
+            {
+              "runner": "playwright",
+              "unit": "px"
+            },
+            {
+              "runner": "playwright",
+              "unit": "bytes"
+            },
+            {
+              "runner": "node",
+              "unit": "count"
+            }
+          ],
+          "rows": [
+            [
+              "short",
+              "small",
+              "chromium",
+              481,
+              13,
+              13098,
+              1
+            ],
+            [
+              "short",
+              "medium",
+              "chromium",
+              999,
+              27,
+              37233,
+              1
+            ],
+            [
+              "short",
+              "large",
+              "chromium",
+              2035,
+              55,
+              114383,
+              1
+            ],
+            [
+              "plain",
+              "small",
+              "chromium",
+              456,
+              8,
+              14549,
+              1
+            ],
+            [
+              "plain",
+              "medium",
+              "chromium",
+              969,
+              17,
+              38769,
+              1
+            ],
+            [
+              "plain",
+              "large",
+              "chromium",
+              1995,
+              35,
+              114846,
+              1
+            ],
+            [
+              "accents",
+              "small",
+              "chromium",
+              488,
+              8,
+              15955,
+              1
+            ],
+            [
+              "accents",
+              "medium",
+              "chromium",
+              976,
+              16,
+              38610,
+              1
+            ],
+            [
+              "accents",
+              "large",
+              "chromium",
+              2013,
+              33,
+              115929,
+              1
+            ],
+            [
+              "long",
+              "small",
+              "chromium",
+              510,
+              6,
+              21062,
+              1
+            ],
+            [
+              "long",
+              "medium",
+              "chromium",
+              1020,
+              12,
+              46776,
+              1
+            ],
+            [
+              "long",
+              "large",
+              "chromium",
+              2040,
+              24,
+              125747,
+              1
+            ],
+            [
+              "short",
+              "small",
+              "webkit",
+              481,
+              13,
+              7084,
+              1
+            ],
+            [
+              "short",
+              "medium",
+              "webkit",
+              999,
+              27,
+              16736,
+              1
+            ],
+            [
+              "short",
+              "large",
+              "webkit",
+              2035,
+              55,
+              42210,
+              1
+            ],
+            [
+              "plain",
+              "small",
+              "webkit",
+              456,
+              8,
+              7526,
+              1
+            ],
+            [
+              "plain",
+              "medium",
+              "webkit",
+              969,
+              17,
+              17712,
+              1
+            ],
+            [
+              "plain",
+              "large",
+              "webkit",
+              1995,
+              35,
+              43158,
+              1
+            ],
+            [
+              "accents",
+              "small",
+              "webkit",
+              488,
+              8,
+              8099,
+              1
+            ],
+            [
+              "accents",
+              "medium",
+              "webkit",
+              976,
+              16,
+              17593,
+              1
+            ],
+            [
+              "accents",
+              "large",
+              "webkit",
+              2013,
+              33,
+              42735,
+              1
+            ],
+            [
+              "long",
+              "small",
+              "webkit",
+              510,
+              6,
+              10594,
+              1
+            ],
+            [
+              "long",
+              "medium",
+              "webkit",
+              1020,
+              12,
+              21986,
+              1
+            ],
+            [
+              "long",
+              "large",
+              "webkit",
+              2040,
+              24,
+              48709,
+              1
+            ]
+          ],
+          "sample": {
+            "kind": "texts",
+            "texts": [
+              "https://fileorca.com/",
+              "Promocao de inverno: cafe, pao de queijo e maca as sextas, ate o fim do mes.",
+              "Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.",
+              "https://example.com/shop/orca-mug?color=ocean-blue&size=large&utm_source=newsletter&utm_medium=email&utm_campaign=winter-sale&utm_content=top-banner&utm_term=ceramic-mug&ref=printed-flyer&lang=en"
+            ],
+            "count": 4,
+            "note": "four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large"
+          },
+          "methods": [
+            {
+              "runner": "node",
+              "engine": "the characters and the UTF-8 bytes of the text in Node (TextEncoder), the bytes the tool counts and encodes"
+            },
+            {
+              "runner": "node",
+              "engine": "jsQR 1.4.0 in Node on the pixels of the downloaded PNG (tests/e2e/lib/png.ts), the reader of tests/e2e/qr-code.spec.ts: the bytes it reads back and the version it finds"
+            },
+            {
+              "runner": "playwright",
+              "browser": "chromium",
+              "version": "156.0.8078.4",
+              "os": "Windows 10.0.26300",
+              "path": "/qr-code-generator/"
+            },
+            {
+              "runner": "playwright",
+              "browser": "webkit",
+              "version": "27.2",
+              "os": "Windows 10.0.26300",
+              "path": "/qr-code-generator/"
+            }
+          ],
+          "date": "2026-11-16",
+          "commit": "1d5b3037b99e8e4d9f485886ef89e50679db88da"
+        }
+      },
+      "facts": {}
     }
   }
 }

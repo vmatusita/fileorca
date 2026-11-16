@@ -968,8 +968,8 @@ describe('portão de conteúdo: o hub de guias (F11)', () => {
     for (const lang of LANGS) {
       expect(checkGuidesHub(guidesHubPage({ lang }), guidesHubWant(lang)), lang).toEqual([]);
       // F19b (DECISOES § 796): 15, 10 and 15 before; with the four file guides and three money guides of the F19b, 22, 14
-      // and 22 (the QR code guide makes them 23, 15 and 23).
-      expect(guidesHubWant(lang).paths, lang).toHaveLength([22, 14, 22][LANGS.indexOf(lang)] ?? 0);
+      // and 22; with the QR code guide, 23, 15 and 23 (front M5).
+      expect(guidesHubWant(lang).paths, lang).toHaveLength([23, 15, 23][LANGS.indexOf(lang)] ?? 0);
     }
     expect(LANGS.map((lang) => guidesHubWords(guidesHubPage({ lang })))).toEqual([91, 108, 97]);
   });

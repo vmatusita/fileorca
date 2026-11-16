@@ -191,9 +191,12 @@ describe('the texts of the Product Hunt kit', () => {
     expect(claimProblems(answer('There is no account. You can protect, unlock and watermark PDFs.')).join()).toMatch(/"unlock" é palavra proibida/);
     expect(claimProblems(answer('There is no account. Unlock PDF removes a password.'))).toEqual([]);
     expect(claimProblems(answer('There is no account, and most sites want you to upload it first.')).join()).toMatch(/fala de outros sites/);
-    expect(measuredProblems('plus 15 guides whose numbers were measured on real test files')).toHaveLength(1);
-    expect(measuredProblems('15 guides with measured numbers')).toHaveLength(1);
-    expect(measuredProblems(`15 guides, ${COUNTS['file-guides']} of them with numbers measured on real test files`)).toEqual([]);
+    // F19b (front M5; DECISOES § 796): the count of every guide, which the hand-typed 15 of these controls was until the QR
+    // code guide made the file guides 15 too (then "15 guides ... measured" was right, and the control saw nothing).
+    expect(COUNTS.guides).not.toBe(COUNTS['file-guides']);
+    expect(measuredProblems(`plus ${COUNTS.guides} guides whose numbers were measured on real test files`)).toHaveLength(1);
+    expect(measuredProblems(`${COUNTS.guides} guides with measured numbers`)).toHaveLength(1);
+    expect(measuredProblems(`${COUNTS.guides} guides, ${COUNTS['file-guides']} of them with numbers measured on real test files`)).toEqual([]);
     expect(measuredProblems('File guides with numbers measured on real files')).toEqual([]);
     expect(claimProblems(answer('There is no account, and 10 of them have numbers measured on real test files.')).join()).toMatch(/diga "our test files"/);
     expect(claimProblems(answer('A very long PDF can be too much for the memory of an older phone.')).join()).toMatch(/memory of an older phone\.": afirmação técnica sem prova/);

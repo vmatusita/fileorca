@@ -9,6 +9,9 @@ import { mediumDate, longDate as writtenDate } from '../../i18n/dates.ts';
 import type { Lang } from '../../i18n/routes.ts';
 import { TEXTS } from '../../i18n/texts.ts';
 import enShared from '../../i18n/en/file-guides.ts';
+import qrEn from '../qr-code-generator/i18n/en.ts';
+import qrPt from '../qr-code-generator/i18n/pt.ts';
+import qrEs from '../qr-code-generator/i18n/es.ts';
 import type { FileGuidesSharedTexts, FileGuideTexts } from '../../i18n/types.ts';
 import type { Cell, MeasuredFile, MeasuredNumber, MeasuredTable } from './measured-types.ts';
 import { GUIDE_PUBLISHED_ON, publishedOn, type FileGuideId } from './registry.ts';
@@ -208,6 +211,12 @@ const gpsLabel = (c: Ctx, kind: Cell): string => c.shared.gps[(String(kind) as k
 const toolName = (tool: string, f: GuideFormat): string => {
   const common = TEXTS[f.lang].common;
   return (common.tools as Record<string, { name: string }>)[tool]?.name ?? (common.pdf as Record<string, { name: string }>)[tool]?.name ?? tool;
+};
+/** F19b (front M5): the PNG sizes as the QR code generator names them in each language ("Small", "Pequeno", "Chico"). */
+const QR_SIZE_WORDS: Record<Lang, Record<'small' | 'medium' | 'large', string>> = {
+  en: { small: qrEn.panel.size.small, medium: qrEn.panel.size.medium, large: qrEn.panel.size.large },
+  pt: { small: qrPt.panel.size.small, medium: qrPt.panel.size.medium, large: qrPt.panel.size.large },
+  es: { small: qrEs.panel.size.small, medium: qrEs.panel.size.medium, large: qrEs.panel.size.large },
 };
 
 const BUILDERS: Record<FileGuideId, Builder> = {
@@ -435,6 +444,37 @@ const BUILDERS: Record<FileGuideId, Builder> = {
         [labels[1] ?? '', size(value('unlockedBytes'), c.f), value('unlockedEncrypted') === 0 && value('unlockedPages') === value('ownerPages') ? c.shared.yes : c.shared.no, blocked(value('unlockedBlocked'))],
         [labels[2] ?? '', size(value('mixedAfter'), c.f), value('refusedWithout') === value('files') ? c.shared.no : c.shared.yes, blocked(value('blocked'))],
       ],
+    ];
+  },
+  // F19b (front M5): the texts typed into the QR code generator, in Chromium (the names of the rows are the texts' labels):
+  // the characters, what the tool counts (the bytes of the UTF-8), the version the reader found in the PNG, the squares
+  // (modules) on a side and the dark ones under Oli; then the PNG of each text at each size, named by the tool's own words
+  // in the language: its pixels, the pixels of each square and the file.
+  'guides-qr-code-size': (c) => {
+    const codes = measuredTable('guides-qr-code-size', 'codes', c.file);
+    const pngs = measuredTable('guides-qr-code-size', 'pngs', c.file);
+    const chromium = (table: MeasuredTable) => (row: Cell[]): boolean => col(table, row, 'browser') === 'chromium';
+    const keys = codes.rows.filter(chromium(codes)).map((row) => String(col(codes, row, 'text')));
+    const labels = c.texts.tables[0]?.labels ?? [];
+    if (labels.length !== keys.length) throw new Error(`guide 5: ${labels.length} labels for the ${keys.length} texts`);
+    const name = (key: Cell): string => labels[keys.indexOf(String(key))] ?? String(key);
+    const sizes: Record<string, string> = QR_SIZE_WORDS[c.f.lang];
+    return [
+      codes.rows.filter(chromium(codes)).map((row) => [
+        name(col(codes, row, 'text')),
+        grouped(Number(col(codes, row, 'chars')), c.f),
+        grouped(Number(col(codes, row, 'bytes')), c.f),
+        grouped(Number(col(codes, row, 'version')), c.f),
+        grouped(Number(col(codes, row, 'modules')), c.f),
+        grouped(Number(col(codes, row, 'hidden')), c.f),
+      ]),
+      pngs.rows.filter(chromium(pngs)).map((row) => [
+        name(col(pngs, row, 'text')),
+        sizes[String(col(pngs, row, 'size'))] ?? String(col(pngs, row, 'size')),
+        pixels(col(pngs, row, 'side'), col(pngs, row, 'side'), c.f),
+        grouped(Number(col(pngs, row, 'perModule')), c.f),
+        cellSize(col(pngs, row, 'bytes'), c.f),
+      ]),
     ];
   },
 };

@@ -291,6 +291,7 @@ Os guias de arquivo em `/es/guias/<slug>/`: os 10 do ajuste de idiomas e os da F
 | WebP vs AVIF vs JPG | WebP, AVIF o JPG | /es/guias/webp-avif-o-jpg/ |
 | How to sign a PDF without printing it | Cómo firmar un PDF sin imprimirlo | /es/guias/firmar-pdf-sin-imprimir/ |
 | What a PDF password protects | Qué protege la contraseña de un PDF | /es/guias/que-protege-la-contrasena-de-un-pdf/ |
+| QR code size | Tamaño del código QR | /es/guias/tamano-del-codigo-qr/ |
 
 | Inglês | Español | Observação |
 | --- | --- | --- |

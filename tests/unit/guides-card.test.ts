@@ -38,12 +38,18 @@ const SPEC_N: Record<FileGuideId, number> = {
   'guides-webp-vs-avif-vs-jpg': 4,
   'guides-sign-pdf-without-printing': 4,
   'guides-what-a-pdf-password-protects': 4,
+  // F19b (front M5): the QR code guide measured no file, only texts (SPEC_TEXTS).
+  'guides-qr-code-size': 0,
 };
 /**
  * F19b (DECISOES § 786 and § 796): the distinct test texts of a guide that measured texts instead of files (the QR code
  * guide; a sample of the kind 'texts'), counted by hand like SPEC_N; a guide absent here measured no text.
  */
-const SPEC_TEXTS: Partial<Record<FileGuideId, number>> = {};
+const SPEC_TEXTS: Partial<Record<FileGuideId, number>> = {
+  // F19b (front M5), counted from the plan (docs/relatorios/fase-19b-plano.md, guide 5, and DECISOES § 785): a short link,
+  // the sentence without accents, the same sentence with them and a long link.
+  'guides-qr-code-size': 4,
+};
 /** The hub of each guide's group on the guides hub, by hand (F19b: Utilities for the QR code guides). */
 const GROUP_OF_HUB = { 'image-tools': 'image', 'pdf-tools': 'pdf', utilities: 'util' } as const;
 type Sampled = { sample: { kind?: string; files?: string[]; texts?: string[] } };
