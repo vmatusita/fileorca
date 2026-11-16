@@ -178,6 +178,7 @@ A falha da WebKit 14/15 é uma instabilidade que já existia (a regra da ficha: 
 ```
 
 - **A execução completa** sai do `gh pr ready`, depois deste relatório: o resultado e o `pnpm ci:custo` dela vão na descrição da PR. O rótulo `ci` não existe no repositório, então nenhuma conferência no Linux aconteceu no meio da run (pendência F19b m-1).
+- **A primeira execução completa:** A primeira execução completa (`43931578243`, no `c5dd869`, depois do `gh pr ready`) reprovou a WebKit 14/15 do Linux num teste que a run não tocou: o `pdf-privacy.spec.ts:424`, no Organizar PDF, achou a sentinela do nome do arquivo num pedido `GET blob:http://127.0.0.1:4173/…` (um objeto em memória do próprio navegador, que não sai do aparelho). O diff da run contra o `a017fc4` em `src/tools/pdf`, `src/engine` e nesse spec é vazio, e o mesmo teste passou no WebKit do Windows no lote A e no `--partes`. O GitHub não deixa re-executar um job antes de a execução inteira terminar; o push deste registro disparou uma execução completa nova, que vale como a nova tentativa (a ficha permite uma por falha que pareça instável). Pendência F19b m-28. O resultado da nova vai na descrição da PR.
 
 ## A revisão
 
@@ -193,7 +194,7 @@ https://fase-19b-fileorca.vmatusita.workers.dev/ (o build padrão, sem anúncio)
 
 ## As decisões novas
 
-§ 777 a § 803: § 777 a § 799 com os assuntos que o plano reservou (seção 2), e § 800 (as contagens de guias), § 801 a § 803 (os textos dos guias 6, 7 e 8 em en e es). A válvula não cortou nada. As pendências da run são as 27 linhas do grupo 30 do `docs/PENDENCIAS.md`.
+§ 777 a § 803: § 777 a § 799 com os assuntos que o plano reservou (seção 2), e § 800 (as contagens de guias), § 801 a § 803 (os textos dos guias 6, 7 e 8 em en e es). A válvula não cortou nada. As pendências da run são as 28 linhas do grupo 30 do `docs/PENDENCIAS.md`.
 
 ## O que é do Victor
 
