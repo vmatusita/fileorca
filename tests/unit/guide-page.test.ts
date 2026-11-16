@@ -74,7 +74,8 @@ describe('the tables of a guide as the page draws them (pageTable)', () => {
 
   it('groups the HEIC photos by camera, the PDF pages by file and the social sizes by network', () => {
     const grouped = FILE_GUIDE_IDS.filter((id) => pageTables(id, GUIDE_SHARED.en, guideTexts(id, 'en')).some((table) => table.grouped));
-    expect(grouped.sort()).toEqual(['guides-heic-to-jpg-on-windows', 'guides-pdf-to-jpg-resolution', 'guides-social-media-image-sizes']);
+    // F19b (front M1): and the photos of the online form by limit, and the signed PDFs by file.
+    expect(grouped.sort()).toEqual(['guides-compress-photo-for-online-form', 'guides-heic-to-jpg-on-windows', 'guides-pdf-to-jpg-resolution', 'guides-sign-pdf-without-printing', 'guides-social-media-image-sizes']);
     const social = pageTables('guides-social-media-image-sizes', GUIDE_SHARED.en, guideTexts('guides-social-media-image-sizes', 'en'))[0];
     expect(social?.groups.map((group) => group[0]?.[0])).toEqual(['Instagram', 'Facebook', 'X', 'LinkedIn', 'YouTube', 'Pinterest']);
     expect(social?.groups.find((group) => group[0]?.[0] === 'YouTube')).toHaveLength(2);

@@ -28,7 +28,14 @@ export default {
   tableHeading: "A medida",
   measuredIntro: "Este guia está sendo escrito.",
   measuredNote: "Medido em {date}.",
-  tables: [],
+  // F19b (front M1): the shape of the table, which the front T rewrites in words and keeps.
+  tables: [
+    {
+      heading: "Cada foto em cada limite",
+      caption: "O que a opção Até um tamanho deu a cada foto de celular em cada limite no Chromium: o arquivo, as dimensões, a qualidade a que chegou e a maior qualidade em que a foto inteira caberia no tamanho original",
+      head: ["Limite", "Foto", "Arquivo", "Dimensões em pixels", "Qualidade alcançada", "Tamanho original cabe até a qualidade"],
+    },
+  ],
   sourcesHeading: "Fontes",
   sources: [],
   facts: {},
