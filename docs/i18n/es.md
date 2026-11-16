@@ -252,9 +252,9 @@ Os guias de dinheiro (os 5 do ajuste de idiomas e os 3 da F19b):
 | How extra payments shorten a mortgage | Cómo los pagos adicionales acortan una hipoteca | /es/guias/pagos-adicionales-a-la-hipoteca/ |
 | Refinancing: find your break-even month | Refinanciamiento: halla tu mes de equilibrio | /es/guias/punto-de-equilibrio-del-refinanciamiento/ |
 | Rent vs buy: when buying starts to pay off | Alquilar o comprar: cuándo empieza a convenir comprar | /es/guias/punto-de-equilibrio-entre-alquilar-y-comprar/ |
-| APR vs APY | APR o APY | /es/guias/apr-o-apy/ |
+| APR vs APY | APR o APY: en qué se diferencian | /es/guias/apr-o-apy/ |
 | Credit card minimum payment: why it takes so long | Pago mínimo de la tarjeta de crédito: por qué tarda tanto | /es/guias/pago-minimo-de-la-tarjeta-de-credito/ |
-| How much house can I afford | Cuánta casa puedo pagar | /es/guias/cuanta-casa-puedo-pagar/ |
+| How much house can I afford | Cuánta casa puedo pagar con mi ingreso | /es/guias/cuanta-casa-puedo-pagar/ |
 
 ## Generador de códigos QR (ajuste idiomas)
 
