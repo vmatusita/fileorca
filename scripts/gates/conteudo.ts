@@ -53,7 +53,7 @@ import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { BR_CALC_IDS, CALC_PAGES, CALC_PAGE_IDS, LIFE_CALC_IDS, isBrCalc, isLifeCalc, moneyPage } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_PAGES, PDF_PRESET_IDS, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID } from '../../src/tools/guides/registry.ts';
-import { hubGuides } from '../../src/tools/guides/hub.ts';
+import { hubGuides, shownGroups } from '../../src/tools/guides/hub.ts';
 import { checkFileGuide, guideWords } from '../lib/file-guides.ts';
 import { fileIn } from '../lib/prontidao.ts';
 import { buildVariant } from '../lib/test-build.ts';
@@ -243,7 +243,7 @@ for (const lang of guidesHub ? languagesOf(guidesHub) : []) {
   guidesHubPages += 1;
   const html = read(path);
   const paths = hubGuides(lang).map((guide) => guide.path);
-  for (const problem of checkGuidesHub(html, { paths, lang })) problems.add(`${path}: ${problem}`);
+  for (const problem of checkGuidesHub(html, { paths, lang, groups: shownGroups(lang) })) problems.add(`${path}: ${problem}`);
   guidesHubWordCounts.push(`${lang} ${guidesHubWords(html)}`);
 }
 if (guidesHub && guidesHubPages !== languagesOf(guidesHub).length) problems.add(`${guidesHubPages} hub(s) de guias conferido(s), o mapa de rotas tem ${languagesOf(guidesHub).length}`);

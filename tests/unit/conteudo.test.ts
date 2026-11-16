@@ -32,6 +32,7 @@ import {
   comparisonPaths,
   findClaims,
   findPlaceholders,
+  GUIDES_HUB_GROUPS,
   GUIDES_HUB_WORDS,
   guidesHubWords,
   isCalcPage,
@@ -56,7 +57,7 @@ import { IMAGE_PAGES, IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/i
 import { CALC_PAGES, CALC_PRESET_IDS, isBrCalc, isLifeCalc } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_PAGES, PDF_PRESET_IDS, PDF_TOOL_IDS, type PdfPageId, type PdfToolId } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID, isFileGuide } from '../../src/tools/guides/registry.ts';
-import { HUB_GROUPS, hubGroup, hubGuides } from '../../src/tools/guides/hub.ts';
+import { HUB_GROUPS, hubGroup, hubGuides, shownGroups } from '../../src/tools/guides/hub.ts';
 import { fmt, groupDigits } from '../../src/i18n/format.ts';
 import { FILLER, FILLER_BY_LANG, MAX_GUIDE_WORDS, MEASURED_DATE, MIN_GUIDE_WORDS, checkFileGuide, findFiller, guideWords } from '../../scripts/lib/file-guides.ts';
 
@@ -912,16 +913,17 @@ function guidesHubPage(fake: FakeGuidesHub = {}): string {
   const n = groupDigits(hubGuides(lang).length, lang);
   const head = fake.head ?? `<title>${t.title} | FileOrca</title><meta name="description" content="${fmt(t.description, { n })}">`;
   const intro = fake.intro === null ? '' : `<p class="fo-muted" data-hub-text>${fake.intro ?? fmt(t.intro, { n })}</p>`;
-  const sections = HUB_GROUPS.map((group) => {
+  // F19b (DECISOES § 786): the groups the view shows in the language (shownGroups), as GuidesHubView.astro does.
+  const sections = shownGroups(lang).map((group) => {
     const paths = hubGroup(group, lang).map((guide) => guide.path).filter((path) => !(fake.drop ?? []).includes(path));
-    const note = t.moneyNote && hubGroup(group, lang).length === 0 ? `<p class="fo-section__note" data-hub-text>${t.moneyNote.before} <a href="/pt/calculadoras-financeiras/">${t.moneyNote.link}</a>${t.moneyNote.after}</p>` : '';
+    const note = t.moneyNote && group === 'money' && hubGroup(group, lang).length === 0 ? `<p class="fo-section__note" data-hub-text>${t.moneyNote.before} <a href="/pt/calculadoras-financeiras/">${t.moneyNote.link}</a>${t.moneyNote.after}</p>` : '';
     const cards = paths.length > 0 ? `<ul class="fo-guidecards">${paths.map(guideCardHtml).join('')}</ul>` : '';
     return `<section class="fo-section" id="${group}" aria-labelledby="${group}-title"><h2 id="${group}-title">${t.groups[group].heading}</h2>${cards}${note}</section>`;
   }).join('');
   const how = `<section class="fo-section fo-prose" id="how" aria-labelledby="how-title"><h2 id="how-title">${t.howHeading}</h2><p data-hub-text>${fake.how ?? t.how}</p></section>`;
   return `<!doctype html><html><head>${head}</head><body><main><div class="fo-hubband fo-cat--guide"><span class="fo-eyebrow">${t.eyebrow}</span><h1 class="fo-h1">${t.h1}</h1>${intro}</div>${sections}${how}${fake.extra ?? ''}</main></body></html>`;
 }
-const guidesHubWant = (lang: Lang) => ({ paths: hubGuides(lang).map((guide) => guide.path), lang });
+const guidesHubWant = (lang: Lang) => ({ paths: hubGuides(lang).map((guide) => guide.path), lang, groups: shownGroups(lang) });
 
 describe('portão de conteúdo: o hub de guias (F11)', () => {
   const problemsOf = (html: string, lang: Lang = 'en'): string => checkGuidesHub(html, guidesHubWant(lang)).join('\n');
@@ -929,9 +931,13 @@ describe('portão de conteúdo: o hub de guias (F11)', () => {
 
   it('accepts the complete hub in the three languages, with its own words in the range (en 91, pt 108, es 97)', () => {
     expect(GUIDES_HUB_WORDS).toEqual({ min: 60, max: 120 });
+    // F19b (DECISOES § 786): the sections the gate knows are the groups of the hub, Utilities included.
+    expect([...GUIDES_HUB_GROUPS]).toEqual([...HUB_GROUPS]);
     for (const lang of LANGS) {
       expect(checkGuidesHub(guidesHubPage({ lang }), guidesHubWant(lang)), lang).toEqual([]);
-      expect(guidesHubWant(lang).paths, lang).toHaveLength([15, 10, 15][LANGS.indexOf(lang)] ?? 0);
+      // F19b (DECISOES § 796): 15, 10 and 15 before; with the four file guides and three money guides of the F19b, 22, 14
+      // and 22 (the QR code guide makes them 23, 15 and 23).
+      expect(guidesHubWant(lang).paths, lang).toHaveLength([22, 14, 22][LANGS.indexOf(lang)] ?? 0);
     }
     expect(LANGS.map((lang) => guidesHubWords(guidesHubPage({ lang })))).toEqual([91, 108, 97]);
   });
@@ -977,6 +983,28 @@ describe('portão de conteúdo: o hub de guias (F11)', () => {
     const pt = guidesHubPage({ lang: 'pt' });
     expect(problemsOf(pt, 'pt')).toBe('');
     expect(problemsOf(pt.replace(/<p class="fo-section__note" data-hub-text>.*?<\/p>/, ''), 'pt')).toContain('o grupo #money não tem cartão nem a nota que diz por quê');
+  });
+
+  // F19b (DECISOES § 786): a group the hub shows only where it has a guide (Utilities, the QR code guides): its section is
+  // asked for where the registries give the language a guide of it, and refused where they give none.
+  it('groups: the Utilities section only where the language has a guide of it', () => {
+    const utilOf = (cards: string): string => `<section class="fo-section" id="util" aria-labelledby="util-title"><h2 id="util-title">Utility guides</h2>${cards}</section>`;
+    // The hub of en without its Utilities section (whether the registries give it a guide or not), then with one.
+    const without = guidesHubPage().replace(/<section class="fo-section" id="util".*?<\/section>/, '');
+    const add = (section: string): string => without.replace('<section class="fo-section" id="money"', `${section}<section class="fo-section" id="money"`);
+    const empty = add(utilOf(''));
+    const full = add(utilOf(`<ul class="fo-guidecards">${guideCardHtml('/guides/a-qr-guide/')}</ul>`));
+    const want = (groups: readonly ('image' | 'pdf' | 'util' | 'money')[]) => ({ paths: guidesHubWant('en').paths, lang: 'en' as const, groups });
+    const utilProblems = (html: string, groups: readonly ('image' | 'pdf' | 'util' | 'money')[]): string[] => checkGuidesHub(html, want(groups)).filter((problem) => problem.includes('#util'));
+    const shows = ['image', 'pdf', 'util', 'money'] as const;
+    const hides = ['image', 'pdf', 'money'] as const;
+    expect(utilProblems(without, shows)).toEqual(['sem a seção do grupo #util']);
+    expect(utilProblems(empty, shows)).toEqual(['o grupo #util não tem cartão nem a nota que diz por quê']);
+    expect(utilProblems(full, shows)).toEqual([]);
+    expect(utilProblems(full, hides)).toEqual(['a seção do grupo #util aparece, e o idioma não tem guia nesse grupo']);
+    expect(utilProblems(without, hides)).toEqual([]);
+    // Without the groups, every group of the hub is asked for, as before the F19b.
+    expect(checkGuidesHub(without, { paths: guidesHubWant('en').paths, lang: 'en' })).toContain('sem a seção do grupo #util');
   });
 
   it('claims: the hub makes none, in its language', () => {

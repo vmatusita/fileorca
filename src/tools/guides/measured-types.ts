@@ -10,13 +10,33 @@ export type Method =
   | { runner: 'node'; engine: string }
   | { runner: 'playwright'; browser: 'chromium' | 'webkit'; version: string; os: string; path: string };
 
-export interface Sample {
+/** A sample of files: what every guide measures but the QR code guide. */
+export interface FileSample {
+  /** Absent in the file: a sample is of files unless it says 'texts'. */
+  kind?: 'files';
   /** The fixture files (or the files the script made from them), by name. */
   files: string[];
   count: number;
   /** What else narrows the sample: the pages of a PDF, the options of the tool. */
   note?: string;
 }
+
+/**
+ * F19b (decision 4; DECISOES § 786): a sample of texts the script generated, for a guide whose tool takes text instead of a
+ * file (the QR code generator: a short link, a long link, a text with accents). No fixture holds them and none is added:
+ * the texts themselves are the sample, written in the file. Only a guide that embeds the QR code generator measures texts,
+ * and only with a list as long as its count (tests/unit/guides-measured.test.ts); its card says "Measured on N test texts".
+ */
+export interface TextSample {
+  kind: 'texts';
+  /** The texts, as they were typed into the tool. */
+  texts: string[];
+  count: number;
+  /** What else narrows the sample: the options of the tool. */
+  note?: string;
+}
+
+export type Sample = FileSample | TextSample;
 
 export interface MeasuredNumber {
   value: number;
