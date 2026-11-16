@@ -2,12 +2,14 @@
 // its assets read from node_modules (the helpers of the unit tests). Lossless and Recommended, Split and Merge are
 // qpdf, MozJPEG and pdf-lib in WebAssembly and JavaScript, the same bytes the site's worker gives. What takes the space
 // in a file is read with pdf-lib, which the engine also uses.
+import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { PDFDict, PDFDocument, PDFName, PDFRawStream, PDFRef, ParseSpeeds } from '@cantoo/pdf-lib';
+import { PDFArray, PDFDict, PDFDocument, PDFName, PDFRawStream, PDFRef, ParseSpeeds } from '@cantoo/pdf-lib';
 import { processPdf } from '../../../src/engine/pdf/process.ts';
-import type { CompressMode, PdfResult } from '../../../src/engine/pdf/types.ts';
+import type { CompressMode, PdfOperation, PdfResult } from '../../../src/engine/pdf/types.ts';
 import { useNodeAssets } from '../../../tests/unit/lib/pdf-engine.ts';
+import { qpdf } from '../../lib/qpdf.ts';
 
 const DIR = 'fixtures/pdf';
 export const pdfFixture = (name: string): Uint8Array => new Uint8Array(readFileSync(join(DIR, name)));
@@ -125,6 +127,106 @@ export interface MergeMeasure {
   inputs: number[];
   merged: number;
   notes: string[];
+}
+
+/**
+ * F19b, guide 4: Protect PDF or Unlock PDF through the engine (qpdf in WebAssembly, the code of the site worker), the
+ * result as it comes, a refusal included.
+ */
+export async function lockTool(op: Extract<PdfOperation, { kind: 'protect' | 'unlock' }>, bytes: Uint8Array): Promise<PdfResult> {
+  assets();
+  return processPdf(op, [bytes], null);
+}
+
+/**
+ * The same, in a process of its own (scripts/guides/lib/lock-child.ts): the engine's qpdf starts fresh, as in a tab where
+ * the tool runs its first file, whatever the measurement ran before in this process (the compression level a Compress
+ * PDF run leaves in the engine's qpdf changes the bytes of a later Protect PDF). The password goes by the environment.
+ */
+export function lockFresh(kind: 'protect' | 'unlock', name: string, password?: string): { ok: true; bytes: Uint8Array } | { ok: false; reason: string } {
+  const run = spawnSync(process.execPath, ['scripts/guides/lib/lock-child.ts', kind, name], {
+    encoding: 'utf8',
+    maxBuffer: 256 * 1024 * 1024,
+    env: { ...process.env, FO_MEASURE_PASSWORD: password ?? '' },
+  });
+  if (run.status !== 0) throw new Error(`lock-child ${kind} ${name}: exit ${String(run.status)} ${run.stderr.slice(0, 400)}`);
+  const line = run.stdout.trim().split('\n').at(-1) ?? '';
+  const answer = JSON.parse(line) as { ok: true; bytes: string } | { ok: false; reason: string };
+  return answer.ok ? { ok: true, bytes: new Uint8Array(Buffer.from(answer.bytes, 'base64')) } : answer;
+}
+
+export const NODE_PDFJS ='PDF.js (pdfjs-dist, legacy build) in Node, the reader of the tests (tests/e2e/lib/pdfjs-read.ts), never the engine';
+export const NODE_QPDF_JSON ='qpdf --json --json-key=encrypt in Node (@neslinesli93/qpdf-wasm, the build the site serves)';
+
+/** What qpdf reads in a file's encryption dictionary (qpdf --json, the "encrypt" key); `encrypted` false for a plain file. */
+export interface Encryption {
+  encrypted: boolean;
+  /** The revision of the standard security handler (R) and the length of the key in bits. */
+  revision: number;
+  bits: number;
+  method: string;
+  /** What a reader that respects the file may do (print, modify, extract…), as qpdf names it. */
+  capabilities: Record<string, boolean>;
+}
+
+export async function encryptionOf(bytes: Uint8Array, password?: string): Promise<Encryption> {
+  const run = await qpdf(['--json', '--json-key=encrypt', ...(password === undefined ? [] : [`--password=${password}`]), '/in/file.pdf'], { 'file.pdf': bytes });
+  if (run.code !== 0 && run.code !== 3) throw new Error(`qpdf --json said ${run.code}`);
+  const json = JSON.parse(run.out.join('\n')) as { encrypt: { encrypted: boolean; capabilities: Record<string, boolean>; parameters: { R: number; bits: number; method: string } } };
+  const encrypt = json.encrypt;
+  return { encrypted: encrypt.encrypted, revision: encrypt.parameters.R, bits: encrypt.parameters.bits, method: encrypt.parameters.method, capabilities: encrypt.capabilities };
+}
+
+/**
+ * F19b, guide 3: the signature parts of a PDF, read with pdf-lib in every object (the ones inside object streams too):
+ * the dictionaries of a signature field or a signature (/FT /Sig, /Type /Sig), the /ByteRange a digital signature needs,
+ * and the fields of the form (/AcroForm /Fields, with their kids).
+ */
+export interface SignatureParts {
+  sigDicts: number;
+  byteRanges: number;
+  /** The /ByteRange arrays that still cover the whole file (from byte 0 to its last byte, the gap of /Contents aside). */
+  rangesCovering: number;
+  /** The document carries usage rights (/Perms with /UR3 or /UR in the catalog), which a signature in /Perms seals. */
+  usageRights: boolean;
+  fields: number;
+}
+
+export async function signatureParts(bytes: Uint8Array): Promise<SignatureParts> {
+  const doc = await PDFDocument.load(bytes, { updateMetadata: false, ignoreEncryption: true, parseSpeed: ParseSpeeds.Fastest, throwOnInvalidObject: false });
+  let sigDicts = 0;
+  let byteRanges = 0;
+  let rangesCovering = 0;
+  const visit = (value: unknown): void => {
+    if (value instanceof PDFRawStream) return visit(value.dict);
+    if (value instanceof PDFArray) {
+      for (const item of value.asArray()) visit(item);
+      return;
+    }
+    if (!(value instanceof PDFDict)) return;
+    if (value.get(PDFName.of('FT'))?.toString() === '/Sig' || value.get(PDFName.of('Type'))?.toString() === '/Sig') sigDicts += 1;
+    const range = value.lookupMaybe(PDFName.of('ByteRange'), PDFArray);
+    if (range) {
+      byteRanges += 1;
+      const [a, b, c, d] = range.asArray().map((item) => Number(item.toString()));
+      if (a === 0 && b !== undefined && c !== undefined && d !== undefined && b <= c && c + d === bytes.length) rangesCovering += 1;
+    }
+    for (const [, inner] of value.entries()) visit(inner);
+  };
+  for (const [, object] of doc.context.enumerateIndirectObjects()) visit(object);
+  const form = doc.catalog.lookupMaybe(PDFName.of('AcroForm'), PDFDict);
+  let fields = 0;
+  const count = (array: PDFArray | undefined): void => {
+    for (const ref of array?.asArray() ?? []) {
+      fields += 1;
+      const field = doc.context.lookupMaybe(ref, PDFDict);
+      count(field?.lookupMaybe(PDFName.of('Kids'), PDFArray));
+    }
+  };
+  count(form?.lookupMaybe(PDFName.of('Fields'), PDFArray));
+  const perms = doc.catalog.lookupMaybe(PDFName.of('Perms'), PDFDict);
+  const usageRights = perms !== undefined && (perms.has(PDFName.of('UR3')) || perms.has(PDFName.of('UR')));
+  return { sigDicts, byteRanges, rangesCovering, usageRights, fields };
 }
 
 export async function merge(names: readonly string[]): Promise<MergeMeasure> {
