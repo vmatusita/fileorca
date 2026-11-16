@@ -276,10 +276,7 @@ export default {
     'home-affordability-calculator': {
       name: 'Calculadora de cuánta casa puedo pagar',
       description: 'Cuánta casa cabe en tu ingreso, con las reglas generales del 28 % y el 36 %.',
-      // F19b (DECISOES § 790): "cuánta casa puedo pagar" left the synonyms when it became the whole name of the guide that
-      // embeds this calculator (§ 180 and § 724: a synonym is never the name of another page); the name of the calculator
-      // still holds it, so the search finds the calculator right after the guide.
-      synonyms: ['cuánta casa puedo comprar', 'comprar casa', 'relación deudas-ingresos', 'dti', 'ingreso', 'pago inicial', 'hipoteca'],
+      synonyms: ['cuánta casa puedo pagar', 'cuánta casa puedo comprar', 'comprar casa', 'relación deudas-ingresos', 'dti', 'ingreso', 'pago inicial', 'hipoteca'],
     },
     'loan-amortization-calculator': {
       name: 'Calculadora de amortización',
@@ -441,9 +438,11 @@ export default {
       description: 'El año en que comprar alcanza a alquilar, y lo que lo mueve.',
       synonyms: ['guía', 'alquilar o comprar', 'punto de equilibrio'],
     },
-    // F19b (DECISOES § 780 and § 790): the new money guides.
+    // F19b (DECISOES § 780 and § 790): the new money guides. The search shows every tool before every guide (§ 397), so
+    // the name of a guide holds a word that no calculator has: "APR o APY" and "Cuánta casa puedo pagar" alone found the
+    // calculator they embed first.
     "guides-apr-vs-apy": {
-      name: "APR o APY",
+      name: "APR o APY: en qué se diferencian",
       description: "Por qué la misma tasa rinde más cuantas más veces se capitaliza, con los números.",
       synonyms: ["guía", "rendimiento anual", "capitalización"],
     },
@@ -453,7 +452,7 @@ export default {
       synonyms: ["guía", "pago mínimo", "solo el mínimo"],
     },
     "guides-how-much-house-can-i-afford": {
-      name: "Cuánta casa puedo pagar",
+      name: "Cuánta casa puedo pagar con mi ingreso",
       description: "Los dos límites de ingreso de los que parte un prestamista y cuál de ellos fija el precio que puedes pagar.",
       synonyms: ["guía", "presupuesto para una casa", "pagar una casa"],
     },
