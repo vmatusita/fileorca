@@ -28,7 +28,20 @@ export default {
   tableHeading: "La medida",
   measuredIntro: "Esta guía se está escribiendo.",
   measuredNote: "Medido el {date}.",
-  tables: [],
+  // F19b (front M1): the shape of the tables, which the front T rewrites in words and keeps.
+  tables: [
+    {
+      heading: "Tres PDF con contraseña",
+      caption: "Tres PDF protegidos con Proteger PDF: sus páginas, el archivo antes y después y los bytes que el cifrado añadió",
+      head: ["PDF", "Páginas", "Antes", "Después", "Añadido"],
+    },
+    {
+      heading: "Restricciones sin contraseña",
+      caption: "El PDF con restricciones y sin contraseña para abrir, como llegó y después de Desbloquear PDF, junto a un PDF después de Proteger PDF: el archivo, si un lector lo abrió sin contraseña y las acciones que bloquea",
+      head: ["Archivo", "Tamaño", "Se abre sin contraseña", "Acciones bloqueadas"],
+      labels: ["Solo restricciones, como llegó", "El mismo PDF después de Desbloquear PDF", "Un PDF después de Proteger PDF"],
+    },
+  ],
   sourcesHeading: "Fuentes",
   sources: [],
   facts: {},
