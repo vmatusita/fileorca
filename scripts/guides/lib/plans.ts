@@ -1,17 +1,22 @@
-// What each of the ten guides measures (prompt F5b, decision 2), on the fixtures, by the path a person's file takes:
+// What each of the ten guides measures (prompt F5b, decision 2), and each file guide of the F19b (prompt F19b, decision 3,
+// guides 11 to 14 below), on the fixtures, by the path a person's file takes:
 // the browser where the site writes with the canvas, Node where it runs WebAssembly or pdf-lib. Every number goes into
 // data/guides-measured.json with its sample, method, date and commit; the guides only read them.
+import { randomUUID } from 'node:crypto';
 import { readdirSync } from 'node:fs';
 import type { FileGuideId } from '../../../src/tools/guides/registry.ts';
 import type { Cell, GuideMeasure, MeasuredNumber, MeasuredTable, Method, OfficialSize, Sample, Unit } from '../../../src/tools/guides/measured-types.ts';
 import type { Page } from '@playwright/test';
 import type { TestFile } from '../../../tests/e2e/lib/page.ts';
-import { metadataReport } from '../../../tests/e2e/lib/images.ts';
+import { parseBmff } from '../../../tests/e2e/lib/bmff.ts';
+import { metadataReport, sniff } from '../../../tests/e2e/lib/images.ts';
+import { opensWithoutPassword, readWithPdfjs, type ReadPdf } from '../../../tests/e2e/lib/pdfjs-read.ts';
 import { pngPixels } from '../../../tests/e2e/lib/png.ts';
-import { webpFrames } from '../../../tests/e2e/lib/webp.ts';
+import { webpFrames, webpInfo } from '../../../tests/e2e/lib/webp.ts';
 import { BROWSERS, bytesFile, download, drop, fileOf, imageResult, method, openTool, option, stem, typeField, type BrowserName, type Out, type Session } from './browser.ts';
+import { NODE_CORNERS, NODE_DQT, NODE_FULL_SIZE, clearCorners, cornersOf, fullSizeQuality, qualityOf, whiteCorners } from './node-codecs.ts';
 import { NODE_IMAGE, NODE_PIXELS, NODE_WEBP, imageFixture, photoFacts, pixelsOf, psnrOf, shownSize, webpOf, type Pixels } from './node-image.ts';
-import { NODE_PDFLIB, NODE_PDF_ENGINE, breakdown, compress, merge, pdfFixture, splitEach } from './node-pdf.ts';
+import { NODE_PDFJS, NODE_PDFLIB, NODE_PDF_ENGINE, NODE_QPDF_JSON, breakdown, compress, encryptionOf, lockFresh, merge, pdfFixture, signatureParts, splitEach, type SignatureParts } from './node-pdf.ts';
 import { decibels, inBrowser, inNode, label, median, num, ratio, sample, sum, table, type Column, type Stamp } from './record.ts';
 import enCommon from '../../../src/i18n/en/common.ts';
 
@@ -827,9 +832,515 @@ async function photosToPdf(ctx: Context): Promise<GuideMeasure> {
   return g.done();
 }
 
-/** F19b, slice 1: a guide whose plan the front M has not written yet. */
-function notYet(): Promise<GuideMeasure> {
-  return Promise.reject(new Error('no plan yet'));
+// ---- 11. A phone photo under the size limit of an online form (F19b, decision 3.1) ------------------------------
+
+/** The limits typed in Up to a size, in KB: the field reads 1 KB as 1,000 bytes (src/tools/compress-image/size.ts). */
+const LIMITS_KB = [100, 200, 500] as const;
+/** A short key per phone photo, for the names of the numbers. */
+const PHOTO_KEY: Record<string, string> = {
+  'jpg-01-pixel2-retrato-gps.jpg': 'pixel',
+  'jpg-02-iphone6-paisagem-gps.jpg': 'iphone6',
+  'jpg-03-iphone5-paisagem-orientacao3-gps.jpg': 'iphone5',
+};
+const photoKey = (photo: string): string => must(PHOTO_KEY[photo], photo);
+
+/** Clicks "Up to a size" and types the limit, before the file goes in (a change after the result runs the batch again). */
+const upToSize = (kb: number) => async (page: Page): Promise<void> => {
+  await option(page, 'Up to a size');
+  await typeField(page, '#ci-max', String(kb));
+};
+
+async function photoForForm(ctx: Context): Promise<GuideMeasure> {
+  const g = collector(ctx.stamp);
+  const photos = sample(PHOTOS, 'the three real phone photos, each one alone in Compress image, Up to a size, at 100, 200 and 500 KB');
+  const meta = node(NODE_IMAGE);
+  const dqt = node(NODE_DQT);
+  const before = new Map(PHOTOS.map((photo) => [photo, { bytes: imageFixture(photo).length, shown: shownSize(imageFixture(photo)) }]));
+  const info = (photo: string) => must(before.get(photo), photo);
+  g.n('photos', PHOTOS.length, 'count', photos, meta);
+  g.n('limits', LIMITS_KB.length, 'count', photos, meta);
+  g.n('photoMax', Math.max(...PHOTOS.map((photo) => info(photo).bytes)), 'bytes', photos, meta);
+  g.n('photoMin', Math.min(...PHOTOS.map((photo) => info(photo).bytes)), 'bytes', photos, meta);
+  for (const photo of PHOTOS) {
+    const one = sample([photo]);
+    g.n(`${photoKey(photo)}Bytes`, info(photo).bytes, 'bytes', one, meta);
+    g.n(`${photoKey(photo)}Width`, info(photo).shown.width, 'px', one, meta);
+    g.n(`${photoKey(photo)}Height`, info(photo).shown.height, 'px', one, meta);
+  }
+  // What lowering the quality alone could have given (Node, on the pixels of the MozJPEG decoder): the highest quality of
+  // the search at which the whole photo, at its full size, fits each limit, or none.
+  const full = node(NODE_FULL_SIZE);
+  const fullFit = new Map<string, number | null>();
+  for (const kb of LIMITS_KB) {
+    for (const photo of PHOTOS) {
+      ctx.log(`  The full size at ${kb} KB in Node: ${photo}`);
+      const quality = await fullSizeQuality(photo, imageFixture(photo), kb * 1000);
+      fullFit.set(`${photo}@${kb}`, quality);
+      if (quality !== null) g.n(`${photoKey(photo)}At${kb}FullQuality`, quality, 'count', sample([photo]), full);
+    }
+  }
+  g.n('fullSizeFits', [...fullFit.values()].filter((quality) => quality !== null).length, 'count', photos, full);
+  const rows: Cell[][] = [];
+  const methods: Method[] = [meta, dqt, full];
+  let unmatched = 0;
+  for (const browser of BROWSERS) {
+    let reducedAnyway = 0;
+    for (const kb of LIMITS_KB) {
+      const limit = kb * 1000;
+      const outs: { photo: string; bytes: number; width: number; height: number; reduced: boolean; quality: number | null }[] = [];
+      let how: Method | null = null;
+      for (const photo of PHOTOS) {
+        ctx.log(`  Up to ${kb} KB, ${photo}, in ${browser}`);
+        const run = await runImages(ctx, browser, '/compress-image/', [imageFile(photo)], upToSize(kb));
+        how = run.how;
+        if (!methods.some((m) => m.runner === 'playwright' && m.browser === browser)) methods.push(run.how);
+        const out = must(run.by.get(stem(photo)), `${photo} at ${kb} KB in ${browser}`);
+        if (sniff(out) !== 'jpeg') throw new Error(`${photo} at ${kb} KB in ${browser}: not a JPG`);
+        if (out.length > limit) throw new Error(`${photo} at ${kb} KB in ${browser}: ${out.length} bytes over ${limit}`);
+        const size = shownSize(out);
+        const reduced = size.width !== info(photo).shown.width || size.height !== info(photo).shown.height;
+        // The page says when the dimensions went down ("Oli also reduced the dimensions to W × H px."): it must agree.
+        const noted = /reduced the dimensions/i.test(run.notes);
+        if (noted !== reduced) throw new Error(`${photo} at ${kb} KB in ${browser}: the note says ${String(noted)}, the file ${String(reduced)}`);
+        const found = await qualityOf(out);
+        if (found.quality === null) {
+          unmatched += 1;
+          ctx.log(`    no single quality matches the tables of ${photo} at ${kb} KB in ${browser}: ${found.matches.join(', ') || 'none'}`);
+        }
+        outs.push({ photo, bytes: out.length, width: size.width, height: size.height, reduced, quality: found.quality });
+        const fits = fullFit.get(`${photo}@${kb}`) ?? null;
+        if (reduced && fits !== null) reducedAnyway += 1;
+        rows.push([kb, photo, browser, info(photo).bytes, out.length, size.width, size.height, found.quality, fits]);
+        const key = `${photoKey(photo)}At${kb}`;
+        const one = sample([photo]);
+        g.n(`${key}${B[browser]}`, out.length, 'bytes', one, run.how);
+        g.n(`${key}Share${B[browser]}`, ratio(out.length, info(photo).bytes), 'ratio', one, run.how);
+        g.n(`${key}Width${B[browser]}`, size.width, 'px', one, run.how);
+        g.n(`${key}Height${B[browser]}`, size.height, 'px', one, run.how);
+        if (found.quality !== null) g.n(`${key}Quality${B[browser]}`, found.quality, 'count', one, dqt);
+      }
+      const at = `at${kb}`;
+      const run = must(how ?? undefined, `${kb} KB in ${browser}`);
+      if (browser === 'chromium') g.n(`limit${kb}`, limit, 'bytes', photos, run);
+      g.n(`${at}Max${B[browser]}`, Math.max(...outs.map((out) => out.bytes)), 'bytes', photos, run);
+      g.n(`${at}Min${B[browser]}`, Math.min(...outs.map((out) => out.bytes)), 'bytes', photos, run);
+      g.n(`${at}FillMax${B[browser]}`, ratio(Math.max(...outs.map((out) => out.bytes)), limit), 'ratio', photos, run);
+      g.n(`${at}FillMin${B[browser]}`, ratio(Math.min(...outs.map((out) => out.bytes)), limit), 'ratio', photos, run);
+      g.n(`${at}Reduced${B[browser]}`, outs.filter((out) => out.reduced).length, 'count', photos, run);
+      g.n(`${at}Kept${B[browser]}`, outs.filter((out) => !out.reduced).length, 'count', photos, run);
+      const qualities = outs.map((out) => out.quality);
+      if (qualities.every((quality): quality is number => quality !== null)) {
+        g.n(`${at}QualityMin${B[browser]}`, Math.min(...qualities), 'count', photos, dqt);
+        g.n(`${at}QualityMax${B[browser]}`, Math.max(...qualities), 'count', photos, dqt);
+      }
+    }
+    // Copies made smaller in pixels although the whole photo fitted at a quality of the search (the full-size column).
+    g.n(`reducedFullFits${B[browser]}`, reducedAnyway, 'count', photos, full);
+  }
+  // Where the two browsers wrote the same dimensions (the canvas of each scales the photo its own way).
+  const same = rows.filter((row) => row[2] === 'chromium').filter((row) => {
+    const other = must(rows.find((cells) => cells[2] === 'webkit' && cells[0] === row[0] && cells[1] === row[1]), 'the WebKit row');
+    return other[5] === row[5] && other[6] === row[6];
+  }).length;
+  g.n('sameDimensions', same, 'count', photos, must(methods.find((m) => m.runner === 'playwright'), 'a browser'));
+  g.n('outputs', rows.length / BROWSERS.length, 'count', photos, meta);
+  g.n('qualityUnmatched', unmatched, 'count', photos, dqt);
+  g.t('fitted', [label('limitKb'), label('photo'), label('browser'), inNode('originalBytes', 'bytes'), inBrowser('bytes', 'bytes'), inBrowser('width', 'px'), inBrowser('height', 'px'), inNode('quality', 'count'), inNode('fullSizeQuality', 'count')], rows, photos, methods);
+  return g.done();
+}
+
+// ---- 12. WebP, AVIF or JPG (F19b, decision 3.2) -------------------------------------------------------------------
+
+async function webpAvifJpg(ctx: Context): Promise<GuideMeasure> {
+  const g = collector(ctx.stamp);
+  const photos = sample(PHOTOS, 'the three real phone photos: Compress image (Recommended) for the JPG, Convert to WebP (Recommended) for the WebP and for the AVIF');
+  const transparent = sample([TRANSPARENT], 'PNG to JPG for the JPG, Convert to WebP (Recommended) for the WebP and for the AVIF');
+  const meta = node(NODE_IMAGE);
+  const seen = node(NODE_CORNERS);
+  const originals = PHOTOS.map((photo) => imageFixture(photo).length);
+  const originalTotal = sum(originals);
+  const png = imageFixture(TRANSPARENT);
+  g.n('photos', PHOTOS.length, 'count', photos, meta);
+  g.n('originalTotal', originalTotal, 'bytes', photos, meta);
+  g.n('pngBytes', png.length, 'bytes', transparent, meta);
+  g.n('pngClearCorners', clearCorners(await cornersOf(png)), 'count', transparent, seen);
+  const rows: Cell[][] = [];
+  const pngRows: Cell[][] = [];
+  const methods: Method[] = [meta];
+  const pngMethods: Method[] = [meta, seen];
+  for (const browser of BROWSERS) {
+    ctx.log(`  Compress image (Recommended) in ${browser}`);
+    const jpg = await runImages(ctx, browser, '/compress-image/', PHOTOS.map(imageFile));
+    ctx.log(`  Convert to WebP (WebP) in ${browser}`);
+    const webp = await runImages(ctx, browser, '/convert-to-webp/', [...PHOTOS, TRANSPARENT].map(imageFile));
+    ctx.log(`  Convert to WebP (AVIF) in ${browser}`);
+    const avif = await runImages(ctx, browser, '/convert-to-webp/', [...PHOTOS, TRANSPARENT].map(imageFile), (page) => option(page, 'AVIF'));
+    ctx.log(`  PNG to JPG (the transparent PNG) in ${browser}`);
+    const flat = await runImages(ctx, browser, '/png-to-jpg/', [imageFile(TRANSPARENT)]);
+    methods.push(webp.how);
+    pngMethods.push(webp.how);
+    const formats: [string, typeof jpg, string][] = [['jpg', jpg, 'jpeg'], ['webp', webp, 'webp'], ['avif', avif, 'avif']];
+    const totals: Record<string, number> = {};
+    for (const [name, run, format] of formats) {
+      const outs = PHOTOS.map((photo) => must(run.by.get(stem(photo)), `${photo} as ${name} in ${browser}`));
+      for (const out of outs) if (sniff(out) !== format) throw new Error(`a ${name} that is ${sniff(out)} in ${browser}`);
+      const total = sum(outs.map((out) => out.length));
+      totals[name] = total;
+      const ratios = outs.map((out, index) => ratio(out.length, originals[index] as number));
+      g.n(`${name}Total${B[browser]}`, total, 'bytes', photos, run.how);
+      g.n(`${name}Ratio${B[browser]}`, ratio(total, originalTotal), 'ratio', photos, run.how);
+      g.n(`${name}RatioMin${B[browser]}`, Math.min(...ratios), 'ratio', photos, run.how);
+      g.n(`${name}RatioMax${B[browser]}`, Math.max(...ratios), 'ratio', photos, run.how);
+      for (const [index, photo] of PHOTOS.entries()) g.n(`${photoKey(photo)}${name[0]?.toUpperCase()}${name.slice(1)}${B[browser]}`, (outs[index] as Uint8Array).length, 'bytes', sample([photo]), run.how);
+    }
+    const total = (name: string): number => must(totals[name], name);
+    g.n(`webpVsJpg${B[browser]}`, ratio(total('webp'), total('jpg')), 'ratio', photos, webp.how);
+    g.n(`avifVsJpg${B[browser]}`, ratio(total('avif'), total('jpg')), 'ratio', photos, avif.how);
+    g.n(`avifVsWebp${B[browser]}`, ratio(total('avif'), total('webp')), 'ratio', photos, avif.how);
+    const smaller = (a: string, b: string): number => PHOTOS.filter((photo) => (must(formats.find(([name]) => name === a), a)[1].by.get(stem(photo))?.length ?? Infinity) < (must(formats.find(([name]) => name === b), b)[1].by.get(stem(photo))?.length ?? 0)).length;
+    g.n(`webpUnderJpg${B[browser]}`, smaller('webp', 'jpg'), 'count', photos, webp.how);
+    g.n(`avifUnderWebp${B[browser]}`, smaller('avif', 'webp'), 'count', photos, avif.how);
+    for (const [index, photo] of PHOTOS.entries()) {
+      const out = (run: typeof jpg): number => must(run.by.get(stem(photo)), photo).length;
+      rows.push([photo, browser, originals[index] as number, out(jpg), out(webp), out(avif)]);
+    }
+    // The PNG with transparent corners, in the three formats: the bytes, and what the four corners became.
+    const pngJpg = must(flat.by.get(stem(TRANSPARENT)), `the PNG as JPG in ${browser}`);
+    const pngWebp = must(webp.by.get(stem(TRANSPARENT)), `the PNG as WebP in ${browser}`);
+    const pngAvif = must(avif.by.get(stem(TRANSPARENT)), `the PNG as AVIF in ${browser}`);
+    if (sniff(pngJpg) !== 'jpeg' || sniff(pngWebp) !== 'webp' || sniff(pngAvif) !== 'avif') throw new Error(`the PNG in ${browser}: ${sniff(pngJpg)}, ${sniff(pngWebp)}, ${sniff(pngAvif)}`);
+    const jpgWhite = whiteCorners(await cornersOf(pngJpg));
+    const webpClear = clearCorners(await cornersOf(pngWebp));
+    const avifClear = clearCorners(await cornersOf(pngAvif));
+    const webpAlpha = webpInfo(pngWebp).hasAlpha ? 1 : 0;
+    const avifAlpha = parseBmff(pngAvif).items.some((item) => item.properties.some((property) => property.type === 'auxC' && 'auxType' in property && /alpha/i.test(property.auxType))) ? 1 : 0;
+    g.n(`pngJpgBytes${B[browser]}`, pngJpg.length, 'bytes', transparent, flat.how);
+    g.n(`pngWebpBytes${B[browser]}`, pngWebp.length, 'bytes', transparent, webp.how);
+    g.n(`pngAvifBytes${B[browser]}`, pngAvif.length, 'bytes', transparent, avif.how);
+    g.n(`pngJpgRatio${B[browser]}`, ratio(pngJpg.length, png.length), 'ratio', transparent, flat.how);
+    g.n(`pngWebpRatio${B[browser]}`, ratio(pngWebp.length, png.length), 'ratio', transparent, webp.how);
+    g.n(`pngAvifRatio${B[browser]}`, ratio(pngAvif.length, png.length), 'ratio', transparent, avif.how);
+    g.n(`pngJpgWhiteCorners${B[browser]}`, jpgWhite, 'count', transparent, seen);
+    g.n(`pngWebpClearCorners${B[browser]}`, webpClear, 'count', transparent, seen);
+    g.n(`pngAvifClearCorners${B[browser]}`, avifClear, 'count', transparent, seen);
+    g.n(`pngWebpAlpha${B[browser]}`, webpAlpha, 'count', transparent, webp.how);
+    g.n(`pngAvifAlpha${B[browser]}`, avifAlpha, 'count', transparent, avif.how);
+    g.n(`pngFlattenedNote${B[browser]}`, /white/i.test(flat.notes) ? 1 : 0, 'count', transparent, flat.how);
+    pngRows.push(['jpg', browser, png.length, pngJpg.length, jpgWhite, 0]);
+    pngRows.push(['webp', browser, png.length, pngWebp.length, 0, webpClear]);
+    pngRows.push(['avif', browser, png.length, pngAvif.length, 0, avifClear]);
+  }
+  // Where Chromium and WebKit wrote the same bytes: the photos in each format, and the formats of the transparent PNG.
+  const at = (table: Cell[][], key: Cell, browser: BrowserName): Cell[] => must(table.find((row) => row[0] === key && row[1] === browser), `${String(key)} in ${browser}`);
+  const webkitHow = must(methods.find((m) => m.runner === 'playwright' && m.browser === 'webkit'), 'WebKit');
+  for (const [name, column] of [['jpg', 3], ['webp', 4], ['avif', 5]] as const) {
+    g.n(`${name}SameBrowsers`, PHOTOS.filter((photo) => at(rows, photo, 'chromium')[column] === at(rows, photo, 'webkit')[column]).length, 'count', photos, webkitHow);
+  }
+  g.n('pngSameBrowsers', ['jpg', 'webp', 'avif'].filter((format) => at(pngRows, format, 'chromium')[3] === at(pngRows, format, 'webkit')[3]).length, 'count', transparent, webkitHow);
+  g.t('photos', [label('photo'), label('browser'), inNode('originalBytes', 'bytes'), inBrowser('jpgBytes', 'bytes'), inBrowser('webpBytes', 'bytes'), inBrowser('avifBytes', 'bytes')], rows, photos, methods);
+  g.t('transparent', [label('format'), label('browser'), inNode('pngBytes', 'bytes'), inBrowser('bytes', 'bytes'), inNode('whiteCorners', 'count'), inNode('clearCorners', 'count')], pngRows, transparent, pngMethods);
+  return g.done();
+}
+
+// ---- 13. Sign a PDF without printing (F19b, decision 3.3) ---------------------------------------------------------
+
+/** The PDFs signed: pages of mixed sizes and turns, a file of photos, and the tax form with its fields and XFA layer. */
+const SIGN: Record<string, string> = {
+  mixed: 'gen-paginas-mistas.pdf',
+  photos: 'gen-fotos.pdf',
+  form: 'pdf-formulario-irs-1040-2019.pdf',
+};
+const SIGN_KEYS = Object.keys(SIGN);
+/** The three ways Sign PDF makes a signature, by the label of each option (src/tools/sign-pdf/i18n/en.ts). */
+const SIGN_MODES = { Draw: 'Draw', Upload: 'Upload', Type: 'Type' } as const;
+type SignMode = keyof typeof SIGN_MODES;
+/** The image a person could upload: the fixture with transparent corners (no new file may join the fixtures). */
+const SIGNATURE_IMAGE = TRANSPARENT;
+/** The name typed in Type, made up for the measurement. */
+const TYPED_NAME = 'Oli Orca';
+
+/** Two strokes on the pad, drawn with the mouse: a loop of a capital letter and a line under it. */
+async function drawOnPad(page: Page): Promise<void> {
+  const pad = page.locator('.fo-sign__pad');
+  await pad.scrollIntoViewIfNeeded();
+  const box = await pad.boundingBox();
+  if (!box) throw new Error('the pad has no box');
+  const at = (x: number, y: number): [number, number] => [box.x + box.width * x, box.y + box.height * y];
+  const strokes: [number, number][][] = [
+    [at(0.15, 0.7), at(0.25, 0.2), at(0.35, 0.7), at(0.45, 0.25), at(0.55, 0.7), at(0.65, 0.3)],
+    [at(0.12, 0.85), at(0.8, 0.8)],
+  ];
+  for (const stroke of strokes) {
+    const [first, ...rest] = stroke;
+    if (!first) continue;
+    await page.mouse.move(...first);
+    await page.mouse.down();
+    for (const point of rest) await page.mouse.move(...point, { steps: 8 });
+    await page.mouse.up();
+  }
+}
+
+/** Signs one PDF on every page in one of the three ways, the way a person does it, and gives what Download holds. */
+async function signOne(ctx: Context, browser: BrowserName, name: string, mode: SignMode): Promise<{ bytes: Uint8Array; notes: string; how: Method }> {
+  const session = await ctx.session(browser);
+  const tab = await openTool(session, '/sign-pdf/');
+  try {
+    const page = tab.page;
+    await drop(page, [pdfFile(name)]);
+    await page.getByRole('button', { name: 'Sign PDF' }).waitFor({ state: 'visible', timeout: 60_000 });
+    await option(page, SIGN_MODES[mode]);
+    if (mode === 'Draw') await drawOnPad(page);
+    if (mode === 'Upload') await page.setInputFiles('.fo-sign__file', [imageFile(SIGNATURE_IMAGE)]);
+    if (mode === 'Type') {
+      const field = page.getByLabel('Type your name');
+      await field.fill(TYPED_NAME);
+      await field.blur();
+    }
+    await page.locator('.fo-sign__box').waitFor({ state: 'visible', timeout: 30_000 });
+    await option(page, 'All pages');
+    await page.getByRole('button', { name: 'Sign PDF' }).click();
+    const { files } = await download(page);
+    const notes = (await page.locator('.fo-result__notes li').allTextContents()).join(' | ');
+    return { bytes: must(files[0], `${name} signed`).bytes, notes, how: method(session, '/sign-pdf/') };
+  } finally {
+    await tab.close();
+  }
+}
+
+async function signPdf(ctx: Context): Promise<GuideMeasure> {
+  const g = collector(ctx.stamp);
+  const files = SIGN_KEYS.map((key) => must(SIGN[key], key));
+  const all = sample([...files, SIGNATURE_IMAGE], 'three PDFs, each signed on all pages in the three ways of Sign PDF: drawn with the mouse, the PNG with transparent corners uploaded, and a name typed');
+  const reader = node(NODE_PDFJS);
+  const lib = node(NODE_PDFLIB);
+  const originals = new Map<string, { read: ReadPdf; parts: SignatureParts }>();
+  for (const name of files) originals.set(name, { read: await readWithPdfjs(pdfFixture(name)), parts: await signatureParts(pdfFixture(name)) });
+  const original = (name: string) => must(originals.get(name), name);
+  // The PDFs, and every test file of the table (the three PDFs and the image uploaded as a signature): the text says the
+  // second when it says how many files the table rests on (tests/unit/guides-numbers.test.ts).
+  g.n('files', files.length, 'count', sample(files), reader);
+  g.n('testFiles', all.count, 'count', all, reader);
+  g.n('modes', Object.keys(SIGN_MODES).length, 'count', all, reader);
+  for (const key of SIGN_KEYS) {
+    const name = must(SIGN[key], key);
+    const one = sample([name]);
+    const read = original(name).read;
+    g.n(`${key}Pages`, read.pages.length, 'count', one, reader);
+    g.n(`${key}Before`, pdfFixture(name).length, 'bytes', one, reader);
+    g.n(`${key}Texts`, sum(read.pages.map((p) => p.texts.length)), 'count', one, reader);
+    g.n(`${key}Images`, sum(read.pages.map((p) => p.images)), 'count', one, reader);
+    g.n(`${key}Widgets`, sum(read.pages.map((p) => p.widgets)), 'count', one, reader);
+    g.n(`${key}Fields`, original(name).parts.fields, 'count', one, lib);
+  }
+  // The tax form comes with its own signature parts: the usage rights Adobe sealed into it (/Perms /UR3, a /Type /Sig
+  // with a /ByteRange that covers the file). They are counted before, so "nothing new" compares like with like.
+  const formName = must(SIGN['form'], 'form');
+  const formOne = sample([formName]);
+  const form = original(formName);
+  g.n('formXfaBefore', form.read.xfa ? 1 : 0, 'count', formOne, reader);
+  g.n('formSigDicts', form.parts.sigDicts, 'count', formOne, lib);
+  g.n('formByteRanges', form.parts.byteRanges, 'count', formOne, lib);
+  g.n('formRangesCovering', form.parts.rangesCovering, 'count', formOne, lib);
+  g.n('formUsageRights', form.parts.usageRights ? 1 : 0, 'count', formOne, lib);
+  g.n('sigDictsBefore', sum(files.map((name) => original(name).parts.sigDicts)), 'count', all, lib);
+  const rows: Cell[][] = [];
+  const methods: Method[] = [reader, lib];
+  for (const browser of BROWSERS) {
+    let runs = 0;
+    let onePerPage = 0;
+    let textKept = 0;
+    let widgetsKept = 0;
+    let fieldsKept = 0;
+    let newSigDicts = 0;
+    let newByteRanges = 0;
+    let signedPages = 0;
+    let xfaAfter = 0;
+    let xfaNote = 0;
+    let usageRightsAfter = 0;
+    let rangesCoveringAfter = 0;
+    let how: Method | null = null;
+    for (const key of SIGN_KEYS) {
+      const name = must(SIGN[key], key);
+      const before = original(name);
+      for (const mode of Object.keys(SIGN_MODES) as SignMode[]) {
+        ctx.log(`  Sign PDF, ${mode}, ${name}, in ${browser}`);
+        const run = await signOne(ctx, browser, name, mode);
+        how = run.how;
+        if (!methods.some((m) => m.runner === 'playwright' && m.browser === browser)) methods.push(run.how);
+        const read = await readWithPdfjs(run.bytes);
+        const parts = await signatureParts(run.bytes);
+        if (read.pages.length !== before.read.pages.length) throw new Error(`${name} ${mode} in ${browser}: ${read.pages.length} pages`);
+        runs += 1;
+        signedPages += read.pages.length;
+        const images = read.pages.every((p, index) => p.images === (before.read.pages[index]?.images ?? 0) + 1);
+        const texts = read.pages.every((p, index) => p.texts.length === before.read.pages[index]?.texts.length && p.marker === before.read.pages[index]?.marker);
+        const widgets = read.pages.every((p, index) => p.widgets === before.read.pages[index]?.widgets);
+        if (images) onePerPage += 1;
+        if (texts) textKept += 1;
+        if (widgets && read.acroForm === before.read.acroForm) widgetsKept += 1;
+        if (parts.fields === before.parts.fields) fieldsKept += 1;
+        newSigDicts += parts.sigDicts - before.parts.sigDicts;
+        newByteRanges += parts.byteRanges - before.parts.byteRanges;
+        if (key === 'form') {
+          if (read.xfa) xfaAfter += 1;
+          if (/XFA/i.test(run.notes)) xfaNote += 1;
+          if (parts.usageRights) usageRightsAfter += 1;
+          rangesCoveringAfter += parts.rangesCovering;
+        }
+        const after = run.bytes.length;
+        const one = sample([name, ...(mode === 'Upload' ? [SIGNATURE_IMAGE] : [])]);
+        g.n(`${key}${mode}${B[browser]}`, after, 'bytes', one, run.how);
+        g.n(`${key}${mode}Added${B[browser]}`, after - pdfFixture(name).length, 'bytes', one, run.how);
+        g.n(`${key}${mode}Change${B[browser]}`, ratio(after, pdfFixture(name).length), 'ratio', one, run.how);
+        rows.push([name, mode.toLowerCase(), browser, read.pages.length, pdfFixture(name).length, after, sum(before.read.pages.map((p) => p.images)), sum(read.pages.map((p) => p.images)), sum(read.pages.map((p) => p.texts.length)), sum(read.pages.map((p) => p.widgets)), parts.fields, parts.sigDicts - before.parts.sigDicts + parts.byteRanges - before.parts.byteRanges]);
+      }
+    }
+    const run = must(how ?? undefined, browser);
+    g.n(`signed${B[browser]}`, runs, 'count', all, run);
+    g.n(`signedPages${B[browser]}`, signedPages, 'count', all, run);
+    g.n(`onePerPage${B[browser]}`, onePerPage, 'count', all, reader);
+    g.n(`textKept${B[browser]}`, textKept, 'count', all, reader);
+    g.n(`widgetsKept${B[browser]}`, widgetsKept, 'count', all, reader);
+    g.n(`fieldsKept${B[browser]}`, fieldsKept, 'count', all, lib);
+    g.n(`newSigDicts${B[browser]}`, newSigDicts, 'count', all, lib);
+    g.n(`newByteRanges${B[browser]}`, newByteRanges, 'count', all, lib);
+    g.n(`formXfaAfter${B[browser]}`, xfaAfter, 'count', formOne, reader);
+    g.n(`formXfaNote${B[browser]}`, xfaNote, 'count', formOne, run);
+    g.n(`formUsageRightsAfter${B[browser]}`, usageRightsAfter, 'count', formOne, lib);
+    g.n(`formRangesCoveringAfter${B[browser]}`, rangesCoveringAfter, 'count', formOne, lib);
+    // What each way adds, across the three files: the smallest and the largest addition.
+    for (const mode of Object.keys(SIGN_MODES) as SignMode[]) {
+      const added = rows.filter((row) => row[1] === mode.toLowerCase() && row[2] === browser).map((row) => (row[5] as number) - (row[4] as number));
+      const sampled = mode === 'Upload' ? sample([...files, SIGNATURE_IMAGE]) : sample(files);
+      g.n(`${mode.toLowerCase()}AddedMin${B[browser]}`, Math.min(...added), 'bytes', sampled, run);
+      g.n(`${mode.toLowerCase()}AddedMax${B[browser]}`, Math.max(...added), 'bytes', sampled, run);
+    }
+  }
+  g.n('signatureImageBytes', imageFixture(SIGNATURE_IMAGE).length, 'bytes', sample([SIGNATURE_IMAGE]), node(NODE_IMAGE));
+  g.n('signatureImageWidth', shownSize(imageFixture(SIGNATURE_IMAGE)).width, 'px', sample([SIGNATURE_IMAGE]), node(NODE_IMAGE));
+  g.n('signatureImageHeight', shownSize(imageFixture(SIGNATURE_IMAGE)).height, 'px', sample([SIGNATURE_IMAGE]), node(NODE_IMAGE));
+  g.t('signed', [label('file'), label('mode'), label('browser'), inNode('pages', 'count'), inNode('beforeBytes', 'bytes'), inBrowser('afterBytes', 'bytes'), inNode('imagesBefore', 'count'), inNode('imagesAfter', 'count'), inNode('textItems', 'count'), inNode('widgets', 'count'), inNode('fields', 'count'), inNode('newSignatureParts', 'count')], rows, all, methods);
+  return g.done();
+}
+
+// ---- 14. What a PDF password protects (F19b, decision 3.4) -------------------------------------------------------
+
+const PROTECT: Record<string, string> = {
+  mixed: 'gen-paginas-mistas.pdf',
+  photos: 'gen-fotos.pdf',
+  optimized: 'gen-ja-otimizado.pdf',
+};
+const PROTECT_KEYS = Object.keys(PROTECT);
+/** The only fixture locked by restrictions alone: no password to open, an owner password, printing and editing blocked. */
+const OWNER_ONLY = 'gen-cifrado-dono.pdf';
+
+/** A password made up for one measurement and never written anywhere (each run makes new ones, of the same length). */
+const throwaway = (): string => `measure-${randomUUID()}`;
+
+/** Protect PDF on one fixture, in a Node process of its own (the engine's qpdf fresh, as in a tab: lockFresh). */
+function protects(name: string, password: string): Uint8Array {
+  const result = lockFresh('protect', name, password);
+  if (!result.ok) throw new Error(`Protect PDF refused ${name}: ${result.reason}`);
+  return result.bytes;
+}
+
+const opensWith = async (bytes: Uint8Array, password: string): Promise<boolean> => {
+  try {
+    await readWithPdfjs(bytes, password);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+async function pdfPassword(ctx: Context): Promise<GuideMeasure> {
+  const g = collector(ctx.stamp);
+  const files = PROTECT_KEYS.map((key) => must(PROTECT[key], key));
+  const protectedSample = sample(files, 'three PDFs, each protected twice by Protect PDF in Node, each time in a process of its own and with a new password made up for the measurement');
+  const engine = node(`${NODE_PDF_ENGINE}, each run in a Node process of its own (scripts/guides/lib/lock-child.ts): the engine's qpdf fresh, as in a tab`);
+  const qpdfJson = node(NODE_QPDF_JSON);
+  const reader = node(NODE_PDFJS);
+  const rows: Cell[][] = [];
+  const added: number[] = [];
+  let refusedWithout = 0;
+  let openedWith = 0;
+  let refusedWrong = 0;
+  let passwordInBytes = 0;
+  let sameSize = 0;
+  let blocked = 0;
+  const revisions = new Set<number>();
+  const bits = new Set<number>();
+  const methodsSeen = new Set<string>();
+  for (const key of PROTECT_KEYS) {
+    const name = must(PROTECT[key], key);
+    ctx.log(`  Protect PDF ${name}`);
+    const one = sample([name]);
+    const password = throwaway();
+    const first = protects(name, password);
+    const second = protects(name, throwaway());
+    if (first.length === second.length) sameSize += 1;
+    else ctx.log(`    ${name}: ${first.length} and ${second.length} bytes in two runs`);
+    const before = pdfFixture(name);
+    const pages = (await readWithPdfjs(before)).pages.length;
+    const encryption = await encryptionOf(first, password);
+    revisions.add(encryption.revision);
+    bits.add(encryption.bits);
+    methodsSeen.add(encryption.method);
+    const blockedHere = Object.values(encryption.capabilities).filter((allowed) => !allowed).length;
+    blocked += blockedHere;
+    if (!(await opensWithoutPassword(first))) refusedWithout += 1;
+    if (await opensWith(first, password)) openedWith += 1;
+    if (!(await opensWith(first, throwaway()))) refusedWrong += 1;
+    if (Buffer.from(first).includes(Buffer.from(password, 'latin1'))) passwordInBytes += 1;
+    g.n(`${key}Pages`, pages, 'count', one, reader);
+    g.n(`${key}Before`, before.length, 'bytes', one, engine);
+    g.n(`${key}After`, first.length, 'bytes', one, engine);
+    g.n(`${key}Added`, first.length - before.length, 'bytes', one, engine);
+    g.n(`${key}Change`, ratio(first.length, before.length), 'ratio', one, engine);
+    added.push(first.length - before.length);
+    rows.push([name, pages, before.length, first.length, second.length, encryption.revision, encryption.bits, blockedHere]);
+  }
+  if (revisions.size !== 1 || bits.size !== 1 || methodsSeen.size !== 1) throw new Error(`the protected files differ: R ${[...revisions].join(', ')}, ${[...bits].join(', ')} bits, ${[...methodsSeen].join(', ')}`);
+  g.n('files', files.length, 'count', protectedSample, engine);
+  g.n('revision', must([...revisions][0], 'R'), 'count', protectedSample, qpdfJson);
+  g.n('keyBits', must([...bits][0], 'bits'), 'count', protectedSample, qpdfJson);
+  g.fact('method', must([...methodsSeen][0], 'method'));
+  g.n('blocked', blocked, 'count', protectedSample, qpdfJson);
+  g.n('sameSize', sameSize, 'count', protectedSample, engine);
+  g.n('addedMin', Math.min(...added), 'bytes', protectedSample, engine);
+  g.n('addedMax', Math.max(...added), 'bytes', protectedSample, engine);
+  g.n('refusedWithout', refusedWithout, 'count', protectedSample, reader);
+  g.n('openedWith', openedWith, 'count', protectedSample, reader);
+  g.n('refusedWrong', refusedWrong, 'count', protectedSample, reader);
+  g.n('passwordInBytes', passwordInBytes, 'count', protectedSample, engine);
+  g.t('protected', [label('file'), inNode('pages', 'count'), inNode('beforeBytes', 'bytes'), inNode('afterBytes', 'bytes'), inNode('secondRunBytes', 'bytes'), inNode('revision', 'count'), inNode('bits', 'count'), inNode('blocked', 'count')], rows, protectedSample, [engine, qpdfJson, reader]);
+
+  // The file locked by restrictions alone: what it blocks, that a reader opens it with no password, what Unlock PDF does
+  // with it (restrictions only: no password asked) and that Protect PDF turns it down.
+  ctx.log(`  ${OWNER_ONLY}: Unlock PDF and Protect PDF`);
+  const owner = sample([OWNER_ONLY], 'the fixture with restrictions and no password to open, through Unlock PDF (restrictions only) and Protect PDF in Node');
+  const locked = pdfFixture(OWNER_ONLY);
+  const lockedEncryption = await encryptionOf(locked);
+  const capabilities = Object.keys(lockedEncryption.capabilities).length;
+  const ownerBlocked = Object.values(lockedEncryption.capabilities).filter((allowed) => !allowed).length;
+  const unlocked = lockFresh('unlock', OWNER_ONLY);
+  if (!unlocked.ok) throw new Error(`Unlock PDF refused ${OWNER_ONLY}: ${unlocked.reason}`);
+  const free = unlocked.bytes;
+  const freeEncryption = await encryptionOf(free);
+  const refused = lockFresh('protect', OWNER_ONLY, throwaway());
+  g.n('ownerBytes', locked.length, 'bytes', owner, engine);
+  g.n('ownerPages', (await readWithPdfjs(locked)).pages.length, 'count', owner, reader);
+  g.n('ownerRevision', lockedEncryption.revision, 'count', owner, qpdfJson);
+  g.n('ownerKeyBits', lockedEncryption.bits, 'count', owner, qpdfJson);
+  g.n('capabilities', capabilities, 'count', owner, qpdfJson);
+  g.n('ownerBlocked', ownerBlocked, 'count', owner, qpdfJson);
+  g.n('ownerOpensWithout', (await opensWithoutPassword(locked)) ? 1 : 0, 'count', owner, reader);
+  g.n('unlockedBytes', free.length, 'bytes', owner, engine);
+  g.n('unlockedEncrypted', freeEncryption.encrypted ? 1 : 0, 'count', owner, qpdfJson);
+  g.n('unlockedPages', (await readWithPdfjs(free)).pages.length, 'count', owner, reader);
+  g.n('unlockedBlocked', freeEncryption.encrypted ? Object.values(freeEncryption.capabilities).filter((allowed) => !allowed).length : 0, 'count', owner, qpdfJson);
+  g.n('protectRefused', !refused.ok && refused.reason === 'restricted' ? 1 : 0, 'count', owner, engine);
+  return g.done();
 }
 
 export const PLANS: Record<FileGuideId, (ctx: Context) => Promise<GuideMeasure>> = {
@@ -843,9 +1354,8 @@ export const PLANS: Record<FileGuideId, (ctx: Context) => Promise<GuideMeasure>>
   'guides-split-pdf-file-size': splitSize,
   'guides-combine-pdfs-on-phone': combine,
   'guides-photos-to-one-pdf': photosToPdf,
-  // F19b, slice 1: the front M writes these plans.
-  'guides-compress-photo-for-online-form': notYet,
-  'guides-webp-vs-avif-vs-jpg': notYet,
-  'guides-sign-pdf-without-printing': notYet,
-  'guides-what-a-pdf-password-protects': notYet,
+  'guides-compress-photo-for-online-form': photoForForm,
+  'guides-webp-vs-avif-vs-jpg': webpAvifJpg,
+  'guides-sign-pdf-without-printing': signPdf,
+  'guides-what-a-pdf-password-protects': pdfPassword,
 };
