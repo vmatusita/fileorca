@@ -119,7 +119,10 @@ const categories = [
 ].filter((column) => column !== null);
 const qrPath = pagePath(QR_ID, lang);
 const utility = qrPath && t.qr && t.footer.utilityColumn ? { title: t.footer.utilityColumn, links: [{ label: t.qr.name, href: qrPath }] } : null;
-/** The Guides block: the hub of the language, then each group of the hub that has a guide in the language. */
+/**
+ * The Guides block: the hub of the language, then each group of the hub that has a guide in the language (F19b, DECISOES
+ * § 786: the Utilities group too, #util, once the QR code has a guide there).
+ */
 const guidesHub = pagePath(GUIDES_HUB_ID, lang);
 const guides = guidesHub
   ? {

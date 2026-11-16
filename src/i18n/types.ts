@@ -637,6 +637,15 @@ export interface GuideWordsById {
   'guides-refinance-break-even': { head: [string, string, string, string, string]; month: string; never: string };
   /** The first heading, the heading of a column of returns ("Savings earn {rate}"), the year of a break-even and none in 30 years. */
   'guides-rent-vs-buy-break-even': { head: string; savings: string; year: string; notWithin: string };
+  /**
+   * F19b: the headings of the table (the third with the APR of the example, "APY of a {rate} APR") and the name of each
+   * compounding in the order of the calculator's table: yearly, twice a year, quarterly, monthly, daily.
+   */
+  'guides-apr-vs-apy': { head: [string, string, string, string]; compounding: [string, string, string, string, string] };
+  /** F19b: the headings of the table of fixed payments. */
+  'guides-credit-card-minimum-payment': { head: [string, string, string, string] };
+  /** F19b: the headings of the table over other debts, and the limit that sets the price ("Housing limit, {rate}"; both leave the same room). */
+  'guides-how-much-house-can-i-afford': { head: [string, string, string, string]; front: string; back: string; both: string };
 }
 
 /** A guide /guides/<slug>/ (F4, decision 10): {placeholders} are numbers the engines work out at build. */
@@ -1464,7 +1473,8 @@ export interface GuidesHubTexts extends PageMeta {
   intro: string;
   /** The name of the nav of the shortcuts (aria-label). */
   jumpLabel: string;
-  groups: Record<'image' | 'pdf' | 'money', GuidesHubGroupTexts>;
+  /** F19b (DECISOES § 786): the Utilities group (util) too, the group of the QR code guides, shown once it has a guide. */
+  groups: Record<'image' | 'pdf' | 'util' | 'money', GuidesHubGroupTexts>;
   /**
    * Only in a language with no money guide (pt): the note of the money group, which says why and leads to the money hub of
    * the language (the text before the link, the link, the text after it).
@@ -1485,6 +1495,11 @@ export interface GuidesHubTexts extends PageMeta {
 export interface GuideCardTexts {
   kind: string;
   measured: string;
+  /**
+   * F19b (DECISOES § 786): the measure of a file guide that measured texts the script generated instead of files (the QR
+   * code guide), with {n}, the number of its test texts.
+   */
+  measuredTexts: string;
   workedOut?: string;
   tool: string;
 }

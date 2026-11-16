@@ -7,13 +7,13 @@
 //  4. a deterministic part, measured again here in Node with the same code, gives exactly the file's values.
 import { readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDE_PUBLISHED_ON, GUIDE_REVIEWED_ON } from '../../src/tools/guides/registry.ts';
-import { LANGS } from '../../src/i18n/routes.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDE_PUBLISHED_ON, GUIDE_REVIEWED_ON, publishedOn, reviewedOn, type FileGuideTool } from '../../src/tools/guides/registry.ts';
+import { LANGS, QR_ID } from '../../src/i18n/routes.ts';
 import type { MeasuredFile, MeasuredNumber, MeasuredTable, Method, OfficialSize, Sample } from '../../src/tools/guides/measured-types.ts';
 import { scriptFiles, scriptHash } from '../../scripts/guides/lib/record.ts';
 import { breakdown, compress, merge, pdfFixture, splitEach } from '../../scripts/guides/lib/node-pdf.ts';
 import { compareNumbers, compareTables } from '../../scripts/guides/lib/compare.ts';
-import { VARIANTS, globals, guideTables, resolvePlaceholder } from '../../src/tools/guides/measured.ts';
+import { VARIANTS, globals, guideTables, measuredOf, resolvePlaceholder } from '../../src/tools/guides/measured.ts';
 import enShared from '../../src/i18n/en/file-guides.ts';
 import ptShared from '../../src/i18n/pt/file-guides.ts';
 import esShared from '../../src/i18n/es/file-guides.ts';
@@ -30,8 +30,26 @@ const measured = JSON.parse(readFileSync(FILE, 'utf8')) as MeasuredFile;
 const UNITS = ['bytes', 'ratio', 'count', 'px', 'db', 'ppi'];
 const FIXTURES = new Set([...readdirSync('fixtures/images'), ...readdirSync('fixtures/pdf')]);
 
-function sampleProblems(where: string, sample: Sample): string[] {
+/**
+ * The sample of a number or a table. A sample of files: every file a fixture, as many as its count. F19b (DECISOES § 786;
+ * § 796, a changed test): a sample of texts (kind 'texts') only in a guide whose tool is the QR code generator, the one
+ * tool that takes text instead of a file, with a list of distinct, non-empty texts as long as its count. The rule for the
+ * samples of files is the same as before, for every guide (a guide of the QR code too, if it ever measures a file).
+ */
+function sampleProblems(where: string, sample: Sample, tool: FileGuideTool): string[] {
   const problems: string[] = [];
+  if (sample.kind === 'texts') {
+    if (tool !== QR_ID) problems.push(`${where}: a sample of texts in a guide whose tool takes files (${tool})`);
+    if (!Array.isArray(sample.texts) || sample.texts.length === 0) problems.push(`${where}: no texts in the sample`);
+    else {
+      if (sample.count !== sample.texts.length) problems.push(`${where}: count ${sample.count} for ${sample.texts.length} texts`);
+      if (sample.texts.some((text) => typeof text !== 'string' || text.trim() === '')) problems.push(`${where}: an empty text in the sample`);
+      if (new Set(sample.texts).size !== sample.texts.length) problems.push(`${where}: a text twice in the sample`);
+    }
+    if ('files' in sample) problems.push(`${where}: a sample of texts with files`);
+    return problems;
+  }
+  if (sample.kind !== undefined && sample.kind !== 'files') problems.push(`${where}: a sample of the kind ${String(sample.kind)}`);
   if (!Array.isArray(sample.files) || sample.files.length === 0) problems.push(`${where}: no files in the sample`);
   if (sample.count !== sample.files.length) problems.push(`${where}: count ${sample.count} for ${sample.files.length} files`);
   for (const file of sample.files) if (!FIXTURES.has(file)) problems.push(`${where}: ${file} is not a fixture`);
@@ -51,9 +69,11 @@ function methodProblems(where: string, method: Method): string[] {
   return [`${where}: unknown runner`];
 }
 
-function stampProblems(where: string, stamp: { date: string; commit: string }): string[] {
+// F19b (DECISOES § 778): every number and table of a guide carries the day of that guide's measurement (the first number
+// of the guide gives it), never after the measuredOn of the file, which is the newest of them (fileProblems below).
+function stampProblems(where: string, stamp: { date: string; commit: string }, day: string): string[] {
   const problems: string[] = [];
-  if (stamp.date !== measured.measuredOn) problems.push(`${where}: date ${stamp.date}, the file says ${measured.measuredOn}`);
+  if (stamp.date !== day) problems.push(`${where}: date ${stamp.date}, the guide was measured on ${day}`);
   if (!/^[0-9a-f]{40}$/.test(stamp.commit)) problems.push(`${where}: commit ${stamp.commit}`);
   return problems;
 }
@@ -66,15 +86,19 @@ function fileProblems(file: MeasuredFile): string[] {
   if (!file.environment.browsers.chromium || !file.environment.browsers.webkit) problems.push('a browser version is missing');
   const ids = Object.keys(file.guides);
   if (ids.join() !== FILE_GUIDE_IDS.join()) problems.push(`guides ${ids.join(', ')}`);
+  const days: string[] = [];
   for (const id of FILE_GUIDE_IDS) {
     const guide = file.guides[id];
     if (!guide) continue;
     if (Object.keys(guide.numbers).length === 0) problems.push(`${id}: no numbers`);
+    const day = Object.values(guide.numbers)[0]?.date ?? '';
+    days.push(day);
+    if (day > file.measuredOn) problems.push(`${id}: measured on ${day}, after the measuredOn of the file, ${file.measuredOn}`);
     for (const [name, number] of Object.entries(guide.numbers)) {
       const where = `${id}.${name}`;
       if (typeof number.value !== 'number' || !Number.isFinite(number.value)) problems.push(`${where}: value ${number.value}`);
       if (!UNITS.includes(number.unit)) problems.push(`${where}: unit ${number.unit}`);
-      problems.push(...sampleProblems(where, number.sample), ...methodProblems(where, number.method), ...stampProblems(where, number));
+      problems.push(...sampleProblems(where, number.sample, FILE_GUIDES[id].tool),...methodProblems(where, number.method), ...stampProblems(where, number, day));
     }
     for (const [name, table] of Object.entries(guide.tables)) {
       const where = `${id} table ${name}`;
@@ -83,7 +107,7 @@ function fileProblems(file: MeasuredFile): string[] {
       else if (table.kinds.some((kind) => !['node', 'playwright'].includes(kind.runner) || ![...UNITS, 'label'].includes(kind.unit))) problems.push(`${where}: a column of an unknown kind`);
       for (const row of table.rows) if (row.length !== table.columns.length) problems.push(`${where}: a row of ${row.length} cells for ${table.columns.length} columns`);
       if (table.methods.length === 0) problems.push(`${where}: no method`);
-      problems.push(...sampleProblems(where, table.sample), ...table.methods.flatMap((how) => methodProblems(where, how)), ...stampProblems(where, table));
+      problems.push(...sampleProblems(where, table.sample, FILE_GUIDES[id].tool),...table.methods.flatMap((how) => methodProblems(where, how)), ...stampProblems(where, table, day));
     }
     for (const size of guide.official ?? []) {
       if (!/^https:\/\//.test(size.source.href) || !size.source.title || !/^\d{4}-\d{2}-\d{2}$/.test(size.source.read)) problems.push(`${id}: the source of ${size.id}`);
@@ -91,6 +115,7 @@ function fileProblems(file: MeasuredFile): string[] {
       problems.push(...statedProblems(size).map((problem) => `${id}: ${problem}`));
     }
   }
+  if (days.length > 0 && !days.includes(file.measuredOn)) problems.push(`measuredOn ${file.measuredOn} is not the day of any guide (${[...new Set(days)].join(', ')})`);
   return problems;
 }
 
@@ -151,18 +176,37 @@ describe('the measurements of the file guides', () => {
     expect(problems.some((problem) => problem.includes('typed: value'))).toBe(true);
   });
 
+  // F19b (DECISOES § 786): the QR code guide measures texts the script wrote, which no fixture holds. A sample of texts
+  // passes only in a guide of the QR code generator, with as many distinct texts as its count; a guide of files never
+  // takes one, and a sample of files keeps every rule it had.
+  it('take a sample of texts only in a guide of the QR code generator, with a list as long as its count', () => {
+    const texts: Sample = { kind: 'texts', texts: ['https://fileorca.com/', 'Olá, café'], count: 2, note: 'level H' };
+    expect(sampleProblems('qr', texts, QR_ID)).toEqual([]);
+    expect(sampleProblems('png', texts, 'png-to-jpg').join()).toMatch(/a sample of texts in a guide whose tool takes files \(png-to-jpg\)/);
+    expect(sampleProblems('qr', { ...texts, count: 3 }, QR_ID).join()).toMatch(/count 3 for 2 texts/);
+    expect(sampleProblems('qr', { kind: 'texts', texts: [], count: 0 }, QR_ID).join()).toMatch(/no texts in the sample/);
+    expect(sampleProblems('qr', { kind: 'texts', texts: ['a', ' '], count: 2 }, QR_ID).join()).toMatch(/an empty text in the sample/);
+    expect(sampleProblems('qr', { kind: 'texts', texts: ['a', 'a'], count: 2 }, QR_ID).join()).toMatch(/a text twice in the sample/);
+    // A sample of files in a QR code guide is held to the fixtures, as in any guide.
+    expect(sampleProblems('qr', { files: ['my-photo.jpg'], count: 1 }, QR_ID).join()).toMatch(/my-photo.jpg is not a fixture/);
+    expect(sampleProblems('png', { files: ['gen-png-transparente.png'], count: 1 }, 'png-to-jpg')).toEqual([]);
+  });
+
   // DECISOES § 207: the "Reviewed" line and the dateModified of the Article schema never date the review before the day
   // the numbers they show were measured (the script stamps the UTC day), in any language. F18 (DECISOES § 733): the first
   // publication is the day of the first version, which a later measurement does not move, so it may come before the
   // measurement (the history line then says when the numbers were measured again: guide-page.test.ts reads it on each
-  // page); it never comes after the review.
+  // page); it never comes after the review. F19b (DECISOES § 778): per guide, against the day that guide was measured,
+  // since a guide added later has its own days and the first ten keep theirs.
   it('are never newer than the review dates the guides show, and the first publication never comes after the review', () => {
-    expect(GUIDE_REVIEWED >= measured.measuredOn, `reviewed ${GUIDE_REVIEWED}, measured ${measured.measuredOn}`).toBe(true);
     expect(GUIDE_PUBLISHED <= GUIDE_REVIEWED, `published ${GUIDE_PUBLISHED}, reviewed ${GUIDE_REVIEWED}`).toBe(true);
     expect([GUIDE_REVIEWED_ON.en, GUIDE_PUBLISHED_ON.en]).toEqual([GUIDE_REVIEWED, GUIDE_PUBLISHED]);
-    for (const lang of LANGS) {
-      expect(GUIDE_REVIEWED_ON[lang] >= measured.measuredOn, `${lang}: reviewed ${GUIDE_REVIEWED_ON[lang]}, measured ${measured.measuredOn}`).toBe(true);
-      expect(GUIDE_PUBLISHED_ON[lang] <= GUIDE_REVIEWED_ON[lang], `${lang}: published ${GUIDE_PUBLISHED_ON[lang]}, reviewed ${GUIDE_REVIEWED_ON[lang]}`).toBe(true);
+    for (const id of FILE_GUIDE_IDS) {
+      const day = measuredOf(id, measured);
+      for (const lang of LANGS) {
+        expect(reviewedOn(id, lang) >= day, `${id} ${lang}: reviewed ${reviewedOn(id, lang)}, measured ${day}`).toBe(true);
+        expect(publishedOn(id, lang) <= reviewedOn(id, lang), `${id} ${lang}: published ${publishedOn(id, lang)}, reviewed ${reviewedOn(id, lang)}`).toBe(true);
+      }
     }
   });
 

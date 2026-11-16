@@ -29,16 +29,17 @@ import AdBreak from '../ads/AdBreak.astro';
 import PdfIsland from '../tools/pdf/PdfIsland.astro';
 import Reviewed from '../tools/guides/Reviewed.astro';
 import AuthorBox from '../components/AuthorBox.astro';
-import { routeById, type Lang } from '../i18n/routes.ts';
+import { QR_ID, routeById, type Lang } from '../i18n/routes.ts';
 import { fmt } from '../i18n/format.ts';
 import { TEXTS } from '../i18n/texts.ts';
 import { articleLd, breadcrumbLd, personLd } from '../seo/meta.ts';
 import { FILE_PANEL_POSES } from '../tools/image/Oli.tsx';
 import { panelData as pdfPanelData } from '../tools/pdf/page.ts';
 import type { PdfToolId } from '../tools/pdf/registry.ts';
-import { FILE_GUIDES, type FileGuideId } from '../tools/guides/registry.ts';
-import { MEASURED, fillValues, longDate, pageTables, placeholdersIn } from '../tools/guides/measured.ts';
-import { GUIDE_PUBLISHED_ON, GUIDE_REVIEWED_ON, GUIDE_SHARED, crumbsFor, guidePath, guideTexts, relatedFor, toolInfo } from '../tools/guides/page.ts';
+import { FILE_GUIDES, fileGuideGroup, type FileGuideId } from '../tools/guides/registry.ts';
+import { QR_TEXTS } from '../tools/qr-code-generator/page.ts';
+import { fillValues, longDate, measuredOf, pageTables, placeholdersIn } from '../tools/guides/measured.ts';
+import { GUIDE_SHARED, crumbsFor, guidePath, guideTexts, publishedOn, relatedFor, reviewedOn, toolInfo } from '../tools/guides/page.ts';
 
 interface Props {
   id: FileGuideId;
@@ -57,8 +58,14 @@ const tool = toolInfo(def.tool, lang);
 const tables = pageTables(id, shared, t, undefined, lang);
 const related = relatedFor(id, lang);
 const common = TEXTS[lang].common;
-// The sheet: a paper with the fold in the colour of the guide's hub (turquesa for image, coral for PDF), as its GuideCard.
-const sheetCategory = def.hub === 'pdf-tools' ? 'pdf' : 'image';
+// The sheet: a paper with the fold in the colour of the guide's group (turquesa for image, coral for PDF, lima for the
+// utilities of the QR code since the F19b), as its GuideCard.
+const sheetCategory = fileGuideGroup(id);
+// F19b (decisions 4 and 7; DECISOES § 786 and § 791): the ad area of the route (the area of the tool the guide embeds:
+// "arquivos" for an image or PDF tool, "utilidades" for the QR code), and the seal the cookie notice repeats: a QR code
+// guide keeps no file, so it repeats the seal of the QR page; the others, the seal of the files (common.seal).
+const adArea = route.adArea ?? 'arquivos';
+const seal = def.tool === QR_ID ? { seal: QR_TEXTS[lang].seal } : {};
 // The blocks of each part (its paragraphs, then its list) and the mark between two of them: the first ad after the first
 // block of the first part when it has another one, or else after that part.
 const blocksOf = (section: (typeof t.sections)[number]): number => section.paragraphs.length + (section.list ? 1 : 0);
@@ -67,7 +74,8 @@ const [readBefore, readAfter = ''] = shared.readOn.split('{date}');
 // The sentence that links to the tool's own page, at the end of the part the registry names (D-54; DECISOES § 562).
 const [linkBefore, linkAfter = ''] = shared.toolLink.split('{link}');
 // The history line: its two dates are <time datetime> (DECISOES § 557), the rest is filled like any text of the guide.
-const DATES: Record<string, string> = { published: GUIDE_PUBLISHED_ON[lang], measured: MEASURED.measuredOn };
+// F19b (DECISOES § 778): the days of this guide, its own when it came after the first ten.
+const DATES: Record<string, string> = { published: publishedOn(id, lang), measured: measuredOf(id) };
 const history = t.changed.split(/(\{(?:published|measured)\})/).filter((part) => part !== '');
 const dateOf = (part: string): string | undefined => DATES[part.slice(1, -1)];
 // What the columns left out said, after the note (F5b F-13): only for a table that leaves one out.
@@ -80,15 +88,16 @@ const note = [fill(t.measuredNote), ...constants.map(fill)].join(' ');
   title={t.title}
   description={t.description}
   withAds
-  adArea="arquivos"
+  adArea={adArea}
+  {...seal}
   oli={FILE_PANEL_POSES}
-  schema={[breadcrumbLd(crumbs), articleLd(t.h1, t.description, path, lang, GUIDE_PUBLISHED_ON[lang], GUIDE_REVIEWED_ON[lang], id), personLd()]}
+  schema={[breadcrumbLd(crumbs), articleLd(t.h1, t.description, path, lang, publishedOn(id, lang), reviewedOn(id, lang), id), personLd()]}
 >
   <Breadcrumb label={common.breadcrumb.label} crumbs={crumbs} />
   <div class="fo-top fo-top--calc" data-guide-text>
     <h1 class="fo-h1">{t.h1}</h1>
     <p class="fo-lead">{fill(t.lead)}</p>
-    <Reviewed lang={lang} />
+    <Reviewed lang={lang} id={id} />
   </div>
   <section class={`fo-sheet fo-dogear fo-cat--${sheetCategory}`} aria-labelledby="fo-sheet-title" data-content="facts">
     <h2 class="fo-sheet__title" id="fo-sheet-title">{t.measuredHeading}</h2>
@@ -184,7 +193,7 @@ const note = [fill(t.measuredNote), ...constants.map(fill)].join(' ');
   </section>
   <AdBreak />
   {/* F19a (decision 6; DECISOES § 763): the author box, out of the word count of the guide (no data-guide-text). */}
-  <AuthorBox lang={lang} kind="file" measuredOn={MEASURED.measuredOn} />
+  <AuthorBox lang={lang} kind="file" measuredOn={measuredOf(id)} />
   <section class="fo-section" aria-labelledby="related" data-content="related">
     <h2 id="related">{t.relatedHeading}</h2>
     <ul class="fo-grid">

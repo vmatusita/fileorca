@@ -13,6 +13,7 @@ import { fmt, groupDigits } from '../../src/i18n/format.ts';
 import { LANGS, pagePath } from '../../src/i18n/routes.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
 import { GUIDES_HUB_ID } from '../../src/tools/guides/registry.ts';
+import { HUB_GROUPS, hubGroup } from '../../src/tools/guides/hub.ts';
 
 const DIST = process.env['FO_PAGES_DIST'] ?? 'dist';
 const BUILT = existsSync(join(DIST, 'index.html'));
@@ -54,7 +55,10 @@ describe.runIf(BUILT)('the footer below 768 px: the hub in sight and the tools i
       const guides = footer?.querySelector('.fo-footer__more');
       expect(guides?.querySelector(':scope > a.fo-footer__hub')?.getAttribute('href'), lang).toBe(pagePath(GUIDES_HUB_ID, lang));
       const groups = guides?.querySelectorAll(':scope > details.fo-footer__tools ul > li > a') ?? [];
-      expect(groups.length, lang).toBe(lang === 'pt' ? 2 : 3);
+      // F19b (DECISOES § 786 and § 796): one link per group of the hub with a guide in the language, the Utilities group
+      // of the QR code guide included (pt 3, en and es 4); before the F19b, pt 2 and en and es 3.
+      expect(groups.length, lang).toBe(HUB_GROUPS.filter((group) => hubGroup(group, lang).length > 0).length);
+      expect(groups.length, lang).toBe(lang === 'pt' ? 3 : 4);
       expect(text(guides?.querySelector('summary')), lang).toBe(`${fmt(t.guidesTopics, { n: groupDigits(groups.length, lang) })} ${t.guidesTopicsRest}`);
       const hrefs = footer?.querySelectorAll('a').map((link) => link.getAttribute('href')) ?? [];
       expect(hrefs.length, lang).toBe(new Set(hrefs).size);

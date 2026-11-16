@@ -63,9 +63,24 @@ export const LIFE_REVIEWED = '2026-11-02';
 export const LIFE_FIRST_PUBLISHED = '2026-11-02';
 export const LIFE_SOURCES_READ_ON = '2026-11-02';
 
+/**
+ * F19b (DECISOES § 778): a money guide added after the first five carries its own day, in English and Spanish: the day in
+ * Brasília the run wrote it, which is when it was reviewed, first published and had its sources read (never before the
+ * oracle cases it shows, § 207). The first five keep the days above.
+ */
+const GUIDE_OWN_DAY: Partial<Record<GuideId, string>> = {
+  'guides-apr-vs-apy': '2026-11-16',
+  'guides-credit-card-minimum-payment': '2026-11-16',
+  'guides-how-much-house-can-i-afford': '2026-11-16',
+};
+
 /** The days a calculator page shows: reviewed, first published and the day its sources were read. */
 export function datesOf(id: AnyCalcId | CalcArea | GuideId, lang: Lang): { reviewed: string; first: string; read: string } {
   // A money guide: the English ones of the F4, the Spanish ones of the languages adjustment.
+  if (isGuide(id) && GUIDE_OWN_DAY[id] !== undefined) {
+    const day = GUIDE_OWN_DAY[id];
+    return { reviewed: day, first: day, read: day };
+  }
   if (isGuide(id)) return lang === 'en' ? { reviewed: REVIEWED, first: FIRST_PUBLISHED, read: REVIEWED } : { reviewed: IDIOMAS_DAY, first: IDIOMAS_DAY, read: IDIOMAS_DAY };
   const area = id === 'money' || id === 'house' || id === 'health' ? id : calcAreaOf(id);
   if (area !== 'money') return { reviewed: LIFE_REVIEWED, first: LIFE_FIRST_PUBLISHED, read: LIFE_SOURCES_READ_ON };

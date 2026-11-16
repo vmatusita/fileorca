@@ -22,7 +22,7 @@ import {
 } from '../../scripts/gates/lint-texto.ts';
 import { GUIDE_IDS, LIFE_CALC_IDS } from '../../src/tools/calc/registry.ts';
 import { GUIDE_FACTS } from '../../src/tools/calc/guides.ts';
-import { MEASURED, VARIANTS, placeholdersIn, resolvePlaceholder } from '../../src/tools/guides/measured.ts';
+import { VARIANTS, measuredOf, placeholdersIn, resolvePlaceholder } from '../../src/tools/guides/measured.ts';
 import { longDate } from '../../src/i18n/dates.ts';
 import type { FileGuideTexts, FileGuidesSharedTexts } from '../../src/i18n/types.ts';
 
@@ -294,7 +294,8 @@ describe('lint:texto and the texts of the languages adjustment', () => {
       const shared = ((await import(pathToFileURL(resolve(`src/i18n/${lang}/file-guides.ts`)).href)) as { default: FileGuidesSharedTexts }).default;
       const fill = await fillFor(file);
       const fillEn = await fillFor('src/i18n/en/guide-heic-to-jpg-on-windows.ts');
-      expect(fill('date', ''), lang).toBe(longDate(MEASURED.measuredOn, lang));
+      // F19b (DECISOES § 778): the day this guide was measured.
+      expect(fill('date', ''), lang).toBe(longDate(measuredOf(id), lang));
       let differs = 0;
       let resolved = 0;
       for (const name of placeholdersIn(texts)) {

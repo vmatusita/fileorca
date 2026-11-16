@@ -1,6 +1,7 @@
 ---
 // Compress image in English, Portuguese and Spanish: the shared mold with this tool's panel.
 import ImageToolPage from '../image/ImageToolPage.astro';
+import ImageToolEmbed from '../image/ImageToolEmbed.astro';
 import CompressPanel from './Panel.tsx';
 import { panelData } from '../image/page.ts';
 import type { Lang } from '../../i18n/routes.ts';
@@ -8,13 +9,18 @@ import type { CompressOptionsTexts } from '../../i18n/types.ts';
 
 interface Props {
   lang: Lang;
+  /** Only the island, for the guide that embeds this tool (F19b; DECISOES § 184): the <script> stays here. */
+  embed?: boolean;
+  /** Options the guide starts the tool with (never the URL). */
+  initial?: Record<string, unknown>;
 }
-const { lang } = Astro.props;
-const panel = panelData<CompressOptionsTexts>('compress-image', lang);
+const { lang, embed = false, initial } = Astro.props;
+const panel = panelData<CompressOptionsTexts>('compress-image', lang, initial);
+const Mold = embed ? ImageToolEmbed : ImageToolPage;
 ---
-<ImageToolPage id="compress-image" lang={lang} panel={panel}>
+<Mold id="compress-image" lang={lang} panel={panel}>
   <CompressPanel slot="panel" {...panel} />
   <script>
     import './mount.ts';
   </script>
-</ImageToolPage>
+</Mold>

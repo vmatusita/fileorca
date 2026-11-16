@@ -9,6 +9,7 @@ import {
   PDF_PAGE_IDS,
   SITEMAP_REGISTRY_IDS,
   TRANSLATED_DESCRIPTION_RANGE,
+  brandSuffixProblem,
   descriptionProblem,
   fileGuideTitleProblems,
   fileGuideWant,
@@ -77,6 +78,15 @@ describe('title against the H1', () => {
   it('leaves the other pages alone', () => {
     expect(titleProblem(HUB_ID, 'Free image tools | FileOrca', 'Image tools')).toBeNull();
     expect(titleProblem('privacy', 'Privacy | FileOrca', 'Something else')).toBeNull();
+  });
+
+  // F19b (DECISOES § 790): the minimal texts of the new guides wrote the brand themselves, and pageTitle added it again.
+  it('flags the brand twice at the end of any title, and keeps a page whose own name says FileOrca', () => {
+    expect(brandSuffixProblem('Foto para formulário online | FileOrca | FileOrca')).toMatch(/a marca duas vezes/);
+    expect(brandSuffixProblem('WebP, AVIF o JPG |FileOrca| FileOrca')).toMatch(/a marca duas vezes/);
+    expect(brandSuffixProblem('Photo for an Online Form: How to Fit It Under the Size Limit | FileOrca')).toBeNull();
+    expect(brandSuffixProblem('About FileOrca and who makes the site | FileOrca')).toBeNull();
+    expect(brandSuffixProblem("What's new on FileOrca | FileOrca")).toBeNull();
   });
 });
 
@@ -191,7 +201,8 @@ describe('the home and health pages of the F7', () => {
 
 describe('the money pages of the F4', () => {
   it('asks each kind of money page for its schema types', () => {
-    expect(MONEY_PAGE_IDS).toHaveLength(1 + 18 + 5);
+    // F19b (DECISOES § 796): the hub, 18 calculators and 8 money guides (5 before).
+    expect(MONEY_PAGE_IDS).toHaveLength(1 + 18 + 8);
     expect(requiredSchemaTypes('mortgage-calculator')).toEqual(['Organization', 'BreadcrumbList', 'WebApplication', 'Person']);
     expect(requiredSchemaTypes('mortgage-calculator-15-vs-30-year')).toEqual(['Organization', 'BreadcrumbList', 'WebApplication', 'Person']);
     expect(requiredSchemaTypes('money-calculators')).toEqual(['Organization', 'BreadcrumbList', 'CollectionPage', 'Person']);

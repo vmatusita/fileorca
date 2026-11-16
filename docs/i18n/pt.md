@@ -215,7 +215,7 @@ Nome do arquivo do PDF e do CSV: `simulacao-sac-price`, `financiamento-veiculo`,
 
 ## Guias de arquivo (ajuste idiomas)
 
-Os 10 guias em `/pt/guias/<slug>/`. O número de cada guia sai do código no formato do português: "2,4 MB", "68%", "5,2 vezes" ("0,5 vez" e "1,3 vez" no singular, abaixo de 2), "42,2 dB" e "150 ppi", com espaço sem quebra antes da unidade. Contagem por extenso: `{x_word}` masculino ("dois arquivos") e `{x_wordf}` feminino ("duas fotos"), pelo substantivo que a contagem acompanha; nunca no começo de uma frase (DECISOES § 314).
+Os guias de arquivo em `/pt/guias/<slug>/`: os 10 do ajuste de idiomas e os da F19b, que entram na tabela com o caminho de cada um (DECISOES § 779). O número de cada guia sai do código no formato do português: "2,4 MB", "68%", "5,2 vezes" ("0,5 vez" e "1,3 vez" no singular, abaixo de 2), "42,2 dB" e "150 ppi", com espaço sem quebra antes da unidade. Contagem por extenso: `{x_word}` masculino ("dois arquivos") e `{x_wordf}` feminino ("duas fotos"), pelo substantivo que a contagem acompanha; nunca no começo de uma frase (DECISOES § 314).
 
 | Guia (inglês) | Nome em português | Caminho |
 | --- | --- | --- |
@@ -229,6 +229,11 @@ Os 10 guias em `/pt/guias/<slug>/`. O número de cada guia sai do código no for
 | How to split a PDF, and why the parts can weigh more | Como dividir um PDF e por que as partes podem pesar mais | /pt/guias/dividir-pdf-e-tamanho-do-arquivo/ |
 | How to combine PDFs on a phone | Como juntar PDFs no celular | /pt/guias/juntar-pdfs-no-celular/ |
 | How to turn photos into one PDF | Como transformar fotos em um único PDF | /pt/guias/fotos-em-um-pdf/ |
+| Photo for an online form | Foto para formulário online | /pt/guias/comprimir-foto-para-formulario-online/ |
+| WebP vs AVIF vs JPG | WebP, AVIF ou JPG | /pt/guias/webp-avif-ou-jpg/ |
+| How to sign a PDF without printing it | Como assinar um PDF sem imprimir | /pt/guias/assinar-pdf-sem-imprimir/ |
+| What a PDF password protects | O que a senha de um PDF protege | /pt/guias/o-que-a-senha-do-pdf-protege/ |
+| QR code size | Tamanho do QR code | /pt/guias/tamanho-do-qr-code/ |
 
 | Inglês | Português | Observação |
 | --- | --- | --- |
@@ -253,7 +258,7 @@ Rótulos de sistema, como as páginas de suporte em português escrevem (lidas e
 
 ## O hub de guias, o cartão e a busca (F11)
 
-O hub `/pt/guias/` lista os 10 guias de arquivo; os guias de dinheiro dos EUA não existem em português, e o grupo Dinheiro do hub é a nota que leva às calculadoras financeiras do Brasil (DECISOES § 393). O número de guias sai do registro, nunca à mão. A F11 tirou a linha "Leia o guia" das ferramentas: o cartão de guia ficou no lugar dela (DECISOES § 396).
+O hub `/pt/guias/` lista os guias de arquivo; os guias de dinheiro dos EUA não existem em português, e o grupo Dinheiro do hub é a nota que leva às calculadoras financeiras do Brasil (DECISOES § 393). O número de guias sai do registro, nunca à mão. A F11 tirou a linha "Leia o guia" das ferramentas: o cartão de guia ficou no lugar dela (DECISOES § 396).
 
 | Inglês | Português | Observação |
 | --- | --- | --- |
@@ -263,6 +268,8 @@ O hub `/pt/guias/` lista os 10 guias de arquivo; os guias de dinheiro dos EUA n�
 | All guides | Todos os guias | rodapé |
 | Guide (no cartão e na busca) | Guia | primeira palavra do nome do cartão |
 | Measured on N test files | Medido em N arquivos de teste | |
+| Measured on N test texts | Medido em N textos de teste | F19b: um guia que mede textos, não arquivos (o do QR code) |
+| Utilities · Utility guides | Utilidades · Guias de utilidades | F19b: o grupo dos guias do QR code no hub e no rodapé, mostrado quando o idioma tem um guia dele |
 | Tool in the guide | Ferramenta no guia | |
 | Read a guide · See all N guides | Leia um guia · Ver os N guias | a seção da home |
 | Search tools and guides · Find a tool or a guide | Buscar ferramentas e guias · Encontre uma ferramenta ou um guia | o campo da busca; o botão do cabeçalho segue "Buscar ferramentas" |

@@ -123,5 +123,9 @@ export default {
       title: 'Novedades y Cómo funciona',
       body: 'Esta página reúne cada cambio que ves, y Cómo funciona muestra qué pasa con tu archivo y cómo comprobarlo en tu navegador. Las páginas de las herramientas y de las calculadoras ahora dicen cada cosa en un solo lugar, y el día en que el sitio salió al aire está ahora en Acerca de.',
     },
+    'new-guides': {
+      title: 'Guías nuevas con números medidos por nosotros',
+      body: 'Guías nuevas responden una pregunta cada una, con la herramienta adentro: una foto bajo el límite de tamaño de un formulario, WebP, AVIF o JPG, firmar un PDF sin imprimirlo, qué protege la contraseña de un PDF y el tamaño de un código QR. También hay guías sobre APR y APY, el pago mínimo de la tarjeta de crédito y cuánta casa puedes pagar. Cada número viene de nuestra propia medida o de la calculadora que llevan adentro, comprobada con un cálculo independiente.',
+    },
   },
 } satisfies WhatsNewTexts;

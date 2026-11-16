@@ -5,7 +5,7 @@
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { DIST, Problems, allPages, readHtml, requireDist } from '../lib/dist.ts';
 import { compareAlternates, robotsProblems, validateHreflang, validateSitemap, type PageHead } from '../lib/seo-checks.ts';
-import { BR_PAGE_IDS, SITEMAP_REGISTRY_IDS, descriptionProblem, fileGuideTitleProblems, fileGuideWant, missingFromSitemap, requiredSchemaTypes, schemaProblems, titleProblem, type LdNode } from '../lib/seo-pages.ts';
+import { BR_PAGE_IDS, SITEMAP_REGISTRY_IDS, brandSuffixProblem, descriptionProblem, fileGuideTitleProblems, fileGuideWant, missingFromSitemap, requiredSchemaTypes, schemaProblems, titleProblem, type LdNode } from '../lib/seo-pages.ts';
 import { isFileGuide } from '../../src/tools/guides/registry.ts';
 import { alternatesFor } from '../../src/seo/meta.ts';
 import { LANGS, LANG_TAG, ROUTES, type Lang } from '../../src/i18n/routes.ts';
@@ -28,6 +28,8 @@ for (const page of allPages()) {
   const brandFirst = page.route.id === 'home' && title.startsWith('FileOrca') && !title.includes(' | FileOrca');
   if (!title.endsWith(' | FileOrca') && !brandFirst) problems.add(`${page.path}: título sem " | FileOrca"`);
   if ((title.match(/FileOrca/g) ?? []).length > 1 && page.route.id === 'home') problems.add(`${page.path}: marca repetida no título`);
+  const brandIssue = brandSuffixProblem(title);
+  if (brandIssue) problems.add(`${page.path}: ${brandIssue}`);
   const h1 = root.querySelector('h1')?.text.trim() ?? '';
   // Every tool and preset of the image registry: the title starts with the name of the tool (prompt F2, decision 9).
   const titleIssue = titleProblem(page.route.id, title, h1);

@@ -3,11 +3,15 @@
 // it is a case of the oracle: tests/unit/calc-guides.test.ts) and a table measured by the same engines, the
 // guide's own data. The texts (src/i18n/<lang>/guide-<slug>.ts) hold {placeholders} that these facts fill. Since the
 // languages adjustment the guides also exist in Spanish: the same engines and examples, the numbers written in the language
-// of the guide, and the few words of the facts and the table from that guide's `words` (never typed here).
-import { dollars, money, ratePercent } from '../../calc/parse.ts';
-import { mortgage15vs30, mortgageExtraPayments, refinance, type ExtraPaymentsInput } from '../../calc/loans.ts';
-import { debtPayoff, type DebtPayoffInput } from '../../calc/debts.ts';
+// of the guide, and the few words of the facts and the table from that guide's `words` (never typed here). The F19b adds
+// three guides (APR vs APY, the card minimum payment, how much house): besides the example, every input they work out is a
+// case of the oracle too (GUIDE_INPUTS), so each number they quote is checked to the cent.
+import { dollars, hundredthsPercent, money, ratePercent } from '../../calc/parse.ts';
+import { homeAffordability, mortgage15vs30, mortgageExtraPayments, refinance, type AffordabilityInput, type AffordabilityResult, type ExtraPaymentsInput } from '../../calc/loans.ts';
+import { creditCardPayoff, debtPayoff, type CardInput, type DebtPayoffInput } from '../../calc/debts.ts';
+import { interest } from '../../calc/money.ts';
 import { rentVsBuy, type RentVsBuyInput } from '../../calc/rent-vs-buy.ts';
+import { aprToApy, type AprApyInput, type AprApyResult } from '../../calc/savings.ts';
 import { fmt } from '../../i18n/format.ts';
 import type { GuideTexts } from '../../i18n/types.ts';
 import enShared from './i18n/en.ts';
@@ -22,6 +26,12 @@ import esSnowball from '../../i18n/es/guide-debt-snowball-vs-avalanche.ts';
 import esExtra from '../../i18n/es/guide-extra-mortgage-payments.ts';
 import esRefinance from '../../i18n/es/guide-refinance-break-even.ts';
 import esRent from '../../i18n/es/guide-rent-vs-buy-break-even.ts';
+import enAprApy from '../../i18n/en/guide-apr-vs-apy.ts';
+import esAprApy from '../../i18n/es/guide-apr-vs-apy.ts';
+import enCardMinimum from '../../i18n/en/guide-credit-card-minimum-payment.ts';
+import esCardMinimum from '../../i18n/es/guide-credit-card-minimum-payment.ts';
+import enAfford from '../../i18n/en/guide-how-much-house-can-i-afford.ts';
+import esAfford from '../../i18n/es/guide-how-much-house-can-i-afford.ts';
 import { DEFS } from './defs/index.ts';
 import { duration } from './view.ts';
 import type { CalcPageId, GuideId } from './registry.ts';
@@ -37,6 +47,9 @@ export const GUIDE_TEXTS: { [Id in GuideId]: Record<GuideLang, GuideTexts<Id>> }
   'guides-extra-mortgage-payments': { en: enExtra, es: esExtra },
   'guides-refinance-break-even': { en: enRefinance, es: esRefinance },
   'guides-rent-vs-buy-break-even': { en: enRent, es: esRent },
+  "guides-apr-vs-apy": { en: enAprApy, es: esAprApy },
+  "guides-credit-card-minimum-payment": { en: enCardMinimum, es: esCardMinimum },
+  "guides-how-much-house-can-i-afford": { en: enAfford, es: esAfford },
 };
 
 /** How a guide writes its numbers and durations, in its language. */
@@ -47,10 +60,14 @@ function writer(lang: GuideLang) {
     usd: (cents: number): string => dollars(cents, lang),
     cents: (value: number): string => money(value, lang),
     pct: (units: number): string => ratePercent(units, lang),
+    /** Hundredths of a percent, with two decimals (an APY, or how far it is from the APR): 5.13%. */
+    hundredths: (value: number): string => hundredthsPercent(value, lang),
     time: (months: number): string => duration(months, island),
   };
 }
 const PCT = 10_000;
+/** Cents rounded to the whole dollar the way dollars() writes them (half up), still in cents. */
+const wholeDollars = (cents: number): number => Math.floor((cents + 50) / 100) * 100;
 
 export interface GuideTable {
   head: string[];
@@ -278,6 +295,223 @@ function rentVsBuyBreakEven(lang: GuideLang = 'en'): GuideFacts {
   };
 }
 
+/**
+ * The inputs the three guides of the F19b work out besides their examples (prompt F19b, decision 5). Each one is a case of the
+ * oracle marked with its guide (scripts/oracle/calc.py), and tests/unit/calc-guides.test.ts proves it, so every number these
+ * guides quote is checked to the cent, not only the example. Money in cents, rates in 1/10,000 of a point.
+ */
+export const GUIDE_INPUTS = {
+  /** APR vs APY: a lower and a higher APR, compounded like the example (daily). */
+  aprLow: 10_000,
+  aprHigh: 100_000,
+  /** The card: the fixed payments of the table besides the one that barely covers the interest and the example's own. */
+  cardPayments: [13_000, 15_000, 20_000, 30_000, 50_000],
+  /** The months of the payment a card statement shows for paying the balance off in three years (Regulation Z, 1026.7(b)(12)). */
+  cardBoxMonths: 36,
+  /** The house: the other monthly debts of the table besides the example's own. */
+  affordDebts: [0, 25_000, 65_000, 100_000, 150_000],
+  /** The house: other debts past the point where the total debt limit sets the price, and the same plus $100 a month. */
+  affordStep: [100_000, 110_000],
+} as const;
+
+/**
+ * APR vs APY (F19b): the example of the calculator (5% compounded daily), whose result already holds the same APR in the five
+ * compoundings the calculator offers; the same 5% read as an APY and turned back into the APR; and a lower and a higher APR
+ * compounded daily. The "APR" here is the nominal yearly rate of a deposit, not the APR of a loan under Regulation Z.
+ */
+function aprVsApy(lang: GuideLang = 'en'): GuideFacts {
+  const { pct, hundredths } = writer(lang);
+  const words = GUIDE_TEXTS['guides-apr-vs-apy'][lang].words;
+  const example = DEFS['apr-to-apy-calculator'].initial;
+  const input = DEFS['apr-to-apy-calculator'].toInput(example) as AprApyInput;
+  if (input.direction !== 'apr-to-apy' || input.compounding !== 365) throw new Error('the APR vs APY guide starts from an APR compounded daily');
+  // An APR in hundredths of a percent, to set beside an APY (5% = 500); the rates of the guide have whole hundredths.
+  const asHundredths = (rate: number): number => {
+    if (rate % 100 !== 0) throw new Error(`the APR vs APY guide needs whole hundredths of a percent: ${rate}`);
+    return rate / 100;
+  };
+  const at = (result: AprApyResult, comp: number): number => {
+    const row = result.table.find(([value]) => value === comp);
+    if (!row) throw new Error(`no compounding ${comp} in the table`);
+    return row[1];
+  };
+  const r = aprToApy(input);
+  const apr = asHundredths(input.rate);
+  const back = aprToApy({ ...input, direction: 'apy-to-apr' });
+  const low = aprToApy({ ...input, rate: GUIDE_INPUTS.aprLow });
+  const high = aprToApy({ ...input, rate: GUIDE_INPUTS.aprHigh });
+  // The rows follow the calculator's table (yearly, twice a year, quarterly, monthly, daily), and so do the names.
+  const rows = r.table.map(([comp, value], index) => [words.compounding[index] ?? String(comp), String(comp), hundredths(value), hundredths(value - apr)]);
+  const [first, second, third, fourth] = words.head;
+  return {
+    calc: 'apr-to-apy-calculator',
+    example,
+    facts: {
+      rate: pct(input.rate),
+      apy: hundredths(r.result),
+      gap: hundredths(r.result - apr),
+      yearlyApy: hundredths(at(r, 1)),
+      twiceApy: hundredths(at(r, 2)),
+      quarterlyApy: hundredths(at(r, 4)),
+      monthlyApy: hundredths(at(r, 12)),
+      monthlyGap: hundredths(at(r, 12) - apr),
+      dailyStep: hundredths(at(r, 365) - at(r, 12)),
+      backApr: hundredths(back.result),
+      backGap: hundredths(apr - back.result),
+      lowRate: pct(GUIDE_INPUTS.aprLow),
+      lowApy: hundredths(low.result),
+      lowGap: hundredths(low.result - asHundredths(GUIDE_INPUTS.aprLow)),
+      lowMonthlyApy: hundredths(at(low, 12)),
+      highRate: pct(GUIDE_INPUTS.aprHigh),
+      highApy: hundredths(high.result),
+      highGap: hundredths(high.result - asHundredths(GUIDE_INPUTS.aprHigh)),
+      highMonthlyApy: hundredths(at(high, 12)),
+    },
+    table: { head: [first, second, fmt(third, { rate: pct(input.rate) }), fourth], rows },
+  };
+}
+
+/**
+ * The credit card minimum payment (F19b): the calculator does not work out the minimum a statement asks for, and this guide
+ * never pretends it does. On the example's balance and APR it sets a payment of exactly the first month's interest (the
+ * calculator says it is too low), the first whole dollar above that interest (the payment that barely covers it), larger
+ * fixed payments and the example's own, and the payment that clears the card in three years, like the box of a statement.
+ */
+function cardMinimum(lang: GuideLang = 'en'): GuideFacts {
+  const { usd, cents, pct, time } = writer(lang);
+  const words = GUIDE_TEXTS['guides-credit-card-minimum-payment'][lang].words;
+  const example = DEFS['credit-card-payoff-calculator'].initial;
+  const input = DEFS['credit-card-payoff-calculator'].toInput(example) as CardInput;
+  if (input.mode !== 'payment') throw new Error('the card guide starts from a fixed payment');
+  const paying = (payment: number) => {
+    const result = creditCardPayoff({ ...input, payment });
+    if ('error' in result) throw new Error(`the card guide pays ${payment} and gets ${result.error}`);
+    return result;
+  };
+  const first = interest(input.balance, input.apr);
+  const short = creditCardPayoff({ ...input, payment: first });
+  if (!('error' in short) || short.error !== 'too-low') throw new Error('a payment of the first month interest must be too low');
+  const barely = (Math.floor(first / 100) + 1) * 100;
+  const r = paying(input.payment);
+  const low = paying(barely);
+  const [nextPayment] = GUIDE_INPUTS.cardPayments;
+  const topPayment = GUIDE_INPUTS.cardPayments.at(-1);
+  if (nextPayment === undefined || topPayment === undefined) throw new Error('the card guide needs larger payments');
+  const next = paying(nextPayment);
+  const top = paying(topPayment);
+  const box = creditCardPayoff({ balance: input.balance, apr: input.apr, mode: 'months', months: GUIDE_INPUTS.cardBoxMonths });
+  if ('error' in box) throw new Error('the three-year payment must make an account');
+  const payments = [barely, input.payment, ...GUIDE_INPUTS.cardPayments].sort((a, b) => a - b);
+  const rows = payments.map((payment) => {
+    const at = paying(payment);
+    return [usd(payment), cents(payment - first), time(at.months), usd(at.totalInterest)];
+  });
+  return {
+    calc: 'credit-card-payoff-calculator',
+    example,
+    facts: {
+      balance: usd(input.balance),
+      apr: pct(input.apr),
+      firstInterest: cents(first),
+      minimum: cents(short.minimum),
+      barely: usd(barely),
+      barelyToBalance: cents(barely - first),
+      barelyTime: time(low.months),
+      barelyCount: String(low.months),
+      barelyInterest: usd(low.totalInterest),
+      barelyPaid: usd(low.totalPaid),
+      barelyTimes: String(Math.floor(low.totalInterest / input.balance)),
+      nextPayment: usd(nextPayment),
+      nextTime: time(next.months),
+      nextInterest: usd(next.totalInterest),
+      payment: usd(input.payment),
+      toBalance: cents(input.payment - first),
+      time: time(r.months),
+      count: String(r.months),
+      interest: usd(r.totalInterest),
+      paid: usd(r.totalPaid),
+      // F19b (review b-1): the difference of the two totals as the page shows them, in whole dollars, so a reader who
+      // subtracts the figures beside it gets the same number (the totals are rounded the way usd() rounds them).
+      interestDiff: usd(wholeDollars(low.totalInterest) - wholeDollars(r.totalInterest)),
+      topPayment: usd(topPayment),
+      topTime: time(top.months),
+      topInterest: usd(top.totalInterest),
+      boxPayment: cents(box.payment),
+      boxTime: time(box.months),
+      boxInterest: usd(box.totalInterest),
+      boxPaid: usd(box.totalPaid),
+    },
+    table: { head: [...words.head], rows },
+  };
+}
+
+/**
+ * How much house can I afford (F19b): the example of the calculator, which limit sets its price, and how the price moves with
+ * other monthly debts (the table), including the debts at which the two limits leave the same room and what $100 more a
+ * month of debts takes off the price once the total debt limit sets it. The 28% and 36% are the calculator's starting
+ * rules of thumb, never a rule of law.
+ */
+function howMuchHouse(lang: GuideLang = 'en'): GuideFacts {
+  const { usd, cents, pct, time } = writer(lang);
+  const words = GUIDE_TEXTS['guides-how-much-house-can-i-afford'][lang].words;
+  const example = DEFS['home-affordability-calculator'].initial;
+  const input = DEFS['home-affordability-calculator'].toInput(example) as AffordabilityInput;
+  const owing = (debts: number): AffordabilityResult => {
+    const result = homeAffordability({ ...input, debts });
+    if (result.noRoom) throw new Error(`the house guide leaves no room at ${debts} of debts`);
+    return result;
+  };
+  const r = owing(input.debts);
+  const none = owing(0);
+  // How much more a month of other debts fits before the total debt limit leaves less room than the housing limit.
+  const room = r.backCap - r.frontCap;
+  const [stepDebts, stepMoreDebts] = GUIDE_INPUTS.affordStep;
+  const step = owing(stepDebts);
+  const more = owing(stepMoreDebts);
+  const limitOf = (result: AffordabilityResult): string =>
+    result.limit === 'front' ? fmt(words.front, { rate: pct(input.frontRatio) }) : result.limit === 'back' ? fmt(words.back, { rate: pct(input.backRatio) }) : words.both;
+  const debts = [input.debts, ...GUIDE_INPUTS.affordDebts].sort((a, b) => a - b);
+  const rows = debts.map((value) => {
+    const at = owing(value);
+    return [usd(value), limitOf(at), cents(at.housingCap), usd(at.maxPrice)];
+  });
+  return {
+    calc: 'home-affordability-calculator',
+    example,
+    facts: {
+      income: usd(input.income),
+      debts: usd(input.debts),
+      down: usd(input.down),
+      rate: pct(input.rate),
+      term: time(input.years * 12),
+      tax: usd(input.taxYear),
+      insurance: usd(input.insuranceYear),
+      taxMonth: cents(r.taxMonth),
+      insuranceMonth: cents(r.insuranceMonth),
+      front: pct(input.frontRatio),
+      back: pct(input.backRatio),
+      frontCap: cents(r.frontCap),
+      backTotal: cents(none.backCap),
+      backCap: cents(r.backCap),
+      limit: limitOf(r),
+      maxPI: cents(r.maxPI),
+      payment: cents(r.payment),
+      housing: cents(r.monthlyTotal),
+      loan: usd(r.maxLoan),
+      price: usd(r.maxPrice),
+      room: cents(room),
+      sameRoomDebts: cents(input.debts + room),
+      noDebtsPrice: usd(none.maxPrice),
+      stepDebts: usd(stepDebts),
+      stepExtra: usd(stepMoreDebts - stepDebts),
+      stepPrice: usd(step.maxPrice),
+      stepExtraPrice: usd(more.maxPrice),
+      stepDrop: usd(step.maxPrice - more.maxPrice),
+    },
+    table: { head: [...words.head], rows },
+  };
+}
+
 /** The facts of each guide, in its language (English by default). */
 export const GUIDE_FACTS: Record<GuideId, (lang?: GuideLang) => GuideFacts> = {
   'guides-15-vs-30-year-mortgage': fifteenVsThirty,
@@ -285,4 +519,7 @@ export const GUIDE_FACTS: Record<GuideId, (lang?: GuideLang) => GuideFacts> = {
   'guides-extra-mortgage-payments': extraPayments,
   'guides-refinance-break-even': refinanceBreakEven,
   'guides-rent-vs-buy-break-even': rentVsBuyBreakEven,
+  'guides-apr-vs-apy': aprVsApy,
+  'guides-credit-card-minimum-payment': cardMinimum,
+  'guides-how-much-house-can-i-afford': howMuchHouse,
 };

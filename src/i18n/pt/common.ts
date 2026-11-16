@@ -339,5 +339,32 @@ export default {
       description: 'Um PDF só com algumas fotos, e o que comprimir as fotos antes faz com o tamanho dele.',
       synonyms: ['guia', 'fotos para pdf', 'imagens num pdf'],
     },
+    // F19b (DECISOES § 780 and § 790): the new file guides.
+    "guides-compress-photo-for-online-form": {
+      name: "Foto para formulário online",
+      description: "O que um limite em KB conta e o que nossas fotos de celular perderam para caber nele.",
+      synonyms: ["guia", "limite de tamanho da foto", "formulário de envio"],
+    },
+    "guides-webp-vs-avif-vs-jpg": {
+      name: "WebP, AVIF ou JPG",
+      description: "Quanto as mesmas fotos pesam em JPG, WebP e AVIF, qual mantém a transparência e quando usar cada um.",
+      synonyms: ["guia", "webp ou jpeg", "formato de imagem"],
+    },
+    "guides-sign-pdf-without-printing": {
+      name: "Como assinar um PDF sem imprimir",
+      description: "O que é uma assinatura desenhada na página, o que ela não é, e o que ela muda no arquivo.",
+      synonyms: ["guia", "assinatura eletrônica", "assinar sem imprimir"],
+    },
+    "guides-what-a-pdf-password-protects": {
+      name: "O que a senha de um PDF protege",
+      description: "O que a senha para abrir faz, o que as restrições não fazem e por que uma senha curta é fraca.",
+      synonyms: ["guia", "criptografia de pdf", "segurança do pdf"],
+    },
+    // F19b (DECISOES § 780 and § 790): the QR code guide; no synonym is a query of the QR code generator itself.
+    "guides-qr-code-size": {
+      name: "Tamanho do QR code",
+      description: "Como o texto que você digita define quantos quadradinhos um QR code tem, e o que isso muda no PNG e na impressão.",
+      synonyms: ["guia", "tamanho de impressão do qr code", "dimensões do qr code"],
+    },
   },
 } satisfies PtCommonTexts;

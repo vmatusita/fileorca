@@ -8,13 +8,16 @@
 import { pathFor, type Lang } from '../../i18n/routes.ts';
 import { shortDate } from '../../i18n/dates.ts';
 import { AUTHOR } from '../../platform/site.ts';
-import { GUIDE_REVIEWED_ON, GUIDE_SHARED } from './page.ts';
+import type { FileGuideId } from './registry.ts';
+import { GUIDE_SHARED, reviewedOn } from './page.ts';
 
 interface Props {
   lang?: Lang;
+  /** F19b (DECISOES § 778): the guide, whose own day of review a guide added after the first ten shows. */
+  id: FileGuideId;
 }
-const { lang = 'en' } = Astro.props;
-const reviewed = GUIDE_REVIEWED_ON[lang];
+const { lang = 'en', id } = Astro.props;
+const reviewed = reviewedOn(id, lang);
 // "Reviewed by {name} · {date}": the name before the date in every language.
 const [before = '', rest = ''] = GUIDE_SHARED[lang].reviewed.split('{name}');
 const [between = '', after = ''] = rest.split('{date}');

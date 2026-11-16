@@ -390,6 +390,33 @@ export default {
       description: 'Un solo PDF con unas cuantas fotos, y lo que cambia su tamaño si comprimes antes las fotos.',
       synonyms: ['guía', 'fotos a pdf', 'juntar fotos en pdf'],
     },
+    // F19b (DECISOES § 780 and § 790): the new file guides.
+    "guides-compress-photo-for-online-form": {
+      name: "Foto para un formulario en línea",
+      description: "Qué cuenta un límite en KB y qué perdieron nuestras fotos de celular para caber en él.",
+      synonyms: ["guía", "límite de tamaño de la foto", "formulario de envío"],
+    },
+    "guides-webp-vs-avif-vs-jpg": {
+      name: "WebP, AVIF o JPG",
+      description: "Cuánto pesan las mismas fotos en JPG, WebP y AVIF, cuál conserva la transparencia y cuándo usar cada uno.",
+      synonyms: ["guía", "webp o jpeg", "formato de imagen"],
+    },
+    "guides-sign-pdf-without-printing": {
+      name: "Cómo firmar un PDF sin imprimirlo",
+      description: "Qué es una firma dibujada en la página, qué no es y qué cambia en el archivo.",
+      synonyms: ["guía", "firma electrónica", "firmar sin imprimir"],
+    },
+    "guides-what-a-pdf-password-protects": {
+      name: "Qué protege la contraseña de un PDF",
+      description: "Qué hace la contraseña para abrir, qué no hacen las restricciones y por qué una contraseña corta es débil.",
+      synonyms: ["guía", "cifrado de pdf", "seguridad del pdf"],
+    },
+    // F19b (DECISOES § 780 and § 790): the QR code guide; no synonym is a query of the QR code generator itself.
+    "guides-qr-code-size": {
+      name: "Tamaño del código QR",
+      description: "Cómo el texto que escribes define cuántos cuadritos tiene un código QR, y qué cambia eso en el PNG y al imprimir.",
+      synonyms: ["guía", "tamaño de impresión del código qr", "dimensiones del código qr"],
+    },
   },
   guides: {
     'guides-15-vs-30-year-mortgage': {
@@ -416,6 +443,24 @@ export default {
       name: 'Alquilar o comprar: cuándo empieza a convenir comprar',
       description: 'El año en que comprar alcanza a alquilar, y lo que lo mueve.',
       synonyms: ['guía', 'alquilar o comprar', 'punto de equilibrio'],
+    },
+    // F19b (DECISOES § 780 and § 790): the new money guides. The search shows every tool before every guide (§ 397), so
+    // the name of a guide holds a word that no calculator has: "APR o APY" and "Cuánta casa puedo pagar" alone found the
+    // calculator they embed first.
+    "guides-apr-vs-apy": {
+      name: "APR o APY: en qué se diferencian",
+      description: "Lo que cada capitalización le suma a la misma tasa, y por qué la APR de un depósito no es la de un préstamo.",
+      synonyms: ["guía", "rendimiento anual", "capitalización"],
+    },
+    "guides-credit-card-minimum-payment": {
+      name: "Pago mínimo de la tarjeta de crédito: por qué tarda tanto",
+      description: "Qué hace con el saldo un pago apenas mayor que los intereses, al lado de pagos fijos más grandes.",
+      synonyms: ["guía", "pago mínimo", "solo el mínimo"],
+    },
+    "guides-how-much-house-can-i-afford": {
+      name: "Cuánta casa puedo pagar con mi ingreso",
+      description: "Dos partes de tu ingreso limitan el pago de la vivienda. Cuál de ellas fija el precio y qué cambian tus otras deudas.",
+      synonyms: ["guía", "presupuesto para una casa", "pagar una casa"],
     },
   },
 } satisfies EsCommonTexts;

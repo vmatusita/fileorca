@@ -14,6 +14,8 @@ const texts: GuidesHubTexts = {
   groups: {
     image: { jump: 'Image', heading: 'Image guides' },
     pdf: { jump: 'PDF', heading: 'PDF guides' },
+    // F19b (DECISOES § 786): the group of the QR code guides, "Utilities" as in the footer and the search.
+    util: { jump: 'Utilities', heading: 'Utility guides' },
     money: { jump: 'Money', heading: 'Money guides' },
   },
   howHeading: 'How these guides are made',
@@ -23,6 +25,8 @@ const texts: GuidesHubTexts = {
   card: {
     kind: 'Guide',
     measured: 'Measured on {n} test files',
+    // F19b: a guide that measured texts the script wrote (the QR code guide), not files.
+    measuredTexts: 'Measured on {n} test texts',
     workedOut: 'Numbers worked out',
     tool: 'Tool in the guide',
   },

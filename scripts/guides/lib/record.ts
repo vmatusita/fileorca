@@ -47,6 +47,12 @@ export function sample(files: readonly string[], note?: string): Sample {
   return note ? { files: unique, count: unique.length, note } : { files: unique, count: unique.length };
 }
 
+/** F19b (DECISOES § 786): a sample of the texts the script typed into a tool that takes text (the QR code generator). */
+export function textSample(texts: readonly string[], note?: string): Sample {
+  const unique = [...new Set(texts)];
+  return note ? { kind: 'texts', texts: unique, count: unique.length, note } : { kind: 'texts', texts: unique, count: unique.length };
+}
+
 /** One number with everything the test asks of it. */
 export function num(stamp: Stamp, value: number, unit: Unit, sampled: Sample, method: Method): MeasuredNumber {
   if (!Number.isFinite(value)) throw new Error(`a measured number must be finite (got ${value})`);

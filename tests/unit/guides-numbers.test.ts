@@ -266,6 +266,13 @@ const FEMININE: Record<'pt' | 'es', Partial<Record<FileGuideId, readonly string[
     'guides-jpg-vs-png': ['photos'],
     'guides-remove-location-from-photos': ['withGps', 'withCamera', 'withDate', 'removeExifDataIdenticalChromium', 'removeExifDataOrientationChromium', 'photos', 'browsersSameSize', 'candidates'],
     'guides-photos-to-one-pdf': ['photos'],
+    'guides-what-a-pdf-password-protects': ['ownerBlocked', 'capabilities', 'ownerPages'],
+    // F19b (front T2): "fotos" is feminine; "cantos" (pngClearCorners) is masculine.
+    'guides-webp-vs-avif-vs-jpg': ['photos'],
+    'guides-compress-photo-for-online-form': ['photos', 'at500KeptChromium'],
+    'guides-sign-pdf-without-printing': ['textKeptChromium', 'textKeptWebkit', 'formXfaNoteChromium', 'formUsageRightsAfterChromium', 'mixedPages', 'formPages'],
+    // F19b (front T5): "letras" (accentsMultibyte) is feminine; "textos" (texts) is masculine.
+    'guides-qr-code-size': ['accentsMultibyte'],
   },
   es: {
     'guides-heic-to-jpg-on-windows': ['identicalBrowsers'],
@@ -274,6 +281,13 @@ const FEMININE: Record<'pt' | 'es', Partial<Record<FileGuideId, readonly string[
     'guides-jpg-vs-png': ['photos', 'transparentCornersBefore', 'transparentCornersWhiteChromium'],
     'guides-remove-location-from-photos': ['withGps', 'withCamera', 'withDate', 'removeExifDataIdenticalChromium', 'removeExifDataOrientationChromium', 'photos', 'browsersSameSize', 'candidates'],
     'guides-photos-to-one-pdf': ['photos'],
+    'guides-what-a-pdf-password-protects': ['ownerBlocked', 'capabilities', 'ownerPages'],
+    // F19b (front T2): "fotos" and "esquinas" (pngClearCorners) are feminine.
+    'guides-webp-vs-avif-vs-jpg': ['photos', 'pngClearCorners'],
+    'guides-compress-photo-for-online-form': ['photos', 'at500KeptChromium'],
+    'guides-sign-pdf-without-printing': ['modes', 'textKeptChromium', 'textKeptWebkit', 'formXfaNoteChromium', 'formUsageRightsAfterChromium', 'mixedPages', 'formPages'],
+    // F19b (front T5): "letras" (accentsMultibyte) is feminine; "textos" (texts) is masculine.
+    'guides-qr-code-size': ['accentsMultibyte'],
   },
 };
 

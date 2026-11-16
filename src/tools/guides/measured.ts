@@ -9,9 +9,12 @@ import { mediumDate, longDate as writtenDate } from '../../i18n/dates.ts';
 import type { Lang } from '../../i18n/routes.ts';
 import { TEXTS } from '../../i18n/texts.ts';
 import enShared from '../../i18n/en/file-guides.ts';
+import qrEn from '../qr-code-generator/i18n/en.ts';
+import qrPt from '../qr-code-generator/i18n/pt.ts';
+import qrEs from '../qr-code-generator/i18n/es.ts';
 import type { FileGuidesSharedTexts, FileGuideTexts } from '../../i18n/types.ts';
 import type { Cell, MeasuredFile, MeasuredNumber, MeasuredTable } from './measured-types.ts';
-import { GUIDE_PUBLISHED_ON, type FileGuideId } from './registry.ts';
+import { GUIDE_PUBLISHED_ON, publishedOn, type FileGuideId } from './registry.ts';
 
 export const MEASURED = measuredJson as unknown as MeasuredFile;
 
@@ -92,16 +95,34 @@ export type Variant = keyof typeof VARIANTS;
  * (DECISOES § 558) also the two dates of the history line at the end of "What we measured", in the medium form
  * ("Nov 2, 2026", "3 de nov. de 2026", "3 nov 2026"): {published}, the first publication of the guide in its language,
  * and {measured}, the day of the measurement. The page writes them as <time datetime> (GUIDE_DATES in page.ts).
+ * F19b (DECISOES § 778): with a guide, the dates are the guide's own (measuredOf and publishedOn); without one, the
+ * newest measurement of the file and the first publication of the first ten, as before.
  */
-export function globals(file: MeasuredFile = MEASURED, lang: Lang = 'en'): Record<string, string> {
+export function globals(file: MeasuredFile = MEASURED, lang: Lang = 'en', id?: FileGuideId): Record<string, string> {
+  const measured = id === undefined ? file.measuredOn : measuredOf(id, file);
   return {
-    date: longDate(file.measuredOn, lang),
+    date: longDate(measured, lang),
     chromiumVersion: file.environment.browsers.chromium.split('.')[0] ?? '',
     webkitVersion: file.environment.browsers.webkit,
     system: file.environment.os.split(' ')[0] ?? '',
-    published: mediumDate(GUIDE_PUBLISHED_ON[lang], lang),
-    measured: mediumDate(file.measuredOn, lang),
+    published: mediumDate(id === undefined ? GUIDE_PUBLISHED_ON[lang] : publishedOn(id, lang), lang),
+    measured: mediumDate(measured, lang),
   };
+}
+
+/**
+ * The day a guide was measured (F19b, DECISOES § 778): every number and every table of a guide carries the day pnpm
+ * guias:medir measured it (tests/unit/guides-measured.test.ts proves they agree), and measuredOn, the day the file was
+ * last written, is the newest of them. Measuring a new guide with --only keeps the day of the others.
+ */
+export function measuredOf(id: FileGuideId, file: MeasuredFile = MEASURED): string {
+  const guide = file.guides[id];
+  // F19b (front O): a guide of the registry with no measurement yet stops with its name, as the build does, instead of a
+  // TypeError in the lint:texto.
+  if (!guide) throw new Error(`${id}: no measured file in data/guides-measured.json`);
+  const day = Object.values(guide.numbers)[0]?.date ?? Object.values(guide.tables)[0]?.date;
+  if (day === undefined) throw new Error(`${id} has no measured number`);
+  return day;
 }
 
 /** The measured number a placeholder stands for, and how it is written; null when it is not a measured placeholder. */
@@ -131,7 +152,7 @@ export function measuredTerm(english: string, texts: FileGuideTexts, f: GuideFor
 
 /** Every value a guide text can name: globals, the official facts of the guide and each placeholder it uses. */
 export function fillValues(id: FileGuideId, texts: FileGuideTexts, used: readonly string[], file: MeasuredFile = MEASURED, f: GuideFormat = EN_FORMAT): Record<string, string> {
-  const values: Record<string, string> = { ...globals(file, f.lang) };
+  const values: Record<string, string> = { ...globals(file, f.lang, id) };
   for (const [name, fact] of Object.entries(texts.facts)) values[name] = fact.text;
   // Plain facts the measurement settled (the tool and option guide 6 embeds).
   for (const [name, fact] of Object.entries(file.guides[id].facts)) if (used.includes(name)) values[name] = measuredTerm(fact, texts, f);
@@ -190,6 +211,12 @@ const gpsLabel = (c: Ctx, kind: Cell): string => c.shared.gps[(String(kind) as k
 const toolName = (tool: string, f: GuideFormat): string => {
   const common = TEXTS[f.lang].common;
   return (common.tools as Record<string, { name: string }>)[tool]?.name ?? (common.pdf as Record<string, { name: string }>)[tool]?.name ?? tool;
+};
+/** F19b (front M5): the PNG sizes as the QR code generator names them in each language ("Small", "Pequeno", "Chico"). */
+const QR_SIZE_WORDS: Record<Lang, Record<'small' | 'medium' | 'large', string>> = {
+  en: { small: qrEn.panel.size.small, medium: qrEn.panel.size.medium, large: qrEn.panel.size.large },
+  pt: { small: qrPt.panel.size.small, medium: qrPt.panel.size.medium, large: qrPt.panel.size.large },
+  es: { small: qrEs.panel.size.small, medium: qrEs.panel.size.medium, large: qrEs.panel.size.large },
 };
 
 const BUILDERS: Record<FileGuideId, Builder> = {
@@ -334,6 +361,121 @@ const BUILDERS: Record<FileGuideId, Builder> = {
       [labels[2] ?? '', cellSize(col(t, row, 'compressedBytes'), c.f), share(col(t, row, 'compressedBytes'), photos, c.f)],
       [labels[3] ?? '', cellSize(col(t, row, 'pdfAfterBytes'), c.f), share(col(t, row, 'pdfAfterBytes'), photos, c.f)],
     ]];
+  },
+  // F19b (front M1): the limit, the photo, what Compress image gave in Chromium (the bytes, the dimensions and the quality
+  // its tables say), and the highest quality at which the whole photo, at its full size, would have fit (Node).
+  'guides-compress-photo-for-online-form': (c) => {
+    const t = measuredTable('guides-compress-photo-for-online-form', 'fitted', c.file);
+    return [t.rows.filter((row) => col(t, row, 'browser') === 'chromium').map((row) => {
+      const quality = col(t, row, 'quality');
+      const full = col(t, row, 'fullSizeQuality');
+      return [
+        size(Number(col(t, row, 'limitKb')) * 1000, c.f),
+        label(c, String(col(t, row, 'photo'))),
+        // To the byte: rounded, a copy of 199,598 bytes would read "200 KB", the limit itself.
+        unit(fmt(c.shared.bytes, { n: grouped(Number(col(t, row, 'bytes')), c.f) }), c.f),
+        pixels(col(t, row, 'width'), col(t, row, 'height'), c.f),
+        typeof quality === 'number' ? grouped(quality, c.f) : c.shared.notStated,
+        typeof full === 'number' ? grouped(full, c.f) : c.shared.none,
+      ];
+    })];
+  },
+  // F19b (front M1): the three photos in the three formats, with the share of the original, in Chromium; then the PNG with
+  // transparent corners in each format (the row names are the texts' labels), and whether its transparency stayed.
+  'guides-webp-vs-avif-vs-jpg': (c) => {
+    const photos = measuredTable('guides-webp-vs-avif-vs-jpg', 'photos', c.file);
+    const png = measuredTable('guides-webp-vs-avif-vs-jpg', 'transparent', c.file);
+    const withShare = (bytes: Cell, whole: Cell): string => `${cellSize(bytes, c.f)} (${share(bytes, whole, c.f)})`;
+    const labels = c.texts.tables[1]?.labels ?? [];
+    // Kept: every corner that was transparent in the PNG is still transparent in the copy.
+    const clear = c.file.guides['guides-webp-vs-avif-vs-jpg'].numbers['pngClearCorners']?.value;
+    return [
+      photos.rows.filter((row) => col(photos, row, 'browser') === 'chromium').map((row) => {
+        const original = col(photos, row, 'originalBytes');
+        return [label(c, String(col(photos, row, 'photo'))), cellSize(original, c.f), withShare(col(photos, row, 'jpgBytes'), original), withShare(col(photos, row, 'webpBytes'), original), withShare(col(photos, row, 'avifBytes'), original)];
+      }),
+      ['jpg', 'webp', 'avif'].map((format, index) => {
+        const row = png.rows.find((candidate) => col(png, candidate, 'format') === format && col(png, candidate, 'browser') === 'chromium');
+        if (!row) throw new Error(`no Chromium row for the PNG as ${format}`);
+        return [labels[index] ?? format, withShare(col(png, row, 'bytes'), col(png, row, 'pngBytes')), clear !== undefined && col(png, row, 'clearCorners') === clear ? c.shared.yes : c.shared.no];
+      }),
+    ];
+  },
+  // F19b (front M1): each PDF signed on all pages in the three ways, in Chromium: the file after and what the signature
+  // added (the names of the three ways are the texts' labels, in the order drawn, uploaded image, typed name).
+  'guides-sign-pdf-without-printing': (c) => {
+    const t = measuredTable('guides-sign-pdf-without-printing', 'signed', c.file);
+    const labels = c.texts.tables[0]?.labels ?? [];
+    const modes = ['draw', 'upload', 'type'];
+    return [t.rows.filter((row) => col(t, row, 'browser') === 'chromium').map((row) => {
+      const before = Number(col(t, row, 'beforeBytes'));
+      const after = Number(col(t, row, 'afterBytes'));
+      return [
+        label(c, String(col(t, row, 'file'))),
+        labels[modes.indexOf(String(col(t, row, 'mode')))] ?? String(col(t, row, 'mode')),
+        size(after, c.f),
+        after >= before ? `+${size(after - before, c.f)}` : `−${size(before - after, c.f)}`,
+      ];
+    })];
+  },
+  // F19b (front M1): the three PDFs protected (pages, the size before and after, the bytes added); then the file locked by
+  // restrictions alone as it came and after Unlock PDF, beside one PDF after Protect PDF (the row names are the texts'
+  // labels): its size, whether a reader opens it with no password, and how many of the actions qpdf lists it blocks.
+  'guides-what-a-pdf-password-protects': (c) => {
+    const t = measuredTable('guides-what-a-pdf-password-protects', 'protected', c.file);
+    const numbers = c.file.guides['guides-what-a-pdf-password-protects'].numbers;
+    const value = (name: string): number => {
+      const found = numbers[name];
+      if (!found) throw new Error(`guide 4: no number ${name}`);
+      return found.value;
+    };
+    const labels = c.texts.tables[1]?.labels ?? [];
+    const blocked = (count: number): string => (count === 0 ? c.shared.none : grouped(count, c.f));
+    return [
+      t.rows.map((row) => [
+        label(c, String(col(t, row, 'file'))),
+        grouped(Number(col(t, row, 'pages')), c.f),
+        cellSize(col(t, row, 'beforeBytes'), c.f),
+        cellSize(col(t, row, 'afterBytes'), c.f),
+        `+${unit(fmt(c.shared.bytes, { n: grouped(Number(col(t, row, 'afterBytes')) - Number(col(t, row, 'beforeBytes')), c.f) }), c.f)}`,
+      ]),
+      [
+        [labels[0] ?? '', size(value('ownerBytes'), c.f), value('ownerOpensWithout') === 1 ? c.shared.yes : c.shared.no, blocked(value('ownerBlocked'))],
+        [labels[1] ?? '', size(value('unlockedBytes'), c.f), value('unlockedEncrypted') === 0 && value('unlockedPages') === value('ownerPages') ? c.shared.yes : c.shared.no, blocked(value('unlockedBlocked'))],
+        [labels[2] ?? '', size(value('mixedAfter'), c.f), value('refusedWithout') === value('files') ? c.shared.no : c.shared.yes, blocked(value('blocked'))],
+      ],
+    ];
+  },
+  // F19b (front M5): the texts typed into the QR code generator, in Chromium (the names of the rows are the texts' labels):
+  // the characters, what the tool counts (the bytes of the UTF-8), the version the reader found in the PNG, the squares
+  // (modules) on a side and the dark ones under Oli; then the PNG of each text at each size, named by the tool's own words
+  // in the language: its pixels, the pixels of each square and the file.
+  'guides-qr-code-size': (c) => {
+    const codes = measuredTable('guides-qr-code-size', 'codes', c.file);
+    const pngs = measuredTable('guides-qr-code-size', 'pngs', c.file);
+    const chromium = (table: MeasuredTable) => (row: Cell[]): boolean => col(table, row, 'browser') === 'chromium';
+    const keys = codes.rows.filter(chromium(codes)).map((row) => String(col(codes, row, 'text')));
+    const labels = c.texts.tables[0]?.labels ?? [];
+    if (labels.length !== keys.length) throw new Error(`guide 5: ${labels.length} labels for the ${keys.length} texts`);
+    const name = (key: Cell): string => labels[keys.indexOf(String(key))] ?? String(key);
+    const sizes: Record<string, string> = QR_SIZE_WORDS[c.f.lang];
+    return [
+      codes.rows.filter(chromium(codes)).map((row) => [
+        name(col(codes, row, 'text')),
+        grouped(Number(col(codes, row, 'chars')), c.f),
+        grouped(Number(col(codes, row, 'bytes')), c.f),
+        grouped(Number(col(codes, row, 'version')), c.f),
+        grouped(Number(col(codes, row, 'modules')), c.f),
+        grouped(Number(col(codes, row, 'hidden')), c.f),
+      ]),
+      pngs.rows.filter(chromium(pngs)).map((row) => [
+        name(col(pngs, row, 'text')),
+        sizes[String(col(pngs, row, 'size'))] ?? String(col(pngs, row, 'size')),
+        pixels(col(pngs, row, 'side'), col(pngs, row, 'side'), c.f),
+        grouped(Number(col(pngs, row, 'perModule')), c.f),
+        cellSize(col(pngs, row, 'bytes'), c.f),
+      ]),
+    ];
   },
 };
 

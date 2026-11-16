@@ -32,6 +32,7 @@ import {
   comparisonPaths,
   findClaims,
   findPlaceholders,
+  GUIDES_HUB_GROUPS,
   GUIDES_HUB_WORDS,
   guidesHubWords,
   isCalcPage,
@@ -44,6 +45,7 @@ import {
   type ContentBlock,
 } from '../../scripts/lib/conteudo.ts';
 import { allPages, fileForPath } from '../../scripts/lib/dist.ts';
+import { GUIDES_BEFORE_F19B } from '../../scripts/lib/repeticao.ts';
 import { LANGS, QR_ID, ROUTES, languagesOf, routeById, type Lang } from '../../src/i18n/routes.ts';
 import enCommon from '../../src/i18n/en/common.ts';
 import { TEXTS } from '../../src/i18n/texts.ts';
@@ -53,12 +55,12 @@ import esQrTexts from '../../src/tools/qr-code-generator/i18n/es.ts';
 import type { QrPageTexts } from '../../src/tools/qr-code-generator/types.ts';
 import { longDate } from '../../src/i18n/dates.ts';
 import { IMAGE_PAGES, IMAGE_PRESET_IDS, IMAGE_TOOL_IDS } from '../../src/tools/image/registry.ts';
-import { CALC_PAGES, CALC_PRESET_IDS, isBrCalc, isLifeCalc } from '../../src/tools/calc/registry.ts';
+import { CALC_PAGES, CALC_PRESET_IDS, GUIDE_IDS, guidePathIn, isBrCalc, isGuide, isLifeCalc } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_PAGES, PDF_PRESET_IDS, PDF_TOOL_IDS, type PdfPageId, type PdfToolId } from '../../src/tools/pdf/registry.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDES_HUB_ID, isFileGuide } from '../../src/tools/guides/registry.ts';
-import { HUB_GROUPS, hubGroup, hubGuides } from '../../src/tools/guides/hub.ts';
+import { HUB_GROUPS, hubGroup, hubGuides, shownGroups } from '../../src/tools/guides/hub.ts';
 import { fmt, groupDigits } from '../../src/i18n/format.ts';
-import { FILLER, FILLER_BY_LANG, MAX_GUIDE_WORDS, MEASURED_DATE, MIN_GUIDE_WORDS, checkFileGuide, findFiller, guideWords } from '../../scripts/lib/file-guides.ts';
+import { FILLER, FILLER_BY_LANG, MAX_GUIDE_WORDS, MEASURED_DATE, MIN_GUIDE_WORDS, checkFileGuide, checkMoneyGuide, findFiller, guideWords } from '../../scripts/lib/file-guides.ts';
 
 // The checker is proven on small pages built here: one that passes, then one break at a time.
 const faq = (count: number, tag = 'Q'): string =>
@@ -113,6 +115,37 @@ function guidePage(options: { words?: number; tool?: string; toolPath?: string; 
     <section data-content="author"><h2>About the author</h2><p><a href="${routeById('about').paths[options.lang ?? 'en']}" rel="author">Victor Yuki Matusita</a> makes FileOrca.</p></section>
     <section data-content="related"><h2>Related</h2><ul class="fo-grid"><li><a class="fo-tool" href="/compress-image/">Compress image</a></li></ul></section>
     <div class="fo-ad fo-ad--multiplex"><span class="fo-ad__label">Advertisements</span></div>
+  </main></body></html>`;
+  return options.edit ? options.edit(html) : html;
+}
+
+/**
+ * F19b (DECISOES § 792): a money guide, built the way GuideView renders one, with its own text blocks marked data-guide-text
+ * and `words` words in them (the sentence of the introduction repeated, as in guidePage): the top band, the introduction,
+ * the calculator's paragraph, a part, the paragraph before the table, the formula, the premises, the example and the
+ * warning. The calculator, the table, its note, the sources, the author box and the cards are not marked.
+ */
+const MONEY_SENTENCE = 'An extra payment goes to the balance and the loan ends sooner than it would.';
+function moneyGuidePage(options: { words?: number; tag?: string; part?: string; edit?: (html: string) => string } = {}): string {
+  const text = Array.from({ length: Math.ceil((options.words ?? 900) / 15) }, () => MONEY_SENTENCE).join(' ');
+  const tag = options.tag ?? 'A money guide';
+  const html = `<!doctype html><html><head><title>${tag} | FileOrca</title><meta name="description" content="${tag}, with the numbers."></head><body><main>
+    <nav aria-label="Breadcrumb"><ol class="fo-crumbs"><li><a href="/">Home</a></li></ol></nav>
+    <div class="fo-top fo-top--calc" data-guide-text><h1 class="fo-h1">${tag}</h1><p class="fo-lead">What the payment does.</p><p class="fo-reviewed" data-ymyl="reviewed">Reviewed by <a href="/about/">Victor</a> on <time datetime="2026-11-16">November 16, 2026</time>.</p></div>
+    <div class="fo-prose fo-guide" data-guide-text><p>${text}</p></div>
+    <section class="fo-section fo-prose" aria-labelledby="guide-calc" data-guide-text="calc"><h2 id="guide-calc">Try it</h2><p>Change the rate to see a new term.</p></section>
+    <div id="fo-tool-root" class="fo-calc-island"><p>Your numbers stay on your device.</p></div>
+    <section class="fo-section fo-prose" aria-labelledby="part-0" data-guide-text><h2 id="part-0">The first year</h2><p>${options.part ?? 'Most of the first payments go to interest.'}</p></section>
+    <section class="fo-section fo-prose" aria-labelledby="measured"><h2 id="measured">The table</h2><p data-guide-text="table">Each row is one rate.</p><div class="fo-table-wrap"><table><tbody><tr><th scope="row">5%</th><td>$1</td></tr></tbody></table></div><p class="fo-reviewed">Worked out on <time datetime="2026-11-16">November 16, 2026</time>.</p></section>
+    <section class="fo-section fo-prose" aria-labelledby="works"><h2 id="works">How it is worked out</h2>
+      <div data-ymyl="formula" data-guide-text="formula"><p>The interest of a month is the balance times the monthly rate.</p></div>
+      <div data-ymyl="premises" data-guide-text="premises"><h3>What it assumes</h3><ul><li>A fixed rate.</li></ul></div>
+      <div data-ymyl="example" data-guide-text="example"><h3>An example</h3><p>A balance of $1,000 at 5% for a year.</p></div>
+      <div data-ymyl="source"><h3>Sources</h3><ul><li><a href="https://www.consumerfinance.gov/">CFPB</a>. Read on <time datetime="2026-11-16">November 16, 2026</time>.</li></ul></div>
+      <div data-ymyl="disclaimer" data-guide-text="disclaimer"><h3>Before you decide</h3><p>An educational tool, not financial advice.</p></div>
+    </section>
+    <section data-content="author"><h2>About the author</h2><p><a href="/about/" rel="author">Victor Yuki Matusita</a> makes FileOrca.</p></section>
+    <section class="fo-section" aria-labelledby="related"><h2 id="related">Related calculators</h2><ul class="fo-grid"><li><a class="fo-tool" href="/mortgage-calculator/">Mortgage calculator</a></li></ul></section>
   </main></body></html>`;
   return options.edit ? options.edit(html) : html;
 }
@@ -912,16 +945,17 @@ function guidesHubPage(fake: FakeGuidesHub = {}): string {
   const n = groupDigits(hubGuides(lang).length, lang);
   const head = fake.head ?? `<title>${t.title} | FileOrca</title><meta name="description" content="${fmt(t.description, { n })}">`;
   const intro = fake.intro === null ? '' : `<p class="fo-muted" data-hub-text>${fake.intro ?? fmt(t.intro, { n })}</p>`;
-  const sections = HUB_GROUPS.map((group) => {
+  // F19b (DECISOES § 786): the groups the view shows in the language (shownGroups), as GuidesHubView.astro does.
+  const sections = shownGroups(lang).map((group) => {
     const paths = hubGroup(group, lang).map((guide) => guide.path).filter((path) => !(fake.drop ?? []).includes(path));
-    const note = t.moneyNote && hubGroup(group, lang).length === 0 ? `<p class="fo-section__note" data-hub-text>${t.moneyNote.before} <a href="/pt/calculadoras-financeiras/">${t.moneyNote.link}</a>${t.moneyNote.after}</p>` : '';
+    const note = t.moneyNote && group === 'money' && hubGroup(group, lang).length === 0 ? `<p class="fo-section__note" data-hub-text>${t.moneyNote.before} <a href="/pt/calculadoras-financeiras/">${t.moneyNote.link}</a>${t.moneyNote.after}</p>` : '';
     const cards = paths.length > 0 ? `<ul class="fo-guidecards">${paths.map(guideCardHtml).join('')}</ul>` : '';
     return `<section class="fo-section" id="${group}" aria-labelledby="${group}-title"><h2 id="${group}-title">${t.groups[group].heading}</h2>${cards}${note}</section>`;
   }).join('');
   const how = `<section class="fo-section fo-prose" id="how" aria-labelledby="how-title"><h2 id="how-title">${t.howHeading}</h2><p data-hub-text>${fake.how ?? t.how}</p></section>`;
   return `<!doctype html><html><head>${head}</head><body><main><div class="fo-hubband fo-cat--guide"><span class="fo-eyebrow">${t.eyebrow}</span><h1 class="fo-h1">${t.h1}</h1>${intro}</div>${sections}${how}${fake.extra ?? ''}</main></body></html>`;
 }
-const guidesHubWant = (lang: Lang) => ({ paths: hubGuides(lang).map((guide) => guide.path), lang });
+const guidesHubWant = (lang: Lang) => ({ paths: hubGuides(lang).map((guide) => guide.path), lang, groups: shownGroups(lang) });
 
 describe('portão de conteúdo: o hub de guias (F11)', () => {
   const problemsOf = (html: string, lang: Lang = 'en'): string => checkGuidesHub(html, guidesHubWant(lang)).join('\n');
@@ -929,9 +963,13 @@ describe('portão de conteúdo: o hub de guias (F11)', () => {
 
   it('accepts the complete hub in the three languages, with its own words in the range (en 91, pt 108, es 97)', () => {
     expect(GUIDES_HUB_WORDS).toEqual({ min: 60, max: 120 });
+    // F19b (DECISOES § 786): the sections the gate knows are the groups of the hub, Utilities included.
+    expect([...GUIDES_HUB_GROUPS]).toEqual([...HUB_GROUPS]);
     for (const lang of LANGS) {
       expect(checkGuidesHub(guidesHubPage({ lang }), guidesHubWant(lang)), lang).toEqual([]);
-      expect(guidesHubWant(lang).paths, lang).toHaveLength([15, 10, 15][LANGS.indexOf(lang)] ?? 0);
+      // F19b (DECISOES § 796): 15, 10 and 15 before; with the four file guides and three money guides of the F19b, 22, 14
+      // and 22; with the QR code guide, 23, 15 and 23 (front M5).
+      expect(guidesHubWant(lang).paths, lang).toHaveLength([23, 15, 23][LANGS.indexOf(lang)] ?? 0);
     }
     expect(LANGS.map((lang) => guidesHubWords(guidesHubPage({ lang })))).toEqual([91, 108, 97]);
   });
@@ -977,6 +1015,28 @@ describe('portão de conteúdo: o hub de guias (F11)', () => {
     const pt = guidesHubPage({ lang: 'pt' });
     expect(problemsOf(pt, 'pt')).toBe('');
     expect(problemsOf(pt.replace(/<p class="fo-section__note" data-hub-text>.*?<\/p>/, ''), 'pt')).toContain('o grupo #money não tem cartão nem a nota que diz por quê');
+  });
+
+  // F19b (DECISOES § 786): a group the hub shows only where it has a guide (Utilities, the QR code guides): its section is
+  // asked for where the registries give the language a guide of it, and refused where they give none.
+  it('groups: the Utilities section only where the language has a guide of it', () => {
+    const utilOf = (cards: string): string => `<section class="fo-section" id="util" aria-labelledby="util-title"><h2 id="util-title">Utility guides</h2>${cards}</section>`;
+    // The hub of en without its Utilities section (whether the registries give it a guide or not), then with one.
+    const without = guidesHubPage().replace(/<section class="fo-section" id="util".*?<\/section>/, '');
+    const add = (section: string): string => without.replace('<section class="fo-section" id="money"', `${section}<section class="fo-section" id="money"`);
+    const empty = add(utilOf(''));
+    const full = add(utilOf(`<ul class="fo-guidecards">${guideCardHtml('/guides/a-qr-guide/')}</ul>`));
+    const want = (groups: readonly ('image' | 'pdf' | 'util' | 'money')[]) => ({ paths: guidesHubWant('en').paths, lang: 'en' as const, groups });
+    const utilProblems = (html: string, groups: readonly ('image' | 'pdf' | 'util' | 'money')[]): string[] => checkGuidesHub(html, want(groups)).filter((problem) => problem.includes('#util'));
+    const shows = ['image', 'pdf', 'util', 'money'] as const;
+    const hides = ['image', 'pdf', 'money'] as const;
+    expect(utilProblems(without, shows)).toEqual(['sem a seção do grupo #util']);
+    expect(utilProblems(empty, shows)).toEqual(['o grupo #util não tem cartão nem a nota que diz por quê']);
+    expect(utilProblems(full, shows)).toEqual([]);
+    expect(utilProblems(full, hides)).toEqual(['a seção do grupo #util aparece, e o idioma não tem guia nesse grupo']);
+    expect(utilProblems(without, hides)).toEqual([]);
+    // Without the groups, every group of the hub is asked for, as before the F19b.
+    expect(checkGuidesHub(without, { paths: guidesHubWant('en').paths, lang: 'en' })).toContain('sem a seção do grupo #util');
   });
 
   it('claims: the hub makes none, in its language', () => {
@@ -1388,6 +1448,30 @@ describe('portão de conteúdo: os guias de arquivo em português e espanhol', (
   });
 });
 
+// F19b (acceptance 2; DECISOES § 792): the money guides held to the words of the file guides, in their own text blocks.
+describe('portão de conteúdo: o texto dos guias de dinheiro (F19b)', () => {
+  it('accepts a money guide with 800 to 1,500 words of its own text, and counts only the marked blocks', () => {
+    expect(checkMoneyGuide(moneyGuidePage())).toEqual([]);
+    const words = guideWords(moneyGuidePage());
+    expect(words).toBeGreaterThanOrEqual(MIN_GUIDE_WORDS);
+    expect(words).toBeLessThanOrEqual(MAX_GUIDE_WORDS);
+    // The calculator, the table, its note, the sources, the author box and the cards are not text of the guide.
+    const longer = moneyGuidePage({ edit: (html) => html.replace('<p>Your numbers stay on your device.</p>', `<p>${'word '.repeat(700)}</p>`).replace('CFPB</a>.', `CFPB</a>. ${'word '.repeat(700)}`) });
+    expect(guideWords(longer)).toBe(words);
+  });
+
+  it('fails a money guide under 800 or over 1,500 words, with a filler phrase, or with a block that is not its text marked', () => {
+    expect(checkMoneyGuide(moneyGuidePage({ words: 600 })).join('\n')).toMatch(/\d+ palavras de texto \(pede de 800 a 1500\)/);
+    expect(checkMoneyGuide(moneyGuidePage({ words: 1600 })).join('\n')).toMatch(/\d+ palavras de texto \(pede de 800 a 1500\)/);
+    expect(checkMoneyGuide(moneyGuidePage({ part: 'In conclusion, the first payments go to interest.' }))).toContain('frase de enchimento: "in conclusion"');
+    expect(checkMoneyGuide(moneyGuidePage({ part: 'Cabe destacar que la tasa cambia.' }), 'es')).toContain('frase de enchimento: "cabe destacar"');
+    expect(checkMoneyGuide(moneyGuidePage({ edit: (html) => html.replace('<div data-ymyl="source">', '<div data-ymyl="source" data-guide-text>') }))).toContain('as fontes entra na contagem de palavras do guia (data-guide-text)');
+    expect(checkMoneyGuide(moneyGuidePage({ edit: (html) => html.replace('<div id="fo-tool-root" class="fo-calc-island">', '<div id="fo-tool-root" class="fo-calc-island" data-guide-text>') }))).toContain('a calculadora entra na contagem de palavras do guia (data-guide-text)');
+    expect(checkMoneyGuide(moneyGuidePage({ edit: (html) => html.replace('<div class="fo-table-wrap">', '<div class="fo-table-wrap" data-guide-text>') }))).toContain('a tabela entra na contagem de palavras do guia (data-guide-text)');
+    expect(checkMoneyGuide(moneyGuidePage({ edit: (html) => html.replaceAll(/ data-guide-text(?:="\w+")?/g, '') }))).toEqual(['nenhum bloco de texto do guia (data-guide-text)', '0 palavras de texto (pede de 800 a 1500)']);
+  });
+});
+
 describe('portão de conteúdo: o script sobre um dist de teste', () => {
   const root = mkdtempSync(join(tmpdir(), 'fileorca-conteudo-'));
   afterAll(() => rmSync(root, { recursive: true, force: true }));
@@ -1456,6 +1540,11 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
       if (isFileGuide(id)) {
         const toolPath = ROUTES.find((route) => route.id === FILE_GUIDES[id].tool)?.paths[entry.lang] ?? '/';
         write(dir, entry.path, guidePage({ toolPath, lang: entry.lang, edit: (html) => html.replace('<title>A guide | FileOrca</title>', `<title>${id} ${entry.lang} | FileOrca</title>`).replace('content="A guide to a tool."', `content="Guide ${id} ${entry.lang}."`) }));
+        continue;
+      }
+      // F19b (DECISOES § 792): the money guides, in each of their languages, with their own text blocks.
+      if (isGuide(id)) {
+        write(dir, entry.path, moneyGuidePage({ tag: `${id} ${entry.lang}` }));
         continue;
       }
       if (!isImagePage(id)) {
@@ -1657,6 +1746,40 @@ describe('portão de conteúdo: o script sobre um dist de teste', () => {
     expect(result.output).not.toContain(`${jpgPng.paths.en}:`);
     expect(result.output).not.toContain(`${heic.paths.en}:`);
   });
+
+  // F19b (decision 8 and acceptance 2; DECISOES § 792): the money guides are counted and, those added since the F19b, held
+  // to 800 to 1,500 words and no filler; and the repetition rule reads every guide added since the F19b. The fifteen before
+  // it (GUIDES_BEFORE_F19B) are only counted: they are a pendência of group 30.
+  it('checks the money guides and the repetition rule on the guides added since the F19b, and only counts the ones before', () => {
+    const moneyCount = GUIDE_IDS.reduce((sum, id) => sum + LANGS.filter((lang) => guidePathIn(id, lang) !== null).length, 0);
+    const dir = join(root, 'guides-f19b');
+    build(dir);
+    const clean = run(dir);
+    expect(clean.output).toMatch(new RegExp(`${guideCount} guia\\(s\\) de arquivo, .* do hub de guias; ${moneyCount} guia\\(s\\) de dinheiro; \\d+ sem repetição`));
+    expect(clean.output).toContain('palavras dos guias de dinheiro: ');
+    expect(clean.status).toBe(0);
+    const [oldMoney, newMoney] = [GUIDE_IDS.find((id) => GUIDES_BEFORE_F19B.includes(id)), GUIDE_IDS.find((id) => !GUIDES_BEFORE_F19B.includes(id))];
+    const [oldFile, newFile] = [FILE_GUIDE_IDS.find((id) => GUIDES_BEFORE_F19B.includes(id)), FILE_GUIDE_IDS.find((id) => !GUIDES_BEFORE_F19B.includes(id))];
+    if (!oldMoney || !newMoney || !oldFile || !newFile) throw new Error('a guide before the F19b and one after it, of each kind');
+    const moneyPath = (id: (typeof GUIDE_IDS)[number]): string => guidePathIn(id, 'en') ?? '';
+    // Too few words, and a filler phrase, in a new money guide and in an old one.
+    for (const id of [oldMoney, newMoney]) write(dir, moneyPath(id), moneyGuidePage({ tag: `${id} en`, words: 600, part: 'In conclusion, the first payments go to interest.' }));
+    // The device in two parts of a new file guide and of an old one.
+    const twice = (id: (typeof FILE_GUIDE_IDS)[number]) => {
+      const toolPath = routeById(FILE_GUIDES[id].tool).paths.en ?? '';
+      return guidePage({ toolPath, extra: 'The photo is made smaller on your device.', edit: (html) => html.replace('Drop a photo and it comes back lighter.', 'Drop a photo: it is worked on in your browser.').replace('<title>A guide | FileOrca</title>', `<title>${id} en | FileOrca</title>`).replace('content="A guide to a tool."', `content="Guide ${id} en."`) });
+    };
+    write(dir, FILE_GUIDES[newFile].paths.en, twice(newFile));
+    write(dir, FILE_GUIDES[oldFile].paths.en, twice(oldFile));
+    const result = run(dir);
+    expect(result.status).toBe(1);
+    expect(result.output).toMatch(new RegExp(`${moneyPath(newMoney).replaceAll('/', '\\/')}: \\d+ palavras de texto \\(pede de 800 a 1500\\)`));
+    expect(result.output).toContain(`${moneyPath(newMoney)}: frase de enchimento: "in conclusion"`);
+    expect(result.output).toMatch(new RegExp(`${FILE_GUIDES[newFile].paths.en.replaceAll('/', '\\/')}: repetição: o fato .*\\(on-device\\) aparece em 2 blocos: tool intro, text \\d+`));
+    // The guides before the F19b are counted, never held to the new rules.
+    expect(result.output).not.toContain(`${moneyPath(oldMoney)}:`);
+    expect(result.output).not.toContain(`${FILE_GUIDES[oldFile].paths.en}:`);
+  }, 60_000);
 
   // F11 (decision 5; DECISOES § 394): the guides hub, in each language of its route, from the route map and the registries.
   it('checks the guides hub in each of its languages, and fails when it loses a card or its own words (F11)', () => {

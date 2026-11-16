@@ -355,6 +355,22 @@ export default {
       description: 'The year buying catches up with renting, and what moves it.',
       synonyms: ['guide', 'rent vs buy', 'break-even'],
     },
+    // F19b (DECISOES § 780 and § 790): the new money guides.
+    "guides-apr-vs-apy": {
+      name: "APR vs APY",
+      description: "What each compounding adds to the same rate, and why the APR of a deposit is not the APR of a loan.",
+      synonyms: ["guide", "annual percentage yield", "compounding"],
+    },
+    "guides-credit-card-minimum-payment": {
+      name: "Credit card minimum payment: why it takes so long",
+      description: "What a payment just over the interest does to a balance, next to larger fixed payments.",
+      synonyms: ["guide", "minimum payment", "only the minimum"],
+    },
+    "guides-how-much-house-can-i-afford": {
+      name: "How much house can I afford",
+      description: "Two shares of your income set what a home may cost a month. Which one sets the price, and what other debts do.",
+      synonyms: ["guide", "house budget", "afford a house"],
+    },
   },
   fileGuides: {
     'guides-heic-to-jpg-on-windows': {
@@ -406,6 +422,33 @@ export default {
       name: 'How to turn photos into one PDF',
       description: 'One PDF from a few photos, and what compressing the photos first does to its size.',
       synonyms: ['guide', 'photos to pdf', 'pictures to pdf'],
+    },
+    // F19b (DECISOES § 780 and § 790): the new file guides.
+    "guides-compress-photo-for-online-form": {
+      name: "Photo for an online form",
+      description: "What a size limit in KB counts, and what our phone photos gave up to fit under it.",
+      synonyms: ["guide", "photo size limit", "upload form"],
+    },
+    "guides-webp-vs-avif-vs-jpg": {
+      name: "WebP vs AVIF vs JPG",
+      description: "What the same photos weighed as JPG, WebP and AVIF, which kept transparency, and when to use each.",
+      synonyms: ["guide", "webp or jpeg", "image format"],
+    },
+    "guides-sign-pdf-without-printing": {
+      name: "How to sign a PDF without printing it",
+      description: "What a signature drawn on the page is, what it is not, and what it changes in the file.",
+      synonyms: ["guide", "electronic signature", "sign without printing"],
+    },
+    "guides-what-a-pdf-password-protects": {
+      name: "What a PDF password protects",
+      description: "What the password to open does, what the restrictions do not, and why a short password is a weak one.",
+      synonyms: ["guide", "pdf encryption", "pdf security"],
+    },
+    // F19b (DECISOES § 780 and § 790): the QR code guide; no synonym is a query of the QR code generator itself.
+    "guides-qr-code-size": {
+      name: "QR code size",
+      description: "How the text you type sets the number of squares in a QR code, and what that means for the PNG and for print.",
+      synonyms: ["guide", "qr code print size", "qr code dimensions"],
     },
   },
   tools: {

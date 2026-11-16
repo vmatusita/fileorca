@@ -6,7 +6,7 @@ import { QR_ID, ROUTES, routeById, type RouteDef, type RouteId } from '../../src
 import { IMAGE_PAGES } from '../../src/tools/image/registry.ts';
 import { BR_CALC_IDS, BR_HUB_ID, CALC_PAGE_IDS, GUIDE_IDS, HEALTH_HUB_ID, HOUSE_HUB_ID, LIFE_CALC_IDS, MONEY_HUB_ID, isBrCalc } from '../../src/tools/calc/registry.ts';
 import { PDF_HUB_ID, PDF_PRESET_IDS, PDF_TOOL_IDS } from '../../src/tools/pdf/registry.ts';
-import { FILE_GUIDE_IDS, GUIDES_HUB_ID } from '../../src/tools/guides/registry.ts';
+import { FILE_GUIDE_IDS, GUIDES_HUB_ID, isFileGuide } from '../../src/tools/guides/registry.ts';
 
 const O = 'https://fileorca.com';
 const tags = { xDefaultLang: 'en', langTags: ['en', 'pt-BR', 'es'] };
@@ -81,7 +81,9 @@ describe('sitemaps', () => {
   // F7 (decision 9; DECISOES § 259): English gets the pages of the areas "casa-saude" and "utilidades", read from the map
   // (the two hubs, the 11 home and health calculators and the QR code generator). The languages adjustment: Portuguese and
   // Spanish get the QR code generator and the 10 file guides, and Spanish the 18 calculator pages and the 5 money guides.
-  const f7Rows = ROUTES.filter((route) => route.adArea === 'casa-saude' || route.adArea === 'utilidades').map((route) => route.id);
+  // F19b (DECISOES § 791 and § 796): a guide of the QR code generator is in the area "utilidades" too, but it is a file
+  // guide, counted with them below, not a row of the F7.
+  const f7Rows = ROUTES.filter((route) => (route.adArea === 'casa-saude' || route.adArea === 'utilidades') && !isFileGuide(route.id)).map((route) => route.id);
   // F11 (decision 5): the guides hub, one page in each language (the last 1 of each sum).
   // F17 (DECISOES § 716): AVIF to JPG and Convert to WebP, in the three languages: English 21 pages of the image area and
   // the institutional ones (19 before), and the other 13 pages of the image area in Portuguese and Spanish (11 before).
@@ -89,7 +91,10 @@ describe('sitemaps', () => {
   // Organize PDF and the 2 PDF presets in the PDF area (16: the hub, 13 tools and 2 presets; 13 before), in each language.
   // F19a (decisions 2 and 7; DECISOES § 752): What's new and How it works, one page each in every language (the institutional
   // part grows by 2: 25 in English with the image area, 10 in Portuguese and Spanish).
-  const SIZES = { en: 25 + 24 + 16 + 10 + f7Rows.length + 1, pt: 10 + 15 + 16 + brRows + 1 + 10 + 1, es: 10 + 15 + 16 + 1 + CALC_PAGE_IDS.length + GUIDE_IDS.length + 1 + 10 + 1 } as const;
+  // F19b (DECISOES § 796): the four file guides in each language (14; 10 before) and the three money guides in English and
+  // Spanish (the money area of English 27: the hub, 18 calculators and 8 guides; 24 before). The QR code guide makes the
+  // file guides 15 (front M5).
+  const SIZES = { en: 25 + 27 + 16 + 15 + f7Rows.length + 1, pt: 10 + 15 + 16 + brRows + 1 + 15 + 1, es: 10 + 15 + 16 + 1 + CALC_PAGE_IDS.length + GUIDE_IDS.length + 1 + 15 + 1 } as const;
 
   it('builds one valid sitemap per language and an index, with the counts of the route map', () => {
     expect([0, 1 + BR_CALC_IDS.length]).toContain(brRows);

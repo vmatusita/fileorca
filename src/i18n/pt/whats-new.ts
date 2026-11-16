@@ -123,5 +123,9 @@ export default {
       title: 'Novidades e Como funciona',
       body: 'Esta página lista cada mudança que você vê, e a Como funciona mostra o que acontece com o seu arquivo e como conferir isso no navegador. As páginas das ferramentas e das calculadoras agora dizem cada coisa num lugar só, e o Sobre diz quando o site entrou no ar.',
     },
+    'new-guides': {
+      title: 'Guias novos com números medidos por nós',
+      body: 'Guias novos respondem a uma pergunta cada um, com a ferramenta dentro: uma foto abaixo do limite de tamanho de um formulário, WebP, AVIF ou JPG, assinar um PDF sem imprimir, o que a senha de um PDF protege e o tamanho de um QR code. Todo número deles vem da nossa própria medida, feita com as ferramentas do site.',
+    },
   },
 } satisfies WhatsNewTexts;

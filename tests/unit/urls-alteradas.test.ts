@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { changedUrls } from '../../scripts/ci/urls-alteradas.ts';
+import { FILE_GUIDES } from '../../src/tools/guides/registry.ts';
 
 const o = 'https://fileorca.com';
 
@@ -12,7 +13,8 @@ describe('urls-alteradas', () => {
 
   it('maps a language text file only to that language', () => {
     expect(changedUrls(['src/i18n/es/terms.ts'])).toEqual([`${o}/es/terminos/`]);
-    expect(changedUrls(['src/tools/compress-image/i18n/pt.ts'])).toEqual([`${o}/pt/comprimir-imagem/`]);
+    // F19b (DECISOES § 796): and the Portuguese guide that embeds Compress image, which reads the same texts, in pt only.
+    expect(changedUrls(['src/tools/compress-image/i18n/pt.ts'])).toEqual([`${o}/pt/comprimir-imagem/`, `${o}${FILE_GUIDES['guides-compress-photo-for-online-form'].paths.pt}`]);
   });
 
   it('maps a shared view to every language of every route using it', () => {

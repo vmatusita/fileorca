@@ -2,7 +2,7 @@
 // the languages adjustment they exist in Portuguese and Spanish too (/pt/guias/<slug>/, /es/guias/<slug>/), each the same
 // guide translated, with a pair in hreflang. The pages, the hubs, the search, the gates and the tests read this registry,
 // the way the money guides read GUIDES (src/tools/calc/registry.ts). Plain data: never import it from an island.
-import type { Lang } from '../../i18n/routes.ts';
+import type { Lang, QR_ID } from '../../i18n/routes.ts';
 import type { ImagePresetId, ImageToolId } from '../image/registry.ts';
 import type { PdfToolId } from '../pdf/registry.ts';
 
@@ -17,6 +17,14 @@ export const FILE_GUIDE_IDS = [
   'guides-split-pdf-file-size',
   'guides-combine-pdfs-on-phone',
   'guides-photos-to-one-pdf',
+  // F19b (prompt F19b, decision 2): the new guides, each embedding a tool that is live, with numbers it measured.
+  'guides-compress-photo-for-online-form',
+  'guides-webp-vs-avif-vs-jpg',
+  'guides-sign-pdf-without-printing',
+  'guides-what-a-pdf-password-protects',
+  // F19b (decision 4; DECISOES § 785 and § 786): the guide of the QR code generator, the one file guide whose tool takes
+  // text instead of a file, in the group Utilities of the guides hub.
+  'guides-qr-code-size',
 ] as const;
 export type FileGuideId = (typeof FILE_GUIDE_IDS)[number];
 
@@ -48,9 +56,51 @@ export const GUIDE_PUBLISHED = '2026-11-02';
 export const GUIDE_REVIEWED_ON: Record<Lang, string> = { en: GUIDE_REVIEWED, pt: '2026-11-11', es: '2026-11-11' };
 export const GUIDE_PUBLISHED_ON: Record<Lang, string> = { en: GUIDE_PUBLISHED, pt: '2026-11-03', es: '2026-11-03' };
 
-export type FileGuideHub = 'image-tools' | 'pdf-tools';
-export type FileGuideTool = ImageToolId | PdfToolId;
-export type FileGuideRelated = ImageToolId | ImagePresetId | PdfToolId | FileGuideId;
+/**
+ * F19b (DECISOES § 778): a guide added after the first ten carries its own day, in UTC like the date pnpm guias:medir
+ * stamps: the day of its measurement, which is also the day of its review and of its first publication in each of its
+ * languages (never before the measurement, § 207). The first ten keep the days above, and a new guide never moves them:
+ * the numbers of each guide carry the day they were measured (measuredOf in measured.ts), and pnpm guias:medir --only
+ * measures one guide and keeps the others as they were.
+ */
+const OWN_DAY: Partial<Record<FileGuideId, string>> = {
+  'guides-compress-photo-for-online-form': '2026-11-16',
+  'guides-webp-vs-avif-vs-jpg': '2026-11-16',
+  'guides-sign-pdf-without-printing': '2026-11-16',
+  'guides-what-a-pdf-password-protects': '2026-11-16',
+  'guides-qr-code-size': '2026-11-16',
+};
+
+/** The day a guide was reviewed in a language: its own day, or the day of the first ten. */
+export function reviewedOn(id: FileGuideId, lang: Lang): string {
+  return OWN_DAY[id] ?? GUIDE_REVIEWED_ON[lang];
+}
+
+/** The day a guide was first published in a language: its own day, or the day of the first ten. */
+export function publishedOn(id: FileGuideId, lang: Lang): string {
+  return OWN_DAY[id] ?? GUIDE_PUBLISHED_ON[lang];
+}
+
+/**
+ * F19b (decision 4; DECISOES § 786): the QR code generator is the one tool outside the image and PDF registries that a file
+ * guide embeds, with the smallest deviation: its id joins the tools a guide embeds and links to, and its guides form the
+ * group Utilities of the guides hub (the hub 'utilities', which has no page of its own: the breadcrumb of every guide is
+ * Home › Guides › guide, as the QR page has no hub between Home and itself). The type comes from the route map by a
+ * type-only import, so this registry still imports nothing from routes.ts at run time (routes.ts imports FILE_GUIDES).
+ */
+export type QrToolId = typeof QR_ID;
+export type FileGuideHub = 'image-tools' | 'pdf-tools' | 'utilities';
+export type FileGuideTool = ImageToolId | PdfToolId | QrToolId;
+export type FileGuideRelated = ImageToolId | ImagePresetId | PdfToolId | QrToolId | FileGuideId;
+
+/** The group of the guides hub of each hub of a file guide, which is also the colour of its card and of its sheet. */
+export type FileGuideGroup = 'image' | 'pdf' | 'util';
+export const FILE_GUIDE_GROUP: Record<FileGuideHub, FileGuideGroup> = { 'image-tools': 'image', 'pdf-tools': 'pdf', utilities: 'util' };
+
+/** The group of a file guide on the guides hub: Image, PDF or Utilities. */
+export function fileGuideGroup(id: FileGuideId): FileGuideGroup {
+  return FILE_GUIDE_GROUP[FILE_GUIDES[id].hub];
+}
 
 export interface FileGuideDef {
   id: FileGuideId;
@@ -60,7 +110,10 @@ export interface FileGuideDef {
   paths: Record<Lang, string>;
   /** The tool the guide embeds: the same island and entry as the tool's own page. */
   tool: FileGuideTool;
-  /** The hub of the breadcrumb, which also lists the guide. */
+  /**
+   * The hub that lists the guide (the image or PDF hub; 'utilities' has no page) and the group of the guides hub where the
+   * guide sits (FILE_GUIDE_GROUP). Since the F11 the breadcrumb is Home › Guides › guide for every guide.
+   */
   hub: FileGuideHub;
   /** Up to 6 pages that exist: tools, presets or other guides. */
   related: readonly FileGuideRelated[];
@@ -85,6 +138,12 @@ const SLUGS: Record<FileGuideId, { pt: string; es: string }> = {
   'guides-split-pdf-file-size': { pt: 'dividir-pdf-e-tamanho-do-arquivo', es: 'dividir-pdf-y-tamano-del-archivo' },
   'guides-combine-pdfs-on-phone': { pt: 'juntar-pdfs-no-celular', es: 'unir-pdf-en-el-celular' },
   'guides-photos-to-one-pdf': { pt: 'fotos-em-um-pdf', es: 'fotos-en-un-solo-pdf' },
+  // F19b (DECISOES § 779): from the glossaries of docs/i18n/, without accents.
+  'guides-compress-photo-for-online-form': { pt: 'comprimir-foto-para-formulario-online', es: 'comprimir-foto-para-formulario-en-linea' },
+  'guides-webp-vs-avif-vs-jpg': { pt: 'webp-avif-ou-jpg', es: 'webp-avif-o-jpg' },
+  'guides-sign-pdf-without-printing': { pt: 'assinar-pdf-sem-imprimir', es: 'firmar-pdf-sin-imprimir' },
+  'guides-what-a-pdf-password-protects': { pt: 'o-que-a-senha-do-pdf-protege', es: 'que-protege-la-contrasena-de-un-pdf' },
+  'guides-qr-code-size': { pt: 'tamanho-do-qr-code', es: 'tamano-del-codigo-qr' },
 };
 
 /**
@@ -102,6 +161,12 @@ const TOOL_SECTION: Record<FileGuideId, number> = {
   'guides-split-pdf-file-size': 4, // How to split without the extra weight
   'guides-combine-pdfs-on-phone': 2, // On any phone, in the browser
   'guides-photos-to-one-pdf': 2, // What the tool does with each photo
+  // F19b (DECISOES § 789): the part about the embedded tool, the same index in the three languages.
+  'guides-compress-photo-for-online-form': 2,
+  'guides-webp-vs-avif-vs-jpg': 2,
+  'guides-sign-pdf-without-printing': 2,
+  'guides-what-a-pdf-password-protects': 2,
+  'guides-qr-code-size': 2,
 };
 
 const def = (id: FileGuideId, tool: FileGuideTool, hub: FileGuideHub, related: readonly FileGuideRelated[]): FileGuideDef => ({
@@ -184,6 +249,49 @@ export const FILE_GUIDES: Record<FileGuideId, FileGuideDef> = {
     'compress-pdf',
     'guides-why-is-my-pdf-so-large',
     'guides-combine-pdfs-on-phone',
+  ]),
+  // F19b (DECISOES § 789): up to six pages that exist in the three languages, the tool the guide embeds left out.
+  'guides-compress-photo-for-online-form': def('guides-compress-photo-for-online-form', 'compress-image', 'image-tools', [
+    'compress-image-to-100kb',
+    'resize-image',
+    'crop-image',
+    'image-to-pdf',
+    'guides-webp-vs-avif-vs-jpg',
+    'guides-social-media-image-sizes',
+  ]),
+  'guides-webp-vs-avif-vs-jpg': def('guides-webp-vs-avif-vs-jpg', 'convert-to-webp', 'image-tools', [
+    'compress-image',
+    'avif-to-jpg',
+    'webp-to-jpg',
+    'guides-jpg-vs-png',
+    'guides-open-webp-save-as-jpg',
+    'guides-compress-photo-for-online-form',
+  ]),
+  'guides-sign-pdf-without-printing': def('guides-sign-pdf-without-printing', 'sign-pdf', 'pdf-tools', [
+    'protect-pdf',
+    'merge-pdf',
+    'image-to-pdf',
+    'compress-pdf',
+    'guides-what-a-pdf-password-protects',
+    'guides-combine-pdfs-on-phone',
+  ]),
+  'guides-what-a-pdf-password-protects': def('guides-what-a-pdf-password-protects', 'protect-pdf', 'pdf-tools', [
+    'unlock-pdf',
+    'sign-pdf',
+    'compress-pdf',
+    'merge-pdf',
+    'guides-sign-pdf-without-printing',
+    'guides-why-is-my-pdf-so-large',
+  ]),
+  // F19b (decision 4; DECISOES § 786 and § 789): the QR code generator in the group Utilities; the pages a person goes to
+  // with a QR image (fit it, put it on a sheet, make it lighter) and the guides about sizes and sheets.
+  'guides-qr-code-size': def('guides-qr-code-size', 'qr-code-generator', 'utilities', [
+    'resize-image',
+    'image-to-pdf',
+    'compress-image',
+    'guides-social-media-image-sizes',
+    'guides-photos-to-one-pdf',
+    'guides-compress-photo-for-online-form',
   ]),
 };
 

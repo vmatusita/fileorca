@@ -22,7 +22,7 @@ import { normalize, type SearchEntry } from '../search/search.ts';
 import { ICONS } from '../icons/icons.ts';
 import { BR_CALC_IDS, BR_CALC_PAGES, CALC_PAGES, CALC_PAGE_IDS, GUIDE_IDS, LIFE_CALC_IDS, LIFE_CALC_PAGES, isGuide } from '../tools/calc/registry.ts';
 import { PDF_PAGES, type PdfPageId } from '../tools/pdf/registry.ts';
-import { FILE_GUIDES, FILE_GUIDE_IDS, isFileGuide } from '../tools/guides/registry.ts';
+import { FILE_GUIDE_IDS, fileGuideGroup, isFileGuide } from '../tools/guides/registry.ts';
 
 export function searchIndex(): SearchEntry[] {
   return [...imageEntries(), ...pdfEntries(), ...moneyEntries(), ...fileGuideEntries(), ...lifeEntries()];
@@ -89,9 +89,12 @@ function moneyEntries(): SearchEntry[] {
   ];
 }
 
-/** The file guides, in registry order: the file icon, in the colour of its hub, in the category "Guide" (F11). */
+/**
+ * The file guides, in registry order: the file icon, in the colour of its group (image, PDF or, since the F19b, the
+ * utilities of the QR code guides), in the category "Guide" (F11).
+ */
 function fileGuideEntries(): SearchEntry[] {
-  return FILE_GUIDE_IDS.flatMap((id) => entry(id, FILE_GUIDES[id].hub === 'pdf-tools' ? 'pdf' : 'image', ICONS.file, (lang) => TEXTS[lang].common.fileGuides?.[id], 'guide'));
+  return FILE_GUIDE_IDS.flatMap((id) => entry(id, fileGuideGroup(id), ICONS.file, (lang) => TEXTS[lang].common.fileGuides?.[id], 'guide'));
 }
 
 /** The home and health calculators in hub order (English only, F7), then the QR code generator (en, pt and es). */
