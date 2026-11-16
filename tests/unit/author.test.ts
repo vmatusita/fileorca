@@ -15,7 +15,7 @@ import { TEXTS } from '../../src/i18n/texts.ts';
 import { longDate } from '../../src/i18n/dates.ts';
 import { AUTHOR } from '../../src/platform/site.ts';
 import { FILE_GUIDES, FILE_GUIDE_IDS } from '../../src/tools/guides/registry.ts';
-import { MEASURED } from '../../src/tools/guides/measured.ts';
+import { measuredOf } from '../../src/tools/guides/measured.ts';
 import { GUIDE_IDS, guidePathIn } from '../../src/tools/calc/registry.ts';
 import { MAX_GUIDE_WORDS, MIN_GUIDE_WORDS, checkFileGuide, guideWords } from '../../scripts/lib/file-guides.ts';
 
@@ -99,7 +99,9 @@ describe.runIf(BUILT)('the author box at the end of the 40 guides (DECISOES § 7
       if (link?.getAttribute('href') !== pathFor('about', lang) || text(link) !== AUTHOR.name) wrong.push(`${path}: o link do nome`);
       if (text(box.querySelector('h2')) !== t.heading) wrong.push(`${path}: o título`);
       const time = box.querySelector('time');
-      if (time?.getAttribute('datetime') !== MEASURED.measuredOn || text(time) !== longDate(MEASURED.measuredOn, lang)) wrong.push(`${path}: a data da medida`);
+      // F19b (DECISOES § 778): the day this guide was measured.
+      const day = measuredOf(id);
+      if (time?.getAttribute('datetime') !== day || text(time) !== longDate(day, lang)) wrong.push(`${path}: a data da medida`);
       const [before = ''] = t.fileGuide.split('{date}');
       if (!text(box).includes(before.trim())) wrong.push(`${path}: a frase de como os números foram obtidos`);
       if (box.hasAttribute('data-guide-text') || box.querySelector('[data-guide-text]')) wrong.push(`${path}: o quadro conta palavras`);

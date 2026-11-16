@@ -827,6 +827,11 @@ async function photosToPdf(ctx: Context): Promise<GuideMeasure> {
   return g.done();
 }
 
+/** F19b, slice 1: a guide whose plan the front M has not written yet. */
+function notYet(): Promise<GuideMeasure> {
+  return Promise.reject(new Error('no plan yet'));
+}
+
 export const PLANS: Record<FileGuideId, (ctx: Context) => Promise<GuideMeasure>> = {
   'guides-heic-to-jpg-on-windows': heicToJpg,
   'guides-why-is-my-pdf-so-large': pdfLarge,
@@ -838,4 +843,9 @@ export const PLANS: Record<FileGuideId, (ctx: Context) => Promise<GuideMeasure>>
   'guides-split-pdf-file-size': splitSize,
   'guides-combine-pdfs-on-phone': combine,
   'guides-photos-to-one-pdf': photosToPdf,
+  // F19b, slice 1: the front M writes these plans.
+  'guides-compress-photo-for-online-form': notYet,
+  'guides-webp-vs-avif-vs-jpg': notYet,
+  'guides-sign-pdf-without-printing': notYet,
+  'guides-what-a-pdf-password-protects': notYet,
 };

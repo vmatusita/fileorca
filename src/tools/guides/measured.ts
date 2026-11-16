@@ -11,7 +11,7 @@ import { TEXTS } from '../../i18n/texts.ts';
 import enShared from '../../i18n/en/file-guides.ts';
 import type { FileGuidesSharedTexts, FileGuideTexts } from '../../i18n/types.ts';
 import type { Cell, MeasuredFile, MeasuredNumber, MeasuredTable } from './measured-types.ts';
-import { GUIDE_PUBLISHED_ON, type FileGuideId } from './registry.ts';
+import { GUIDE_PUBLISHED_ON, publishedOn, type FileGuideId } from './registry.ts';
 
 export const MEASURED = measuredJson as unknown as MeasuredFile;
 
@@ -92,16 +92,31 @@ export type Variant = keyof typeof VARIANTS;
  * (DECISOES § 558) also the two dates of the history line at the end of "What we measured", in the medium form
  * ("Nov 2, 2026", "3 de nov. de 2026", "3 nov 2026"): {published}, the first publication of the guide in its language,
  * and {measured}, the day of the measurement. The page writes them as <time datetime> (GUIDE_DATES in page.ts).
+ * F19b (DECISOES § 778): with a guide, the dates are the guide's own (measuredOf and publishedOn); without one, the
+ * newest measurement of the file and the first publication of the first ten, as before.
  */
-export function globals(file: MeasuredFile = MEASURED, lang: Lang = 'en'): Record<string, string> {
+export function globals(file: MeasuredFile = MEASURED, lang: Lang = 'en', id?: FileGuideId): Record<string, string> {
+  const measured = id === undefined ? file.measuredOn : measuredOf(id, file);
   return {
-    date: longDate(file.measuredOn, lang),
+    date: longDate(measured, lang),
     chromiumVersion: file.environment.browsers.chromium.split('.')[0] ?? '',
     webkitVersion: file.environment.browsers.webkit,
     system: file.environment.os.split(' ')[0] ?? '',
-    published: mediumDate(GUIDE_PUBLISHED_ON[lang], lang),
-    measured: mediumDate(file.measuredOn, lang),
+    published: mediumDate(id === undefined ? GUIDE_PUBLISHED_ON[lang] : publishedOn(id, lang), lang),
+    measured: mediumDate(measured, lang),
   };
+}
+
+/**
+ * The day a guide was measured (F19b, DECISOES § 778): every number and every table of a guide carries the day pnpm
+ * guias:medir measured it (tests/unit/guides-measured.test.ts proves they agree), and measuredOn, the day the file was
+ * last written, is the newest of them. Measuring a new guide with --only keeps the day of the others.
+ */
+export function measuredOf(id: FileGuideId, file: MeasuredFile = MEASURED): string {
+  const guide = file.guides[id];
+  const day = Object.values(guide.numbers)[0]?.date ?? Object.values(guide.tables)[0]?.date;
+  if (day === undefined) throw new Error(`${id} has no measured number`);
+  return day;
 }
 
 /** The measured number a placeholder stands for, and how it is written; null when it is not a measured placeholder. */
@@ -131,7 +146,7 @@ export function measuredTerm(english: string, texts: FileGuideTexts, f: GuideFor
 
 /** Every value a guide text can name: globals, the official facts of the guide and each placeholder it uses. */
 export function fillValues(id: FileGuideId, texts: FileGuideTexts, used: readonly string[], file: MeasuredFile = MEASURED, f: GuideFormat = EN_FORMAT): Record<string, string> {
-  const values: Record<string, string> = { ...globals(file, f.lang) };
+  const values: Record<string, string> = { ...globals(file, f.lang, id) };
   for (const [name, fact] of Object.entries(texts.facts)) values[name] = fact.text;
   // Plain facts the measurement settled (the tool and option guide 6 embeds).
   for (const [name, fact] of Object.entries(file.guides[id].facts)) if (used.includes(name)) values[name] = measuredTerm(fact, texts, f);
@@ -335,6 +350,11 @@ const BUILDERS: Record<FileGuideId, Builder> = {
       [labels[3] ?? '', cellSize(col(t, row, 'pdfAfterBytes'), c.f), share(col(t, row, 'pdfAfterBytes'), photos, c.f)],
     ]];
   },
+  // F19b, slice 1: the front M writes the tables of these guides.
+  'guides-compress-photo-for-online-form': () => [],
+  'guides-webp-vs-avif-vs-jpg': () => [],
+  'guides-sign-pdf-without-printing': () => [],
+  'guides-what-a-pdf-password-protects': () => [],
 };
 
 /** The rows of each table of a guide, in the order of its texts. */

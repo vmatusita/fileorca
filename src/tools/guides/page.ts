@@ -21,7 +21,7 @@ import { guideCardData, type GuideCardData } from './card.ts';
  * The days the guides were reviewed and first published, in each language (prompt F5b, DECISOES § 207 and § 223). They
  * live in the registry since the F13b (DECISOES § 558), plain data that src/tools/guides/measured.ts reads in Node too.
  */
-export { GUIDE_PUBLISHED, GUIDE_PUBLISHED_ON, GUIDE_REVIEWED, GUIDE_REVIEWED_ON } from './registry.ts';
+export { GUIDE_PUBLISHED, GUIDE_PUBLISHED_ON, GUIDE_REVIEWED, GUIDE_REVIEWED_ON, publishedOn, reviewedOn } from './registry.ts';
 
 /** What every guide of a language shares: the "Reviewed" line, the table words, the fixture names, the counts in words. */
 export const GUIDE_SHARED: Record<Lang, FileGuidesSharedTexts> = { en: enShared, pt: ptShared, es: esShared };

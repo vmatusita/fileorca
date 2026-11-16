@@ -312,11 +312,12 @@ export const CHANGELOG = [
     pages: ['organize-pdf', 'remove-exif-data', 'split-pdf-extract-pages', 'pdf-to-jpg-to-png', 'rotate-image-flip', 'pdf-tools', 'image-tools', 'home', 'split-pdf', 'pdf-to-jpg', 'rotate-image', 'convert-to-webp'],
   },
   { id: 'file-guides-measured', date: '2026-11-13', pr: 35, kind: 'conteudo', pages: ['all:file-guides'] },
-  // F19a (this run; decision 9): the two new pages and the texts of the tools without repetition.
+  // F19a (#37; decision 9): the two new pages and the texts of the tools without repetition. Merged on 2026-11-13 in
+  // Brasília; the F19b gave it its pull request before appending its own entry (DECISOES § 773, PENDENCIAS F19a m-2).
   {
     id: 'trust-and-content',
     date: '2026-11-13',
-    pr: null,
+    pr: 37,
     kind: 'conteudo',
     pages: [
       'whats-new',
@@ -334,6 +335,36 @@ export const CHANGELOG = [
       'all:br-calculators',
       'all:home-calculators',
       'all:health-calculators',
+    ],
+  },
+  // F19b (this run; decision 6; DECISOES § 793): the new guides, born here (a money guide only where it has a path: en and
+  // es), and the pages that list them or show them in their line of guides: the hubs, the home (the count of its link to
+  // the hub), the tools and calculators the guides embed.
+  {
+    id: 'new-guides',
+    date: '2026-11-16',
+    pr: null,
+    kind: 'conteudo',
+    pages: [
+      'guides-compress-photo-for-online-form',
+      'guides-webp-vs-avif-vs-jpg',
+      'guides-sign-pdf-without-printing',
+      'guides-what-a-pdf-password-protects',
+      'guides-apr-vs-apy',
+      'guides-credit-card-minimum-payment',
+      'guides-how-much-house-can-i-afford',
+      'guides',
+      'home',
+      'image-tools',
+      'pdf-tools',
+      'money-calculators',
+      'compress-image',
+      'convert-to-webp',
+      'sign-pdf',
+      'protect-pdf',
+      'apr-to-apy-calculator',
+      'credit-card-payoff-calculator',
+      'home-affordability-calculator',
     ],
   },
 ] as const satisfies readonly ChangeEntry[];

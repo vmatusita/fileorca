@@ -10,8 +10,8 @@ import { describe, expect, it } from 'vitest';
 import { LANGS, type Lang } from '../../src/i18n/routes.ts';
 import { fmt } from '../../src/i18n/format.ts';
 import { mediumDate, shortDate } from '../../src/i18n/dates.ts';
-import { MEASURED, VARIANTS, globals, pageTable, pageTables, placeholdersIn, resolvePlaceholder } from '../../src/tools/guides/measured.ts';
-import { FILE_GUIDES, FILE_GUIDE_IDS, GUIDE_PUBLISHED_ON, GUIDE_REVIEWED_ON, type FileGuideId } from '../../src/tools/guides/registry.ts';
+import { MEASURED, VARIANTS, globals, measuredOf, pageTable, pageTables, placeholdersIn, resolvePlaceholder } from '../../src/tools/guides/measured.ts';
+import { FILE_GUIDES, FILE_GUIDE_IDS, publishedOn, reviewedOn, type FileGuideId } from '../../src/tools/guides/registry.ts';
 import { GUIDE_SHARED, guideTexts, toolInfo } from '../../src/tools/guides/page.ts';
 
 /** The built site; the proof against the starting point reads a copy of this file with the folder swapped. */
@@ -84,7 +84,7 @@ describe('the tables of a guide as the page draws them (pageTable)', () => {
 /** The values of the placeholders of a text, written from data/guides-measured.json by the formats of measured.ts. */
 function fromJson(id: FileGuideId, template: string, lang: Lang): { filled: string; values: string[] } {
   const f = { lang, shared: GUIDE_SHARED[lang] };
-  const always = globals(MEASURED, lang);
+  const always = globals(MEASURED, lang, id);
   const values: string[] = [];
   const filled = template.replace(/\{(\w+)\}/g, (_, name: string) => {
     const found = resolvePlaceholder(id, name, MEASURED);
@@ -242,10 +242,10 @@ describe('the 30 file guides in dist/', () => {
           sub += 1;
           if (!wanted.every((part) => got.includes(part))) problems.push(`${path}: a linha de baixo do número ${index + 1} é "${got}", o JSON dá "${wanted.join(' … ')}"`);
         });
-        for (const part of [...t.sheet.stats.map((stat) => stat.label), t.sheet.sample, t.sheet.link]) seen.push(...fromJson(id, part, lang).values, ...Object.values(globals(MEASURED, lang)).filter((value) => part.includes(value)));
+        for (const part of [...t.sheet.stats.map((stat) => stat.label), t.sheet.sample, t.sheet.link]) seen.push(...fromJson(id, part, lang).values, ...Object.values(globals(MEASURED, lang, id)).filter((value) => part.includes(value)));
         // Every digit of the sheet is a measured number (or a technical name of the guide, such as "Form 1040").
         let rest = text(sheet);
-        for (const known of [...seen, ...t.names, ...Object.values(globals(MEASURED, lang))].sort((a, b) => b.length - a.length)) rest = rest.split(known).join(' ');
+        for (const known of [...seen, ...t.names, ...Object.values(globals(MEASURED, lang, id))].sort((a, b) => b.length - a.length)) rest = rest.split(known).join(' ');
         if (/\d/.test(rest)) problems.push(`${path}: algarismo na ficha fora dos números medidos: "${rest}"`);
         if (/\{\w+\}/.test(text(sheet))) problems.push(`${path}: placeholder na ficha`);
       }
@@ -254,18 +254,22 @@ describe('the 30 file guides in dist/', () => {
 
     it(`sign the guide in one line with one short date, and keep the first publication in the history line, with the day of a later measurement (${lang})`, () => {
       const problems: string[] = [];
-      for (const { path } of pages) {
+      for (const { id, path } of pages) {
         const root = page(path);
         const times = root.querySelectorAll('.fo-top .fo-reviewed time');
-        if (times.length !== 1 || times[0]?.getAttribute('datetime') !== GUIDE_REVIEWED_ON[lang] || text(times[0]) !== shortDate(GUIDE_REVIEWED_ON[lang], lang)) problems.push(`${path}: a assinatura "${text(root.querySelector('.fo-top .fo-reviewed'))}"`);
+        // F19b (DECISOES § 778): the days of each guide, its own when it came after the first ten.
+        const reviewed = reviewedOn(id, lang);
+        const first = publishedOn(id, lang);
+        const day = measuredOf(id);
+        if (times.length !== 1 || times[0]?.getAttribute('datetime') !== reviewed || text(times[0]) !== shortDate(reviewed, lang)) problems.push(`${path}: a assinatura "${text(root.querySelector('.fo-top .fo-reviewed'))}"`);
         const history = root.querySelector('[data-content="measured"] .fo-guide__history');
-        const published = history?.querySelector(`time[datetime="${GUIDE_PUBLISHED_ON[lang]}"]`);
-        if (!published || text(published) !== mediumDate(GUIDE_PUBLISHED_ON[lang], lang)) problems.push(`${path}: o histórico "${text(history)}"`);
-        // The pages of pt and es were first published after the first measurement, and a page whose numbers were measured
-        // after its first version says so (F18, DECISOES § 733): the history line holds the day of the measurement.
-        const measuredLater = MEASURED.measuredOn > GUIDE_PUBLISHED_ON[lang];
-        const measuredTime = history?.querySelector(`time[datetime="${MEASURED.measuredOn}"]`);
-        if ((lang !== 'en' || measuredLater) && (!measuredTime || text(measuredTime) !== mediumDate(MEASURED.measuredOn, lang))) problems.push(`${path}: o histórico sem a data da medida, "${text(history)}"`);
+        const published = history?.querySelector(`time[datetime="${first}"]`);
+        if (!published || text(published) !== mediumDate(first, lang)) problems.push(`${path}: o histórico "${text(history)}"`);
+        // The pages of pt and es of the first ten were first published after the first measurement, and a page whose numbers
+        // were measured after its first version says so (F18, DECISOES § 733): the history line holds the day of the measurement.
+        const measuredLater = day > first;
+        const measuredTime = history?.querySelector(`time[datetime="${day}"]`);
+        if (measuredLater && (!measuredTime || text(measuredTime) !== mediumDate(day, lang))) problems.push(`${path}: o histórico sem a data da medida, "${text(history)}"`);
       }
       expect(problems).toEqual([]);
     });

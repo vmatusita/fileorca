@@ -22,6 +22,12 @@ import esSnowball from '../../i18n/es/guide-debt-snowball-vs-avalanche.ts';
 import esExtra from '../../i18n/es/guide-extra-mortgage-payments.ts';
 import esRefinance from '../../i18n/es/guide-refinance-break-even.ts';
 import esRent from '../../i18n/es/guide-rent-vs-buy-break-even.ts';
+import enAprApy from '../../i18n/en/guide-apr-vs-apy.ts';
+import esAprApy from '../../i18n/es/guide-apr-vs-apy.ts';
+import enCardMinimum from '../../i18n/en/guide-credit-card-minimum-payment.ts';
+import esCardMinimum from '../../i18n/es/guide-credit-card-minimum-payment.ts';
+import enAfford from '../../i18n/en/guide-how-much-house-can-i-afford.ts';
+import esAfford from '../../i18n/es/guide-how-much-house-can-i-afford.ts';
 import { DEFS } from './defs/index.ts';
 import { duration } from './view.ts';
 import type { CalcPageId, GuideId } from './registry.ts';
@@ -37,6 +43,9 @@ export const GUIDE_TEXTS: { [Id in GuideId]: Record<GuideLang, GuideTexts<Id>> }
   'guides-extra-mortgage-payments': { en: enExtra, es: esExtra },
   'guides-refinance-break-even': { en: enRefinance, es: esRefinance },
   'guides-rent-vs-buy-break-even': { en: enRent, es: esRent },
+  "guides-apr-vs-apy": { en: enAprApy, es: esAprApy },
+  "guides-credit-card-minimum-payment": { en: enCardMinimum, es: esCardMinimum },
+  "guides-how-much-house-can-i-afford": { en: enAfford, es: esAfford },
 };
 
 /** How a guide writes its numbers and durations, in its language. */
@@ -278,6 +287,11 @@ function rentVsBuyBreakEven(lang: GuideLang = 'en'): GuideFacts {
   };
 }
 
+/** F19b, slice 1: a guide whose facts the front O has not written yet opens its calculator at the page example. */
+function pending(id: 'guides-apr-vs-apy' | 'guides-credit-card-minimum-payment' | 'guides-how-much-house-can-i-afford', calc: CalcPageId) {
+  return (lang: GuideLang = 'en'): GuideFacts => ({ calc, example: DEFS[calc].initial, facts: {}, table: { head: [...GUIDE_TEXTS[id][lang].words.head], rows: [] } });
+}
+
 /** The facts of each guide, in its language (English by default). */
 export const GUIDE_FACTS: Record<GuideId, (lang?: GuideLang) => GuideFacts> = {
   'guides-15-vs-30-year-mortgage': fifteenVsThirty,
@@ -285,4 +299,7 @@ export const GUIDE_FACTS: Record<GuideId, (lang?: GuideLang) => GuideFacts> = {
   'guides-extra-mortgage-payments': extraPayments,
   'guides-refinance-break-even': refinanceBreakEven,
   'guides-rent-vs-buy-break-even': rentVsBuyBreakEven,
+  'guides-apr-vs-apy': pending('guides-apr-vs-apy', 'apr-to-apy-calculator'),
+  'guides-credit-card-minimum-payment': pending('guides-credit-card-minimum-payment', 'credit-card-payoff-calculator'),
+  'guides-how-much-house-can-i-afford': pending('guides-how-much-house-can-i-afford', 'home-affordability-calculator'),
 };

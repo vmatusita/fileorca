@@ -390,6 +390,27 @@ export default {
       description: 'Un solo PDF con unas cuantas fotos, y lo que cambia su tamaño si comprimes antes las fotos.',
       synonyms: ['guía', 'fotos a pdf', 'juntar fotos en pdf'],
     },
+    // F19b (DECISOES § 780 and § 790): the new file guides.
+    "guides-compress-photo-for-online-form": {
+      name: "Foto para un formulario en línea",
+      description: "Qué quiere decir el límite de tamaño de un formulario y qué pierde una foto de celular para caber en él.",
+      synonyms: ["guía", "límite de tamaño de la foto", "formulario de envío"],
+    },
+    "guides-webp-vs-avif-vs-jpg": {
+      name: "WebP, AVIF o JPG",
+      description: "Cuánto pesan las mismas fotos en cada formato y cuándo conviene cada uno.",
+      synonyms: ["guía", "jpeg", "formato de imagen"],
+    },
+    "guides-sign-pdf-without-printing": {
+      name: "Cómo firmar un PDF sin imprimirlo",
+      description: "Qué es una firma dibujada en la página, qué no es y qué cambia en el archivo.",
+      synonyms: ["guía", "firma electrónica", "firmar sin imprimir"],
+    },
+    "guides-what-a-pdf-password-protects": {
+      name: "Qué protege la contraseña de un PDF",
+      description: "Qué hace la contraseña para abrir, qué no hacen las restricciones y por qué una contraseña corta es débil.",
+      synonyms: ["guía", "cifrado de pdf", "seguridad del pdf"],
+    },
   },
   guides: {
     'guides-15-vs-30-year-mortgage': {
@@ -416,6 +437,22 @@ export default {
       name: 'Alquilar o comprar: cuándo empieza a convenir comprar',
       description: 'El año en que comprar alcanza a alquilar, y lo que lo mueve.',
       synonyms: ['guía', 'alquilar o comprar', 'punto de equilibrio'],
+    },
+    // F19b (DECISOES § 780 and § 790): the new money guides.
+    "guides-apr-vs-apy": {
+      name: "APR o APY",
+      description: "Por qué la misma tasa rinde más cuantas más veces se capitaliza, con los números.",
+      synonyms: ["guía", "rendimiento anual", "capitalización"],
+    },
+    "guides-credit-card-minimum-payment": {
+      name: "Pago mínimo de la tarjeta de crédito: por qué tarda tanto",
+      description: "Qué hace con el saldo un pago apenas mayor que los intereses, al lado de pagos fijos más grandes.",
+      synonyms: ["guía", "pago mínimo", "solo el mínimo"],
+    },
+    "guides-how-much-house-can-i-afford": {
+      name: "Cuánta casa puedo pagar",
+      description: "Los dos límites de ingreso de los que parte un prestamista y cuál de ellos fija el precio que puedes pagar.",
+      synonyms: ["guía", "presupuesto para una casa", "pagar una casa"],
     },
   },
 } satisfies EsCommonTexts;

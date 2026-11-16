@@ -31,6 +31,11 @@ const SPEC_N: Record<FileGuideId, number> = {
   'guides-split-pdf-file-size': 5,
   'guides-combine-pdfs-on-phone': 7,
   'guides-photos-to-one-pdf': 3,
+  // F19b, slice 1: the front M counts the files of each new guide.
+  'guides-compress-photo-for-online-form': 0,
+  'guides-webp-vs-avif-vs-jpg': 0,
+  'guides-sign-pdf-without-printing': 0,
+  'guides-what-a-pdf-password-protects': 0,
 };
 type Sampled = { sample: { files: string[] } };
 /** The same count by the shape of the JSON alone: the files of the numbers and of the tables of the guide, once each. */

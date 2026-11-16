@@ -32,6 +32,11 @@ const USE: Record<FileGuideId, { files: () => TestFile[]; action?: true }> = {
   'guides-split-pdf-file-size': { files: () => [pdfFile('gen-paginas-mistas.pdf')], action: true },
   'guides-combine-pdfs-on-phone': { files: () => [pdfFile('gen-paginas-mistas.pdf'), pdfFile('gen-acoes.pdf')], action: true },
   'guides-photos-to-one-pdf': { files: () => [fixtureFile('jpg-02-iphone6-paisagem-gps.jpg'), fixtureFile('gen-png-transparente.png')] },
+  // F19b, slice 1: the front S gives each new guide its use.
+  'guides-compress-photo-for-online-form': { files: () => [fixtureFile('jpg-02-iphone6-paisagem-gps.jpg')] },
+  'guides-webp-vs-avif-vs-jpg': { files: () => [fixtureFile('jpg-02-iphone6-paisagem-gps.jpg')] },
+  'guides-sign-pdf-without-printing': { files: () => [pdfFile('gen-paginas-mistas.pdf')], action: true },
+  'guides-what-a-pdf-password-protects': { files: () => [pdfFile('gen-paginas-mistas.pdf')], action: true },
 };
 
 async function guideContext(browser: Browser, viewport: { width: number; height: number }, fonts = true): Promise<BrowserContext> {

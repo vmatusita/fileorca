@@ -637,6 +637,10 @@ export interface GuideWordsById {
   'guides-refinance-break-even': { head: [string, string, string, string, string]; month: string; never: string };
   /** The first heading, the heading of a column of returns ("Savings earn {rate}"), the year of a break-even and none in 30 years. */
   'guides-rent-vs-buy-break-even': { head: string; savings: string; year: string; notWithin: string };
+  // F19b, slice 1: the front O gives each of these its own words with the table of its facts.
+  'guides-apr-vs-apy': { head: [string] };
+  'guides-credit-card-minimum-payment': { head: [string] };
+  'guides-how-much-house-can-i-afford': { head: [string] };
 }
 
 /** A guide /guides/<slug>/ (F4, decision 10): {placeholders} are numbers the engines work out at build. */

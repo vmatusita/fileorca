@@ -355,6 +355,22 @@ export default {
       description: 'The year buying catches up with renting, and what moves it.',
       synonyms: ['guide', 'rent vs buy', 'break-even'],
     },
+    // F19b (DECISOES § 780 and § 790): the new money guides.
+    "guides-apr-vs-apy": {
+      name: "APR vs APY",
+      description: "Why the same rate gives a higher yield the more often it compounds, with the numbers.",
+      synonyms: ["guide", "annual percentage yield", "compounding"],
+    },
+    "guides-credit-card-minimum-payment": {
+      name: "Credit card minimum payment: why it takes so long",
+      description: "What a payment just over the interest does to a balance, next to larger fixed payments.",
+      synonyms: ["guide", "minimum payment", "only the minimum"],
+    },
+    "guides-how-much-house-can-i-afford": {
+      name: "How much house can I afford",
+      description: "The two income limits a lender starts from, and which one sets the price you can pay.",
+      synonyms: ["guide", "house budget", "afford a house"],
+    },
   },
   fileGuides: {
     'guides-heic-to-jpg-on-windows': {
@@ -406,6 +422,27 @@ export default {
       name: 'How to turn photos into one PDF',
       description: 'One PDF from a few photos, and what compressing the photos first does to its size.',
       synonyms: ['guide', 'photos to pdf', 'pictures to pdf'],
+    },
+    // F19b (DECISOES § 780 and § 790): the new file guides.
+    "guides-compress-photo-for-online-form": {
+      name: "Photo for an online form",
+      description: "What the size limit of a form means, and what a phone photo gives up to fit under it.",
+      synonyms: ["guide", "photo size limit", "upload form"],
+    },
+    "guides-webp-vs-avif-vs-jpg": {
+      name: "WebP vs AVIF vs JPG",
+      description: "How much the same photos weigh in each format, and when each one is the one to use.",
+      synonyms: ["guide", "jpeg", "image format"],
+    },
+    "guides-sign-pdf-without-printing": {
+      name: "How to sign a PDF without printing it",
+      description: "What a signature drawn on the page is, what it is not, and what it changes in the file.",
+      synonyms: ["guide", "electronic signature", "sign without printing"],
+    },
+    "guides-what-a-pdf-password-protects": {
+      name: "What a PDF password protects",
+      description: "What the password to open does, what the restrictions do not, and why a short password is a weak one.",
+      synonyms: ["guide", "pdf encryption", "pdf security"],
     },
   },
   tools: {

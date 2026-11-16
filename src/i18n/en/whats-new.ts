@@ -139,5 +139,9 @@ export default {
       title: "What's new and How it works",
       body: 'This page lists every change you can see, and How it works shows what happens to your file and how to check it in your browser. The tool and calculator pages now say each thing in one place, and About says when the site went live.',
     },
+    'new-guides': {
+      title: 'New guides with numbers of our own',
+      body: 'New guides answer one question each with the tool inside them: a photo under the size limit of a form, WebP, AVIF or JPG, signing a PDF without printing it and what a PDF password protects. In English and Spanish there are also guides on APR and APY, the credit card minimum payment and how much house you can afford. Every number in them comes from our own measurement or from the calculator inside, checked against an independent calculation.',
+    },
   },
 } satisfies WhatsNewTexts;

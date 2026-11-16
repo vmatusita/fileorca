@@ -17,6 +17,11 @@ export const FILE_GUIDE_IDS = [
   'guides-split-pdf-file-size',
   'guides-combine-pdfs-on-phone',
   'guides-photos-to-one-pdf',
+  // F19b (prompt F19b, decision 2): the new guides, each embedding a tool that is live, with numbers it measured.
+  'guides-compress-photo-for-online-form',
+  'guides-webp-vs-avif-vs-jpg',
+  'guides-sign-pdf-without-printing',
+  'guides-what-a-pdf-password-protects',
 ] as const;
 export type FileGuideId = (typeof FILE_GUIDE_IDS)[number];
 
@@ -47,6 +52,30 @@ export const GUIDE_PUBLISHED = '2026-11-02';
  */
 export const GUIDE_REVIEWED_ON: Record<Lang, string> = { en: GUIDE_REVIEWED, pt: '2026-11-11', es: '2026-11-11' };
 export const GUIDE_PUBLISHED_ON: Record<Lang, string> = { en: GUIDE_PUBLISHED, pt: '2026-11-03', es: '2026-11-03' };
+
+/**
+ * F19b (DECISOES § 778): a guide added after the first ten carries its own day, in UTC like the date pnpm guias:medir
+ * stamps: the day of its measurement, which is also the day of its review and of its first publication in each of its
+ * languages (never before the measurement, § 207). The first ten keep the days above, and a new guide never moves them:
+ * the numbers of each guide carry the day they were measured (measuredOf in measured.ts), and pnpm guias:medir --only
+ * measures one guide and keeps the others as they were.
+ */
+const OWN_DAY: Partial<Record<FileGuideId, string>> = {
+  'guides-compress-photo-for-online-form': '2026-11-16',
+  'guides-webp-vs-avif-vs-jpg': '2026-11-16',
+  'guides-sign-pdf-without-printing': '2026-11-16',
+  'guides-what-a-pdf-password-protects': '2026-11-16',
+};
+
+/** The day a guide was reviewed in a language: its own day, or the day of the first ten. */
+export function reviewedOn(id: FileGuideId, lang: Lang): string {
+  return OWN_DAY[id] ?? GUIDE_REVIEWED_ON[lang];
+}
+
+/** The day a guide was first published in a language: its own day, or the day of the first ten. */
+export function publishedOn(id: FileGuideId, lang: Lang): string {
+  return OWN_DAY[id] ?? GUIDE_PUBLISHED_ON[lang];
+}
 
 export type FileGuideHub = 'image-tools' | 'pdf-tools';
 export type FileGuideTool = ImageToolId | PdfToolId;
@@ -85,6 +114,11 @@ const SLUGS: Record<FileGuideId, { pt: string; es: string }> = {
   'guides-split-pdf-file-size': { pt: 'dividir-pdf-e-tamanho-do-arquivo', es: 'dividir-pdf-y-tamano-del-archivo' },
   'guides-combine-pdfs-on-phone': { pt: 'juntar-pdfs-no-celular', es: 'unir-pdf-en-el-celular' },
   'guides-photos-to-one-pdf': { pt: 'fotos-em-um-pdf', es: 'fotos-en-un-solo-pdf' },
+  // F19b (DECISOES § 779): from the glossaries of docs/i18n/, without accents.
+  'guides-compress-photo-for-online-form': { pt: 'comprimir-foto-para-formulario-online', es: 'comprimir-foto-para-formulario-en-linea' },
+  'guides-webp-vs-avif-vs-jpg': { pt: 'webp-avif-ou-jpg', es: 'webp-avif-o-jpg' },
+  'guides-sign-pdf-without-printing': { pt: 'assinar-pdf-sem-imprimir', es: 'firmar-pdf-sin-imprimir' },
+  'guides-what-a-pdf-password-protects': { pt: 'o-que-a-senha-do-pdf-protege', es: 'que-protege-la-contrasena-de-un-pdf' },
 };
 
 /**
@@ -102,6 +136,11 @@ const TOOL_SECTION: Record<FileGuideId, number> = {
   'guides-split-pdf-file-size': 4, // How to split without the extra weight
   'guides-combine-pdfs-on-phone': 2, // On any phone, in the browser
   'guides-photos-to-one-pdf': 2, // What the tool does with each photo
+  // F19b (DECISOES § 789): the part about the embedded tool, the same index in the three languages.
+  'guides-compress-photo-for-online-form': 2,
+  'guides-webp-vs-avif-vs-jpg': 2,
+  'guides-sign-pdf-without-printing': 2,
+  'guides-what-a-pdf-password-protects': 2,
 };
 
 const def = (id: FileGuideId, tool: FileGuideTool, hub: FileGuideHub, related: readonly FileGuideRelated[]): FileGuideDef => ({
@@ -184,6 +223,39 @@ export const FILE_GUIDES: Record<FileGuideId, FileGuideDef> = {
     'compress-pdf',
     'guides-why-is-my-pdf-so-large',
     'guides-combine-pdfs-on-phone',
+  ]),
+  // F19b (DECISOES § 789): up to six pages that exist in the three languages, the tool the guide embeds left out.
+  'guides-compress-photo-for-online-form': def('guides-compress-photo-for-online-form', 'compress-image', 'image-tools', [
+    'compress-image-to-100kb',
+    'resize-image',
+    'crop-image',
+    'image-to-pdf',
+    'guides-webp-vs-avif-vs-jpg',
+    'guides-social-media-image-sizes',
+  ]),
+  'guides-webp-vs-avif-vs-jpg': def('guides-webp-vs-avif-vs-jpg', 'convert-to-webp', 'image-tools', [
+    'compress-image',
+    'avif-to-jpg',
+    'webp-to-jpg',
+    'guides-jpg-vs-png',
+    'guides-open-webp-save-as-jpg',
+    'guides-compress-photo-for-online-form',
+  ]),
+  'guides-sign-pdf-without-printing': def('guides-sign-pdf-without-printing', 'sign-pdf', 'pdf-tools', [
+    'protect-pdf',
+    'merge-pdf',
+    'image-to-pdf',
+    'compress-pdf',
+    'guides-what-a-pdf-password-protects',
+    'guides-combine-pdfs-on-phone',
+  ]),
+  'guides-what-a-pdf-password-protects': def('guides-what-a-pdf-password-protects', 'protect-pdf', 'pdf-tools', [
+    'unlock-pdf',
+    'sign-pdf',
+    'compress-pdf',
+    'merge-pdf',
+    'guides-sign-pdf-without-printing',
+    'guides-why-is-my-pdf-so-large',
   ]),
 };
 

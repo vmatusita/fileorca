@@ -134,6 +134,33 @@ const CASES: Record<FileGuideId, Case> = {
       expect(parsePdf(delivered.bytes).hasXmp, 'no XMP').toBe(false);
     },
   },
+  // F19b, slice 1: the front S writes the case of each new guide.
+  'guides-compress-photo-for-online-form': {
+    files: () => [photo('jpg-02-iphone6-paisagem-gps.jpg')],
+    check: (delivered) => {
+      expectImages(delivered, 'jpeg');
+    },
+  },
+  'guides-webp-vs-avif-vs-jpg': {
+    files: () => [photo('jpg-02-iphone6-paisagem-gps.jpg')],
+    check: (delivered) => {
+      for (const out of filesOf(delivered)) expect(sniff(out.bytes), out.name).toBe('webp');
+    },
+  },
+  'guides-sign-pdf-without-printing': {
+    files: () => [pdfFile('gen-paginas-mistas.pdf')],
+    action: true,
+    check: async (delivered) => {
+      await expectPdf(delivered.bytes, 8);
+    },
+  },
+  'guides-what-a-pdf-password-protects': {
+    files: () => [pdfFile('gen-paginas-mistas.pdf')],
+    action: true,
+    check: (delivered) => {
+      expect(sniff(delivered.bytes), 'a PDF').toBe('pdf');
+    },
+  },
 };
 
 interface Seen {

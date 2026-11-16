@@ -43,6 +43,10 @@ export const GUIDE_IDS = [
   'guides-extra-mortgage-payments',
   'guides-refinance-break-even',
   'guides-rent-vs-buy-break-even',
+  // F19b (prompt F19b, decision 5): the new money guides, each with a calculator that is live and an example of the oracle.
+  'guides-apr-vs-apy',
+  'guides-credit-card-minimum-payment',
+  'guides-how-much-house-can-i-afford',
 ] as const;
 export type GuideId = (typeof GUIDE_IDS)[number];
 
@@ -190,6 +194,7 @@ export const CALC_PAGES: Record<CalcPageId, CalcPageDef> = {
     group: 'credit',
     next: ['mortgage-calculator', 'rent-vs-buy-calculator'],
     related: ['mortgage-calculator', 'rent-vs-buy-calculator', 'mortgage-calculator-15-vs-30-year', 'savings-goal-calculator', 'refinance-calculator', 'mortgage-calculator-biweekly'],
+    guide: 'guides-how-much-house-can-i-afford',
     file: 'home-affordability',
     es: { path: '/es/calculadora-de-cuanta-casa-puedo-pagar/', file: 'cuanta-casa-puedo-pagar' },
   },
@@ -210,6 +215,7 @@ export const CALC_PAGES: Record<CalcPageId, CalcPageDef> = {
     group: 'credit',
     next: ['debt-payoff-calculator', 'debt-consolidation-calculator'],
     related: ['debt-payoff-calculator', 'debt-consolidation-calculator', 'personal-loan-calculator', 'apr-to-apy-calculator', 'savings-goal-calculator', 'simple-interest-calculator'],
+    guide: 'guides-credit-card-minimum-payment',
     file: 'credit-card-payoff-schedule',
     es: { path: '/es/calculadora-de-tarjeta-de-credito/', file: 'plan-tarjeta-de-credito' },
   },
@@ -282,6 +288,7 @@ export const CALC_PAGES: Record<CalcPageId, CalcPageDef> = {
     group: 'educational',
     next: ['compound-interest-calculator', 'savings-goal-calculator'],
     related: ['compound-interest-calculator', 'savings-goal-calculator', 'simple-interest-calculator', 'personal-loan-calculator', 'credit-card-payoff-calculator', 'loan-amortization-calculator'],
+    guide: 'guides-apr-vs-apy',
     file: 'apr-to-apy-table',
     es: { path: '/es/calculadora-de-apr-a-apy/', file: 'tabla-apr-a-apy' },
   },
@@ -379,6 +386,28 @@ export const GUIDES: Record<GuideId, GuideDef> = {
     es: { path: '/es/guias/punto-de-equilibrio-entre-alquilar-y-comprar/' },
     calc: 'rent-vs-buy-calculator',
     related: ['home-affordability-calculator', 'mortgage-calculator', 'compound-interest-calculator'],
+  },
+  // F19b (DECISOES § 779 and § 789): the Spanish paths from the glossary of docs/i18n/es.md, and the related calculators.
+  'guides-apr-vs-apy': {
+    id: 'guides-apr-vs-apy',
+    path: '/guides/apr-vs-apy/',
+    es: { path: '/es/guias/apr-o-apy/' },
+    calc: 'apr-to-apy-calculator',
+    related: ['compound-interest-calculator', 'savings-goal-calculator', 'simple-interest-calculator', 'credit-card-payoff-calculator'],
+  },
+  'guides-credit-card-minimum-payment': {
+    id: 'guides-credit-card-minimum-payment',
+    path: '/guides/credit-card-minimum-payment/',
+    es: { path: '/es/guias/pago-minimo-de-la-tarjeta-de-credito/' },
+    calc: 'credit-card-payoff-calculator',
+    related: ['debt-payoff-calculator', 'debt-consolidation-calculator', 'personal-loan-calculator', 'apr-to-apy-calculator'],
+  },
+  'guides-how-much-house-can-i-afford': {
+    id: 'guides-how-much-house-can-i-afford',
+    path: '/guides/how-much-house-can-i-afford/',
+    es: { path: '/es/guias/cuanta-casa-puedo-pagar/' },
+    calc: 'home-affordability-calculator',
+    related: ['mortgage-calculator', 'rent-vs-buy-calculator', 'mortgage-calculator-15-vs-30-year', 'refinance-calculator'],
   },
 };
 
