@@ -1,23 +1,25 @@
 // What each of the ten guides measures (prompt F5b, decision 2), and each file guide of the F19b (prompt F19b, decision 3,
-// guides 11 to 14 below), on the fixtures, by the path a person's file takes:
+// guides 11 to 15 below), on the fixtures, by the path a person's file takes:
 // the browser where the site writes with the canvas, Node where it runs WebAssembly or pdf-lib. Every number goes into
-// data/guides-measured.json with its sample, method, date and commit; the guides only read them.
+// data/guides-measured.json with its sample, method, date and commit; the guides only read them. The QR code guide (15)
+// measures texts the script types, not fixtures: its tool takes text, and draws the PNG on a canvas of the page.
 import { randomUUID } from 'node:crypto';
 import { readdirSync } from 'node:fs';
+import jsQR from 'jsqr';
 import type { FileGuideId } from '../../../src/tools/guides/registry.ts';
 import type { Cell, GuideMeasure, MeasuredNumber, MeasuredTable, Method, OfficialSize, Sample, Unit } from '../../../src/tools/guides/measured-types.ts';
-import type { Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 import type { TestFile } from '../../../tests/e2e/lib/page.ts';
 import { parseBmff } from '../../../tests/e2e/lib/bmff.ts';
 import { metadataReport, sniff } from '../../../tests/e2e/lib/images.ts';
 import { opensWithoutPassword, readWithPdfjs, type ReadPdf } from '../../../tests/e2e/lib/pdfjs-read.ts';
-import { pngPixels } from '../../../tests/e2e/lib/png.ts';
+import { pngInfo, pngPixels } from '../../../tests/e2e/lib/png.ts';
 import { webpFrames, webpInfo } from '../../../tests/e2e/lib/webp.ts';
 import { BROWSERS, bytesFile, download, drop, fileOf, imageResult, method, openTool, option, stem, typeField, type BrowserName, type Out, type Session } from './browser.ts';
 import { NODE_CORNERS, NODE_DQT, NODE_FULL_SIZE, clearCorners, cornersOf, fullSizeQuality, qualityOf, whiteCorners } from './node-codecs.ts';
 import { NODE_IMAGE, NODE_PIXELS, NODE_WEBP, imageFixture, photoFacts, pixelsOf, psnrOf, shownSize, webpOf, type Pixels } from './node-image.ts';
 import { NODE_PDFJS, NODE_PDFLIB, NODE_PDF_ENGINE, NODE_QPDF_JSON, breakdown, compress, encryptionOf, lockFresh, merge, pdfFixture, signatureParts, splitEach, type SignatureParts } from './node-pdf.ts';
-import { decibels, inBrowser, inNode, label, median, num, ratio, sample, sum, table, type Column, type Stamp } from './record.ts';
+import { decibels, inBrowser, inNode, label, median, num, ratio, sample, sum, table, textSample, type Column, type Stamp } from './record.ts';
 import enCommon from '../../../src/i18n/en/common.ts';
 
 export interface Context {
@@ -1343,9 +1345,219 @@ async function pdfPassword(ctx: Context): Promise<GuideMeasure> {
   return g.done();
 }
 
-/** F19b (front M5): the QR code guide, in the registry before its plan; the next commit measures it. */
-function notYet(): Promise<GuideMeasure> {
-  return Promise.reject(new Error('no plan yet'));
+// ---- 15. QR code size (F19b, decisions 3.5 and 4) -----------------------------------------------------------------
+
+const QR_PATH = '/qr-code-generator/';
+/** A sentence with accents: each accented letter is two bytes of UTF-8, and the tool counts and encodes bytes. */
+const QR_ACCENTS = 'Promoção de inverno: café, pão de queijo e maçã às sextas, até o fim do mês.';
+/**
+ * The texts typed into the QR code generator, made here (a text is no fixture, and no fixture is added), of increasing
+ * length: a short link; the sentence with its accents taken off (the script strips them: the control of the next one);
+ * the sentence with accents; and a long link with the query parameters a shop or a newsletter adds. example.com is the
+ * domain kept for examples.
+ */
+const QR_KEYS = ['short', 'plain', 'accents', 'long'] as const;
+type QrKey = (typeof QR_KEYS)[number];
+const QR_SAMPLE: Record<QrKey, string> = {
+  short: 'https://fileorca.com/',
+  plain: QR_ACCENTS.normalize('NFD').replace(/\p{M}/gu, ''),
+  accents: QR_ACCENTS,
+  long: `https://example.com/shop/orca-mug?${['color=ocean-blue', 'size=large', 'utm_source=newsletter', 'utm_medium=email', 'utm_campaign=winter-sale', 'utm_content=top-banner', 'utm_term=ceramic-mug', 'ref=printed-flyer', 'lang=en'].join('&')}`,
+};
+/** The three PNG sizes of the tool, by the value of their option and the name of their numbers. */
+const QR_SIZES = [['small', 'Small'], ['medium', 'Medium'], ['large', 'Large']] as const;
+/** The name the tool gives the PNG in English (its `panel.file`), never the text typed. */
+const QR_PNG_NAME = 'qr-code.png';
+const NODE_TEXT = 'the characters and the UTF-8 bytes of the text in Node (TextEncoder), the bytes the tool counts and encodes';
+const NODE_JSQR = 'jsQR 1.4.0 in Node on the pixels of the downloaded PNG (tests/e2e/lib/png.ts), the reader of tests/e2e/qr-code.spec.ts: the bytes it reads back and the version it finds';
+
+const utf8 = (text: string): Uint8Array => new TextEncoder().encode(text);
+
+/** The code as the preview draws it: the side of its viewBox in modules, and its one path of dark runs. */
+interface QrDrawing {
+  /** Modules on a side with the quiet zone: the viewBox. */
+  side: number;
+  /** Modules on a side of the code itself, from the first dark run to the last. */
+  modules: number;
+  /** The white margin, in modules, on each of the four sides. */
+  quiet: number;
+  /** Dark modules drawn. */
+  dark: number;
+}
+
+/**
+ * Reads the preview SVG of the page (`.fo-qr__code > svg`): the viewBox "0 0 S S" and the runs "M{x} {y}h{n}v1h-{n}z" of
+ * its path. The code is where the dark runs are (its finder patterns sit in three corners), and the margin around it on
+ * every side is the quiet zone; the plan stops on a drawing it does not understand.
+ */
+async function qrDrawing(page: Page, oli: boolean): Promise<QrDrawing> {
+  const code = page.locator('#fo-tool-root .fo-qr__code > svg');
+  await expect(code).toBeVisible();
+  await expect(page.locator('#fo-tool-root .fo-qr__code > svg > svg'), oli ? 'Oli in the middle' : 'no Oli').toHaveCount(oli ? 1 : 0);
+  const seen = await code.evaluate((svg) => ({ viewBox: svg.getAttribute('viewBox') ?? '', path: svg.querySelector(':scope > path')?.getAttribute('d') ?? '' }));
+  const side = Number(/^0 0 (\d+) \1$/.exec(seen.viewBox)?.[1] ?? Number.NaN);
+  if (!Number.isInteger(side)) throw new Error(`a viewBox of the preview the plan does not read: ${seen.viewBox}`);
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  let dark = 0;
+  let read = 0;
+  for (const match of seen.path.matchAll(/M(\d+) (\d+)h(\d+)v1h-(\d+)z/g)) {
+    const [whole, x, y, length, back] = match;
+    if (length !== back) throw new Error(`a run that does not close: ${whole}`);
+    const [left, top, run] = [Number(x), Number(y), Number(length)];
+    minX = Math.min(minX, left);
+    minY = Math.min(minY, top);
+    maxX = Math.max(maxX, left + run);
+    maxY = Math.max(maxY, top + 1);
+    dark += run;
+    read += whole.length;
+  }
+  if (read !== seen.path.length || dark === 0) throw new Error('a path of the preview the plan does not read');
+  const modules = maxX - minX;
+  const quiet = minX;
+  if (maxY - minY !== modules || minY !== quiet || side - maxX !== quiet || side - maxY !== quiet) {
+    throw new Error(`a code that is not square in its margin: ${JSON.stringify({ side, minX, minY, maxX, maxY })}`);
+  }
+  return { side, modules, quiet, dark };
+}
+
+/** Clicks an option of the QR panel (the radio is hidden in its rail) by its value, and waits for it to be chosen. */
+async function qrChoose(page: Page, group: 'oli' | 'size', value: string): Promise<void> {
+  const input = `input[name="fo-qr-${group}"][value="${value}"]`;
+  await page.locator('#fo-tool-root .fo-seg__opt', { has: page.locator(input) }).click();
+  await expect(page.locator(`#fo-tool-root ${input}`)).toBeChecked();
+}
+
+/** The first number of a line of the page ("86 of 1,273", "481 × 481 px"), without its thousands separator. */
+async function firstNumber(page: Page, selector: string): Promise<number> {
+  const text = (await page.locator(selector).textContent()) ?? '';
+  const found = /\d[\d.,]*/.exec(text)?.[0];
+  if (!found) throw new Error(`no number in ${selector}: "${text}"`);
+  return Number(found.replace(/[.,]/g, ''));
+}
+
+/** What jsQR reads from a PNG: every pixel must be opaque (a clear pixel reads as dark), and the icon of Oli drawn. */
+function qrRead(bytes: Uint8Array): { binary: number[] | undefined; version: number | undefined; width: number; height: number; clear: number; blue: number } {
+  const { width, height, rgba } = pngPixels(bytes);
+  let clear = 0;
+  let blue = 0;
+  for (let at = 0; at < rgba.length; at += 4) {
+    if (rgba[at + 3] !== 255) clear += 1;
+    // The Oceano of the app icon, #0B63F6, as tests/e2e/qr-code.spec.ts counts it: drawn only with Oli in the middle.
+    if ((rgba[at] ?? 255) < 60 && (rgba[at + 1] ?? 0) > 70 && (rgba[at + 1] ?? 255) < 130 && (rgba[at + 2] ?? 0) > 200) blue += 1;
+  }
+  const found = jsQR(new Uint8ClampedArray(rgba.buffer, rgba.byteOffset, rgba.length), width, height);
+  return { binary: found?.binaryData, version: found?.version, width, height, clear, blue };
+}
+
+async function qrCodeSize(ctx: Context): Promise<GuideMeasure> {
+  const g = collector(ctx.stamp);
+  const all = textSample(QR_KEYS.map((key) => QR_SAMPLE[key]), 'four texts typed into the QR code generator, each in a new tab, with its error correction H (the only level it uses) and Oli in the middle; the PNG downloaded at Small, Medium and Large');
+  const one = (key: QrKey): Sample => textSample([QR_SAMPLE[key]]);
+  const text = node(NODE_TEXT);
+  const reader = node(NODE_JSQR);
+  g.n('texts', QR_KEYS.length, 'count', all, text);
+  for (const key of QR_KEYS) {
+    g.n(`${key}Chars`, [...QR_SAMPLE[key]].length, 'count', one(key), text);
+    g.n(`${key}Bytes`, utf8(QR_SAMPLE[key]).length, 'bytes', one(key), text);
+  }
+  g.n('accentsMultibyte', [...QR_SAMPLE.accents].filter((char) => utf8(char).length > 1).length, 'count', one('accents'), text);
+  const codes: Cell[][] = [];
+  const pngs: Cell[][] = [];
+  const methods: Method[] = [text, reader];
+  for (const browser of BROWSERS) {
+    const session = await ctx.session(browser);
+    const how = method(session, QR_PATH);
+    methods.push(how);
+    const quiet = new Set<number>();
+    const perModule: Record<string, number[]> = { small: [], medium: [], large: [] };
+    const shares: number[] = [];
+    let downloaded = 0;
+    let readBack = 0;
+    for (const key of QR_KEYS) {
+      ctx.log(`  ${key} (${utf8(QR_SAMPLE[key]).length} bytes) in ${browser}`);
+      const tab = await openTool(session, QR_PATH);
+      try {
+        const { page } = tab;
+        await page.locator('#fo-tool-root #fo-qr-text').fill(QR_SAMPLE[key]);
+        // The counter beside the box counts what the code holds: the bytes of the UTF-8, the same as Node's.
+        const counted = await firstNumber(page, '#fo-tool-root #fo-qr-count');
+        if (counted !== utf8(QR_SAMPLE[key]).length) throw new Error(`${key} in ${browser}: the tool counts ${counted}, the UTF-8 has ${utf8(QR_SAMPLE[key]).length} bytes`);
+        // The code with Oli in the middle, as it opens, and the same code without her: the dark modules under her frame.
+        const withOli = await qrDrawing(page, true);
+        await qrChoose(page, 'oli', 'off');
+        const plain = await qrDrawing(page, false);
+        await qrChoose(page, 'oli', 'on');
+        await qrDrawing(page, true);
+        if (withOli.side !== plain.side || withOli.modules !== plain.modules || withOli.quiet !== plain.quiet) throw new Error(`${key} in ${browser}: Oli changed the size of the code`);
+        const hidden = plain.dark - withOli.dark;
+        if (hidden <= 0) throw new Error(`${key} in ${browser}: Oli hid no module`);
+        quiet.add(plain.quiet);
+        shares.push(ratio(hidden, plain.dark));
+        const versions = new Set<number>();
+        for (const [value, name] of QR_SIZES) {
+          await qrChoose(page, 'size', value);
+          const shown = await firstNumber(page, '#fo-tool-root .fo-qr__png .fo-btn__meta');
+          const { delivered } = await download(page);
+          await expect(page.locator('#fo-tool-root .fo-qr__png')).not.toHaveAttribute('aria-busy', 'true');
+          if (delivered.name !== QR_PNG_NAME) throw new Error(`${key} ${value} in ${browser}: the PNG is named ${delivered.name}`);
+          const info = pngInfo(delivered.bytes);
+          const read = qrRead(delivered.bytes);
+          if (info.width !== info.height || info.width !== shown) throw new Error(`${key} ${value} in ${browser}: the PNG is ${info.width} × ${info.height}, the page says ${shown}`);
+          if (info.width % plain.side !== 0) throw new Error(`${key} ${value} in ${browser}: ${info.width} px is no whole number of pixels for each of ${plain.side} modules`);
+          if (read.clear > 0) throw new Error(`${key} ${value} in ${browser}: ${read.clear} pixels not opaque`);
+          if (read.blue === 0) throw new Error(`${key} ${value} in ${browser}: no Oli in the PNG`);
+          const same = read.binary !== undefined && Buffer.from(Uint8Array.from(read.binary)).equals(Buffer.from(utf8(QR_SAMPLE[key])));
+          if (read.version !== undefined) versions.add(read.version);
+          downloaded += 1;
+          if (same) readBack += 1;
+          const scale = info.width / plain.side;
+          perModule[value]?.push(scale);
+          g.n(`${key}${name}Side${B[browser]}`, info.width, 'px', one(key), how);
+          g.n(`${key}${name}PerModule${B[browser]}`, scale, 'px', one(key), how);
+          g.n(`${key}${name}Bytes${B[browser]}`, delivered.bytes.length, 'bytes', one(key), how);
+          pngs.push([key, value, browser, info.width, scale, delivered.bytes.length, same ? 1 : 0]);
+        }
+        // The version is what the reader finds in each PNG, and it is the one the modules give (21 for version 1, four more
+        // for each version after it).
+        const [version] = [...versions];
+        if (versions.size !== 1 || version === undefined || (plain.modules - 17) / 4 !== version) throw new Error(`${key} in ${browser}: versions ${[...versions].join(', ')} for ${plain.modules} modules`);
+        g.n(`${key}Version${B[browser]}`, version, 'count', one(key), reader);
+        g.n(`${key}Modules${B[browser]}`, plain.modules, 'count', one(key), how);
+        g.n(`${key}Side${B[browser]}`, plain.side, 'count', one(key), how);
+        g.n(`${key}Dark${B[browser]}`, plain.dark, 'count', one(key), how);
+        g.n(`${key}Hidden${B[browser]}`, hidden, 'count', one(key), how);
+        g.n(`${key}HiddenShare${B[browser]}`, ratio(hidden, plain.dark), 'ratio', one(key), how);
+        codes.push([key, browser, [...QR_SAMPLE[key]].length, utf8(QR_SAMPLE[key]).length, version, plain.modules, plain.side, plain.dark, hidden]);
+      } finally {
+        await tab.close();
+      }
+    }
+    const [margin] = [...quiet];
+    if (quiet.size !== 1 || margin === undefined) throw new Error(`quiet zones of ${[...quiet].join(', ')} modules in ${browser}`);
+    g.n(`quietZone${B[browser]}`, margin, 'count', all, how);
+    g.n(`pngs${B[browser]}`, downloaded, 'count', all, how);
+    g.n(`read${B[browser]}`, readBack, 'count', all, reader);
+    for (const [value] of QR_SIZES) {
+      const scales = perModule[value] ?? [];
+      g.n(`${value}PerModuleMin${B[browser]}`, Math.min(...scales), 'px', all, how);
+      g.n(`${value}PerModuleMax${B[browser]}`, Math.max(...scales), 'px', all, how);
+    }
+    g.n(`hiddenShareMin${B[browser]}`, Math.min(...shares), 'ratio', all, how);
+    g.n(`hiddenShareMax${B[browser]}`, Math.max(...shares), 'ratio', all, how);
+  }
+  // Where Chromium and WebKit drew the same code (the page's own JavaScript), and wrote the same PNG bytes (each browser's
+  // canvas encodes its own PNG).
+  const webkit = must(methods.find((how) => how.runner === 'playwright' && how.browser === 'webkit'), 'WebKit');
+  const codeOf = (key: QrKey, browser: BrowserName): Cell[] => must(codes.find((cells) => cells[0] === key && cells[1] === browser), `the code of ${key} in ${browser}`);
+  const pngOf = (key: QrKey, value: string, browser: BrowserName): Cell[] => must(pngs.find((cells) => cells[0] === key && cells[1] === value && cells[2] === browser), `the ${value} PNG of ${key} in ${browser}`);
+  g.n('sameCodes', QR_KEYS.filter((key) => JSON.stringify(codeOf(key, 'chromium').slice(2)) === JSON.stringify(codeOf(key, 'webkit').slice(2))).length, 'count', all, webkit);
+  g.n('samePngBytes', QR_KEYS.flatMap((key) => QR_SIZES.map(([value]) => pngOf(key, value, 'chromium')[5] === pngOf(key, value, 'webkit')[5])).filter(Boolean).length, 'count', all, webkit);
+  g.t('codes', [label('text'), label('browser'), inNode('chars', 'count'), inNode('bytes', 'bytes'), inNode('version', 'count'), inBrowser('modules', 'count'), inBrowser('side', 'count'), inBrowser('dark', 'count'), inBrowser('hidden', 'count')], codes, all, methods);
+  g.t('pngs', [label('text'), label('size'), label('browser'), inBrowser('side', 'px'), inBrowser('perModule', 'px'), inBrowser('bytes', 'bytes'), inNode('read', 'count')], pngs, all, methods);
+  return g.done();
 }
 
 export const PLANS: Record<FileGuideId, (ctx: Context) => Promise<GuideMeasure>> = {
@@ -1363,5 +1575,5 @@ export const PLANS: Record<FileGuideId, (ctx: Context) => Promise<GuideMeasure>>
   'guides-webp-vs-avif-vs-jpg': webpAvifJpg,
   'guides-sign-pdf-without-printing': signPdf,
   'guides-what-a-pdf-password-protects': pdfPassword,
-  'guides-qr-code-size': notYet,
+  'guides-qr-code-size': qrCodeSize,
 };

@@ -28,7 +28,21 @@ export default {
   tableHeading: "The measurement",
   measuredIntro: "This guide is being written.",
   measuredNote: "Measured on {date}.",
-  tables: [],
+  // F19b (front M5): the shape of the tables, which the front E rewrites in words and keeps (the labels name the texts, in
+  // the order of the measurement: the short link, the sentence without accents, the same sentence with them, the long link).
+  tables: [
+    {
+      heading: "The texts and their codes",
+      caption: "Each text typed into the QR code generator, in Chromium: its characters, what the tool counts, the version the reader found, the squares on a side and the dark squares under Oli",
+      head: ["Text", "Characters", "Counted by the tool", "Version", "Squares per side", "Dark squares under Oli"],
+      labels: ["Short link", "Sentence without accents", "Same sentence with accents", "Long link"],
+    },
+    {
+      heading: "The PNG of each text at each size",
+      caption: "The PNG of each text at each size of the QR code generator, in Chromium: its pixels, the pixels of each square and the file",
+      head: ["Text", "PNG size", "Pixels", "Pixels per square", "File"],
+    },
+  ],
   sourcesHeading: "Sources",
   sources: [],
   facts: {},

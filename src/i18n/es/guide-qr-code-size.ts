@@ -28,7 +28,21 @@ export default {
   tableHeading: "La medida",
   measuredIntro: "Esta guía se está escribiendo.",
   measuredNote: "Medido el {date}.",
-  tables: [],
+  // F19b (front M5): the shape of the tables, which the front T rewrites in words and keeps (the labels in the order of
+  // the measurement).
+  tables: [
+    {
+      heading: "Los textos y sus códigos",
+      caption: "Cada texto escrito en el Generador de códigos QR, en Chromium: los caracteres, lo que cuenta la herramienta, la versión que encontró el lector, los cuadritos de cada lado y los cuadritos oscuros bajo Oli",
+      head: ["Texto", "Caracteres", "Contados por la herramienta", "Versión", "Cuadritos por lado", "Cuadritos oscuros bajo Oli"],
+      labels: ["Enlace corto", "Frase sin acentos", "La misma frase con acentos", "Enlace largo"],
+    },
+    {
+      heading: "El PNG de cada texto en cada tamaño",
+      caption: "El PNG de cada texto en cada tamaño del Generador de códigos QR, en Chromium: los píxeles, los píxeles de cada cuadrito y el archivo",
+      head: ["Texto", "Tamaño del PNG", "Píxeles", "Píxeles por cuadrito", "Archivo"],
+    },
+  ],
   sourcesHeading: "Fuentes",
   sources: [],
   facts: {},
