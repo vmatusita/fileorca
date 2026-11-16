@@ -8,7 +8,8 @@ export default {
   lead: "How the text you type sets the number of squares in a QR code, and what that means for the PNG and for print.",
   changed: "First published {published}.",
   intro: ["This guide is being written."],
-  toolHeading: "QR code size",
+  // Two lines at 360 px beside the Oli of the QR panel, who rises 86 px above it (guide-page.spec.ts: the Oli clear of the sheet).
+  toolHeading: "Make a QR code and see its size here",
   toolIntro: "This guide is being written.",
   sections: [
     { heading: "Part 1", paragraphs: ["This guide is being written."] },

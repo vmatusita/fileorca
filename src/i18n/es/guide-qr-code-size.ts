@@ -8,7 +8,8 @@ export default {
   lead: "Cómo el texto que escribes define cuántos cuadritos tiene un código QR, y qué cambia eso en el PNG y al imprimir.",
   changed: "Publicado por primera vez el {published}.",
   intro: ["Esta guía se está escribiendo."],
-  toolHeading: "Tamaño del código QR",
+  // Two lines at 360 px beside the Oli of the QR panel, who rises 86 px above it (guide-page.spec.ts: the Oli clear of the sheet).
+  toolHeading: "Haz un código QR y mira su tamaño aquí",
   toolIntro: "Esta guía se está escribiendo.",
   sections: [
     { heading: "Parte 1", paragraphs: ["Esta guía se está escribiendo."] },
