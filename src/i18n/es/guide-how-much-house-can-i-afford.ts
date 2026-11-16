@@ -4,7 +4,12 @@ import type { GuideTexts } from '../types.ts';
 export default {
   title: "Cuánta casa puedo pagar | FileOrca",
   description: "Los dos límites de ingreso de los que parte un prestamista y cuál de ellos fija el precio que puedes pagar.",
-  words: { head: ["Caso"] },
+  words: {
+    head: ['Otras deudas al mes', 'Límite que fija el precio', 'Margen para la vivienda', 'Precio de vivienda que puedes pagar'],
+    front: 'Límite de vivienda, {rate}',
+    back: 'Límite de deuda total, {rate}',
+    both: 'Los dos límites',
+  },
   h1: "Cuánta casa puedo pagar",
   lead: "Los dos límites de ingreso de los que parte un prestamista y cuál de ellos fija el precio que puedes pagar.",
   intro: ["Esta guía se está escribiendo."],

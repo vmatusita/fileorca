@@ -4,7 +4,7 @@ import type { GuideTexts } from '../types.ts';
 export default {
   title: "Credit card minimum payment: why it takes so long | FileOrca",
   description: "What a payment just over the interest does to a balance, next to larger fixed payments.",
-  words: { head: ["Case"] },
+  words: { head: ['Payment per month', 'First month, to the balance', 'Paid off in', 'Total interest'] },
   h1: "Credit card minimum payment: why it takes so long",
   lead: "What a payment just over the interest does to a balance, next to larger fixed payments.",
   intro: ["This guide is being written."],
