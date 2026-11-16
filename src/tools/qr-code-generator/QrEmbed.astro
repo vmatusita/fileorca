@@ -1,6 +1,6 @@
 ---
 // The QR code generator without its page, for the guide that embeds it (F19b, decision 4; DECISOES § 184 and § 794): the
-// same root, data-props and panel QrPage.astro renders, and nothing around them, the way ImageToolEmbed.astro serves an
+// same root, data-props and panel QrPageMold.astro renders, and nothing around them, the way ImageToolEmbed.astro serves an
 // image tool. QrTool.astro picks this mold when it gets `embed`, so the <script> of its mount.ts stays in that component and
 // the guide loads the same entry file as the QR page, plus the shared island chunk. No coffee line: the QR panel has none.
 import type { Lang } from '../../i18n/routes.ts';

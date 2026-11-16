@@ -1,10 +1,10 @@
 ---
 // The QR code generator (prompt F7, decision 8): its page in each language (en, and pt and es since the languages
 // adjustment) and, with `embed`, only the island, for the guide that embeds the tool (F19b, decision 4; DECISOES § 794).
-// The markup of the page lives in QrPage.astro and the island alone in QrEmbed.astro, the way an image tool's page
+// The markup of the page lives in QrPageMold.astro and the island alone in QrEmbed.astro, the way an image tool's page
 // component picks ImageToolPage or ImageToolEmbed. The <script> that imports mount.ts lives here and only here: a second
 // <script> with the same module would make a third JS file (DECISOES § 184), so the page and the guide load the same entry.
-import QrPage from './QrPage.astro';
+import QrPageMold from './QrPageMold.astro';
 import QrEmbed from './QrEmbed.astro';
 import { QR_TEXTS } from './page.ts';
 import type { Lang } from '../../i18n/routes.ts';
@@ -17,7 +17,7 @@ interface Props {
 }
 const { lang = 'en', embed = false } = Astro.props;
 const panel: QrPanelData = { lang, t: QR_TEXTS[lang].panel };
-const Mold = embed ? QrEmbed : QrPage;
+const Mold = embed ? QrEmbed : QrPageMold;
 ---
 <Mold lang={lang} panel={panel}>
   <script>
