@@ -233,6 +233,13 @@ describe('the words of the guides still match their numbers', () => {
   it("credit card: a payment of the first month's interest is too low, a larger fixed payment pays off sooner with less interest, each extra dollar saving fewer months, and the three-year payment is just above the example", () => {
     const input = DEFS['credit-card-payoff-calculator'].toInput(DEFS['credit-card-payoff-calculator'].initial) as CardInput;
     if (input.mode !== 'payment') throw new Error('the example pays a fixed amount');
+    // F19b (review b-1): the difference the worked example states is the difference of the two totals it shows beside it,
+    // so a reader's subtraction agrees with it ($30,261 − $2,582 = $27,679), in both languages.
+    for (const lang of ['en', 'es'] as const) {
+      const facts = GUIDE_FACTS['guides-credit-card-minimum-payment'](lang).facts;
+      const whole = (text: string | undefined): number => Number((text ?? '').replace(/[^0-9]/g, ''));
+      expect(whole(facts['interestDiff']), lang).toBe(whole(facts['barelyInterest']) - whole(facts['interest']));
+    }
     const paying = (payment: number) => {
       const result = creditCardPayoff({ ...input, payment });
       if ('error' in result) throw new Error(`${payment}: ${result.error}`);

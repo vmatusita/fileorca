@@ -66,6 +66,8 @@ function writer(lang: GuideLang) {
   };
 }
 const PCT = 10_000;
+/** Cents rounded to the whole dollar the way dollars() writes them (half up), still in cents. */
+const wholeDollars = (cents: number): number => Math.floor((cents + 50) / 100) * 100;
 
 export interface GuideTable {
   head: string[];
@@ -428,7 +430,9 @@ function cardMinimum(lang: GuideLang = 'en'): GuideFacts {
       count: String(r.months),
       interest: usd(r.totalInterest),
       paid: usd(r.totalPaid),
-      interestDiff: usd(low.totalInterest - r.totalInterest),
+      // F19b (review b-1): the difference of the two totals as the page shows them, in whole dollars, so a reader who
+      // subtracts the figures beside it gets the same number (the totals are rounded the way usd() rounds them).
+      interestDiff: usd(wholeDollars(low.totalInterest) - wholeDollars(r.totalInterest)),
       topPayment: usd(topPayment),
       topTime: time(top.months),
       topInterest: usd(top.totalInterest),
