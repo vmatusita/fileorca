@@ -46,9 +46,9 @@ Conferido em 2 de novembro de 2026 sobre a `main` em `29afbce` (a F7), na F8 (DE
 | 27. O que a F17 deixou | 1 | O Victor e runs de ajuste |
 | 28. O que a F18 deixou | 1 | Runs de ajuste |
 | 29. O que a F19a deixou | 14 | A F19b, o Victor e runs de ajuste |
-| 30. O que a F19b deixou | 26 | O Victor e runs de ajuste |
+| 30. O que a F19b deixou | 27 | O Victor e runs de ajuste |
 
-Total: 229 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 2 (oráculo antes), 7, 8, 9, 10, 12 (os grupos 5 e 6 a F13b fechou, o 3 a F16 e o 13 a F17).
+Total: 230 linhas (alguns ids de revisões diferentes são o mesmo defeito e dividem a linha). Ordem sugerida das runs de ajuste, do que mais pesa para o que menos pesa: 1 (afirma além da fonte numa página de saúde), 4 (barato e vem de muitos itens), 2 (oráculo antes), 7, 8, 9, 10, 12 (os grupos 5 e 6 a F13b fechou, o 3 a F16 e o 13 a F17).
 
 ## 1. Saúde e fontes (YMYL)
 
@@ -484,6 +484,7 @@ O que a F19b (os oito guias novos com dado próprio: cinco de arquivo em en, pt 
 | F19b m-24 | DECISOES § 788; notas: T7 | baixo | O folheto em espanhol do Fed citado no guia 7 em es ("Lo que necesita saber: nuevas reglas para las tarjetas de crédito") é de abril de 2010 e pode sair do ar sem aviso: nenhum portão confere link externo. | Na próxima revisão do guia, conferir o link; se cair, a fonte sai, e a frase continua apoiada na Regulation Z. | Victor faz, na revisão do guia |
 | F19b m-25 | DECISOES § 803; notas: T8 | baixo | O artigo do CFPB varia em espanhol: "La CFPB" no FAQ da calculadora de quanto de casa (`src/tools/home-affordability-calculator/i18n/es.ts`) e "el CFPB" nos guias de dinheiro em es, os cinco antigos e os três novos. | Fixar o gênero no `docs/i18n/es.md` (o órgão é "la Oficina…", a sigla costuma ir no masculino) e alinhar a outra forma. | Run de ajuste de texto e voz |
 | F19b m-26 | DECISOES § 795; a junção (`c9eeb89`) | baixo | A estimativa das marcas de anúncio (`chooseMarks`, `src/ads/map.ts`) mede o texto a 360 px e pede 15 % de folga sobre os 1.110 px; num trecho só de parágrafos longos, o texto encolhe mais que isso a 459 px, e dois anúncios de conteúdo podem ficar mais perto que 1.110 px. Aconteceu no guia 4 em inglês (1.092 px, `fo-ad-map.spec.ts`), corrigido juntando dois parágrafos; outro texto denso pode repetir. | Estimar a altura também a 459 px (a largura em que o conteúdo 2 em diante ainda aparece, § 445) e escolher a marca pela menor das duas distâncias, com o `fo-ad-map.spec.ts` como prova; muda a posição dos anúncios de outras páginas, então numa run de anúncios. | Run de ajuste de anúncios |
+| F19b m-27 | DECISOES § 799 | baixo | O teste parametrizado `pdf-tool.spec.ts:461` ("Enter on the action puts the focus on Download, and the DropZone never shows meanwhile") falha às vezes no WebKit do Windows: o foco não chega à primeira página da grade do Reorganizar ou do Excluir páginas. Reprovou 1 vez em 12 na F19b e 1 vez em 12 no ponto de partida (`a017fc4`), e uma vez parou a WebKit 14/15 do `verificar --partes`. | Numa run de testes: achar o que o WebKit faz com o foco depois do Espaço e da seta (esperar a grade terminar de renderizar antes da tecla, ou o `focus()` do componente depois do re-render), com o `--repeat-each` como prova; nunca mais tempo nem pular. | Run de ajuste de testes |
 
 ## Registrados (escolhas, não defeitos)
 
