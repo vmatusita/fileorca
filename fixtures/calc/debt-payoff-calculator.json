@@ -2,11 +2,11 @@
   "calculator": "debt-payoff-calculator",
   "oracle": {
     "script": "scripts/oracle/calc.py",
-    "sha256": "137e9380763616e99b827ce915c478aae3a44079e289f26ec435c8a850949ab0",
+    "sha256": "a42b86bc3e09e2cb877d5f34512faf7c44293ae6977e0c90c0baec34fb3a7b5a",
     "python": "3.13.18",
-    "numpy": "2.5.4",
+    "numpy": "2.5.5",
     "numpyFinancial": "1.1.0",
-    "date": "2026-11-01"
+    "date": "2026-11-16"
   },
   "units": {
     "money": "cents",
