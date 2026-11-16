@@ -28,7 +28,20 @@ export default {
   tableHeading: "The measurement",
   measuredIntro: "This guide is being written.",
   measuredNote: "Measured on {date}.",
-  tables: [],
+  // F19b (front M1): the shape of the tables, which the front E rewrites in words and keeps.
+  tables: [
+    {
+      heading: "The three photos in each format",
+      caption: "Each phone photo as JPG from Compress image and as WebP and AVIF from Convert to WebP, at Recommended, in Chromium, with the share of the original",
+      head: ["Photo", "Original", "JPG", "WebP", "AVIF"],
+    },
+    {
+      heading: "The PNG with transparent corners",
+      caption: "The PNG with transparent corners saved as JPG by PNG to JPG and as WebP and AVIF by Convert to WebP, in Chromium: the file, its share of the PNG, and whether the transparency stayed",
+      head: ["Saved as", "File", "Transparency kept"],
+      labels: ["JPG", "WebP", "AVIF"],
+    },
+  ],
   sourcesHeading: "Sources",
   sources: [],
   facts: {},

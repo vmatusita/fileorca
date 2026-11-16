@@ -833,10 +833,28 @@ def afford_cases() -> list[dict]:
     example = build(95_000, 450, 6.5, 30, 40_000)
     return [
         case('page-example', 'page-example', example),
+        *afford_guide_cases(example),
         case('ratios-31-43', 'grid', {**example, 'frontRatio': pct(31), 'backRatio': pct(43)}),
         case('no-room', 'grid', {**example, 'income': dollars(20_000), 'debts': dollars(900)}),
         case('equal-limits', 'grid', {**example, 'debts': 0, 'frontRatio': pct(36), 'backRatio': pct(36)}),
         *grid('grid', build, [30_000, 95_000, 400_000], [0, 450, 3000], [0, 6.5, 12], [15, 30], [0, 40_000]),
+    ]
+
+
+# The guide "How much house can I afford" (F19b): the example of the page, the same example with other monthly debts (the
+# table of the guide, and $100 more a month once the total debt limit sets the price), and the debts at which the two limits
+# leave the same room, worked out here from the two limits of the example.
+GUIDE_AFFORD_DEBTS = [0, 250, 650, 1000, 1100, 1500]
+
+
+def afford_guide_cases(example: dict) -> list[dict]:
+    source = 'guide:how-much-house-can-i-afford'
+    front = floor_int(D(example['income']) * D(example['frontRatio']) / D(12 * ONE))
+    back_total = floor_int(D(example['income']) * D(example['backRatio']) / D(12 * ONE))
+    return [
+        case('guide-afford', source, example),
+        *[case(f'guide-afford-debts-{debts}', source, {**example, 'debts': dollars(debts)}) for debts in GUIDE_AFFORD_DEBTS],
+        case('guide-afford-same-room', source, {**example, 'debts': back_total - front}),
     ]
 
 
@@ -899,9 +917,32 @@ def card_cases() -> list[dict]:
              ('months', 180)]
     return [
         case('page-example', 'page-example', build(6500, 22.99, ('payment', 250)), True),
+        *card_guide_cases(build(6500, 22.99, ('payment', 250)), build(6500, 22.99, ('months', 36))),
         case('target-example', 'grid', build(6500, 22.99, ('months', 24))),
         case('barely-covers', 'grid', build(25_000, 59.99, ('payment', 1249.80))),
         *grid('grid', build, [500, 6500, 25_000], [0, 18.99, 29.99, 36, 59.99], modes),
+    ]
+
+
+# The guide on the credit card minimum payment (F19b): the calculator does not work out the minimum a statement asks for, so
+# the guide compares, on the example's balance and APR, a payment of exactly the first month's interest (too low), the first
+# whole dollar above it (the payment that barely covers it), larger fixed payments and the example's own, and the payment
+# that clears the card in three years (the box of a statement, Regulation Z 1026.7(b)(12)). The first month's interest and
+# the payment that barely covers it are worked out here, from the example.
+GUIDE_CARD_PAYMENTS = [130, 150, 200, 300, 500]
+
+
+def card_guide_cases(example: dict, three_years: dict) -> list[dict]:
+    source = 'guide:credit-card-minimum-payment'
+    first = interest(example['balance'], example['apr'])
+    barely = (first // 100 + 1) * 100
+    ensure(barely not in [dollars(p) for p in GUIDE_CARD_PAYMENTS] + [example['payment']], 'a payment of the guide repeats')
+    return [
+        case('guide-card', source, example),
+        case('guide-card-interest-only', source, {**example, 'payment': first}),
+        case('guide-card-barely', source, {**example, 'payment': barely}),
+        *[case(f'guide-card-{pay}', source, {**example, 'payment': dollars(pay)}) for pay in GUIDE_CARD_PAYMENTS],
+        case('guide-card-three-years', source, three_years),
     ]
 
 
@@ -1142,8 +1183,15 @@ def apy_cases() -> list[dict]:
     def build(rate, comp, direction):
         return {'rate': pct(rate), 'compounding': comp, 'direction': direction}
 
+    example = build(5, 365, 'apr-to-apy')
     return [
-        case('page-example', 'page-example', build(5, 365, 'apr-to-apy')),
+        case('page-example', 'page-example', example),
+        # The guide "APR vs APY" (F19b): the example of the page (its table holds the five compoundings), the same 5% read as
+        # an APY and turned back into the APR, and a lower and a higher APR compounded daily.
+        case('guide-apr-vs-apy', 'guide:apr-vs-apy', example),
+        case('guide-apr-vs-apy-back', 'guide:apr-vs-apy', build(5, 365, 'apy-to-apr')),
+        case('guide-apr-vs-apy-1', 'guide:apr-vs-apy', build(1, 365, 'apr-to-apy')),
+        case('guide-apr-vs-apy-10', 'guide:apr-vs-apy', build(10, 365, 'apr-to-apy')),
         *grid('grid', build, [0, 0.01, 1, 5, 6, 12.5, 29.99, 100], COMPOUNDINGS, ['apr-to-apy', 'apy-to-apr']),
     ]
 
